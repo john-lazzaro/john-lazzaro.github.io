@@ -1,0 +1,231 @@
+<HTML>
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<table>
+<TR>
+<TD width=200>
+<A HREF="index.html">Home ...</A>
+</TD>
+<TD width=250>
+</TD>
+<TD width=125>
+</TD>
+</TR>
+</table>
+
+<table>
+<TR>
+<TD width=550>
+<hr>
+</TD>
+</TR>
+</table>
+
+
+<TITLE>The Silicon Audition Project </TITLE>
+
+<table>
+<tr>
+<td width = 600>
+
+<H1>The Silicon Audition Project</H1>
+
+
+<UL>
+<LI> John Lazzaro - Research Specialist
+<LI> John Wawrzynek - Professor
+</UL>
+
+<P> 
+Silicon audition involves implementing computational models of
+biological auditory processing in micropower analog VLSI circuits.  We
+conducted research in silicon audition at <A
+HREF="http://www.cs.berkeley.edu/">Berkeley</A> from September 1991
+until May 1997, funded by the <A HREF="http://www.nsf.gov/">National
+Science Foundation</A> and the <A
+HREF="http://www.onr.navy.mil/">Office for Naval Research.</A> An <A
+HREF="biblio/index.html"> annotated bibliography</A> and <A
+HREF="biblio/bib.html"> concise bibliography </A> describe the
+accomplishments of the project.
+</P>
+
+<P> 
+This webpage was written shortly after the research ended.  In January
+2007, I did some light editing on these pages, to remove dead links
+and better specify the timeline of the research.</P>
+
+<H2>Why Model Audition? </H2>
+
+<P> Many engineering systems that process sound, such as speech
+recognition systems, pitch detectors, and psychoacoustic audio
+compressors, include simple models of human audition in their
+processing.  Extensive research into the physiological and
+psychological basis of hearing provides a substrate for computational
+models of audition that are much more accurate than traditional
+engineering practice.  
+
+<P>
+Engineering research into creating comprehensive auditory models, and
+applying them to practical problems, flourished in the 1980s and
+1990s. Examples from that era include:
+
+<UL>
+<LI> Cochleogram representations by 
+Richard Lyon and Malcolm Slaney.
+<LI> The stabilized auditory image representations by 
+Roy Patterson.
+<LI> Sound localization research by 
+Richard Duda.
+<LI> Auditory scene analysis systems by Guy Brown
+and Dan Ellis.
+<LI> Auditory browsing systems by <A
+HREF="http://www.musclefish.com/">Musclefish.</A>
+</UL>
+
+<H2>Why Silicon Audition? </H2>
+
+<P>Engineering systems based on auditory models require substantial
+computational resources, especially when judged by the state of the
+art of computing in the early 1990s. For example, in that era a sound
+separation system designed by Guy Brown at Sheffield University
+operated at approximately 4000 times real time, running under UNIX on
+a Sun SPARCstation 1. The computational needs of auditory models are
+especially troubling when considering the use of such system in
+battery-operated portable devices.
+
+<P> Digital-signal-processors (DSPs) are the traditional solution to
+speeding up computationally-intensive audio algorithms. However, in
+many applications, the audio input takes an analog form: a voltage
+signal from a microphone or a guitar pickup. For these applications,
+an alternative approach to DSPs is to use a special-purpose analog to
+digital converter, that computes auditory model representations
+directly on the analog signal before digitization. </P>
+
+<H2>Auditory Models in Analog VLSI </H2>
+
+<P> The 1985-1995 time period was a time of continual improvement in
+analog circuit models of biological audition. Silicon models of
+cochlear function began with work by Richard F. Lyon and Carver Mead.
+Several generations of improved designs followed,
+including work by:</P>
+
+<UL>
+<LI>Lloyd Watts
+<LI>Rahul Sarpeshkar
+<LI>Andreas Andreou
+<LI>Andre van Schaik
+<LI>Neal A. Bhadkamkar
+<LI>Shihab Shamma
+<LI>Mohammed Ismail
+<LI>Chris Toumazou
+</UL>
+
+<P> and their respective collaborators.</P>
+
+<P> Research in that time period also addressed models of biological auditory
+processing at higher neural centers. John Lazzaro's 
+graduate
+work at Caltech, in collaboration with Carver Mead and Richard
+Lyon, focused on circuit models beyond cochlear mechanics, as did
+contemporaneous work
+by Andre van Schaik and collaborators, and by
+Richard Lyon. </A>
+
+<H2> Silicon Audition at UC Berkeley</H2>
+
+<P>Our research at Berkeley explored systems issues in silicon
+audition: how can these circuits be used to create VLSI systems for
+practical applications? From 1991 to 1997, we focused on creating
+technology that would bring silicon audition to commercial viability.
+In this section, we review some highlights of this research; see this
+<A HREF="biblio/index.html"> annotated bibliography</A> and this <A
+HREF="biblio/bib.html"> concise bibliography </A> for a complete
+listing of the results of the project.</P>
+
+<P> Our early efforts focused on creating special-purpose analog-to-digital
+converter chips. These chips receive analog input, and perform several
+stages on analog computation on the signal, using circuit techniques
+from silicon audition. The output of these chips are a digital encoding
+of the final auditory representation, suitable for direct processing
+by computing systems. </P>
+
+<P> We developed several core technologies for these special-purpose
+analog-to-digital converter chips.</P>
+
+<UL>
+<LI> <B>Efficient digital communication protocols.</B> The
+address-event protocol (AER) is a digital communication system
+optimized for communicating neural representations between chips. In
+collaboration with researchers from Caltech, we <A
+HREF="biblio/asynch-ieee.pdf">developed</A>
+auditory chips that used AER for point-to-point communications; we
+later extended AER to support <A
+HREF="biblio/multi-aer.pdf">
+multi-chip</A> systems.  
+<LI> <B> Non-volatile, digitally-controlled parameter storage. </B>
+Silicon audition prototypes typically used off-chip potentiometers
+for parameter control. In collaboration with 
+Alan Kramer we developed an on-chip, non-volatile analog memory
+architecture, which can be programmed via a microprocessor-compatible
+asynchronous bus.
+<LI> <B> Low-power spiking neuron circuits. </B> Pulse coding is an
+important part of many silicon auditory models; we developed 
+<A HREF="biblio/lowpower-kluwer.pdf">
+microwatt versions </A> of popular spiking circuits. . 
+</UL>
+
+<P> We combined these technologies to produce several generations of
+analog-to-digital converter chips. An early generation device was
+featured in our <A
+HREF="http://ieeexplore.ieee.org/xpls/abs_all.jsp?tp=&arnumber=285219">article</A>
+in June 1994 edition of IEEE Micro. The current generation chip
+includes the multi-chip AER protocol, supporting the construction of
+systems with several converters.
+
+<P> Using this chip, we designed a <A HREF="biblio/aud-scene.pdf">
+multi-chip system </A> that serves as a front-end for an auditory
+scene analysis system, computing multiple auditory representations
+from an analog signal input. We performed a study on using this
+multi-chip system as a front-end for speaker-independent,
+isolated-word speech recognition, which was published in our 1997 <A
+HREF="biblio/recog.pdf">article</A> in Analog Integrated Circuits
+and Signal Processing.  This article describes a "recognizer-representation
+gap" that prevents traditional speech recognition algorithms from
+making good use of auditory representations</P>
+
+<P> We also investigated creating complete audio signal processing
+systems that operation in the micropower regime.  This research was in
+collaboration with Richard Lippmann, MIT Lincoln Labs. This NIPS*96 <A
+HREF="biblio/decoder.pdf">paper</A> describes a micropower hidden
+Markov model state decoder for wordspotting applications, operating in
+the analog domain.  This <A HREF="biblio/anawake.pdf">paper</A>
+describes a power management architecture for DSP systems that uses
+micropower analog processing. </P>
+
+
+</td>
+</tr>
+</table>
+
+<table>
+<TR>
+<TD width=550>
+<hr>
+</TD>
+</TR>
+</table>
+
+<table>
+<TR>
+<TD width=200>
+<A HREF="index.html">Home ...</A>
+</TD>
+<TD width=250>
+</TD>
+<TD width=125>
+</TD>
+</TR>
+</table>
+
+
