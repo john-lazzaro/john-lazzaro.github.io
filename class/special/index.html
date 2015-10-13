@@ -1,0 +1,1098 @@
+<TITLE>Projects for Fall 2013, CS 250</TITLE>
+
+<TABLE WIDTH=600 CELLSPACING=12>
+<TR>
+<TD COLSPAN=1>
+
+<H1> Projects for Fall 2013, CS 250 </H1>
+
+<P>
+This web page describes project topics for the class. Each project
+describes a class of special-purpose instructions that are a good fit
+for the RISC-V (pronounced: "risk five") accelerator.
+</P>
+
+<P> Here is a Table of Contents for this web page:</A>
+
+<UL>
+<LI><A HREF="#interface">Interface Description</A></LI>
+<LI><A HREF="#sparsedot">Sparse Dot Products</A></LI>
+<LI><A HREF="#deter">Linear Equation Solver (Determinants)</A></LI>
+<LI><A HREF="#string">Flexible String Comparisons</A></LI>
+<LI><A HREF="#pdm">Audio Pulse Density Modulation</A></LI>
+<LI><A HREF="#image">Image Compression</A></LI>
+<LI><A HREF="#convolv">Convolution Engine</A></LI>
+<LI><A HREF="#vision">Vision</A></LI>
+<LI><A HREF="#transpose">Matrix Transposition</A></LI>
+<LI><A HREF="#fixedpoint">Fixed-Point Implementations</A></LI>
+<LI><A HREF="#sort">Sorting</A></LI>
+<LI><A HREF="#memcached">Memcached</A></LI>
+<LI><A HREF="#viterbi">Viterbi Algorithm, Cryptographic Hashing</A></LI>
+<LI><A HREF="#caltech">Support Vector Machines, Error Correcting Codes</A></LI>
+</UL>
+
+<P>
+The project topics on this web page are offered as a starting point,
+not a specification.  Project teams are free to revise an instruction
+as they see fit to make an interesting project.  Furthermore, teams
+may propose an alternative project topic, as long as the project is a
+good match for the RISC-V interface.
+</P>
+
+<P>
+A goal of the class is to learn how to design an integrated circuit
+to meet a specific energy-performance-area target.  And so, teams will
+design several accelerators for their topic, each optimized for a
+different set of tradeoffs.
+
+<P>
+For example, one accelerator may be targeted for lowest energy, while
+another may be optimized for smallest area.  In each case, the designs
+should optimize the other secondary variables as much as possible,
+given the primary constraint.  In order to fairly compare your
+designs, all accelerators should produce identical results for your
+testing algorithms, in a bit-accurate sense.
+</P>
+
+<P>
+The options at your disposal for optimization include:
+</P>
+<UL>
+<LI> Technology-independent techniques, such as clock-gating and
+data-dependent processing.</LI>
+<LI> The Vdd value for a design (libraries are characterized at
+multiple Vdd values).</LI>
+<LI> The mix of library cells in a design (library cells are offered in low-power and high-speed
+versions).</LI>
+</UL>
+
+<P>
+You will be able to implement simple versions of the "trading
+hardware for power" and "slowing down slack paths" techniques
+described in the power and energy lecture.  Techniques that rely on
+multiple power islands, or on dynamically varying Vdd, will not be
+possible.
+</P>
+
+<P>
+We will provide comprehensive documentation of the RISC-V accelerator
+interface in a later document.  Here, we provide a brief description,
+so that we can introduce the project topics using a common notation.
+</P>
+
+<H2><A NAME="interface">The Accelerator Interface</A></H2>
+
+<P>
+The RISC-V CPU is a scalar processor with 32-bit instructions. The
+processor has a 64-bit address space, and its 32-entry register file
+holds 64-bit values.
+</P>
+
+<P>
+Accelerator instructions act, in many ways, like normal RISC-V
+instructions. Your instructions are 32 bits in length, and may appear
+in the scalar instruction stream of a user-land program. All 32 bits
+of an accelerator's instructions are forwarded to the accelerator.
+The accelerator instruction format appears below.
+</P>
+
+<TABLE WIDTH=600 CELLSPACING=12>
+<TR>
+<TD COLSPAN=1>
+<P><IMG SRC="images/inst.png" ALIGN="LEFT" WIDTH="600" HEIGHT="65"></P>
+</TD>
+</TR>
+</TABLE>
+
+<P>
+Your accelerator should ignore the <TT>opcode</TT> field; it acts like
+the "to" address of a postal envelope, and is used by the CPU to route
+your accelerator instructions (and only your accelerator instructions)
+to you.
+</P>
+
+<P>
+If the <TT>xd</TT>, <TT>xs1</TT>, and <TT>xs2</TT> bits are set, the
+accelerator instructions have the register semantics of normal RISC-V
+ALU instructions.  The 64-bit values of the registers coded by
+the <TT>rs1</TT> and <TT>rs2</TT> fields are delivered to the
+accelerator along with the instruction.  Upon instruction completion,
+the accelerator returns a 64-bit value to the RISC-V core, which
+writes it to the register coded by <TT>rd</TT>.
+</P>
+
+<P>
+The <TT>funct7</TT> field encodes an opcode space for the
+accelerator's own use.  Thus, an accelerator may define 128
+instruction types. 
+</P>
+
+<P>
+The system diagram of a RISC-V core with an attached accelerator
+appears below.
+</P>
+
+
+<TABLE WIDTH=600 CELLSPACING=12>
+<TR>
+<TD COLSPAN=1>
+<P><IMG SRC="images/block.png" ALIGN="LEFT" WIDTH="600" HEIGHT="576"></P>
+</TD>
+</TR>
+</TABLE>
+
+
+<P>
+Your accelerator communicates with the RISC-V core via a set of
+queues, each of which is specialized for a single purpose.
+</P>
+
+<P>
+The issue queue lets RISC-V issue instructions to the accelerator. The
+issue queue holds the 32-bit instruction <B>INST</B> and the contents
+of the two operand registers (64-bit values <B>A</B> and <B>B</B>).
+</P>
+
+<P>
+The accelerator signals the completion of an instruction to the RISC-V
+core by placing the 64-bit value <B>R</B> in the result queue.  The
+RISC-V will store the result value in the register specified by
+the <TT>rd</TT> field of the retired instruction.  The <B>R</B> value
+has no tag field -- accelerator instructions must complete in the
+order they issue.
+</P>
+
+<P>
+An accelerator has direct access to the memory system, and can issue
+loads and stores to the L1 data cache.  There is one pair of queues
+between the accelerator and the memory system. The <B>CMD</B> field
+identifies a memory operation as load or store.
+</P>
+
+<P>
+Memory requests can be 1, 2, 4, or 8 bytes long, as indicated by
+the <B>MTYPE</B> field.  The memory address, coded by the
+<B>MADDR</B> field, must be aligned to the boundary implied by <B>MTYPE</B>.
+</P>
+
+<P>
+The accelerator tags each memory request, using the 9-bit
+<B>TAG</B> field.  Tags allow the memory system to service
+loads out of order (load data is returned with a tag).
+The memory system also returns tagged write acknowledgements
+to the accelerator.
+</P>
+
+<P>
+The 64 KB L1 data cache has lines that are 64-bytes long.  If an
+accelerator load hits the cache, the minimum return latency is 4
+cycles.  A miss may take 50-60 cycles to return. The L1 data cache can
+service memory requests after a load miss, up to a maximum of 4
+misses.
+</P>
+
+<P>
+The accelerator sends two control wires to the RISC-V core. The
+<TT>busy</TT> signal is used to manage memory coherency, while
+the interrupt bit signals an illegal instruction. The semantics
+of these wires is somewhat complex, and will be addressed by Ben 
+in a discussion section.
+</P>
+
+<P>
+If an accelerator does not wish to fully use the RISC-V register file,
+any or all of the <TT>xd</TT>, <TT>xs1</TT>, and <TT>xs2</TT> bits in
+the accelerator instruction (collectively, the <TT>x</TT> bits) may be
+cleared. In this case, the RISC-V core does not perform the semantics
+associated with the cleared bits, and the accelerator may re-purpose
+up to 15 bits of its instruction space for its own use
+(<TT>rd</TT>, <TT>rs1</TT>, and <TT>rs2</TT> fields).
+</P>
+
+<P>
+The <TT>x</TT> bit semantics are particularly useful for accelerators
+that include a private 32-element register file (let's call it an
+A-file).  In this case, each of the 128 instruction types could have
+several types of semantics.  If all <TT>x</TT> bits are set, the
+instruction would act on the RISC-V register file, as described above.
+If all <TT>x</TT> bits are clear, the instruction acts on A-file
+registers.  Combinations of set and clear <TT>x</TT> bits could
+correspond to data transfers between the RISC-V register file and the
+A-file.
+</P>
+
+<P>
+An illustration of an accelerator with an A-file is shown below.
+</P>
+
+<TABLE WIDTH=600 CELLSPACING=12>
+<TR>
+<TD COLSPAN=1>
+<P><IMG SRC="images/afile.png" ALIGN="LEFT" WIDTH="600" HEIGHT="475"></P>
+</TD>
+</TR>
+</TABLE>
+ 
+<P>
+An accelerator is free to define its instruction semantics to have
+side effects with respect to main memory.  If the accelerator uses
+writes to main memory to communicate with the program running on the
+RISC-V core, this program should use memory fences to ensure
+consistency.  The accelerator signals information about memory
+consistency to the RISC-V core using one of the control wires (the
+"busy bit").
+</P>
+
+<P>
+In an industrial design, an accelerator would need to handle a host of
+secondary issues (internal state management on context switches, page
+table faults for memory operations, etc).  To make the project
+tractable, we will provide an accelerator interface that lets you
+ignore these issues, so that you can focus on the core operation of
+your instructions.
+</P>
+
+<H2>Accelerator Project List</H2>
+
+<P>
+Below, we present our project ideas, as a numbered list.  Most project
+descriptions include links to papers for background reading. In some
+cases, the paper links will only work when accessed from a UC Berkeley
+campus IP address, because of publisher copyright restrictions.
+</P>
+
+<H2><A NAME="sparsedot"><B>Sparse Dot Products</B></A></H2>
+<P> The arithmetic dot product of length-<i>n</i> vectors <B>a</B> and <B>b</B>
+is defined by the equation:</P>
+
+<TABLE WIDTH=600>
+<TR>
+<TD COLSPAN=1>
+<P>
+<IMG SRC="images/dot.png" WIDTH="480" LENGTH="82" ALIGN="LEFT">
+</P>
+</TD>
+</TR>
+</TABLE>
+
+<P>
+In this project, we wish to accelerate dot products of 
+high-dimensional vectors (<i>n</i> from thousands to billions), where 
+most vector elements have the value 0
+(known as "sparse" vectors).  Sparse dot products 
+are used in many application areas, including
+web advertising 
+<A HREF="http://research.google.com/pubs/archive/41159.pdf">click prediction</A> and
+chemical 
+<A HREF="http://www.cs.stanford.edu/people/ihaque/papers/2dtanimoto.pdf">similarity analysis</A>.
+</P>
+
+<P>
+We first consider a special class of sparse vectors, called
+<B>binary sparse vectors</B>, whose vector elements may only
+take on the values 0 or 1.  In a click-prediction application,
+the vector may have dimensions of 4 billion, with a typical 
+vector having 4,000 non-zero elements
+(thus, 99.999975% of elements are zero).</P>
+
+<P>
+Sparse binary vectors have a natural representation: a list of the
+indices of all 1-valued vector elements.  In our accelerator, we restrict the
+list representation in several ways. Indices are coded as 32-bit
+unsigned integers, and span the range [1, 4294967295].  Index 0 is
+reserved to act as a list termination symbol. Lists must be stored in
+sorted form. No index may appear twice in the list.</P>
+
+<P>
+The lists:
+</P>
+
+<P><B>a:</B> 1, 13, 1827, 2000, 1938475, 0</P>
+<P><B>b:</B> 12, 13, 2000, 1602938, 0</P>
+
+<P>
+are examples of vector encodings. Vector <B>a</B> uses 24 bytes of
+storage; vector <B>b</B> uses 20 bytes.  The dot product of <b>a</b>
+and <B>b</B> is 2, because two indices (13 and 2000) appear in both lists.
+</P>
+
+
+<P>
+We are now ready to define our accelerator instruction:
+</P>
+
+<P><B>SBDT</B> dest_reg, a_reg, b_reg</P>
+
+<P>
+The a_reg and b_reg fields identify the RISC-V scalar registers that
+hold 64-bit memory addresses of sparse binary vector lists <B>a</B>
+and <B>b</B>. The addresses stored in <B>a</B> and <B>b</B> must be
+aligned to 32-bit boundaries. Vector list lengths are restricted to
+65536 elements (including the terminating 0 element).
+</P>
+
+<P>
+The dest_reg field identify the register for the return value.  The
+return value has several computed quantities packed into the 64-bit
+payload.  The lower 32 bits hold the dot product, as an unsigned
+integer. The upper 32 bits are divided into two 16-bit unsigned
+integers, which hold the number of 1-valued elements (the "vector
+density") of <b>a</b> (upper 16-bits) and <b>b</b> (lower 16-bits).
+</P>
+
+<P>
+Below, we show a simple implementation of the accelerator.
+</P>
+
+<TABLE WIDTH=600>
+<TR>
+<TD COLSPAN=1>
+<P>
+<IMG SRC="images/dotaccel.png" WIDTH="600" LENGTH="436" ALIGN="LEFT">
+</P>
+</TD>
+</TR>
+</TABLE>
+
+
+<P>
+The counters at the top of the diagram accumulate the result
+values for the instruction, and are initialized to zero at the start
+of each <B>SBDT</B> instruction.  The accelerator computes the result
+by incrementing the counters as it scans through the two lists.
+</P>
+
+<P>
+The accelerator has a simple memory controller, with only one
+memory request in flight at a time.  During the execution of the
+instruction, the controller loads elements of each list in sequence,
+starting from the first element.  After both lists are fully scanned,
+the controller completes instruction processing by queuing the
+counter register values to the RISC-V core.
+</P>
+
+<P>
+The controller decides which list element to fetch based on the values
+stored in the <B>most recent a</B> (element) and <B>most recent b</B>
+(element) registers, shown in the center of the diagram. The
+controller fetches the next element of the "lagging" list, and clocks
+its value into the appropriate register.  It also updates the count
+register for the list.
+</P>
+
+<P>
+On the following clock cycle, the "=" comparator tests for an index
+match, and updates the dot-product counter as needed.  The comparator
+is not a simple bit-wise comparator: matches to the zero index are
+ignored.  The controller qualifies the counting action, via an enable
+line.
+</P>
+
+<P>
+In this implementation, the average number of comparisons per cycle
+are low. Ways to improve performance include:
+<UL>
+<LI> Improve the memory controller to sustain one 64-bit memory access per
+cycle, while avoiding cache misses by using prefetching.</LI>
+<LI> Take advantage of the sorted nature of lists, to speculatively 
+skip loading of list elements. Ideally, the controller would only load
+elements that contribute to the dot product. This tactic is only practical
+if the list lengths are known by the accelerator in advance.
+<LI> Change the list data structure to store a compressed representation
+of list indices, so that a 64-bit memory access would (on average) hold
+more than two indices.
+</UL>
+</P>
+
+<P>
+A simple example of a compressed list representation is delta
+encoding. For example, the vector:
+</P>
+<P><B>a:</B> 200, 300, 301, 400, 402, 0</P>
+
+
+<P>
+could be recoded as:
+</P>
+
+<P><B>a:</B> 200, 100,   1,  99,   2, 0</P>
+
+
+<P>
+when each "delta element" is a number to add to the previous index to
+compute the next one (the first element in a list is added to 0). The
+elements could be stored using the compressed format that the MIDI
+standard uses, as shown below:
+</P>
+
+<PRE>
+        One-Octet Delta Time:
+
+           Encoded form: 0ddddddd
+           Decoded form: 00000000 00000000 00000000 0ddddddd
+
+        Two-Octet Delta Time:
+
+           Encoded form: 1ccccccc 0ddddddd
+           Decoded form: 00000000 00000000 00cccccc cddddddd
+
+        Three-Octet Delta Time:
+
+           Encoded form: 1bbbbbbb 1ccccccc 0ddddddd
+           Decoded form: 00000000 000bbbbb bbcccccc cddddddd
+
+        Four-Octet Delta Time:
+
+           Encoded form: 1aaaaaaa 1bbbbbbb 1ccccccc 0ddddddd
+           Decoded form: 0000aaaa aaabbbbb bbcccccc cddddddd
+</PRE>
+
+<P>
+For the example <B>a</B> vector above, this lossless compression
+technique results in a 3.4x gain in memory bandwidth.
+
+<P>
+Many variations on this project concept are possible.  For example,
+you may choose to let the <B>a</B> vector be sparse but not binary
+(the
+<A HREF="http://research.google.com/pubs/archive/41159.pdf">click prediction</A>
+paper uses a 16-bit fixed-point vector representation for <B>a</B>).
+</P>
+
+<P>
+As a second example, you may choose to remove requirement for the
+lists to be sorted, which would change your acceleration strategies
+in fundamental ways.
+</P>
+
+<P>
+As a third example, you could make the binary vector representation be
+a long binary bitstream stored in memory, whose "1" density is
+extremely low.  Your accelerator design would define a compression
+format for these bistreams that took advantage of the density using a
+different approach than the "list of indices" method.
+
+<H2><A NAME="deter"><B>Linear Equation Solver (Determinants)</A></B></H2>
+
+<P>
+This project is an accelerator for solving systems of linear equations
+using determinants. The accelerator defines two instructions, and
+contains programmer-visible state.
+</P>
+
+<P>
+We begin with a brief review of determinants. A determinant is a
+reduction of a square matrix to a scalar value.  The determinant of a
+2-by-2 matrix is defined as:
+</P>
+
+<TABLE WIDTH=600>
+<TR>
+<TD COLSPAN=1>
+<P>
+<IMG SRC="images/twodet.png" WIDTH="476" LENGTH="96" ALIGN="LEFT">
+</P>
+</TD>
+</TR>
+</TABLE>
+
+<P>
+and the determinants of larger matrices may be calculated by the
+recurrence relation:
+</P>
+
+<TABLE WIDTH=600>
+<TR>
+<TD COLSPAN=1>
+<P>
+<IMG SRC="images/chio.gif" WIDTH="471" LENGTH="219" ALIGN="LEFT">
+</P>
+</TD>
+</TR>
+</TABLE>
+
+<P>
+We can use determinants to solve a system of linear equations:
+</P>
+
+<TABLE WIDTH=600>
+<TR>
+<TD COLSPAN=1>
+<P>
+<IMG SRC="images/lineq.png" WIDTH="61" LENGTH="14" ALIGN="LEFT">
+</P>
+</TD>
+</TR>
+</TABLE>
+
+<P>
+where <B>A</B> (an N-by-N matrix) and <B>b</B> (a length-N column vector) are
+the equation coefficients, and <B>x</B> is the length-N column vector holding
+the solution
+</P>
+
+<P>
+The solution to this matrix equation is given by Cramer's rule:
+</P>
+
+<TABLE WIDTH=600>
+<TR>
+<TD COLSPAN=1>
+<P>
+<IMG SRC="images/cramer.png" WIDTH="247" LENGTH="48" ALIGN="LEFT">
+</P>
+</TD>
+</TR>
+</TABLE>
+
+<P>
+where <b>Ai</b> is the matrix formed by replacing the i'th column of <b>A</b> by 
+the column vector <b>b</b>. 
+</P>
+
+<P>
+If we use a fast algorithm for computing the determinant, the time
+complexity of solving equations via Cramer's rule is O(N^3),
+competitive with Gaussian elimination (see this
+<A HREF="http://web.eecs.utk.edu/~itamar/Papers/JDA2011.pdf">paper</A>
+for details).
+</P>
+
+<P>
+---------
+</P>
+
+<P>
+We now define two accelerator instructions,
+<B>DETA</B> and <B>DETAI</B>, which work together to 
+implement Cramer's rule.
+</P>
+
+<P><B>DETA</B> dest_reg, a_reg, len_reg</P>
+
+<P>
+The <B>DETA</B> instruction is called at the start of the Cramer's
+rule algorithm. The a_reg field identifies the RISC-V register that
+holds the 64-bit memory address that points to the start of the <B>A</B> matrix.
+The len_reg field identifies the RISC-V register that holds the
+dimension of <B>A</B>.
+</P>
+
+<P>
+The instruction returns the determinant of <B>A</B> as a 64-bit value,
+that will be written in the RISC-V register coded by the dest_reg
+field.  In addition, the accelerator maintains sufficient state
+information about <B>A</B> to execute subsequent <B>DETAI</B>
+instructions.  The accelerator maintains this information until it is
+asked to execute another <B>DETA</B> instruction instance.  The amount
+of saved state is a function of the dimension of <B>A</B>, and so a
+practical accelerator will only be able to solve equation systems up
+to a certain size.
+</P>
+
+<P><B>DETAI</B> dest_reg, b_reg, col_reg</P>
+
+<P>
+The <B>DETAI</B> instruction computes the determinant of the <B>Ai</B>
+matrix formed by replacing the i'th column of <b>A</b> by the column
+vector <b>b</b>.  The b_reg field identifies the RISC-V register that
+holds the 64-bit memory address that is the start of the <B>b</B> column
+vector.  The col_reg field identifies the RISC-V register that holds
+the <b>i</b> subscript of <b>Ai</b>, as a 64-bit unsigned integer.
+</P>
+
+<P>
+The instruction returns the determinant of <B>Ai</B> as a 64-bit
+value, that will be written in the RISC-V registed coded by the
+dest_reg field. The computation uses local state information in the
+accelerator that was stored by the most recently executed <B>DETA</B>
+instruction, and by <B>DETAI</B> commands that followed that
+<B>DETA</B>. Each <B>DETAI</B> instruction saves local state
+information to speed up solving other <B>Ai</B> determinants.
+</P>
+
+<P>
+---------
+</P>
+
+<P>
+An algorithm to solve a set of N equations starts by calling
+<B>DETA</B> once, followed by N calls to <B>DETAI</B>. To
+complete the algorithm, N scalar divisions are performed on the RISC-V
+core, to compute each xi = det(Ai)/det(A).
+</P>
+
+<P>
+This project is "reasonable" to complete in a semester if
+the <B>A</B> matrix and <B>b</B> column vector are restricted to be
+small signed integers (perhaps as small as 8 bits).  This restriction
+ensures that the determinant will also be an exact signed integer, as the
+determinant computation uses only multiplication, addition, and
+subtraction.
+</P>
+
+<P>
+This property makes it possible for your designs to hit different
+points in the energy-area-performance space by changing the size of
+the multiplier array. You may wish to look into bit-serial multipliers, as
+described in this classic
+<A HREF="http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1093315">paper</A>.
+</P>
+
+<P>
+The description above leaves many details of the project unspecified.
+To do this project, you will need to study this
+<A HREF="http://web.eecs.utk.edu/~itamar/Papers/JDA2011.pdf">paper</A>
+to fully understand the algorithm.
+</P>
+
+
+<H2><A NAME="string"><B>Flexible String Comparisons</B></A></H2>
+
+<P>
+This project topic is flexible acceleration for character string processing.
+</P>
+
+<P>
+It builds on the string acceleration instructions in recent versions
+of the Intel ISA (see linked documentation excerpts for an
+<A HREF="./pdf/string_intro.pdf">introduction</A>, 
+four <A HREF="./pdf/string_opcodes.pdf">opcode</A> descriptions,
+and <A HREF="./pdf/string_uses.pdf">code</A> examples).
+</P>
+
+<P>
+Below, we show a block diagram of the Intel string accelerator,
+with annotations that resize its datapath to match RISC-V.
+</P>
+
+<TABLE WIDTH=600>
+<TR>
+<TD COLSPAN=1>
+<P>
+<IMG SRC="images/intel.png" WIDTH="600" LENGTH="450" ALIGN="LEFT">
+</P>
+</TD>
+</TR>
+</TABLE>
+
+<P>
+In the mode annotated above, 64-bit operands <B>A</B> and <B>B</B> are
+organized as lists of 8 8-bit characters. An array of 64 ALUs compares
+each character in <B>A</B> with each character in <B>B</B>, producing
+a 128-element bit vector as an intermediate result. The 2-bit output
+of each ALU codes the "less than". "equals to", "greater than", and
+"at least one null" conditions.
+</P>
+
+<P>
+To complete the computation, the accelerator reduces the vector to an
+8-bit mask or a 3-bit index value.  Reduction modes are hand-crafted
+for common programming tasks (for example, C string library
+functions <TT>strcmp()</TT> and <TT>strstr()</TT> have dedicated
+modes).  The comparator array also has several modes of operation,
+customized for common lexical tasks.  
+</P>
+
+<P>
+Altogether, the accelerator offers 9-bits of configurable options (4
+instruction opcodes, each with a 7-bit configuration field coded in
+<TT>funct7</TT>).
+<P>
+
+<P>
+One good class project for the class would be to reimplement the Intel
+architecture, or if this turns out to be too challenging, an appropriate
+subset.  
+</P>
+
+<P>
+Another approach would be to take the Intel architecture as a starting
+point, and then replace the comparison array and reduction logic with
+regular, configurable blocks that are borrowed from Field-Programmable
+Gate Arrays (FPGAs). This idea is reminiscent in some ways of
+the GARP architecture, described in this
+<A HREF="http://class.ece.iastate.edu/tyagi/cpre583/documents/garp.pdf">
+paper</A>.
+</P>
+
+<P>
+Below, we sketch a block diagram of the project idea.
+</P>
+
+<TABLE WIDTH=600>
+<TR>
+<TD COLSPAN=1>
+<P>
+<IMG SRC="images/fpga.png" WIDTH="600" LENGTH="450" ALIGN="LEFT">
+</P>
+</TD>
+</TR>
+</TABLE>
+
+<P>
+The motivation of this architecture is to support string 
+comparisons with irregular equivalence classes (for
+example, case-insensitive comparison).
+
+<P>
+A look-up table (LUT) is a natural way to support this functionality.
+To save chip area, the 64 LUTs in the array share one block of LUT
+SRAM.  Accelerator instructions directly access the memory system to
+update the LUT SRAM.
+</P>
+
+<P>
+On a final note, some types of bioinformatics problems can be seen as a
+specialized type of string processing.  The acceleration ideas
+described above can be used as a starting point for a DNA comparison
+engine. A good example of such an accelerator can be found in
+the paper available 
+<A HREF="http://www.lifl.fr/~touzet/Papiers06/dydel.pdf">here</A>.
+</P>
+
+<H2><A NAME="pdm"><B>Audio Pulse Density Modulation</B></A></H2>
+
+<P>
+This project is a good fit for someone with an interest and a
+background in audio digital signal processing (DSP). If you haven't
+taken a DSP class, and try to do this project, you will spend
+most of the semester teaching yourself DSP instead of doing
+acceleration design. So don't do that!
+</P>
+
+<P>
+To begin, the image below shows two representations of an audio signal.  The
+left representation is the more familiar one: a waveform of 16-bit
+samples at a 44,100 Hz sample rate, like a standard compact disc (CD).
+We call this representation Pulse-Coded Modulation (PCM).
+</P>
+
+<TABLE WIDTH=600>
+<TR>
+<TD COLSPAN=1>
+<P>
+<IMG SRC="images/audio_pdm.png" WIDTH="600" LENGTH="165" ALIGN="LEFT">
+</P>
+</TD>
+</TR>
+</TABLE>
+
+<P>
+The waveform on the right is a different representation of the
+same signal: a 2.4 MHz one-bit waveform (-1 or +1).  The amplitude of a
+particular sinewave sample of the left is equivalent to the
+local density of +1 samples on the right.  Thus, we call the representation
+Pulse Density Modulation (PDM).
+</P>
+
+<P>
+PDM is an interesting format because it is the first digital
+representation in a Sigma-Delta A/D converter, which is the most
+popular audio converter topology. In a traditional Sigma-Delta A/D
+chip, much of the die is taken up by digital circuits that
+post-process PDM into PCM.
+</P>
+
+<P>
+It is becoming popular to make products with arrays of microphones
+(many smart phones have two or more microphones). Another trend
+is to use MEMS microphones, that combine the microphone and
+the A/D in the same package. Given these trends, it improves
+system performance to design MEMS microphones with A/D converters
+that send PDM off the chip, and post-process the PDM to PCM elsewhere.
+An example part that works this way is the Analog Devices MEMS
+microphone ADMP521 (pictured below, with data sheet available
+<A HREF="http://www.analog.com/en/mems-sensors/mems-microphones/admp521/products/product.html">here</A>.
+
+</P>
+
+<TABLE WIDTH=600>
+<TR>
+<TD COLSPAN=1>
+<P>
+<IMG SRC="images/mems.png" WIDTH="600" LENGTH="705" ALIGN="LEFT">
+</P>
+</TD>
+</TR>
+</TABLE>
+
+<P>
+With this background, we can now describe PDM-related project ideas.
+One idea is to create an accelerator with a single instruction that
+converts stereo PDM to stereo PCM.  The <B>A</B> register would point
+to the region of memory that contains PDM samples, and the <B>B</B>
+register would point to the region of memory that the accelerator
+should deposit the PCM samples.  The <TT>funct7</TT> field would
+encode the length of the sample blocks, etc.
+</P>
+
+<P>
+A good introduction to the algorithms behind PDM to PCM conversion
+is an Analog Devices application note, available 
+<A HREF="http://www.analog.com/static/imported-files/application_notes/EE-350rev1.pdf">
+here</A>.
+The figure below shows the basic algorithm in the application note.
+There are other documents you should read to get a more theoretical
+description of PDM to PCM conversion; a good starting point is the
+Professor Boser's lecture slides on the topic, available 
+<A HREF="http://inst.eecs.berkeley.edu/~ee247/fa05/lectures/decimation.boser.pdf">here</A>.
+</P>
+
+<TABLE WIDTH=600>
+<TR>
+<TD COLSPAN=1>
+<P>
+<IMG SRC="images/pdm2pcm.png" WIDTH="600" LENGTH="244" ALIGN="LEFT">
+</P>
+</TD>
+</TR>
+</TABLE>
+
+<P>
+A related project idea is to implement an accelerator instruction
+that does audio signal processing using the PDM representation. A
+practical example is an accelerator that takes as input interleaved
+PDM bitstreams from an array of microphones, and performs beam-forming
+to "focus" on sounds in a particular point in space.
+</P>
+
+<P>
+Two website references serve as a good start for such a project. The
+first website provides a self-contained introduction to audio
+beamforming, and is available 
+<A HREF="http://www.labbookpages.co.uk/audio/beamforming.html">here</A>. 
+The second set
+of links is a five-part series on doing signal processing in the
+PDM domain, available here
+(<A HREF="http://electronicdesign.com/analog/signal-processing-density-domain-part-i">one</A>,
+<A HREF="http://electronicdesign.com/analog/signal-processing-density-domain-part-ii">two</A>,
+<A HREF="http://electronicdesign.com/analog/signal-processing-density-domain-part-iii">three</A>,
+<A HREF="http://electronicdesign.com/analog/signal-processing-density-domain-part-iv">four</A>,
+<A HREF="http://electronicdesign.com/analog/signal-processing-density-domain-part-v">five</A>).
+Unfortunately, time
+has not been a friend to the latter website, and the formatting
+breaks in some browsers; try using the "print" link on that webpage
+for a more readable version.
+</P>
+
+<H2><A NAME="image"><B>Image Compression</B></A></H2>
+
+<P>
+A black-and-white image, that consists mostly of white pixels, 
+can be considered to be a sparse binary matrix.  An algorithm
+that compacts that matrix into an efficient representation is,
+in effect, a lossless image compression algorithm.
+</P>
+
+<P>
+This observation was the starting point for an interesting set
+of image compression algorithms, described in a paper available
+<A HREF="http://www.sciencedirect.com/science/article/pii/S0097849396000702">here</A>
+(note that you will need to be on the campus Internet to access
+this paper for free).  An interesting accelerator project would
+be to implement instructions for the compression and decompression 
+algorithms from this paper.  
+</P>
+
+<P>
+A related acceleration project would be to use the quadtree sparse
+matrix representation they describe in their paper as a starting point
+for a sparse vector-matrix multiply engine.
+</P>
+
+<H2><A NAME="convolv"><B>Convolution Engine</B></A></H2>
+
+<P>
+The convolution operator is a computationally intensive
+part of many image processing and computer vision
+algorithms.
+</P>
+
+<P>
+Recently, a group at Stanford published a paper on an
+acceleration architecture for convolution, that is a 
+good fit for our class project. 
+</P>
+
+<P>
+Below is a diagram from their paper, that shows
+a key part of their architecture.
+</P>
+
+<TABLE WIDTH=600>
+<TR>
+<TD COLSPAN=1>
+<P>
+<IMG SRC="images/convolution.png" WIDTH="600" LENGTH="437" ALIGN="LEFT">
+</P>
+</TD>
+</TR>
+</TABLE>
+
+<P>
+The paper is available
+for download 
+<A HREF="http://csl.stanford.edu/~christos/publications/2013.convolution.isca.pdf">here</A>,
+and the slide deck from their ISCA talk is available
+<A HREF="http://csl.stanford.edu/~christos/publications/2013.convolution.isca.slides.pdf">here</A>.
+</P>
+
+<H2><A NAME="vision"><B>Vision</B></A></H2>
+
+<P>
+Visual motion processing is a natural target for hardware
+acceleration, because it is a key bottleneck in video compression
+algorithms.  Intel processors have extensive support for these
+algorithms, both in the CPU and the on-chip GPU.  A good starting
+point is this recent JSSC paper from an Intel chip design group,
+available <A HREF="http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=4735555">
+here</A>.
+</P>
+
+<P>
+Another popular topic for vision acceleration is finding abstract
+"corners" in real-world images. Such corner detectors are a key
+bottleneck in many object recognition algorithms.  Recent JSSC
+papers on such accelerators are available
+<A 
+HREF="http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6330650">
+here</A> and
+<A HREF="http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6328252">
+here</A>, which are based on an algorithm described
+<A HREF="http://arxiv.org/pdf/0810.2434.pdf">here</A>.
+</P>
+
+<P>
+A final vision accelerator idea is "image hashing", whose accelerator
+is described in a JSSC paper available
+<A HREF="http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=6504543">
+here</A>.
+
+<H2><A NAME="transpose"><B>Matrix Transposition</B></A></H2>
+
+<P>
+In numerical analysis programs, it is sometimes necessary to transpose
+matrices before performing operations on them. One approach to 
+accelerating transposition is to design SIMD register files that can
+be written and read in both a per-row and a per-column. A recent
+Intel paper implements this approach to matrix manipulation, and
+is available <A HREF="http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6373761">here</A>.
+
+<P>
+On a related note, partitioning vector-matrix operations into
+smaller blocks is another type of matrix manipulation that
+may be amenable to acceleration. A good introduction to this
+sort of partitioning is available <A HREF="http://dl.acm.org/citation.cfm?id=1356053">here</A>.
+
+
+
+<H2><A NAME="fixedpoint"><B>Fixed-Point Implementations</B></A></H2>
+
+<P>
+In some application domains, floating point numeric representations are 
+always
+used in a restricted range (for example, -1.0 to +1.0), and the
+resolution and accuracy requirements within that range are relaxed.
+</P>
+
+<P>
+For these applications, it makes sense to consider accelerators
+that compute on floating-point numbers using fixed-point math.
+</P>
+
+<P>
+A well-implemented example of accelerators of this type is an
+Intel graphics pipeline paper, available
+<A HREF="http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6374707">here</A>.
+
+<H2><A NAME="sort"><B>Sorting</B></A></H2>
+
+<P>
+Accelerators for sorting large databases have a long history
+in computer architecture. The memory interface of the RISC-V
+accelerator makes it a good fit for implementing some of these
+classic algorithms.  Two good starting points are papers
+available
+<A HREF="http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1676603">here</A> and 
+<A HREF="http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=5390917">here</A>.
+
+<H2><A NAME="memcached"><B>Memcached</B></A></H2>
+
+<P>
+Memcached is a popular image caching system used in large websites,
+like Facebook. It is typically run on standard server CPUs.
+</p>
+
+<P>
+However, there has been recent interest in building special-purpose
+hardware for memcached, as described in papers available
+<A HREF="http://web.eecs.umich.edu/~twenisch/papers/isca13.pdf">
+here</A> and 
+<A HREF="http://dl.acm.org/citation.cfm?id=2435306">here</A>.
+</P>
+
+<P>
+It would be interesting to repurpose the architectures developed
+in these papers in the RISC-V accelerator format.  Alternatively,
+it may be interesting to accelerate a key building block in cache
+systems of this type, the Bloom filter, apart from memcached itself.
+A good starting reference for Bloom filters is available
+<A HREF="http://en.wikipedia.org/wiki/Bloom_filter">here</A>.
+
+
+<H2><A NAME="viterbi"><B>Viterbi Algorithm, Cryptographic Hashing</B></A></H2>
+
+<P>
+Krste thought that a Viterbi algorithm accelerator would make a 
+good project.  A good example of such an accelerator is available
+<A HREF="http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=4443180">here</A>.
+
+<P>
+Krste also suggested that a cryptographic hash function would be
+a tractable cryptography accelerator for the class. Good 
+examples of such an accelerator are available
+<A HREF="http://www.cosic.esat.kuleuven.be/publications/article-137.pdf">
+here</A> and 
+<A HREF="http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=4560238&tag=1">
+here</A>.
+</P>
+
+
+<H2><A NAME="caltech"><B>Support Vector Machines, Error Correcting Codes</A></B></H2>
+
+<P>
+John Platt and David MacKay are Caltech alumni who were at the school
+when I was in the 1980s.
+Each has implemented an algorithm whose inner loops would be a good
+fit for an accelerator project.  
+
+<P>
+John Platt's algorithm concerns fast
+implementation of Support Vector Machine learning, and is available
+<A HREF="http://www.cs.utsa.edu/~bylander/cs6243/smo-book.pdf">here</A>.
+
+<P>
+David MacKay's algorithm concerns error-correcting codes, and is available
+<A HREF="http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=748992"</A>
+here</A>.
+
+<P>
+Both algorithms will require floating-point operations, and are a good
+match for someone interesting in exploring Chisel's support for floating
+point.
+
+<P>
+A related idea is to do accelerator instructions for encoding and
+decoding QR codes ("2-D barcodes"), which are based on error correcting codes.
+A tutorial introduction is available <A 
+HREF="http://www.thonky.com/qr-code-tutorial/">here</A>.
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+
+
