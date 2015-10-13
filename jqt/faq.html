@@ -1,0 +1,175 @@
+<HTML>
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<table>
+<TR>
+<TD width=200>
+<A HREF="enhance.html">Previous ...</A>
+</TD>
+<TD width=250>
+<A HREF="index.html">Home ...</A>
+</TD>
+<TD width=125>
+<A HREF="jqt.pdf">Download paper (PDF)</A>
+</TD>
+</TR>
+</table>
+
+<table>
+<TR>
+<TD width=550>
+<hr>
+</TD>
+</TR>
+</table>
+
+<TITLE>Frequently-Asked Questions about JQTs</TITLE>
+
+<table>
+<tr>
+<td width = 600>
+
+
+<H1>Frequently-Asked Questions about JQTs</H1>
+
+<P>
+Q1. What is a JPEG encoder/decoder/transcoder? </br>
+A1. A JPEG encoder converts an uncompressed imagefile into a
+compressed JPEG file. A JPEG decoder converts a compressed JPEG file
+back into an uncompressed imagefile. A JPEG transcoder takes
+a compressed JPEG file, performs some sort of processing on the file,
+and returns another compressed JPEG file.
+</P>
+
+<P>
+Q2: Will JPEG encoding and then JPEG decoding an uncompressed image file
+yield the original file back? </br>
+A2: Generally speaking, no. JPEG is a lossy compression algorithm,
+with the goal of perceptually-lossless, but not bit-accurate, image
+compression. JPEG encoders allow the user to tradeoff compressed file
+size and image quality: if a user chooses a sufficiently small file
+size, the decoded image will have noticeable visual artifacts,
+including blockiness, ringing, and color shifting.
+</P>
+
+<P>
+Q3. What is a JPEG Quality Transcoder (JQT)?  </br>
+A3. A JQT takes a compressed JPEG file as input, and produces as
+output a JPEG file that has reduced visual artifacts, at the expense
+of increased file size.
+</P>
+
+<P>
+Q4. Does the JQT perform a full image decompression? </br>
+A4. No. JPEG compression can be broken up into two parts, a lossy part
+that converts pixels into a quantized spatial-frequency representation
+(removing irrelevancy from the image), and a lossless part that packs
+this intermediate frequency-space representation into the smallest
+number of bits (removing redundancy from the intermediate form). Our
+JQT undoes the lossless compression, performs image processing on the
+intermediate representation, then reapplies lossless compression to
+create the output JPEG.
+</P>
+
+<P>
+Q5. What sort of image processing does the JQT perform? </br>
+A5. The JQT uses neural networks to estimate the information lost
+during quantization of the spatial-frequency representation of an
+image. The neural networks get trained using a large database of color
+images. Note that the specific images and the general performance
+numbers we quote on this website are NOT images from the training
+database, but from a separate independent test set.
+</P>
+
+<P>
+Q6. Isn't the neural network "creating information from nothing? </br>
+A6. No, it isn't. JPEG compression works compressing a small
+window of an image, for one color channel at a time. Our neural
+networks look over larger windows of the image, and at all three
+color channels, to estimate the information lost during quantization
+of the small window of one color plane. In other words, the neural
+network looks at other information sources not used by the original
+compression algorithm.
+</P>
+
+<P>
+Q7. Isn't the neural network just memorizing details about the training
+set images? How does it work on novel images? </br>
+A7. We used an independent test set of 132 images to measure the performance of
+the system; this test set was not used during the training of the
+network. All numbers quoted in the web site are measured on this test
+set. The two images used for examples are part of this independent
+test set.
+</P>
+
+<P>
+Q8. Tell me more about how the algorithm works. </br>
+A8. See this <A HREF="jqt.pdf">technical report</A>; this TR is an
+updated version of a paper due to appear in the peer-reviewed journal
+Neural Computation in a few months.
+</P>
+
+<P>
+Q9. What sort of JPEGs does the system work on? </br>
+A9. Right now, it works on 8-bit JPEG/JFIF color files sampled at
+4:2:2 (i.e. the two color channels are subsampled in X and Y by a
+factor of two, relative to the luminance channel), which are the
+majority of the images out there on the net. It doesn't yet
+work on 1:1:1 or monochrome images -- we are planning to train
+up nets for these two image types as well. The nets are trained
+for PhotoCD-type gamma correction (gamma = 2.5), although we've
+found the networks to be pretty immune to gamma in practice.
+</P>
+
+
+</td>
+</tr>
+</table>
+
+<table>
+<TR>
+<TD width=200>
+<A HREF="enhance.html">Previous ...</A>
+</TD>
+<TD width=250>
+<A HREF="index.html">JQT Home ...</A>
+</TD>
+<TD width=125>
+<A HREF="jqt.pdf">Download paper (PDF)</A>
+</TD>
+</TR>
+</table>
+
+<table>
+<TR>
+<TD width=550>
+<hr>
+</TD>
+</TR>
+</table>
+
+<table>
+<TR>
+<TD width=600>
+<center>
+[<A HREF="index.html">JQT Home Page</A>]
+[<A HREF="cband.html">Network Architectures for JQTs</A>]
+</center>
+<center>
+[<A HREF="filesize.html">Images: Filesize Reduction</A>] 
+[<A HREF="enhance.html">Images: Quality Enhancement</A>]
+</center>
+<center>
+[<A HREF="faq.html">Frequently Asked Questions</A>]
+[<A HREF="jqt.pdf">Download paper (PDF)</A>]
+</center>
+</TD>
+</TR>
+</table>
+
+
+</HTML>
+
+
+

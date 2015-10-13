@@ -1,0 +1,141 @@
+<HTML>
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<table>
+<TR>
+<TD width=200>
+<A HREF="index.html">Previous ...</A>
+</TD>
+<TD width=250>
+<A HREF="index.html">JQT Home ...</A>
+</TD>
+<TD width=125>
+<A HREF="filesize.html">Next ...</A>
+</TD>
+</TR>
+</table>
+
+<table>
+<TR>
+<TD width=550>
+<hr>
+</TD>
+</TR>
+</table>
+<TITLE>Network Architectures for JQTs</TITLE>
+
+<table>
+<tr>
+<td width = 600>
+
+
+<H1>Network Architectures for JPEG Quality Transcoders</H1>
+
+<P> A JPEG Quality Transcoder (JQT) converts a JPEG image file that
+was encoded with low image quality to a larger JPEG image file with
+reduced visual artifacts, without access to the original uncompressed
+image. JQTs can be added to standard networking architectures to
+reduce bandwidth on constrained network links. </P>
+
+<P> This figure shows a common Intranet topology :</P>
+
+<P>
+<IMG vspace=10 SRC="proxy.gif">
+<br>
+</P>
+
+<UL>
+<LI>JPEG image files reside on a web server. These images were
+compressed at an image quality appropriate for the application.
+<LI>These files are sent via a low-bandwidth
+network link to a remote web proxy server machine. 
+<LI>The proxy machine
+serves a heretogeneous cluster of end-user machines via a
+high-bandwidth local area network. 
+</UL>
+</P>
+
+<P> This figure adds a JPEG Quality Transcoder to the Intranet
+topology :</P>
+
+<P>
+<IMG vspace=10 SRC="proxy2.gif">
+<br>
+</P>
+
+<UL>
+<LI> The JQT sits in the proxy server, and converts input JPEG files
+with lower image quality to new JPEG files with higher image quality.
+<LI> With the JQT in the system, the filesize of the original JPEG
+images on the webserver can be reduced, while maintaining the same
+end-user image quality as in the original system.  Using our current JQT
+prototype, and a target image quality recommended in the JPEG
+standard, we can achieve average filesize reductions of 11.5
+percent. 
+<LI> The JQT converts the smaller JPEG image file retrieved from the
+web server into a larger file: in our prototype system, average
+filesize is increased by a factor of 3.4.  The high-bandwidth connection
+between the web proxy server and end-user machines can easily absorb
+this bandwidth increase.
+<LI> On an UltraSPARC II server, our prototype JQT processes
+a 384 by 256 color image in under two seconds.
+</UL>
+</P>
+  
+<P> 
+One use for the JQT, as described above, is to reduce the filesize of
+images on the web server. Alternatively, if the image files remain
+unaltered, the JQT acts to improve the image quality presented to end
+users. Our current prototype JQT improves image quality by 31 percent,
+as measured using a perceptual metric. 
+</P>
+
+</td>
+</tr>
+</table>
+
+<table>
+<TR>
+<TD width=200>
+<A HREF="index.html">Previous ...</A>
+</TD>
+<TD width=250>
+<A HREF="index.html">JQT Home ...</A>
+</TD>
+<TD width=125>
+<A HREF="filesize.html">Next ...</A>
+</TD>
+</TR>
+</table>
+
+<table>
+<TR>
+<TD width=550>
+<hr>
+</TD>
+</TR>
+</table>
+
+<table>
+<TR>
+<TD width=600>
+<center>
+[<A HREF="index.html">JQT Home Page</A>]
+[<A HREF="cband.html">Network Architectures for JQTs</A>]
+</center>
+<center>
+[<A HREF="filesize.html">Images: Filesize Reduction</A>] 
+[<A HREF="enhance.html">Images: Quality Enhancement</A>]
+</center>
+<center>
+[<A HREF="faq.html">Frequently Asked Questions</A>]
+[<A HREF="jqt.pdf">Download paper (PDF)</A>]
+</center>
+</TD>
+</TR>
+</table>
+
+
+</HTML>
+

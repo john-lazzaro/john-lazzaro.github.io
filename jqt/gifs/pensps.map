@@ -1,0 +1,41 @@
+#
+# standard color map
+# see /lib/laserwriter/untilstuff.ps for macro defs.
+#
+#  these colors are drawn BOTTOM to TOP, for laserwriter overwrite purposes
+#     (this order is independent of the order in this file.  SORRY)
+#
+#  the numbers of these patterns range from 0 to 14 from TOP to BOTTOM
+#
+# black  -  heavy data (thick)
+# red    -  dashed data
+# green  -  wires (medium)
+# yellow -  filled gray
+# blue   -  box outline (thick)
+# purple -  filled black
+# cyan   -  thin dashed
+# white  -  thin line
+# white2 -
+# red2   -
+# green2 -
+# blue2  -
+# yellow2-  filled gray, with outline (medium)
+# purple2-
+# cyan2  -
+#
+BLACK    { STROKE 0 SG  3 pt  SLW [] 0 SD }
+RED      { STROKE 0 SG  1 pt  SLW [] 0 SD }
+GREEN    { FILL 0 SG }
+YELLOW   { FILL 0.85 SG }
+BLUE     { STROKE 0 SG 1.75 pt SLW [] 0 SD }
+PURPLE   { FILL   0 SG }
+CYAN     { STROKE 0 SG .5 pt  SLW [10 pt 4 pt ] 0 SD }
+WHITE    { STROKE 0 SG 1 pt  SLW [] 0 SD }
+WHITE2   { STROKE 0 SG .7 pt  SLW [] 0 SD }
+RED2     { STROKE 0 SG  1 pt  SLW [18 pt 5 pt 2 pt 5 pt ] 0 SD }
+GREEN2   { STROKE 0 SG  1 pt  SLW [] 0 SD }
+YELLOW2  { FILLOUT 0.98 SG 1 pt  SLW [] 0 SD }
+BLUE2    { STROKE 0 SG 5 pt SLW [] 0 SD }
+PURPLE2  { FILL   0 SG }
+CYAN2    { STROKE 0 SG .5 pt  SLW [10 pt 4 pt ] 0 SD }
+

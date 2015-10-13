@@ -1,0 +1,194 @@
+<HTML>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<table>
+<TR>
+<TD width=200>
+<A HREF="filesize.html">Previous ...</A>
+</TD>
+<TD width=250>
+<A HREF="index.html">JQT Home ...</A>
+</TD>
+<TD width=125>
+<A HREF="faq.html">Frequently Asked Questions ...</A>
+</TD>
+</TR>
+</table>
+
+<table>
+<TR>
+<TD width=550>
+<hr>
+</TD>
+</TR>
+</table>
+
+<TITLE>Image Enhancement: Sample Images</TITLE>
+
+<table>
+<tr>
+<td width = 600>
+
+<H1>Image Enhancement: Sample Images</H1>
+
+<P>
+In some applications, a JQT is added to a network architecture to
+improve the image quality for end users, rather than maintaining a
+constant image quality while reducing bandwidth. In this section, we
+show an example of quality enhancement. A 24-bit color display is
+necessary to fully appreciate this example: 8-bit displays use color
+mapping techniques with artifacts of their own, which are not helped
+by the JQT processing.
+</P>
+
+<P>
+The image below is compressed using the quantization tables
+recommended in the JPEG standard. Most commercial and free JPEG
+encoders use linear scalings of these tables to provide a filesize
+vs. image quality tradeoff. The image below was compressed using a
+unity scaling of the tables, achieving a compressed filesize of 9287
+bytes. 
+</P>
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td width = 400>
+<IMG SRC="en_orig.jpg" >
+</td>
+<td width = 200>
+Sample image, compressed in accordance
+with JPEG standard recommendations. Note artifacts
+around parrot heads and beaks.
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td width = 600>
+
+<P>
+Note the moderate image quality: the image basically looks OK, but
+some compression artifacts are noticeable.  In particular, notice the
+color ringing around the head of the parrot to the right, and the
+artifacts around the beak of the parrot to the left. When measured
+using our perceptual error metric, which compares the image quality of
+the uncompressed and compressed images, it receives a score of 0.0253.
+</P>
+
+<P>When our JQT is applied to this test image, it improves the
+subjective image quality by reducing the compression artifacts,
+as shown below. </P>
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td width = 400>
+<IMG SRC="en_jqt.jpg" >
+</td>
+<td width = 200>
+Above image, after processing with JQT.
+Notice the reduction of artifacts around
+parrot heads and beaks.
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td width = 600>
+
+<P> 
+When measured by our perceptual error metric, it achieves a score of
+0.0238. To put this number in perspective, the JPEG standard
+recommends halving their recommended quantization tables, in order to
+achieve an image quality that is "usually perceptually
+indistinguishable" from the original image. When compressed with the
+indistinguishable tables, this sample image achieves a perceptual
+metric score of 0.0193. Ideally, our JQT could reduce the perceptual
+error score of the original image from 0.0253 to this "perceptually
+indistinguishable" 0.0193 : we define this ideal situation to be 100
+percent perceptual error reduction . In practice, it reduces the
+perceptual error to 0.0238. We can express the JQT performance as the
+percentage value 100*((0.0253-0.0238)/(0.0253-0.0193)) = 25 percent.
+</P>
+
+<P>
+To use a more common signal processing
+metric, our JQT improves PSNR (peak signal-to-noise ratio) by 0.58 dB;
+if the JQT was able to improve the original image to "usually
+perceptually indistinguishable" it would have registered a 2.44 dB
+improvement.
+</P>
+
+<P>
+We measured the percentage reduction of artifacts over an independent
+test set of 132 images (nominally 384 by 256), and found an average
+perceptual error reduction of 31 percent, and an average PSNR
+improvement of 0.56 dB.
+</P>
+
+
+</td>
+</tr>
+</table>
+
+<table>
+<TR>
+<TD width=200>
+<A HREF="filesize.html">Previous ...</A>
+</TD>
+<TD width=250>
+<A HREF="index.html">JQT Home ...</A>
+</TD>
+<TD width=125>
+<A HREF="faq.html">Frequently-Asked Questions ...</A>
+</TD>
+</TR>
+</table>
+
+<table>
+<TR>
+<TD width=550>
+<hr>
+</TD>
+</TR>
+</table>
+
+<table>
+<TR>
+<TD width=600>
+<center>
+[<A HREF="index.html">JQT Home Page</A>]
+[<A HREF="cband.html">Network Architectures for JQTs</A>]
+</center>
+<center>
+[<A HREF="filesize.html">Images: Filesize Reduction</A>] 
+[<A HREF="enhance.html">Images: Quality Enhancement</A>]
+</center>
+<center>
+[<A HREF="faq.html">Frequently Asked Questions</A>]
+[<A HREF="jqt.pdf">Download paper (PDF)</A>]
+</center>
+</TD>
+</TR>
+</table>
+
+
+</HTML>
+
+
+
+
+
+
+
+
+

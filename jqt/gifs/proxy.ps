@@ -1,0 +1,264 @@
+%!PS-Adobe-2.0
+% Caged_date='r% Last change: $x by $u'
+% Last change: Feb 1, 1989 3:16:38 pm by calvin
+/UntilState save def
+180 dict begin
+/UNTILFINISH { end UntilState restore } def
+%%BoundingBox: 20 20 576 756
+% $ Include /lib/laserwriter/texstuff.ps
+%  PS-in-TeX macros
+
+% Determine whether or not we are being called from TeX.  Currently, this
+% relies on GPOSX being defined or not.
+%
+%  Is-TeX <boolean>
+%
+/GPOSX where /Is-TeX exch def Is-TeX {pop} if % Define Is-TeX and eat "dict"
+
+% Try to define the current TeX-MBB.  If not Is-TeX then use the user-supplied
+% TeX-MBB or the whole page if TeX-MBB can not be found.
+%
+%  TeX-MBB <[mbb in TeX space]>
+%
+Is-TeX
+   {/TeX-MBB [GPOSX GPOSY currentpoint] def}
+   {/TeX-MBB where {pop} {/TeX-MBB [20 20 576 756] def} ifelse}
+ifelse
+
+%
+%  Define a couple of macros that do stuff if you are in TeX or not.
+%
+%  <procedure> In-Tex
+%  <procedure> Not-In-Tex
+%
+/In-TeX {Is-TeX exch if} def
+/Not-In-TeX {Is-TeX not exch if} def
+
+%
+%  Set up square scaling given an MBB
+%
+%  <[user-mbb]> TeX-do-square-scale
+%
+/TeX-do-square-scale {
+   % get User mbb
+      aload pop
+      /U-top   exch def
+      /U-right exch def
+      /U-bot   exch def
+      /U-left  exch def
+   % sort MBB
+      U-top U-bot lt    {U-top U-bot /U-top exch def /U-bot exch def} if
+      U-right U-left lt {U-right U-left /U-right exch def /U-left exch def} if
+   /U-height U-top U-bot sub def
+   /U-width  U-right U-left sub def
+   % get TeX MBB
+      TeX-MBB aload pop
+      /T-top   exch def
+      /T-right exch def
+      /T-bot   exch def
+      /T-left  exch def
+   % sort MBB
+      T-top T-bot lt    {T-top T-bot /T-top exch def /T-bot exch def} if
+      T-right T-left lt {T-right T-left /T-right exch def /T-left exch def} if
+   /T-height T-top T-bot sub def
+   /T-width  T-right T-left sub def
+   % Compute scaling in X and Y
+      /S-x T-width  U-width  div def
+      /S-y T-height U-height div def
+   % Make scales equal and center Tex-Mbb
+   % extra height=(T-height - S-x * U-height)
+   % Then divide by 2 and add to bottom (similar for extrawidth) }
+      S-x S-y gt
+      { /S-x S-y def 
+        T-width S-x U-width mul sub 2 div T-left add /T-left exch def }
+      { /S-y S-x def
+        T-height S-x U-height mul sub 2 div T-bot add /T-bot exch def }
+   ifelse
+   % Compute translation
+   T-left T-bot translate
+   S-x S-y scale
+   % Compute translation
+   U-left neg U-bot neg translate
+} def
+
+%
+%  Set up non-square scaling given an MBB
+%
+%  <[user-mbb]> TeX-do-scale
+%
+/TeX-do-scale {
+   aload pop % get User mbb
+   /U-top   exch def
+   /U-right exch def
+   /U-bot   exch def
+   /U-left  exch def
+   /U-height U-top U-bot sub def
+   /U-width  U-right U-left sub def
+   TeX-MBB aload pop % get TeX MBB
+   /T-top   exch def
+   /T-right exch def
+   /T-bot   exch def
+   /T-left  exch def
+   /T-height T-top T-bot sub def
+   /T-width  T-right T-left sub def
+   % Compute scaling in X and Y
+   /S-x T-width  U-width  div def
+   /S-y T-height U-height div def
+   % Compute translation
+   T-left T-bot translate
+   S-x S-y scale
+   % Compute translation
+   U-left neg U-bot neg translate
+} def
+
+%
+% Draw a box around an mbb-array
+%
+% <[mbb]> TeX-mbb-box
+%
+/TeX-mbb-box {
+   aload pop
+   /B-ury exch def
+   /B-urx exch def
+   /B-lly exch def
+   /B-llx exch def
+   newpath B-llx B-lly moveto B-llx B-ury lineto B-urx B-ury
+   lineto B-urx B-lly lineto closepath stroke
+} def
+
+
+
+% <size in points (72 per inch)> pt <size in user-units>
+% Feed pt through the default matrix to get device coordinates,
+% and then reverse transform it through the current matrix to get user units
+/pt { dup matrix defaultmatrix dtransform idtransform pop abs } def
+
+% Macro to define fonts-takes "/ID Size /Font-Name" as params
+/DF { findfont exch pt dup 0.8 mul /STRH exch def scalefont def } def
+% Define a default text font...
+/DT { /DT0 20 /Times-Roman DF DT0 SF } def
+% Macros for positioning Text-take "(string) x y" as params
+/strbox { gsave newpath 0 0 moveto false charpath
+          40 setflat flattenpath pathbbox grestore } def
+%/strsizes { strbox 4 2 roll exch pop } def
+/strsizes { stringwidth pop STRH 0 } def
+% Usage: string    _strsizes_     width height depth
+/TOP { pop -1 mul } def
+/VCENT { pop -.5 mul } def
+/LOW { pop pop 0 } def
+/BOT { exch pop -1 mul } def
+/LEFT { exch pop 0 exch } def
+/HCENT { exch -.5 mul exch } def
+/RIGHT { exch -1 mul exch } def
+
+/DEBUG { (Now showing:) print dup print (\n) print } def
+/TUL { moveto dup strsizes TOP LEFT rmoveto show } def
+/TUC { moveto dup strsizes TOP HCENT rmoveto show } def
+/TUR { moveto dup strsizes TOP RIGHT rmoveto show } def
+/TCL { moveto dup strsizes VCENT LEFT rmoveto show } def
+/TCC { moveto dup strsizes VCENT HCENT rmoveto show } def
+/TCR { moveto dup strsizes VCENT RIGHT rmoveto show } def
+/TLL { moveto dup strsizes LOW LEFT rmoveto show } def
+/TLC { moveto dup strsizes LOW HCENT rmoveto show } def
+/TLR { moveto dup strsizes LOW RIGHT rmoveto show } def
+/TBL { moveto dup strsizes BOT LEFT rmoveto show } def
+/TBC { moveto dup strsizes BOT HCENT rmoveto show } def
+/TBR { moveto dup strsizes BOT RIGHT rmoveto show } def
+% Shorthand for things
+/LD { load def } def
+/S /show LD
+/M /moveto LD
+/L /lineto LD
+/R /rlineto LD
+/DS { /DOTSIZE exch def } def
+5 pt DS
+/DOT { DOTSIZE 0 360 arc } def
+/D { 2 copy lineto stroke moveto } def
+/CT /rcurveto LD
+/CI { 0 360 arc } def
+/CP /closepath LD
+/NP /newpath LD
+/SF /setfont LD
+% defaults to use the old til-type stuff.  (FillPath and StrokePath)
+/FP { finpath } def
+/SP { finpath } def
+% Shorthand for colors
+/FILL { /FP /fill LD /SP /FP LD } def
+/FILLOUT { /FP { gsave gsave fill grestore 0 setgray stroke grestore } def 
+           /SP /FP LD } def
+/FILLSTROKE { /FP /fill LD /SP /stroke LD } def
+/STROKE { /FP /stroke LD /SP /FP LD } def
+/SG /setgray LD
+/SLW /setlinewidth LD
+/SLJ /setlinejoin LD
+/SLC /setlinecap LD
+/SD /setdash LD
+% Stuff to include comments in files
+/CmtY 10 def   % Starting Y position
+/Cmt { 20 CmtY moveto /Helvetica findfont 8 scalefont setfont show 
+       /CmtY CmtY 10 add store } def
+%!Not-Quite-PS-Adobe-1.0
+%%BeginFile: proxy.ff proxy
+%%Creator: Until
+%%CreationDate: Wed Sep  9 14:37:24 1998
+%%For: Lazzaro
+%%BoundingBox: -2112 -896 3456 1536
+% $ Include /lib/laserwriter/untilstuff.ps
+%%EndProlog
+{/TeX-MBB [36 36 576 756] def} Not-In-TeX
+[ -1536 -960 2944 1536 ] TeX-do-square-scale
+% color #14 pos 18
+{ STROKE 0 SG .5 pt  SLW [10 pt 4 pt ] 0 SD } exec
+% color #13 pos 19
+{ FILL   0 SG } exec
+% color #12 pos 20
+{ STROKE 0 SG 5 pt SLW [] 0 SD } exec
+NP -960 768 M 0 -256 R SP NP 1600 320 M 832 704 R SP NP 1600 64 M 832 -704 R
+SP NP 1600 192 M 832 0 R SP
+% color #11 pos 21
+{ FILLOUT 0.98 SG 1 pt  SLW [] 0 SD } exec
+% color #10 pos 22
+{ STROKE 0 SG  1 pt  SLW [] 0 SD } exec
+% color #9 pos 23
+{ STROKE 0 SG  1 pt  SLW [18 pt 5 pt 2 pt 5 pt ] 0 SD } exec
+% color #8 pos 24
+{ STROKE 0 SG .7 pt  SLW [] 0 SD } exec
+% color #7 pos 25
+{ STROKE 0 SG 1 pt  SLW [] 0 SD } exec
+NP /FTMP 12 /Helvetica DF FTMP SF (Low-Bandwidth Link) 128 0 TUC SP NP
+/FTMP 12 /Helvetica DF FTMP SF (JPEG Files) -832 1408 TLC SP NP
+/FTMP 12 /Helvetica DF FTMP SF (End Users) 2624 1344 TLC SP NP -1152 832 M
+0 384 R 320 0 R 0 -384 R -320 0 R CP FP NP -1088 896 M 0 384 R 320 0 R
+0 -384 R -320 0 R CP FP NP -1024 960 M 0 384 R 320 0 R 0 -384 R -320 0 R CP
+FP
+% color #6 pos 26
+{ STROKE 0 SG .5 pt  SLW [10 pt 4 pt ] 0 SD } exec
+% color #5 pos 27
+{ FILL   0 SG } exec
+% color #4 pos 28
+{ STROKE 0 SG 1.75 pt SLW [] 0 SD } exec
+% color #3 pos 29
+{ FILL 0.85 SG } exec
+NP -1408 -256 M 0 768 R 768 0 R 0 -768 R -768 0 R CP FP NP 832 -256 M 0 768
+R 768 0 R 0 -768 R -768 0 R CP FP NP 2432 832 M 0 384 R 384 0 R 0 -384 R
+-384 0 R CP FP NP 2432 0 M 0 384 R 384 0 R 0 -384 R -384 0 R CP FP NP
+2432 -832 M 0 384 R 384 0 R 0 -384 R -384 0 R CP FP
+% color #2 pos 30
+{ FILL 0 SG } exec
+% color #1 pos 31
+{ STROKE 0 SG  1 pt  SLW [] 0 SD } exec
+NP -1408 -256 M 0 768 R 768 0 R 0 -768 R -768 0 R CP FP NP
+/FTMP 15 /Helvetica DF FTMP SF (Web) -1024 256 TCC SP NP
+/FTMP 15 /Helvetica DF FTMP SF (Server) -1024 0 TCC SP NP
+/FTMP 15 /Helvetica DF FTMP SF (Server) 1216 0 TCC SP NP
+/FTMP 15 /Helvetica DF FTMP SF (Proxy) 1216 256 TCC SP NP 832 -256 M 0 768 R
+768 0 R 0 -768 R -768 0 R CP FP NP -640 128 M 1472 0 R SP NP 2432 0 M 0 384
+R 384 0 R 0 -384 R -384 0 R CP FP NP /FTMP 15 /Helvetica DF FTMP SF (PC)
+2624 1024 TCC SP NP /FTMP 15 /Helvetica DF FTMP SF (Mac) 2624 192 TCC SP NP
+2432 832 M 0 384 R 384 0 R 0 -384 R -384 0 R CP FP NP 2432 -832 M 0 384 R
+384 0 R 0 -384 R -384 0 R CP FP NP /FTMP 15 /Helvetica DF FTMP SF (NC)
+2624 -640 TCC SP
+% color #0 pos 32
+{ STROKE 0 SG  3 pt  SLW [] 0 SD } exec
+{showpage} Not-In-TeX UNTILFINISH
+%%EndFile

@@ -1,0 +1,209 @@
+<HTML>
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+
+
+<table>
+<TR>
+<TD width=200>
+<A HREF="cband.html">Previous ...</A>
+</TD>
+<TD width=250>
+<A HREF="index.html">JQT Home ...</A>
+</TD>
+<TD width=125>
+<A HREF="enhance.html">Next ...</A>
+</TD>
+</TR>
+</table>
+
+<table>
+<TR>
+<TD width=550>
+<hr>
+</TD>
+</TR>
+</table>
+
+<TITLE>Filesize Reduction: Sample Images</TITLE>
+
+
+<table>
+<tr>
+<td width = 600>
+
+<H1>Filesize Reduction: Sample Images</H1>
+
+<P>
+In this section, we show an example of bandwidth reduction using
+a JQT. A 24-bit color display is necessary to fully appreciate
+this example: 8-bit displays use color mapping techniques with
+artifacts of their own, which are not helped by the JQT processing.
+</P>
+
+<P>
+The image below is compressed using the quantization tables
+recommended in the JPEG standard. Most commercial and free JPEG
+encoders use linear scalings of these tables to provide a filesize
+vs. image quality tradeoff. The image below was compressed using a
+unity scaling of the tables, achieving a compressed filesize of 9353
+bytes. 
+</P>
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td width = 400>
+<IMG SRC="fs_orig.jpg" >
+</td>
+<td width = 200>
+Sample image, compressed in accordance with JPEG standard
+recommendations. Note slight artifacts around the lettering, tops, and
+rims of hats.  Compressed filesize: 9353 bytes. Perceptual error: 0.0231</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td width = 600>
+
+
+<P>
+Note the moderate image quality: the image basically
+looks OK, but some compression artifacts are noticeable (look at the
+text on the yellow hat, and the top edges of all of the hats). When
+measured using our perceptual error metric, which compares the
+image quality of the uncompressed and compressed images, it
+receives a score of 0.0231.
+</P>
+
+<P>When our JQT is applied to this test image, it improves the
+subjective image quality by reducing the compression artifacts.
+We can take advantage of this performance to reduce the filesize
+of the initial image, so that this smaller imagefile, processed
+by the JQT, also scores a value below 0.0231 on our perceptual error
+metric. We do this by scaling the quantization tables used during
+the encoding of the image. For this sample image, the filesize
+is reduced from 9353 bytes to 8473 bytes, a filesize reduction of 9.4 percent.
+</P>
+
+<P> 
+This smaller imagefile is shown below (before JQT
+processing). Note the artifacts in this image are more severe than the
+original image above; it has a perceptual error score of 0.0251.  
+</P>
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td width = 400>
+<IMG SRC="fs_small.jpg" >
+</td>
+<td width = 200>
+Sample image as above, but with a higher compression rate. File size
+is reduced to 8473 bytes -- however, artifacts around the lettering,
+tops, and rims of hats are worse, as perceptual error score increases
+to 0.0251.
+</tr>
+</table>
+
+<table>
+<tr>
+<td width = 600>
+
+<P>
+When we apply our JQT to this image, the artifacts are reduced:
+compare the image below with the others. The perceptual error metric
+for this image is 0.02308, slightly better than the score of the original
+image. Note that the filesize of this image has expanded due to JQT
+processing, from 8203 bytes to 33,543 bytes -- when used in a web
+proxy server, the high-bandwidth local area network links between the
+proxy server and the end-user machines can absorb this extra increase.
+</P>
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td width = 400>
+<IMG SRC="fs_jqt.jpg" >
+</td>
+<td width = 200>
+The image immediately above, after JQT processing. This image has a
+perceptual error score less than the top image on this page. Note that
+the artifacts around the lettering, tops, and rims of hats are reduced
+to the level of the top image.
+</tr>
+</table>
+
+<table>
+<tr>
+<td width = 600>
+
+<P>
+We measured the average filesize reduction over an independent test
+set of 132 color images (nominal size 384 by 256) and found an average
+filesize reduction of 11.5 percent.
+</P>
+
+
+</td>
+</tr>
+</table>
+
+<table>
+<TR>
+<TD width=200>
+<A HREF="cband.html">Previous ...</A>
+</TD>
+<TD width=250>
+<A HREF="index.html">JQT Home ...</A>
+</TD>
+<TD width=125>
+<A HREF="enhance.html">Next ...</A>
+</TD>
+</TR>
+</table>
+
+<table>
+<TR>
+<TD width=550>
+<hr>
+</TD>
+</TR>
+</table>
+
+<table>
+<TR>
+<TD width=600>
+<center>
+[<A HREF="index.html">JQT Home Page</A>]
+[<A HREF="cband.html">Network Architectures for JQTs</A>]
+</center>
+<center>
+[<A HREF="filesize.html">Images: Filesize Reduction</A>] 
+[<A HREF="enhance.html">Images: Quality Enhancement</A>]
+</center>
+<center>
+[<A HREF="faq.html">Frequently Asked Questions</A>]
+[<A HREF="jqt.pdf">Download paper (PDF)</A>]
+</center>
+</TD>
+</TR>
+</table>
+
+
+</HTML>
+
+
+
+
+
