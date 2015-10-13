@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The Spectral Median Filter: A Tilt Filter in a Servo Loop</TITLE>
+<META name="keywords" content="John Lazzaro, John Lazaro, Jon Lazzaro,
+Jon Lazaro, John Lazarro, Jon Lazarro, John Lazzarro, Jon Lazzarro,
+John Lazzarow, John Wawrzynek, tilt filter, dynamic filter, spectral
+median, spectral centroid, envelope follower, Audio Unit, AudioUnit,
+plug-in, MPEG, MPEG 4, MPEG-4, MP4, MPEG-4 Structured Audio, MP4, SA,
+MP4-SA, MP4/SA, structured audio, coreaudio, Apple, OS X, Lion">
+<META name="description" content="Audio examples, source code, and
+AudioUnit plug-in for A Tilt Filter in A Servo Loop (2012 AES
+San Francisco convention paper).">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL><STRONG>tilt-filter servo-loop</STRONG></SMALL></FONT>
+</TD>
+</TR>
+</TABLE>
+
+<H1>The Spectral Median Filter: A Tilt Filter in a Servo Loop</H1>
+<H3>By <A HREF="../index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek</A>, <A HREF="http://www.cs.berkeley.edu/">
+CS Division</A>, <A HREF="http://www.berkeley.edu/">UC Berkeley.</A></H3>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>Introduction</H2>
+
+<P>
+Dynamic filters change their filter shape in response to audio input.
+A de-esser is a good example of a dynamic filter: it detects sibilant
+vocal sounds, and responds by notching out the sibilance for a short
+period of time.</P>
+
+<P>
+In our 2012 AES convention paper in San Francisco, we described a
+dynamic filter plug-in that servos its output to have a constant tonal
+center.</P>
+
+<P>
+<IMG SRC="./ui.jpg" ALIGN="TOP" WIDTH=490 HEIGHT=209></P>
+
+<P>
+The user interface of the plug-in lets the user set this "Spectral
+Center" frequency, and also set the "Tracking Time" and "Threshold" of
+the servo loop that controls the filter transfer function.  Faster
+tracking times are good for envelope-follower style effects, while
+slower tracking times are good for use in mastering and as automatic
+tone controls.
+
+</P>
+
+<P>
+The plug-in works by servoing the tilt parameter of a tilt filter.
+See our AES paper
+<A HREF = "../sa/pubs/pdf/aes133.pdf">[PDF]</A>
+for technical details.</P>
+
+<H2>Audio Example</H2>
+
+<P>
+The paper includes examples of plug-in behavior when processing
+various audio sources. Below are MP3 audio files for one of the examples.
+
+<P>
+The example shows the plug-in processing a trombone loop
+for different tracking times, and corresponds to Figure 14 in the
+paper.</P>
+
+<P><IMG SRC="trombone.jpg" ALIGN="TOP" WIDTH=630 HEIGHT=470></P>
+
+<P>
+For all examples, the Spectral Center is set to 60 Hz and the
+Threshold is set to 0.1 dB.</P>
+
+<p>The audio files start with the plug-in audio input, followed by a
+short pause and the plug-in audio output.</P>
+
+<P> Tracking Time = 100ms:
+<audio controls="controls">
+  <source src="mp3/Trombone_100_ms.mp3" type="audio/mpeg">
+(Your browser does not support the audio element)
+</audio></P>
+
+<P> Tracking Time = 200ms:
+<audio controls="controls">
+  <source src="mp3/Trombone_200_ms.mp3" type="audio/mpeg">
+(Your browser does not support the audio element)
+</audio></P>
+
+<P> Tracking Time = 300ms:
+<audio controls="controls">
+  <source src="mp3/Trombone_300_ms.mp3" type="audio/mpeg">
+(Your browser does not support the audio element)
+</audio></P>
+
+<P> Tracking Time = 400ms:
+<audio controls="controls">
+  <source src="mp3/Trombone_400_ms.mp3" type="audio/mpeg">
+(Your browser does not support the audio element)
+</audio></P>
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Downloads</H2>
+
+<P>
+A Mac OS X disk image file that contains the
+AudioUnit plug-in may be downloaded 
+by clicking <A HREF="./tilt-au.dmg">here.</A></P>
+
+<P>
+Clicking on the link will download the disk image
+file <TT>tilt-au.dmg</TT> to the place where downloads
+usually happen for your web browser. </P>
+
+<P>
+To install the plug-in, open the disk image, and drag the the
+folder <TT>plugin</TT> to your disk. Open the folder, and read the
+file README.TXT for instructions on installing and using the plug-in.
+</P>
+
+<H2>Source Code</H2>
+
+<P>
+You can download source code for the plug-in by
+clicking <A HREF="./dist.zip">here</A>. 
+
+<P>
+Clicking on the link will download the ZIP file 
+<TT>dist.zip</TT> to the place where downloads
+usually happen for your web browser.  Unzip the
+file (by double-clicking its icon in Finder, or
+by using the <TT>unzip</TT> command in Terminal)
+to create the folder <TT>dist</TT>.</P>
+
+<P>
+Open the folder, and read the file <TT>README.TXT</TT>
+for information about the source code distribution.
+</P>
+
+<H2>References</H2>
+
+<P>
+
+John Lazzaro and John Wawrzynek (2012). &nbsp<B>A Tilt Filter in a
+Servo Loop </B> The 133th Convention of the Audio Engineering 
+Society (AES), October 26-29, 2012, San Francisco, CA, USA.
+<A HREF = "../sa/pubs/pdf/aes133.pdf">[PDF]</A>.
+</TD>
+
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL><STRONG>tilt-filter servo-loop</STRONG></SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+</BODY>
+</HTML>
