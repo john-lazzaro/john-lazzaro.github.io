@@ -1,0 +1,291 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>RTP MIDI: An RTP Payload Format for MIDI</TITLE>
+<META name="keywords" content="John Lazzaro, John Lazaro, Jon Lazzaro,
+Jon Lazaro, John Lazarro, Jon Lazarro, John Lazzarro, Jon Lazzarro,
+John Lazzarow, John Wawrzynek, network musical performance, netjam,
+IETF, RTP, SIP, SDP, RSVP, real time protocol, real-time procotol,
+session initiation protocol, session description protocol, 
+MPEG, MPEG 4, MPEG-4, MP4, MPEG-4 Structured Audio, MP4, SA, MP4-SA, 
+MP4/SA, computational audio, structured audio, RTP MIDI, RFC 4695,
+RFC 4696, MIDI Network Driver, Apple, OS X, Tiger, Leopard">
+<META name="description" content="Home page for the RTP payload
+format for MIDI, at the CS Division of UC Berkeley.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL><STRONG>rtp-midi</STRONG></SMALL></FONT>
+</TD>
+</TR>
+</TABLE>
+
+<H1>RTP MIDI: An RTP Payload Format for MIDI</H1>
+<H3>By <A HREF="../index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek</A>, <A HREF="http://www.cs.berkeley.edu/">
+CS Division</A>, <A HREF="http://www.berkeley.edu/">UC Berkeley.</A></H3>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>RTP MIDI</H2>
+
+<P>
+Internet telephony and video-conferencing programs send audio and video
+over the net using the Real-time Transport Protocol
+(<A HREF="http://en.wikipedia.org/wiki/Real-time_Transport_Protocol">RTP</A>). RTP
+is an Internet Engineering Task Force
+(<A HREF="http://www.ietf.org/">IETF</A>) standard, whose payload
+formats are developed in the Audio-Video Transport payload working
+group (<A HREF="http://datatracker.ietf.org/wg/payload/">payload</A>).
+
+<P>
+We have worked within AVT-payload to standardize RTP MIDI, a payload
+format to send MIDI over networks using
+RTP.  <A HREF="http://www.midi.org/about-midi/aboutmidi3.shtml">MIDI</A>
+is a standard for coding the gestures of musical performance --
+pressing piano keys, striking drum pads, moving faders, etc).
+
+<P>
+<A HREF="http://www.rfc-editor.org/rfc/rfc6295.txt">RFC 6295</A>
+normatively defines the RTP MIDI payload format. 
+<A HREF="http://www.rfc-editor.org/rfc/rfc4696.txt">RFC 4696</A> is an
+implementation guide for RTP MIDI.  The RFCs were developed in
+cooperation with the <A HREF="http://www.midi.org">MIDI Manufacturers
+Association</A> (MMA) and the <A
+HREF="http://en.wikipedia.org/wiki/Mpeg">Motion Pictures Expert
+Group</A> (MPEG).
+
+<P>
+RTP MIDI is able to send MIDI over a "lossy" network (a network that
+loses packets).  To prevent "stuck notes" and other artifacts, RTP
+MIDI uses a feed-forward resiliency system (the <I>recovery
+journal</I>) to recover from packet loss.
+
+<P>
+We anticipate three major application areas for RTP MIDI:
+
+<UL> 
+<LI>
+<B>MIDI over wired and wireless LANs.</B> 
+RTP MIDI may be used to send real-time MIDI streams over wired and
+wireless Local Area Networks
+(LANs).  <A HREF="http://www.apple.com">Apple</A> uses RTP MIDI as the
+transport layer for
+the <A HREF="http://www.soundonsound.com/sos/jul05/articles/tiger.htm#3">MIDI
+Network Driver</A>, included
+in <A HREF="http://www.apple.com/macosx/">OS X</A> and in iOS (the
+operating system for the <A HREF="http://www.apple.com/iphone/">iPhone</A>, the 
+<A HREF="http://www.apple.com/ipad/">iPad</A>, and the <A HREF="http://www.apple.com/ipod/">iPod</A> Touch).
+</LI>
+</UL> 
+
+<UL> 
+<LI>
+<B>Network Musical Performance.</B> 
+VoIP and videoconferencing applications may add support for <A
+HREF="../nmp/index.html">network
+musical performance</A> via RTP MIDI.  In a network performance,
+musicians located in different physical locations interact over a
+network to perform as they would if located in the same room.
+</LI>
+</UL> 
+
+<UL> 
+<LI>
+<B>Content Streaming.</B>  
+Content streams may begin to use MIDI for low-bitrate music coding,
+perhaps in conjunction with normative sound synthesis methods such as
+<A HREF="../sa/index.html">Structured
+Audio</A>.  Applications include Internet broadcasting, multimedia
+presentations, and telephony audicons and ring tones.
+</LI>
+</UL> 
+
+
+<H2>To Learn More</H2>
+
+<P>
+Implementors should refer to
+<A HREF="http://www.rfc-editor.org/rfc/rfc6295.txt">RFC 6295</A> and 
+<A HREF="http://www.rfc-editor.org/rfc/rfc4696.txt">RFC 4696</A>
+for the final version of RTP MIDI.
+
+<P>
+<A HREF="http://www.rfc-editor.org/rfc/rfc6295.txt">RFC 6295</A> was
+approved in 2011, and fixes many document errors in the first RTP
+MIDI RFC (<A HREF="http://www.rfc-editor.org/rfc/rfc4695.txt">RFC
+4695</A>).  See Section 12 of RFC 6295 for a complete change log.
+Errors in <A HREF="http://www.rfc-editor.org/rfc/rfc4696.txt">RFC 4696</A>
+are documented on its <A HREF="http://www.rfc-editor.org/errata_search.php?rfc=4696">
+errata page</A>.
+
+<P>
+This <A HREF="../sa/pubs/pdf/aes117.pdf"> paper,</A> presented at the
+117th AES convention, is a good introduction to how RTP MIDI works,
+and how it fits into the IETF media protocol stack.  The AES paper
+discusses a protocol that is a snapshot of RTP MIDI as it existed in
+October 2004.
+
+<P>
+In network musical performance applications, one cause of concern is
+the latency between performers. This <A
+HREF="../sa/pubs/pdf/nossdav01.pdf">
+paper,</A> presented at the <A
+HREF="http://www.nossdav.org">NOSSDAV</A> 2001 conference, discusses
+latency (and other issues) in network musical performances, in the
+context of an application that uses a proto-version of RTP MIDI as the
+network transport.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Implementations</H2>
+
+<P>
+<A HREF="http://www.apple.com">Apple</A> uses RTP MIDI as the
+transport layer for the MIDI Network Driver that ships in Mac OS X and
+iOS.</P>
+
+<P>
+See this Sound on Sound
+magazine <A HREF="http://www.soundonsound.com/sos/mar07/articles/dpworkshop_0307.htm"
+>article</A> for a comprehensive guide to using Apple's MIDI Network
+Driver on OS X.  A shorter introduction to the topic is presented in
+this
+<A HREF="http://www.soundonsound.com/sos/jul05/articles/tiger.htm#3"
+>article</A>.  
+
+<P>
+iOS app developers can access RTP MIDI via the
+<A HREF="https://developer.apple.com/library/ios/#documentation/CoreMidi/Reference/MIDINetworkSession_ClassReference/Reference/Reference.html">MIDINetworkSession</A> 
+Class. Hundreds of iOS apps use RTP MIDI; one example is
+<A HREF="http://saitarasoftware.com/Site/AC-7_Core.html">AC-7</A>.</P>
+
+<P> 
+<A HREF="http://www.tobias-erichsen.de/">Tobias Erichsen</A>
+has created a MIDI Network Driver for Windows that can interoperate
+with Apple's RTP MIDI implementation.  His driver is free for private,
+non-commercial use, and is available for download 
+<A HREF="http://www.tobias-erichsen.de/Software.html">here.<A>
+</P>
+
+<P> <A HREF="http://www.kissbox.nl/">Kiss-Box</A> manufactures
+Ethernet networking hardware that interoperates with Apple's RTP MIDI
+implementation.  The Kiss-Box RTP MIDI stack was developed
+by <A HREF="http://fr.linkedin.com/pub/benoît-bouchez/10/489/189">Benoit
+Bouchez</A>, who also develops embedded implementations of RTP MIDI on
+a consulting basis (email: beb [dot] digitalaudio [at] free [dot] fr).
+
+<P> <A HREF="http://www.humatic.de/htools/nmj/">nmj</A> is a Java
+library that lets developers write Android apps that interoperate with
+Apple's RTP MIDI implementation.
+<A HREF="http://www.humatic.de/htools/touchdaw/">TouchDAW</A> is an
+example of an Android app that is based on nmj technology.
+
+<P> Jim Young has written an RTP MIDI stack for Windows 8 using the
+WinRT API (<A HREF="http://www.youtube.com/watch?v=jzsJljhmz_s">video</A>). 
+</P>
+
+<P> <A HREF="http://www.wireshark.org"> Wireshark </A> now includes an
+RTP MIDI dissector, written
+by <A HREF="http://www.tobias-erichsen.de/">Tobias Erichsen</A>, that
+interoperates with Apple's RTP MIDI implementation. </P>
+
+<P>
+<A HREF="http://midishare.sourceforge.net/">MidiShare</A>, a realtime
+operating system for musical applications, includes an RTP MIDI library
+in its development branch.
+
+<P>
+The (unofficial) reference implementation for RTP MIDI is the network
+stack in <TT>sfront</TT>, an <A HREF=
+"../sa/index.html">MPEG 4 Structured Audio</A>
+decoder.  
+
+<P>
+Networking is no longer enabled in the <TT>sfront</TT>
+distribution, because we no longer host the required network services.  
+However, the networking source code still ships in the
+distribution.  Developers wishing to examine the network code can download
+<TT>sfront</TT> <A
+HREF="../sa/sfman/user/install/index.html#download">here</A>, and
+follow these <A
+HREF="../sa/sfman/user/cmdline/index.html#network">instructions</A>
+for locating the network source code.  Alternatively, we offer
+a smaller distribution that contains only the
+network source code (click <A
+HREF="../sa/nsys_bsd.tar.gz">here</A>
+to download).  Note that the network code (and <TT>sfront</TT>
+itself) is BSD-licensed.
+
+<H2>References</H2>
+
+<P>
+John Lazzaro and John Wawrzynek (2011). &nbsp<B>RTP Payload Format for
+MIDI.</B> RFC 6295, <A HREF="http://www.ietf.org">IETF</A>
+Proposed Standard Protocol [<A
+HREF="http://www.rfc-editor.org/rfc/rfc6295.txt">document</A>].
+
+<P>
+John Lazzaro and John Wawrzynek (2006). &nbsp<B>An Implementation
+Guide for RTP MIDI.</B> RFC 4696, <A HREF="http://www.ietf.org">IETF</A>
+Standards-Track (Informative)  [<A
+HREF="http://www.rfc-editor.org/rfc/rfc4696.txt">document</A>]
+[<A HREF="http://www.rfc-editor.org/errata_search.php?rfc=4696">errata</A>].
+
+<P>
+John Lazzaro and John Wawrzynek (2006). &nbsp<B>RTP Payload Format for
+MIDI.</B> RFC 4695, <A HREF="http://www.ietf.org">IETF</A> Proposed
+Standard Protocol
+[<A HREF="http://www.rfc-editor.org/rfc/rfc6295.txt">document</A>]
+[<A HREF="http://www.rfc-editor.org/errata_search.php?rfc=4695">errata</A>].
+Obsoleted by RFC 6295.
+
+<P>
+J. Lazzaro (2006). &nbsp<B>Framing RTP and RTCP Packets over
+Connection-Oriented Transport.</B> RFC 4571, <A
+HREF="http://www.ietf.org">IETF</A> Proposed Standard Protocol 
+ [<A
+HREF="http://www.rfc-editor.org/rfc/rfc4571.txt">document</A>].
+
+<P>
+John Lazzaro and John Wawrzynek (2004). <B>An RTP Payload Format for MIDI.
+</B> <I>The 117th Convention of the Audio Engineering Society,</I> 
+October 28-31, 2004, San Francisco, CA.
+<A HREF="../sa/pubs/pdf/aes117.pdf">
+[PDF]</A>.
+
+<P>
+John Lazzaro and John Wawrzynek (2001). <B>A
+Case for Network Musical Performance.</B> <I>The 11th International
+Workshop on Network and Operating Systems Support for Digital Audio
+and Video (NOSSDAV 2001)</I> June 25-26, 2001, Port Jefferson, New York 
+<A HREF="../sa/pubs/pdf/nossdav01.pdf">
+[PDF]</A>.
+</TD>
+
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL><STRONG>rtp-midi</STRONG></SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+</BODY>
+</HTML>
