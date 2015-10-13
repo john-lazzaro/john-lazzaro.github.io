@@ -1,3 +1,4 @@
+git status -uno
 git add [filenames]
 git commit -m 'X'
 git push -u origin master

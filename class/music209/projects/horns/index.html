@@ -1,0 +1,550 @@
+<head>
+<title>Music 209 Projects: Wind Instruments</title>
+</head>
+<body>
+<h1>Music 209 Projects: Wind Instruments</h1>
+<A HREF="../../index.html">Music 209</A> : <A HREF="../index.html">Projects</A> : Wind Instruments
+<hr>
+
+<P> 
+These project ideas involve wind instruments.  Following the project
+list is a set of <A HREF="#notes">notes</A> about concatenative drum
+synthesis that may be helpful.
+
+<H2><A NAME="artic">Project: Playing Horns from a Keyboard with Improved Articulation</A></H2>
+
+<P>
+In the <A HREF="#notes">notes</A> below, we discussed how
+multi-sampling -- systematically sampling a horn playing different
+notes, with different articulations and different volumes -- is the
+dominant current practice for horn parts played from a keyboard.
+
+<P>
+An alternative architecture for horn sampling would be to record an
+instrumentalist playing complete performances, and to then use this
+performance as a database that keyboardist "indexes into" in real time
+by playing a part.  The hope is that more fluid parts will result, as
+the database contains natural transitions between notes.  An
+implementation of this basic architecture is present in the Synful
+plug-in, as described <A HREF="http://www.synful.com/RPM.htm"
+TARGET="_blank">here.</A>
+
+<P>
+In this architecture, we are using the database for two reasons: to
+look up performance control data, and to look up waveforms.  However,
+as we heard in the WX-7 examples linked in the <A
+HREF="#notes">notes</A>, acoustic physical modeling synthesizers have
+existed for a decade which provide amazingly realistic horn sounds,
+given realistic performance control data (in our mp3s, from a WX-7).
+
+<P>
+The class project would be to begin with the concatenative real-time
+database architecture as used by products like Synful, but modify
+it so that the database is converted from an audio database to
+a control parameter database as an off-line operation.  Ideally,
+new database would hold the sort of controller information
+a wind controller like the WX-7 generates.  This parameter database
+could then be used for real-time lookups, to convert piano keyboard
+MIDI control to expressive WX-7 style control, which could then be
+used to drive a physical modeling synthesizer.  This architecture
+has the advantage that the performance control database would be
+KBs, not GBs, and could easily fit in RAM.
+
+
+<H2><A NAME="phrase">Project: Automatic Horn Phrase Selection to Match a Track</A></H2>
+
+<P>
+Collaboratively working with a horn soloist or section in the studio
+is an invigorating experience for all concerned: the clock is ticking,
+and everyone in the room wants a successful take at the end of the
+day.
+
+<P>
+Contrast this experience with searching a loop library for the right
+horn section loop, or using a user interface like the one described
+for Liquid Saxophone.  The robot "player" doesn't listen -- you do.
+You audition loops one by one, keeping in mind the role in your track
+the part needs to play, and try to stay focused.
+
+<P>
+Maybe there is a better way.
+
+<P>
+This project is about coming up with a user interface, and a plan for
+realizing the user interface using currently-known technology, that
+goes beyond a producer auditioning a lists of loops one by one.
+
+<P>
+The description for a project like this is necessarily vague: the
+goal is for some genuinely new and useful ideas to emerge from 
+the class project.  However, the following ideas should give
+a sense of a direction to get you started:
+<UL>
+<LI>In some sense, your system should be able to <I>listen</I> to the
+ideas already on the track.  In a practical sense, this involves
+knowing (at least) the time signature, tempo(s), number of bars, bass
+root values, and chord chart for the part of the composition that
+needs horns.  It also means knowing hard data from which to deduce
+a style: instrumentation, spectral shape of the tracks, etc.</LI>
+<LI>
+The phrase catalog needs to be analyzed to get data that can
+be used in the context of the track data described above.  A
+monophonic audio-to-MIDI system can be used as a starting point
+to get timing and notation for the loop; audio analysis and 
+hand-labeled meta-data can help fill in the pieces.</LI>
+<LI>
+The bridge between the track analysis and the loop analysis is
+probably too much to jump via automatic methods.  The creative part of
+this project is coming up with ways for the user to guide the loop
+selection process, that feels more like talking to horn players
+between takes, and less like auditioning endless loops in a library.
+One idea to consider is to develop a graphical language, where the
+user creates abstract line drawings that follow the bar-line to
+communicate an aspect of the desired part (such as pitch contour,
+energy level, articulation, etc).
+</UL>
+
+<P>
+In an operational sense, one possible design would put the program and
+the user in a dialogue.  Candidate concatenations of loops by the program
+would form sonic requests in the dialogue, and guidance from the user
+on how to improve the loop would form responses to the request.
+
+
+<H2><A NAME="wx7">Project: Real-time Timbre Selection with a Wind Controller</A></H2>
+
+<P>
+[David -- your WX-7 timbre selection system goes here]
+
+
+<h2><A NAME="notes">Wind Instrument Lecture Notes</A></h2>
+
+<P>
+This lecture will focus on the wind instruments most commonly used in
+popular music: <A
+HREF="http://en.wikipedia.org/wiki/Saxophone"
+TARGET="_blank">saxophone</A>, <A
+HREF="http://en.wikipedia.org/wiki/Trumpet"
+TARGET="_blank">trumpet</A>, <A
+HREF="http://en.wikipedia.org/wiki/Trombone"
+TARGET="_blank">trombone</A>.  Following common practice, we use the
+term "horn" to refer to these instruments, although technically the
+saxophone is a woodwind and not a horn.
+
+
+<P>
+In pop music arrangements, horns play two major roles: 
+<ul>
+<li><B>Featured solos.</B>  In vocal songs, solos during an instrumental
+break are often played by a saxophone or a trumpet.  In instrumental
+compositions, horns often act as the replacement for the vocal part, and play
+the melody line of the entire song.</il>
+
+<li><B>Section playing.</B> Several horns playing coordinated lines,
+as accompaniment to vocals or a solo instrument.  Horn sections take
+many forms, but are most commonly 2-4 players, with at least one
+brass (trumpet, and perhaps trombone) and one saxophone
+(tenor, and perhaps alto and baritone).  Horn sections in pop and
+soul records usually use baritone sax as the lowest voice;
+Latin music usually uses a trombone as the lowest voice.</li> </ul>
+
+<P>
+Soloists are usually hired to improvise a solo that fits the
+context of a song.  The final track is usually a collaboration, to
+some degree, between the producer (who often has a "vision", in some
+abstract sense, for the solo) and the sax or trumpet player (who has
+the technique and the improvisation style to bring the producer's
+vision to life).
+
+<P>
+In horn <I>section</I> studio work, a wider variety of working styles are
+common.  At one extreme, full charts may be written in advance for a
+section by an arranger.  At the other extreme, a group of players who
+play as a section may be hired as team, with the understanding that
+they will develop appropriate lines for the song during the session
+in collaboration with a producer.
+
+<P>
+A good "novice guide" to the mechanics of writing section charts
+is available <A
+HREF="http://www.computermusic.co.uk/pdf/tutorials/brass.pdf" TARGET="_blank">here</A>.
+In addition, commentary on the horn section styles found in pop music may be
+found in the interview of Andy Bush in this <A
+HREF="http://www.soundonsound.com/sos/feb98/articles/arranging.html" TARGET="_blank">article</A>
+(page down to reach his interview).
+
+
+<h2>Physics of Wind Instruments</h2>
+
+<P>
+A qualitative understanding of how trumpets and saxophones produce
+sound is essential for understanding the lecture.  This <A
+HREF="http://www.soundonsound.com/sos/apr01/articles/synthsecrets.asp
+" TARGET="_blank">article</A> is an excellent tutorial on the simplified physics of
+wind instruments.  That article, and this lecture, assumes a
+traditional playing style for the instrument, where the goal is to
+produce a pitched monophonic voice.
+
+<P>
+We summarize the article with a few key observations:
+<ul>
+<li>Playable musical lines on a horn
+consist of phrases separated by pauses, during which the players
+breathe.  <A
+HREF="http://en.wikipedia.org/wiki/Circular_breathing" TARGET="_blank">Circular
+breathing</A> is a technique some players use to extend
+the length of phrases.  Circular breathing
+lets a player breathe without interrupting air flow to the instrument.
+</li>
+<li>Once a phrase begins, players have the option of playing the
+subsequent notes in a phrase without new attacks (called <I>legato</I> or <I>slurred</I>) or with new
+attacks (called <I>articulated</I> or <I>staccato</I>).  Phrasing is a
+way players add expression to a performance.</li>
+<li>The harmonic structure of the sustained portion of the sound
+varies with loudness: softer sounds are darker, louder sounds are
+brighter.  Players vary loudness (and thus brightness) and pitch
+across a phrase to add expression to a performance.</li>
+<li>The start-up transient for articulated notes has a
+unique signature sound for all of the wind instruments.</li>
+</ul>
+
+<P>
+Taken as a whole, these characteristics let horn solo lines be
+expressive, in the way a vocal line is expressive (apart from the
+ability to convey words, of course).
+
+<P>
+Capturing the sound of horns in the studio is a challenging
+task: brass in particular has a large dynamic range (range of
+softest to loudest sound).  This <A
+HREF="http://mixonline.com/mag/audio_hellacious_horns/" TARGET="_blank">article</A> is
+an excellent review of current practice for recording solo horns and horn
+sections.  This set of engineer <A
+HREF="http://mixonline.com/mag/audio_recording_brass_woodwinds/index.html" TARGET="_blank">interviews</A>
+is another good resource of engineering a horn session.
+
+<H2>Analog Horn Synthesis</H2>
+
+<P>
+When analog keyboard synthesizers became popular in the late 1970s,
+hopes were high that realistic horn parts could be produced by the
+instrument: sawtooth waves were a good match for the harmonic series
+of an ideal blown pipe, and voltage-controlled low-pass filtering
+could model the dependency of brightness on loudness.
+Good descriptions on how to generate brass-like
+sounds from analog synthesizers can be found in
+these articles: a horn patch for a <A
+HREF="http://www.soundonsound.com/sos/may01/articles/synthsecrets.asp"
+TARGET="_blank">modular synthesizer</A> and for a <A
+HREF="http://www.soundonsound.com/sos/jun01/articles/synthsecrets.pt26.asp"
+TARGET="_blank">MiniMoog</A>.
+
+<P>
+To listen to example analog brass sounds using these techniques, click
+on these links: <A
+HREF="http://www.synthmania.com/Synthesizers/Roland/MKS-80/Audio%20Files/Factory%20patch%20examples/I-45.mp3"
+TARGET="_blank">sound 1</A>, <A
+HREF="http://www.synthmania.com/Synthesizers/Roland/MKS-80/Audio%20Files/Factory%20patch%20examples/I-54.mp3"
+TARGET="_blank">sound 2</A>.
+
+<P>
+These sorts of sounds were used quite often in the 80s (and indeed,
+most modern keyboards include factory patches for "analog brass"
+emulation).  However, at best, these sounds could be said to "evoke" a
+brass sound, much as the analog drum sounds we listened to last
+lecture evoke an acoustic drum sound (but would never be mistaken for
+the real thing).
+
+<P>
+What went wrong?  Major issues to realistic analog brass synthesis at
+the time were:
+<ul>
+<li><B>Unrealistic attack.</B> Articulated horn notes 
+have a characteristic onset sound as air flow builds up in the instrument.
+Analog synthesis does not do well emulating this onset sound. </li>
+<li><B>Lack of performance expression.</B> The expression a good
+player brings to a horn forms a large part of its authenticity.
+The use of legato and staccato articulation, changes in brightness and
+volume, and changes in pitch all contribute to an authentic sound.
+Achieving this expression by controlling a brass or sax sound from a 
+keyboard is not easy, and requires proficiency at using modulation
+and pitch-bend wheels and aftertouch to fluidly control a line.</li>
+<li><B>Inappropriate parts.</B> As we noted earlier in the lecture,
+sax and trumpet solos are rarely composed, but instead are a
+collaboration between an improvising player and a producer on a
+session.  Good players know the vernacular of soloing in a style,
+and the physical limitations of the instrument (fingering and
+embouchure) inform that vernacular.  If a keyboardist does not
+appreciate this aspect of improvising a sax or trumpet line,
+the solo will not sound authentic.</li>
+</ul>
+
+<P>
+In the next part of the lecture, we discuss research and commercial
+efforts to address each of these issue.
+
+<H2>Wind Controllers</H2>
+
+<P>
+The importance of performance control to wind instruments was made
+clear to all in 1987, when Yamaha released the WX-7, a MIDI controller
+that emulated the user-interface of a saxophone.  These <A
+HREF="http://www.ibiblio.org/emusic-l/info-docs-FAQs/wind-controllers-FAQ.html#2.1" TARGET="_blank">photos</A>
+show close-ups of the look of the WX-7, and this <A
+HREF="http://www.ibiblio.org/emusic-l/info-docs-FAQs/wind-controllers-FAQ.html#2.1" TARGET="_blank">FAQ</A>
+gives a good sense of the MIDI control information the WX-7 generates.
+
+<P>
+When the WX-7 was released, Yamaha's synthesizer product line was
+based on FM synthesis.  Just like in analog synthesis, an FM horn
+patch played from a keyboard yielded an unconvincing emulation of an
+acoustic instrument.  However, when FM patches were controlled
+by a WX-7 played by a talented saxophonists, the FM horn timbres came
+alive.
+
+<P>
+This <A
+HREF="http://www.patchmanmusic.com/SalGallina/09Sax1.mp3" TARGET="_blank">mp3</A> of
+Sal Gallina playing a soprano sax FM patch on a WX-7 makes this point
+clearly.  Even though the attack sound on the patch is not particularly
+authentic, the performance control makes the line sound like a
+convincing saxophone-like sound.  This <A
+HREF="http://www.patchmanmusic.com/SalGallina/06Clarinet.mp3" TARGET="_blank">clarinet</A>
+FM sound is also brought to life via WX-7 control.
+
+<P>
+Wind controllers are still available today, and are part of the
+arsenal of session players who specialize in doubling on many variants
+of reed instruments (example: Bob Magnuson, whose online WX-7 demo
+reel can be listened to <A HREF="http://leftearmusic.com/ewi.htm" TARGET="_blank">web
+page</A>).  
+
+<P>
+In the mid-1990s, Yamaha developed a new synthesis engine for use
+with wind controllers.  This monophonic synth 
+attempts to model the physics of brass and woodwinds instruments.
+This <A
+HREF="http://www.yamahasynth.com/demos/vl70m/vl70md1.mp3" TARGET="_blank">MP3</A>
+gives a sense of the realism of its trumpet model, when controlled by
+a wind controller; this Sound on Sound <A
+HREF="http://www.soundonsound.com/sos/1994_articles/jul94/yamahavl1.html" TARGET="_blank">review</A>
+describes the basics of this physical modeling system.
+
+<P>
+Given this mp3, one would think the topic of today's lecture is now
+old hat: a ten-year old synthesis engine, when driven by a
+proper controller, is capable of producing quite realistic horn
+lines.
+
+<P>
+However, in a business sense, this product did not meet expectations.
+The Yamaha product line stays alive as a niche product, that caters to
+open-minded wind players.  The basic problem is that the realism heard
+on these demos requires the use of a controller like the WX-7, and for
+a pianist, learning how to use a WX-7 well is almost as hard as
+learning how to play saxophone or trumpet well.  Most composers have
+have had piano training, and thus are interested in using a keyboard
+instrument that could realistically emulate horns, but few composers
+are willing to put in the time to learn how to play a WX-7 well.
+
+<P>
+This market experiment was quite expensive for Yamaha -- many millions
+were spent on the investments of controller and physical model
+development, and although the technology worked well, it is doubtful
+they have broken even on the project.  
+
+<P>
+However, a lesson was learned: new profit-making ventures in brass and
+reed synthesis focused on letting a piano keyboardist (and later, an
+operator of a DAW) replace horn players in some types of recording
+sessions.  The lecture continues with examples of this sort of
+technology.
+
+<H2>Keyboarding Horn Sections</H2>
+
+<P>
+Horn <I>section</I> lines are easier for keyboard players to pull off than sax or
+trumpet <I>solos</I>, for several reasons:
+<UL>
+<LI><B>Simplified performance expression.</B>  When horns 
+play in a section style, all parts usually sound together.  To sound "tight",
+performance expression (phrasing, volume swells, pitch movement) must
+be coordinated among the players.  This need for coordination has
+led to stereotypical types of expression for different styles of horn
+charts.  For the keyboardist trying to reproduce these lines, patches
+can be designed that map modulation wheels and aftertouch to control
+that makes sense for a particular section style.</LI>
+<LI><B>Easier part writing.</B> Writing section parts in a
+particular style is much easier for a keyboardist to master
+than learning how to authentically improvise a horn solo.
+</UL>
+
+<P>
+Thus, instrument makers focused on improving the sound of horn section
+patches.  As mentioned earlier in the lecture, one open issue was the
+unconvincing nature of the attack transient for brass: this is
+particularly important for pop section work, where a biting attack
+sound is important.
+
+<P>
+Roland addressed this issue with its D50 synthesizer, released in
+1987.  The D50 combined a digital emulation of an analog synthesis
+engine (oscillators, filters, VCAs) with a set of short samples to
+produce the onset of sounds known to be difficult for conventional
+synthesis (including horns).  A full
+description of the D50 can be found <A
+HREF="http://www.soundonsound.com/sos/1997_articles/dec97/synthschool5.html" TARGET="_blank">here</A>.
+
+<P>
+These mp3s (<A
+HREF="http://www.synthmania.com/Synthesizers/Roland/D-50/Audio/Preset%20demos/Factory/85%20Bones.mp3" TARGET="_blank">[patch 1]</A>
+<A
+HREF="http://www.synthmania.com/Synthesizers/Roland/D-50/Audio/Preset%20demos/Factory/15%20Horn%20Section.mp3" TARGET="_blank">[patch
+2]</A>)
+are demos from the brass factory patches of the D50.  These patches
+cross-fade a 100 millisecond sample of a brass onset with a
+traditional filtered-sawtooth analog synthesis patch.  A key problem
+with this approach is <I>fusion</I> (i.e. tricking the ear into hearing
+the sequence of two sounds as one).  The D50 solved the fusion problem by including
+on-board effects (reverb and chorous) that were used in the factory
+patches to mask the transition between sample and synth.  
+Roger Dannenberg's group at CMU later solved the trumpet
+fusion problem without resorting to effects masking, by 
+crafting synthesis waveforms that fused cleanly into the onset
+sound (see a paper on this work <A HREF="http://www.cs.cmu.edu/%7Erbd/papers/csis98/csis98.pdf" TARGET="_blank">here</A>,
+and listen to results <A HREF="http://www.cs.cmu.edu/~music/examples/csis.html" TARGET="_blank">here</A>).
+
+<P>
+The D50 was an significant commercial
+success for Roland.  Individual D50 factory presents became quickly overused, as
+artists began to use the patches on their recording projects
+(examples: <A
+HREF="http://www.synthmania.com/Synthesizers/Roland/D-50/Audio/Preset%20demos/Factory/44%20Pizzagogo.mp3" TARGET="_blank">pizzagogo</A>
+<A
+HREF="http://www.synthmania.com/Synthesizers/Roland/D-50/Audio/Preset%20demos/Factory/37%20Soundtrack.mp3" TARGET="_blank">soundtrack</A>
+).
+
+<P>
+The D50 shifted the market trend away from FM synthesis, and
+towards "workstation" instruments that used sampled waveforms in ROM
+as a key part of their architecture.  Roland soon lost the lead in
+instruments of this type to Korg (Yamaha later also became a market
+player).
+
+<P>
+As ROM prices became cheaper (per bit) in each generation, these
+instruments (as well as the softsynth plug-ins for DAWs that compete
+with them) were able to improve the quality of their horn section
+emulation by "brute force":
+<UL>
+<LI>Instead of blending an onset sample with a synthesis sound, the
+instruments used longer horn samples, and "looped" a steady part near
+the end of the sample to handle very long notes.</LI>
+<LI>Instead of pitch-shifting one horn sample to cover a wide range of
+notes, many samples were taken over the instrument's range.</LI>
+<LI> Likewise, samples were taken over a range of soft notes to loud
+notes, so that keyboard velocity could be used to trigger bright or
+dark sounds. </LI>
+<LI>Multi-sampling was also applied to handle different
+types of articulation, which could be triggered by the modulation
+wheel position during the attack</LI>
+<LI> Sometimes, entire horn sections were sampled as an instrument, to
+add realism to unison lines.</LI>
+</UL>
+
+<P>
+The multi-sampling approach is now the state-of-the-art for playing
+horn parts from a keyboard.  This method works well for horn section
+parts, once the keyboard player has become familiar with the setup of
+the sample library, as realism demands picking the right sample to
+match the section playing style.
+
+<P>
+There are several strategies for horn articulation control via the
+keyboard when using multi-samples.  One approach is to use a footpedal
+to signal patch volume (and brightness), use key velocity to select an
+articulation style (staccato or legato), and use the performance
+wheels for vibrato depth (via the modulation wheel) and pitch-bend
+(via the pitch bend wheel).  The Garriton sample libraries use this
+method, as described <A
+HREF="http://www.garritan.com/GPO-control.html"
+TARGET="_blank">here</A>.
+
+<P>
+Alternatively, if monophonic lines are assumed, pressing a new key
+while an old key is already depressed can be used to signal a legato
+transition to a new note.  The <A
+HREF="http://www.synful.com/SynfulOrchestra.htm"
+TARGET="_blank">Synful</A> plug-in uses this method, and legato
+detection is also a part of the user interface of the <A
+HREF="http://mixonline.com/products/review/audio_vienna_symphonic_library_5/"
+TARGET="_blank">Vienna Symphonic Library</A>.  Automatically detecting
+legato playing is not a new idea: it dates back to the analog-era <A
+HREF="http://student.foi.hr/~rlogozar/mbsn1/AnalogSynthsRolandSH101.html"
+TARGET="_blank">Roland SH-101</A>, if not earlier.
+
+
+<H2>Phrase Sampling</H2>
+
+<P>
+As we noted earlier in the lecture, horn solos and sections are often
+a collaboration between producers and instrumentalists, done without
+formal charts.  For producers comfortable with this approach, scoring
+and playing horn section parts on a keyboard may not be practical:
+their talent lies in knowing what sounds right, not in performance.
+
+<P>
+In these producers, a better approach may be to buy "loop libraries"
+of horn sections playing a sets of riffs in different styles.  An
+example of a horn section loop library is <A
+HREF="http://www.bigfishaudio.com/4DCGI/detail.html?721"
+TARGET="_blank">here</A>.  Most DAWs now have facilities
+for browsing loop libraries via keyword search, and for pitch-shifting
+and time-warping chosen loops to fit an existing track.
+
+<P>
+Sometimes, loop libraries are used to add horns to an existing
+track. In this case, a producer browses the library in search of the
+"right" loop(s).  This can be a tedious job, and may be impossible if
+no library loop exists which is a good match to the track.  Indeed, in
+certain styles of music, it is common practice to first choose loops
+that evoke the desired style, and then rewrite the composition to work
+well with the chosen loops.
+
+<P>
+The first products that extend the loop library concept from horn
+sections to horn solos are appearing on the market.  The best example
+is Liquid Saxophone, whose product description (and audio demo) is
+available <A
+HREF="http://www.ueberschall.com/index.php?id=showproduct&user_uschall_pi1[showUid]=61&type=1"
+TARGET="_blank">here</A>.  Liquid Saxophone is a plug-in that features
+a large set of jazz saxophone phrases, categorized into difference
+styles, than can be pasted together into a solo by the user.  The
+plug-in uses resynthesis to allow limited editing of the phrases to
+fit a piece.  An early review of the product is available <A
+HREF="http://www.ueberschall.com/index.php?id=showproduct&uid=61&user_uschall_pi1[showUid]=61&user_uschall_pi1[showReview]=45&type=1#45"
+TARGET="_blank">here</A>.
+
+<P>
+For some productions, loops and phrase sampling are no substitute for
+real players.  The production may run into trouble if for logistical
+reasons finding in suitable horn players for a track is not possible
+(example: artists whose home base is far from major production
+centers).
+
+<P>
+To address this need, some session players now
+sell custom performances for a recording project over the Internet.
+For example, <A HREF="http://www.ihorns.com/"
+TARGET="_blank">iHorns</A> is run by a NY session musician, and will
+arrange and record a 5-piece horn section to match a supplied track
+for $195; a sax or flute solo is $85.  Audio tracks are sent
+across the Internet in a way that ensures the solos will sync to the
+track. The main difficulty in this approach is communication: the
+spontaneous give-and-take of a producer and a soloist in the studio is
+replaced by emails and telephone conversations.
+
+
+<hr>
+<small>Questions on this web page?  Contact: <TT>john [dot] lazzaro [at] gmail [dot] com </small>
+</body>

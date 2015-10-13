@@ -1,0 +1,156 @@
+<pre>
+//    Sfront, a SAOL to C translator
+//    Copyright (C) 2001 John Lazzaro
+//    This file: Multi-sampled piano written in SAOL.
+//    Maintainers's address: lazzaro@cs.berkeley.edu;
+// 
+// This license covers also covers SASL file in this directory.
+// 
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation (Version 1, 1989).
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program; see the file COPYING.  If not, write to
+// the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+#include "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/s.hs"
+#include "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/mf.hs"
+#include "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/h.hs"
+
+global { 
+  srate 44100; 
+  krate 1050; 
+  outchannels 2;
+} 
+ 
+
+instr piano_proto (pitch, vel) preset 0 { 
+  imports exports table SSET;
+  imports exports table MFSET;
+  imports exports table HSET;
+
+  tablemap left_s(LEFT_S_MAP);
+  tablemap right_s(RIGHT_S_MAP);
+  tablemap left_mf(LEFT_MF_MAP);
+  tablemap right_mf(RIGHT_MF_MAP);
+  tablemap left_h(LEFT_H_MAP);
+  tablemap right_h(RIGHT_H_MAP);
+
+  imports exports table s_pitch;
+  imports exports table mf_pitch;
+  imports exports table h_pitch;
+
+  ivar rel_time, full_scale, volume, stop, df;
+  ivar split_lo_med, split_med_hi;
+  ksig k, rel;
+  asig pwave[2];
+  asig i, snum, srem;
+
+  // **********************
+  // computed during i-pass
+  // **********************
+
+  rel_time = 0.200;
+  full_scale = 0.1;  
+  volume = full_scale*(vel/127);  // NoteOn velocity scales volume
+
+  split_lo_med = 64;
+  split_med_hi = 96;
+
+  if (vel < split_lo_med)       // transposition constant
+    {
+      df = tableread(s_pitch, pitch);   // low split
+      stop = (ftlen(left_s[pitch]) 
+	      - rel_time*df*s_rate - 2*(s_rate/k_rate));
+    }
+  else
+    {
+      if (vel < split_med_hi)
+	{
+	  df = tableread(mf_pitch, pitch);   //medium split   
+	  stop = (ftlen(left_mf[pitch]) 
+	      - rel_time*df*s_rate - 2*(s_rate/k_rate));
+	}
+      else
+	{
+	  df = tableread(h_pitch, pitch);   // high split
+	  stop = (ftlen(left_h[pitch]) 
+	      - rel_time*df*s_rate - 2*(s_rate/k_rate));
+	}
+    }
+
+  // **********************
+  // computed during k-pass
+  // **********************
+
+  if (released && !rel)          // Add release time when NoteOff occurs
+    {
+      rel = 1;
+      extend(rel_time); 
+    }
+  
+  if (rel)
+    {
+      printf("still alive %f\n", itime);
+    }
+  
+  if (!rel && (k > stop))
+    {
+      turnoff;   // Force NoteOff before we run out of sample to play
+    }
+
+  k = k + (s_rate/k_rate)*df;
+
+  // **********************
+  // computed during a-pass
+  // **********************
+
+  if (vel < split_lo_med)       // waveform lookup
+    {
+      // low split
+      
+      pwave[0] = tableread(left_s[pitch], i); 
+      pwave[1] = tableread(right_s[pitch], i);
+    }
+  else
+    {
+      if (vel < split_med_hi)
+	{
+	  //medium split   
+	  
+	  pwave[0] = tableread(left_mf[pitch], i); 
+	  pwave[1] = tableread(right_mf[pitch], i);
+	}
+      else
+	{
+	  // high split
+	  
+	  pwave[0] = tableread(left_h[pitch], i); 
+	  pwave[1] = tableread(right_h[pitch], i);
+	}
+    }
+  
+  if (!rel)    // Attack and sustain portion of note
+    {
+      output(volume*pwave);
+    }
+  else        // Release envelope after NoteOff
+    {
+      output(aline(volume, rel_time, 0)*pwave);
+    }
+
+  srem = srem + df;
+  while (srem > 1)
+    {
+      snum = snum + 1;
+      srem = srem - 1;
+    }
+  i = snum + srem;     
+} 
+</pre>

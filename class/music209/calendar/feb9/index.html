@@ -1,0 +1,77 @@
+<head>
+<title>Music 209 Week 4: Time-Warping</title>
+</head>
+<body>
+<h1>Music 209 Week 4: Time-Warping and Beat-Matching</h1>
+<P>February 9, 2006.</P>
+<A HREF="../../index.html">Music 209</A> : 
+<A HREF="../index.html">Calendar</A> : Week 4
+<P>
+Concatenation of two rhythmic units may
+require the tempos to match.  We describe techniques for matching
+tempos without otherwise altering units.</P>
+<hr>
+
+<h2>Topics</h2>
+
+<P>
+The lecture covered beat-slicing and overlap-add techniques for
+time-warping.  We began with a description of Drumcore, a drumloop
+system that handles tempo changing by recording real drummers playing
+at many different tempos.  This <A
+HREF="http://www.soundonsound.com/sos/feb05/articles/drumcore.htm"
+TARGET="_blank">review</A> describes how Drumcore works.
+
+<P>
+We then discussed beat-slicing.  Good tutorials on beat splicing are
+available <A
+HREF="http://www.soundonsound.com/sos/jun04/articles/beatslicing.htm"
+TARGET="_blank">here</A> and <A
+HREF="http://emusician.com/mag/square_one/emusic_slice/index.html"
+TARGET="_blank">here</A>. We also discussed the beat-slicing
+implementation in Pro Tool's Beat Detective feature.  A good tutorial
+on Beat Detective is available <A
+HREF="http://www.soundonsound.com/sos/aug03/articles/protoolsnotes.htm"
+TARGET="_blank">here</A>.
+
+<P>
+We then turned our focus to overlap-add methods of time warping.  We
+began by noting that professional use of these algorithms dates back
+to the 1980 (Lexicon 2400).  This <A
+HREF="http://www.stanford.edu/~dattorro/2400.htm" TARGET="_blank"
+>webpage</A> and this <A
+HREF="http://www.stanford.edu/~dattorro/Lexicon.htm" TARGET="_blank"
+>webpage</A> describe the overlap-add methods used in the Lexicon
+2400.
+
+<P>
+We then described the mechanics of overlap-add methods in detail.
+This tutorial was adapted from Chapter 2 of Jordi Sanhaume's Ph.D.
+thesis, available for download <A
+HREF="http://www.iua.upf.es/mtg/publications/Phd-2002-Jordi-Bonada.pdf"
+TARGET="_blank">here</A>.
+
+<P>
+The SOLA examples we played in class used the PICOLA algorithm.  This
+algorithm is described in Annex 5.D (page 128) of this <A
+HREF="http://www.cs.berkeley.edu/~lazzaro/sa/book/append/fdis/SA-FDIS.pdf"
+TARGET="_blank">document</A>.  To play with this algorithm, try out
+the <A
+HREF="http://www.cs.berkeley.edu/~lazzaro/sa/book/saol/wave/index.html#speedt"
+TARGET="_blank">speedt</A> SAOL core opcode as implemented in <A
+HREF="http://www.cs.berkeley.edu/~lazzaro/sa/index.html"
+TARGET="_blank">sfront</A>.
+
+<P>We ended the lecture with an idea for a class project based on this
+<A HREF="http://thebots.net/GWBushSampleArchive.htm"
+TARGET="_blank">archive</A> of George Bush speeches.</P>
+
+<P>
+Finally, this <A HREF="http://www.dspdimension.com/data/index.html"
+TARGET="_blank">website</A> provides a good comparative analysis of
+time-warping methods.
+
+<hr>
+<small>Questions on this web page?  Contact: <TT>john [dot] lazzaro [at] gmail [dot] com </small>
+</body>
+

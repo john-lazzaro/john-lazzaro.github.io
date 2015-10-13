@@ -1,0 +1,604 @@
+<pre>
+//    Sfront, a SAOL to C translator
+//    Copyright (C) 2001 John Lazzaro
+//    This file: Garageband Sampled Piano: mf subset
+//    Maintainers's address: lazzaro@cs.berkeley.edu;
+// 
+// This license covers also covers SASL file in this directory.
+// 
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation (Version 1, 1989).
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program; see the file COPYING.  If not, write to
+// the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+
+// table defines for a subset Garageband Grand Piano sample set
+
+#define MFSET left_024_mf, right_024_mf,\
+  left_031_mf, right_031_mf,\
+  left_035_mf, right_035_mf,\
+  left_038_mf, right_038_mf,\
+  left_042_mf, right_042_mf,\
+  left_045_mf, right_045_mf,\
+  left_050_mf, right_050_mf,\
+  left_054_mf, right_054_mf,\
+  left_058_mf, right_058_mf,\
+  left_060_mf, right_060_mf,\
+  left_062_mf, right_062_mf,\
+  left_064_mf, right_064_mf,\
+  left_065_mf, right_065_mf,\
+  left_068_mf, right_068_mf,\
+  left_070_mf, right_070_mf,\
+  left_072_mf, right_072_mf,\
+  left_077_mf, right_077_mf,\
+  left_081_mf, right_081_mf,\
+  left_086_mf, right_086_mf,\
+  left_090_mf, right_090_mf,\
+  left_095_mf, right_095_mf,\
+  left_099_mf, right_099_mf,\
+  left_101_mf, right_101_mf
+
+
+#define LEFT_MF_MAP    left_024_mf, /*  0 */ \
+		       left_024_mf, /*  1 */ \
+		       left_024_mf, /*  2 */ \
+		       left_024_mf, /*  3 */ \
+		       left_024_mf, /*  4 */ \
+		       left_024_mf, /*  5 */ \
+		       left_024_mf, /*  6 */ \
+		       left_024_mf, /*  7 */ \
+		       left_024_mf, /*  8 */ \
+		       left_024_mf, /*  9 */ \
+		       left_024_mf, /* 10 */ \
+		       left_024_mf, /* 11 */ \
+		       left_024_mf, /* 12 */ \
+		       left_024_mf, /* 13 */ \
+		       left_024_mf, /* 14 */ \
+		       left_024_mf, /* 15 */ \
+		       left_024_mf, /* 16 */ \
+		       left_024_mf, /* 17 */ \
+		       left_024_mf, /* 18 */ \
+		       left_024_mf, /* 19 */ \
+		       left_024_mf, /* 20 */ \
+		       left_024_mf, /* 21 */ \
+		       left_024_mf, /* 22 */ \
+		       left_024_mf, /* 23 */ \
+		       left_024_mf, /* 24 */ \
+		       left_024_mf, /* 25 */ \
+		       left_024_mf, /* 26 */ \
+		       left_024_mf, /* 27 */ \
+		       left_031_mf, /* 28 */ \
+		       left_031_mf, /* 29 */ \
+		       left_031_mf, /* 30 */ \
+		       left_031_mf, /* 31 */ \
+		       left_031_mf, /* 32 */ \
+		       left_031_mf, /* 33 */ \
+		       left_035_mf, /* 34 */ \
+		       left_035_mf, /* 35 */ \
+		       left_035_mf, /* 36 */ \
+		       left_038_mf, /* 37 */ \
+		       left_038_mf, /* 38 */ \
+		       left_038_mf, /* 39 */ \
+		       left_042_mf, /* 40 */ \
+		       left_042_mf, /* 41 */ \
+		       left_042_mf, /* 42 */ \
+		       left_042_mf, /* 43 */ \
+		       left_045_mf, /* 44 */ \
+		       left_045_mf, /* 45 */ \
+		       left_045_mf, /* 46 */ \
+		       left_045_mf, /* 47 */ \
+		       left_045_mf, /* 48 */ \
+		       left_050_mf, /* 49 */ \
+		       left_050_mf, /* 50 */ \
+		       left_050_mf, /* 51 */ \
+		       left_050_mf, /* 52 */ \
+		       left_054_mf, /* 53 */ \
+		       left_054_mf, /* 54 */ \
+		       left_054_mf, /* 55 */ \
+		       left_054_mf, /* 56 */ \
+		       left_058_mf, /* 57 */ \
+		       left_058_mf, /* 58 */ \
+		       left_058_mf, /* 59 */ \
+		       left_060_mf, /* 60 */ \
+		       left_060_mf, /* 61 */ \
+		       left_062_mf, /* 62 */ \
+		       left_062_mf, /* 63 */ \
+		       left_064_mf, /* 64 */ \
+		       left_065_mf, /* 65 */ \
+		       left_065_mf, /* 66 */ \
+		       left_068_mf, /* 67 */ \
+		       left_068_mf, /* 68 */ \
+		       left_070_mf, /* 69 */ \
+		       left_070_mf, /* 70 */ \
+		       left_072_mf, /* 71 */ \
+		       left_072_mf, /* 72 */ \
+		       left_072_mf, /* 73 */ \
+		       left_072_mf, /* 74 */ \
+		       left_077_mf, /* 75 */ \
+		       left_077_mf, /* 76 */ \
+		       left_077_mf, /* 77 */ \
+		       left_077_mf, /* 78 */ \
+		       left_081_mf, /* 79 */ \
+		       left_081_mf, /* 80 */ \
+		       left_081_mf, /* 81 */ \
+		       left_081_mf, /* 82 */ \
+		       left_081_mf, /* 83 */ \
+		       left_086_mf, /* 84 */ \
+		       left_086_mf, /* 85 */ \
+		       left_086_mf, /* 86 */ \
+		       left_086_mf, /* 87 */ \
+		       left_086_mf, /* 88 */ \
+		       left_090_mf, /* 89 */ \
+		       left_090_mf, /* 90 */ \
+		       left_090_mf, /* 91 */ \
+		       left_090_mf, /* 92 */ \
+		       left_095_mf, /* 93 */ \
+		       left_095_mf, /* 94 */ \
+		       left_095_mf, /* 95 */ \
+		       left_095_mf, /* 96 */ \
+		       left_095_mf, /* 97 */ \
+		       left_099_mf, /* 98 */ \
+		       left_099_mf, /* 99 */ \
+		       left_101_mf, /* 100 */ \
+		       left_101_mf, /* 101 */ \
+		       left_101_mf, /* 102 */ \
+		       left_101_mf, /* 103 */ \
+		       left_101_mf, /* 104 */ \
+		       left_101_mf, /* 105 */ \
+		       left_101_mf, /* 106 */ \
+		       left_101_mf, /* 107 */ \
+		       left_101_mf, /* 108 */ \
+		       left_101_mf, /* 109 */ \
+		       left_101_mf, /* 110 */ \
+		       left_101_mf, /* 111 */ \
+		       left_101_mf, /* 112 */ \
+		       left_101_mf, /* 113 */ \
+		       left_101_mf, /* 114 */ \
+		       left_101_mf, /* 115 */ \
+		       left_101_mf, /* 116 */ \
+		       left_101_mf, /* 117 */ \
+		       left_101_mf, /* 118 */ \
+		       left_101_mf, /* 119 */ \
+		       left_101_mf, /* 120 */ \
+		       left_101_mf, /* 121 */ \
+		       left_101_mf, /* 122 */ \
+		       left_101_mf, /* 123 */ \
+		       left_101_mf, /* 124 */ \
+		       left_101_mf, /* 125 */ \
+		       left_101_mf, /* 126 */ \
+		       left_101_mf  /* 127 */
+
+#define RIGHT_MF_MAP   right_024_mf, /*  0 */ \
+		       right_024_mf, /*  1 */ \
+		       right_024_mf, /*  2 */ \
+		       right_024_mf, /*  3 */ \
+		       right_024_mf, /*  4 */ \
+		       right_024_mf, /*  5 */ \
+		       right_024_mf, /*  6 */ \
+		       right_024_mf, /*  7 */ \
+		       right_031_mf, /*  8 */ \
+		       right_031_mf, /*  9 */ \
+		       right_024_mf, /* 10 */ \
+		       right_024_mf, /* 11 */ \
+		       right_024_mf, /* 12 */ \
+		       right_024_mf, /* 13 */ \
+		       right_024_mf, /* 14 */ \
+		       right_024_mf, /* 15 */ \
+		       right_024_mf, /* 16 */ \
+		       right_024_mf, /* 17 */ \
+		       right_031_mf, /* 18 */ \
+		       right_031_mf, /* 19 */ \
+		       right_024_mf, /* 20 */ \
+		       right_024_mf, /* 21 */ \
+		       right_024_mf, /* 22 */ \
+		       right_024_mf, /* 23 */ \
+		       right_024_mf, /* 24 */ \
+		       right_024_mf, /* 25 */ \
+		       right_024_mf, /* 26 */ \
+		       right_024_mf, /* 27 */ \
+		       right_031_mf, /* 28 */ \
+		       right_031_mf, /* 29 */ \
+		       right_031_mf, /* 30 */ \
+		       right_031_mf, /* 31 */ \
+		       right_031_mf, /* 32 */ \
+		       right_031_mf, /* 33 */ \
+		       right_035_mf, /* 34 */ \
+		       right_035_mf, /* 35 */ \
+		       right_035_mf, /* 36 */ \
+		       right_038_mf, /* 37 */ \
+		       right_038_mf, /* 38 */ \
+		       right_038_mf, /* 39 */ \
+		       right_042_mf, /* 40 */ \
+		       right_042_mf, /* 41 */ \
+		       right_042_mf, /* 42 */ \
+		       right_042_mf, /* 43 */ \
+		       right_045_mf, /* 44 */ \
+		       right_045_mf, /* 45 */ \
+		       right_045_mf, /* 46 */ \
+		       right_045_mf, /* 47 */ \
+		       right_045_mf, /* 48 */ \
+		       right_050_mf, /* 49 */ \
+		       right_050_mf, /* 50 */ \
+		       right_050_mf, /* 51 */ \
+		       right_050_mf, /* 52 */ \
+		       right_054_mf, /* 53 */ \
+		       right_054_mf, /* 54 */ \
+		       right_054_mf, /* 55 */ \
+		       right_054_mf, /* 56 */ \
+		       right_058_mf, /* 57 */ \
+		       right_058_mf, /* 58 */ \
+		       right_058_mf, /* 59 */ \
+		       right_060_mf, /* 60 */ \
+		       right_060_mf, /* 61 */ \
+		       right_062_mf, /* 62 */ \
+		       right_062_mf, /* 63 */ \
+		       right_064_mf, /* 64 */ \
+		       right_065_mf, /* 65 */ \
+		       right_065_mf, /* 66 */ \
+		       right_068_mf, /* 67 */ \
+		       right_068_mf, /* 68 */ \
+		       right_070_mf, /* 69 */ \
+		       right_070_mf, /* 70 */ \
+		       right_072_mf, /* 71 */ \
+		       right_072_mf, /* 72 */ \
+		       right_072_mf, /* 73 */ \
+		       right_072_mf, /* 74 */ \
+		       right_077_mf, /* 75 */ \
+		       right_077_mf, /* 76 */ \
+		       right_077_mf, /* 77 */ \
+		       right_077_mf, /* 78 */ \
+		       right_081_mf, /* 79 */ \
+		       right_081_mf, /* 80 */ \
+		       right_081_mf, /* 81 */ \
+		       right_081_mf, /* 82 */ \
+		       right_081_mf, /* 83 */ \
+		       right_086_mf, /* 84 */ \
+		       right_086_mf, /* 85 */ \
+		       right_086_mf, /* 86 */ \
+		       right_086_mf, /* 87 */ \
+		       right_086_mf, /* 88 */ \
+		       right_090_mf, /* 89 */ \
+		       right_090_mf, /* 90 */ \
+		       right_090_mf, /* 91 */ \
+		       right_090_mf, /* 92 */ \
+		       right_095_mf, /* 93 */ \
+		       right_095_mf, /* 94 */ \
+		       right_095_mf, /* 95 */ \
+		       right_095_mf, /* 96 */ \
+		       right_095_mf, /* 97 */ \
+		       right_099_mf, /* 98 */ \
+		       right_099_mf, /* 99 */ \
+		       right_101_mf, /* 100 */ \
+		       right_101_mf, /* 101 */ \
+		       right_101_mf, /* 102 */ \
+		       right_101_mf, /* 103 */ \
+		       right_101_mf, /* 104 */ \
+		       right_101_mf, /* 105 */ \
+		       right_101_mf, /* 106 */ \
+		       right_101_mf, /* 107 */ \
+		       right_101_mf, /* 108 */ \
+		       right_101_mf, /* 109 */ \
+		       right_101_mf, /* 110 */ \
+		       right_101_mf, /* 111 */ \
+		       right_101_mf, /* 112 */ \
+		       right_101_mf, /* 113 */ \
+		       right_101_mf, /* 114 */ \
+		       right_101_mf, /* 115 */ \
+		       right_101_mf, /* 116 */ \
+		       right_101_mf, /* 117 */ \
+		       right_101_mf, /* 118 */ \
+		       right_101_mf, /* 119 */ \
+		       right_101_mf, /* 120 */ \
+		       right_101_mf, /* 121 */ \
+		       right_101_mf, /* 122 */ \
+		       right_101_mf, /* 123 */ \
+		       right_101_mf, /* 124 */ \
+		       right_101_mf, /* 125 */ \
+		       right_101_mf, /* 126 */ \
+		       right_101_mf  /* 127 */
+
+
+
+// global block that declares tables 
+
+global { 
+
+  table left_024_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/024_C0KM56_M.wav"
+     );
+
+  table right_024_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/024_C0KM56_M.wav"
+     );
+
+  table left_031_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/031_G0KM56_M.wav"
+     );
+
+  table right_031_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/031_G0KM56_M.wav"
+     );
+
+  table left_035_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/035_B0KM56_M.wav"
+     );
+
+  table right_035_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/035_B0KM56_M.wav"
+     );
+
+  table left_038_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/038_D1KM56_M.wav"
+     );
+
+  table right_038_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/038_D1KM56_M.wav"
+     );
+
+  table left_042_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/042_F#1KM56_M.wav"
+     );
+
+  table right_042_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/042_F#1KM56_M.wav"
+     );
+
+  table left_045_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/045_A1KM56_M.wav"
+     );
+
+  table right_045_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/045_A1KM56_M.wav"
+     );
+
+  table left_050_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/050_D2KM56_M.wav"
+     );
+
+  table right_050_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/050_D2KM56_M.wav"
+     );
+
+  table left_054_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/054_F#2KM56_M.wav"
+     );
+
+  table right_054_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/054_F#2KM56_M.wav"
+     );
+
+  table left_058_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/058_A#2KM56_M.wav"
+     );
+
+  table right_058_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/058_A#2KM56_M.wav"
+     );
+
+  table left_060_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/060_C3KM56_M.wav"
+     );
+
+  table right_060_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/060_C3KM56_M.wav"
+     );
+
+  table left_062_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/062_D3KM56_M.wav"
+     );
+
+  table right_062_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/062_D3KM56_M.wav"
+     );
+
+  table left_064_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/064_E3KM56_M.wav"
+     );
+
+  table right_064_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/064_E3KM56_M.wav"
+     );
+
+  table left_065_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/065_F3KM56_M.wav"
+     );
+
+  table right_065_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/065_F3KM56_M.wav"
+     );
+
+  table left_068_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/068_G#3KM56_M.wav"
+     );
+
+  table right_068_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/068_G#3KM56_M.wav"
+     );
+
+  table left_070_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/070_A#3KM56_M.wav"
+     );
+
+  table right_070_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/070_A#3KM56_M.wav"
+     );
+
+  table left_072_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/072_C4KM56_M.wav"
+     );
+
+  table right_072_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/072_C4KM56_M.wav"
+     );
+
+  table left_077_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/077_F4KM56_M.wav"
+     );
+
+  table right_077_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/077_F4KM56_M.wav"
+     );
+
+  table left_081_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/081_A4KM56_M.wav"
+     );
+
+  table right_081_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/081_A4KM56_M.wav"
+     );
+
+  table left_086_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/086_D5KM56_M.wav"
+     );
+
+  table right_086_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/086_D5KM56_M.wav"
+     );
+
+  table left_090_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/090_F#5KM56_M.wav"
+     );
+
+  table right_090_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/090_F#5KM56_M.wav"
+     );
+
+  table left_095_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/095_B5KM56_M.wav"
+     );
+
+  table right_095_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/095_B5KM56_M.wav"
+     );
+
+  table left_099_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/099_D#6KM56_M.wav"
+     );
+
+  table right_099_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/099_D#6KM56_M.wav"
+     );
+
+  table left_101_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/101_F6KM56_M.wav"
+     );
+
+  table right_101_mf
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/101_F6KM56_M.wav"
+     );
+
+}
+
+
+// global block that sets pitch map
+
+#define MINUS3 (0.840896415)
+#define MINUS2 (0.890898718)
+#define MINUS1 (0.943874313)
+#define ROOT   (1.0)
+#define PLUS1  (1.05946309)
+#define PLUS2  (1.12246205)
+#define PLUS3  (1.18920712)
+#define PLUS4  (1.25992105)
+#define PLUS5  (1.33483985)
+#define PLUS6  (1.41421356)
+#define PLUS7  (1.49830708)
+
+global {
+  table mf_pitch(data, 128, 
+	       /* 000 */   MINUS3, MINUS3, MINUS3, MINUS3, MINUS3, 
+	       /* 005 */   MINUS3, MINUS3, MINUS3, MINUS3, MINUS3,
+	       /* 010 */   MINUS3, MINUS3, MINUS3, MINUS3, MINUS3,
+	       /* 015 */   MINUS3, MINUS3, MINUS3, MINUS3, MINUS3,
+	       /* 020 */   MINUS3, MINUS3, MINUS2, MINUS1, ROOT,
+	       /* 025 */   PLUS1,  PLUS2,  PLUS3,  MINUS3, MINUS2,
+	       /* 030 */   MINUS1, ROOT,   PLUS1,  PLUS2,  MINUS1,
+	       /* 035 */   ROOT,   PLUS1,  MINUS1, ROOT,   PLUS1,
+	       /* 040 */   MINUS2, MINUS1, ROOT,   PLUS1,  MINUS1,
+	       /* 045 */   ROOT,   PLUS1,  PLUS2,  PLUS3,  MINUS1,
+	       /* 050 */   ROOT,   PLUS1,  PLUS2,  MINUS1, ROOT,
+	       /* 055 */   PLUS1,  PLUS2,  MINUS1, ROOT,   PLUS1,
+	       /* 060 */   ROOT,   PLUS1,  ROOT,   PLUS1,  ROOT,
+	       /* 065 */   ROOT,   PLUS1,  MINUS1, ROOT,   MINUS1,
+	       /* 070 */   ROOT,   MINUS1, ROOT,   PLUS1,  PLUS2,
+	       /* 075 */   MINUS2, MINUS1, ROOT,   PLUS1,  MINUS2, 
+	       /* 080 */   MINUS1, ROOT,   PLUS1,  PLUS2,  MINUS2,
+	       /* 085 */   MINUS1, ROOT,   PLUS1,  PLUS2,  MINUS1,
+	       /* 090 */   ROOT,   PLUS1,  PLUS2,  MINUS2, MINUS1,
+	       /* 095 */   ROOT,   PLUS1,  PLUS2,  MINUS1, ROOT,
+	       /* 100 */   MINUS1, ROOT,   PLUS1,  PLUS2,  PLUS3,
+  	       /* 105 */   PLUS4,  PLUS5,  PLUS6,  PLUS7,  PLUS7,
+	       /* 110 */   PLUS7,  PLUS7,   PLUS7,  PLUS7,  PLUS7,
+	       /* 115 */   PLUS7,  PLUS7,   PLUS7,  PLUS7,  PLUS7,
+	       /* 120 */   PLUS7,  PLUS7,   PLUS7,  PLUS7,  PLUS7,
+	       /* 125 */   PLUS7,  PLUS7,   PLUS7);
+
+}
+
+#undef MINUS3
+#undef MINUS2
+#undef MINUS1
+#undef ROOT
+#undef PLUS1
+#undef PLUS2
+#undef PLUS3
+#undef PLUS4
+#undef PLUS5
+#undef PLUS6
+#undef PLUS7
+
+</pre>

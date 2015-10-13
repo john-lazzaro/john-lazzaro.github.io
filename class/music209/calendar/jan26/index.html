@@ -1,0 +1,212 @@
+<head>
+<title>Music 209 Week 2: Splicing</title>
+</head>
+<body>
+<h1>Music 209 Week 2: Splicing</h1>
+<P>January 26, 2006.</P>
+<A HREF="../../index.html">Music 209</A> : 
+<A HREF="../index.html">Calendar</A> : Week 2
+<P>
+Evaluating the quality of a candidate
+concatenation, by comparing pitch, loudness, spectrum, tempo, and volume
+across the concatenation.  Methods for performing splices in the time
+domain and the spectral domain (morphing).  Guest appearance by 
+Eric Lindemann of <A HREF="http://www.synful.com" TARGET="_blank">Synful</A>.
+</P>
+<hr>
+
+<h2><A NAME="links_from_lecture">Links from Lecture</A></H2>
+
+<P>
+At the start of the lecture, we introduced the flowchart of a
+concatenative synthesis system.  This work was derived from Diemo
+Schwarz's work, referenced in <A HREF="../jan19/index.html"
+TARGET="_blank"> Lecture 1</A>.
+
+<P>
+We then introduced transparency splicing, by discussing classical
+techniques for hardware samplers.  The tutorial discussion in this
+part of the lecture was adapted from this <A
+HREF="http://www.harmony-central.com/MIDI/Doc/tutorial.html#tech"
+TARGET="_blank">tutorial</A> from Harmony Central, and this <A
+HREF="http://www.tweakheadz.com/Sampling_Tips.html"
+TARGET="_blank">review</A> on the Tweakheadz.net website.
+
+<P>
+We then discussed crossfading as a technique for doing a transparent
+splice.  This <A HREF="http://emusician.com/mag/emusic_making_cut/"
+TARGET="_blank">article</A> discusses the art and science of crossfade
+splices.
+
+<P>
+We then moved on to non-transparent splices.  To introduce the topic,
+we discussed the Roland D-50 synthesis system.  This <A
+TARGET="_blank"
+HREF="http://www.soundonsound.com/sos/1997_articles/dec97/synthschool5.html">article</A>
+is a good introduction to the D-50.  The D-50 sounds we played in
+class can be auditioned <A HREF="http://www.synthmania.com/d-50.htm"
+TARGET="_blank">here</A>.
+
+<P>
+We ended the first part of the class with a discussion of the Roger
+Dannenberg trumpet synthesis system that follows on from the D-50
+synthesizer architecture, and solves the fusion problem in a more
+modern way.  The sound examples from class may be heard <A
+HREF="http://www.cs.cmu.edu/~music/examples/csis.html"
+TARGET="_blank">here</A>, and the key paper on this work may be
+downloaded <A
+HREF="http://www.cs.cmu.edu/~rbd/papers/csis98/csis98.pdf"
+TARGET="_blank">here</A>.
+
+<P>
+We noted how the Dannenberg system naturally leads to a discussion of
+spectrally morphing two samples (his system morphs a sample into a
+synthesis engine).  This <A
+HREF="http://www.virsyn.de/en/E_Products/E_CUBE/e_cube.html"
+TARGET="_blank">product</A> is a good example of a stand-alone tool
+for spectral morphing.
+
+<P>
+The rest of the lecture featured a guest appearance by Eric Lindemann
+of <A HREF="http://www.synful.com" TARGET="_blank">Synful</A>.  His
+company website is a good place to look for further information on
+the topics he discussed in class.
+
+<hr>
+
+<P>
+The text below are notes we made in preparation of the lecture
+slides. They may be helpful in reviewing the slides.
+
+<h2>Introduction</H2>
+
+<P>
+The term <I>concatenative</I> synthesis implies combining separate
+audio recordings (hereafter called samples) to produce a composite
+output.  These recordings might be notes of a single monophonic
+instrument, or the sound of a thunderstorm, or the sound of the
+Beatles song Love Me Do -- anything.
+
+<P>
+At the highest level of abstraction, these samples can be combined in
+two ways:
+<UL>
+<LI> <B>Mixing.</B> Two or more samples that represent separate
+audio objects are composited by linear mixdown.  Example: a drum
+machine that takes recordings of individual drum sounds (bass drum,
+snare drum) and mixes them down to a stereo output pair.  This
+technology is well known, and will not be covered further here.</LI>
+<LI> <B>Splicing</B>  Two samples are played back-to-back, in some
+general sense, with the goal of creating the illusion of a unitary
+audio experience, in some sense.  Splicing is the focus of the
+lecture.</LI>
+</UL>
+
+<P>
+We begin with the technically simplest kind of splicing: the case
+where we place sample A next to sample B, and no click occurs because
+sample A falls to silence at its end, and sample B begins with silence
+(defined here as samples of value 0.0).
+
+<P>
+Technically, this is easy: play A, then play B, and perhaps shrink or
+grow the silence region to fit the needs of an application.  An
+example of a system that concatenates in this manner, while keeping a
+unitary percept, is <A
+HREF="http://www.ueberschall.com/index.php?id=showproduct&user_uschall_pi1[showUid]=61&type=1"
+TARGET="_blank">Liquid Saxophone.</A>  The samples are complete
+phrases of saxophone solos -- the necessity for wind players to
+breath means that these phrases begin and end with silence.  
+
+<P>
+Liquid Saxophone achieves a unitary percept when its user chooses A
+and B so that it sounds like two phrases a real saxophonist would play
+back to back -- this selection would include picking phrases whose
+notes follow well, and whose playing volume and timbres are compatible
+when heard back to back.  This level of "making a good splice" is
+a topic for later on in the course -- today, we focus on making
+abutments of non-silence-ending audio samples create the illusion
+of a unitary audio experience.
+
+<H2>Monophonic Instrument Voices</H2>
+
+<P>
+We start by thinking of the simple case: a monophonic instrument, like
+a trumpet or a saxophone.  In general, when sample A and B are joined
+to create the illusion of the instrument playing through the join, we
+have one of these goals in mind:
+<UL>
+<LI> <B>Transparency.</B>  In this case, we choose the end of sample
+A and the beginning of sample B to have sound properties as close
+as possible (example: both are trumpets playing a sustained tone
+at the same pitch, brightness, and loudness), and our goal is to
+have the splice produce a continuous sound.</LI>
+<LI><B>Fusion.</B>  In this case, the end of sample A and the 
+beginning of sample B are qualitatively different sounds the
+instrument can make (example: sample A is a 100 ms burst of a
+trumpet onset sound, sample B is the sustained tone for a trumpet).
+Our goal is to achieve "fusion" across the splice: listeners
+will hear the sound quality has changed (as they should), but
+it should sound "real", not like an artifice.</LI>
+</UL>
+<P>
+In the sections that follow, we discuss transparent transitions.
+<A HREF="#links_from_lecture">Earlier</A> in this webpage we
+provided pointers to discussion on fusion.
+
+<H2>Choosing Transparent Transitions</H2>
+
+<P>
+In this lecture, we assume that we choose sample A from the
+database (example: sample A is a sustained E-flat note from
+a saxophone).  We assume that we have some criteria for 
+choosing a sample B to abut to it (example:  we want a 
+sustained E-flat that then smoothly segways to a D-flat).
+
+<P>
+We assume we have some search mechanism for going through
+the database to find the sample we want: however, this
+search mechanism needs "metrics" so it can compare the 
+sounds at the end of sample A and the beginning of sample B,
+so that playing one after the other will yield the same
+percept on either side of the transition region (we later
+talk about how to do artifact-free "splices").  We also
+assume that a near-perfect match is available somewhere
+in the database -- all we need are metrics to find it.
+
+<P>
+Given these assumptions, we need:
+<UL>
+<LI> Metrics for comparing the loudness of two sample regions.
+<LI> Metrics for comparing the spectral shape of two sample regions.
+<LI> Metrics for comparing the pitch of two sample regions.
+</UL>
+
+<P>
+Once we have these simple metrics, we can use them to build a complete
+metric for transparency.  This complete metric will probably look use
+local changes in each property in addition to absolute value (examples
+of phenomena that need change detection: pitch-bend, vibrato, amplitude
+envelopes)
+
+<H2>Linear Splicing</H2>
+
+<P>
+Once we've selected two samples to splice to make a transparent
+transition, all that's left to do is the splice itself.  This <A
+HREF="http://emusician.com/mag/emusic_making_cut/"
+TARGET="_blank">article</A> discusses the art and science of
+cross-fading splices.
+
+<H2>Phase Bashing</H2>
+
+<P>
+An alternative to doing a linear splice is to use <A
+HREF="http://crca.ucsd.edu/~msp/techniques/latest/book-html/node166.html"
+TARGET="_blank">phase bashing</A>.  We will discuss this
+technique in detail later in the semester.</P> 
+
+<hr>
+<small>Questions on this web page?  Contact: <TT>john [dot] lazzaro [at] gmail [dot] com </small>
+</body>
+

@@ -1,0 +1,642 @@
+<pre>
+//    Sfront, a SAOL to C translator
+//    Copyright (C) 2001 John Lazzaro
+//    This file: Garageband Sampled Piano: s subset
+//    Maintainers's address: lazzaro@cs.berkeley.edu;
+// 
+// This license covers also covers SASL file in this directory.
+// 
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation (Version 1, 1989).
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program; see the file COPYING.  If not, write to
+// the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+
+// table defines for a subset Garageband Grand Piano sample set
+
+#define SSET  left_031_s, right_031_s,\
+  left_035_s, right_035_s,\
+  left_038_s, right_038_s,\
+  left_042_s, right_042_s,\
+  left_045_s, right_045_s,\
+  left_051_s, right_051_s,\
+  left_054_s, right_054_s,\
+  left_058_s, right_058_s,\
+  left_060_s, right_060_s,\
+  left_063_s, right_063_s,\
+  left_064_s, right_064_s,\
+  left_065_s, right_065_s,\
+  left_068_s, right_068_s,\
+  left_070_s, right_070_s,\
+  left_072_s, right_072_s,\
+  left_077_s, right_077_s,\
+  left_082_s, right_082_s,\
+  left_086_s, right_086_s,\
+  left_090_s, right_090_s,\
+  left_095_s, right_095_s,\
+  left_099_s, right_099_s,\
+  left_101_s, right_101_s
+
+
+#define LEFT_S_MAP     left_031_s, /*  0 */ \
+		       left_031_s, /*  1 */ \
+		       left_031_s, /*  2 */ \
+		       left_031_s, /*  3 */ \
+		       left_031_s, /*  4 */ \
+		       left_031_s, /*  5 */ \
+		       left_031_s, /*  6 */ \
+		       left_031_s, /*  7 */ \
+		       left_031_s, /*  8 */ \
+		       left_031_s, /*  9 */ \
+		       left_031_s, /* 10 */ \
+		       left_031_s, /* 11 */ \
+		       left_031_s, /* 12 */ \
+		       left_031_s, /* 13 */ \
+		       left_031_s, /* 14 */ \
+		       left_031_s, /* 15 */ \
+		       left_031_s, /* 16 */ \
+		       left_031_s, /* 17 */ \
+		       left_031_s, /* 18 */ \
+		       left_031_s, /* 19 */ \
+		       left_031_s, /* 20 */ \
+		       left_031_s, /* 21 */ \
+		       left_031_s, /* 22 */ \
+		       left_031_s, /* 23 */ \
+		       left_031_s, /* 24 */ \
+		       left_031_s, /* 25 */ \
+		       left_031_s, /* 26 */ \
+		       left_031_s, /* 27 */ \
+		       left_031_s, /* 28 */ \
+		       left_031_s, /* 29 */ \
+		       left_031_s, /* 30 */ \
+		       left_031_s, /* 31 */ \
+		       left_031_s, /* 32 */ \
+		       left_031_s, /* 33 */ \
+		       left_035_s, /* 34 */ \
+		       left_035_s, /* 35 */ \
+		       left_035_s, /* 36 */ \
+		       left_038_s, /* 37 */ \
+		       left_038_s, /* 38 */ \
+		       left_038_s, /* 39 */ \
+		       left_042_s, /* 40 */ \
+		       left_042_s, /* 41 */ \
+		       left_042_s, /* 42 */ \
+		       left_042_s, /* 43 */ \
+		       left_045_s, /* 44 */ \
+		       left_045_s, /* 45 */ \
+		       left_045_s, /* 46 */ \
+		       left_045_s, /* 47 */ \
+		       left_045_s, /* 48 */ \
+		       left_051_s, /* 49 */ \
+		       left_051_s, /* 50 */ \
+		       left_051_s, /* 51 */ \
+		       left_051_s, /* 52 */ \
+		       left_054_s, /* 53 */ \
+		       left_054_s, /* 54 */ \
+		       left_054_s, /* 55 */ \
+		       left_054_s, /* 56 */ \
+		       left_058_s, /* 57 */ \
+		       left_058_s, /* 58 */ \
+		       left_058_s, /* 59 */ \
+		       left_060_s, /* 60 */ \
+		       left_060_s, /* 61 */ \
+		       left_063_s, /* 62 */ \
+		       left_063_s, /* 63 */ \
+		       left_064_s, /* 64 */ \
+		       left_065_s, /* 65 */ \
+		       left_065_s, /* 66 */ \
+		       left_068_s, /* 67 */ \
+		       left_068_s, /* 68 */ \
+		       left_070_s, /* 69 */ \
+		       left_070_s, /* 70 */ \
+		       left_072_s, /* 71 */ \
+		       left_072_s, /* 72 */ \
+		       left_072_s, /* 73 */ \
+		       left_072_s, /* 74 */ \
+		       left_077_s, /* 75 */ \
+		       left_077_s, /* 76 */ \
+		       left_077_s, /* 77 */ \
+		       left_077_s, /* 78 */ \
+		       left_077_s, /* 79 */ \
+		       left_082_s, /* 80 */ \
+		       left_082_s, /* 81 */ \
+		       left_082_s, /* 82 */ \
+		       left_082_s, /* 83 */ \
+		       left_086_s, /* 84 */ \
+		       left_086_s, /* 85 */ \
+		       left_086_s, /* 86 */ \
+		       left_086_s, /* 87 */ \
+		       left_086_s, /* 88 */ \
+		       left_090_s, /* 89 */ \
+		       left_090_s, /* 90 */ \
+		       left_090_s, /* 91 */ \
+		       left_090_s, /* 92 */ \
+		       left_095_s, /* 93 */ \
+		       left_095_s, /* 94 */ \
+		       left_095_s, /* 95 */ \
+		       left_095_s, /* 96 */ \
+		       left_095_s, /* 97 */ \
+		       left_099_s, /* 98 */ \
+		       left_099_s, /* 99 */ \
+		       left_101_s, /* 100 */ \
+		       left_101_s, /* 101 */ \
+		       left_101_s, /* 102 */ \
+		       left_101_s, /* 103 */ \
+		       left_101_s, /* 104 */ \
+		       left_101_s, /* 105 */ \
+		       left_101_s, /* 106 */ \
+		       left_101_s, /* 107 */ \
+		       left_101_s, /* 108 */ \
+		       left_101_s, /* 109 */ \
+		       left_101_s, /* 110 */ \
+		       left_101_s, /* 111 */ \
+		       left_101_s, /* 112 */ \
+		       left_101_s, /* 113 */ \
+		       left_101_s, /* 114 */ \
+		       left_101_s, /* 115 */ \
+		       left_101_s, /* 116 */ \
+		       left_101_s, /* 117 */ \
+		       left_101_s, /* 118 */ \
+		       left_101_s, /* 119 */ \
+		       left_101_s, /* 120 */ \
+		       left_101_s, /* 121 */ \
+		       left_101_s, /* 122 */ \
+		       left_101_s, /* 123 */ \
+		       left_101_s, /* 124 */ \
+		       left_101_s, /* 125 */ \
+		       left_101_s, /* 126 */ \
+		       left_101_s  /* 127 */
+
+
+#define RIGHT_S_MAP right_031_s, /*  0 */ \
+		       right_031_s, /*  1 */ \
+		       right_031_s, /*  2 */ \
+		       right_031_s, /*  3 */ \
+		       right_031_s, /*  4 */ \
+		       right_031_s, /*  5 */ \
+		       right_031_s, /*  6 */ \
+		       right_031_s, /*  7 */ \
+		       right_031_s, /*  8 */ \
+		       right_031_s, /*  9 */ \
+		       right_031_s, /* 10 */ \
+		       right_031_s, /* 11 */ \
+		       right_031_s, /* 12 */ \
+		       right_031_s, /* 13 */ \
+		       right_031_s, /* 14 */ \
+		       right_031_s, /* 15 */ \
+		       right_031_s, /* 16 */ \
+		       right_031_s, /* 17 */ \
+		       right_031_s, /* 18 */ \
+		       right_031_s, /* 19 */ \
+		       right_031_s, /* 20 */ \
+		       right_031_s, /* 21 */ \
+		       right_031_s, /* 22 */ \
+		       right_031_s, /* 23 */ \
+		       right_031_s, /* 24 */ \
+		       right_031_s, /* 25 */ \
+		       right_031_s, /* 26 */ \
+		       right_031_s, /* 27 */ \
+		       right_031_s, /* 28 */ \
+		       right_031_s, /* 29 */ \
+		       right_031_s, /* 30 */ \
+		       right_031_s, /* 31 */ \
+		       right_031_s, /* 32 */ \
+		       right_031_s, /* 33 */ \
+		       right_035_s, /* 34 */ \
+		       right_035_s, /* 35 */ \
+		       right_035_s, /* 36 */ \
+		       right_038_s, /* 37 */ \
+		       right_038_s, /* 38 */ \
+		       right_038_s, /* 39 */ \
+		       right_042_s, /* 40 */ \
+		       right_042_s, /* 41 */ \
+		       right_042_s, /* 42 */ \
+		       right_042_s, /* 43 */ \
+		       right_045_s, /* 44 */ \
+		       right_045_s, /* 45 */ \
+		       right_045_s, /* 46 */ \
+		       right_045_s, /* 47 */ \
+		       right_045_s, /* 48 */ \
+		       right_051_s, /* 49 */ \
+		       right_051_s, /* 50 */ \
+		       right_051_s, /* 51 */ \
+		       right_051_s, /* 52 */ \
+		       right_054_s, /* 53 */ \
+		       right_054_s, /* 54 */ \
+		       right_054_s, /* 55 */ \
+		       right_054_s, /* 56 */ \
+		       right_058_s, /* 57 */ \
+		       right_058_s, /* 58 */ \
+		       right_058_s, /* 59 */ \
+		       right_060_s, /* 60 */ \
+		       right_060_s, /* 61 */ \
+		       right_063_s, /* 62 */ \
+		       right_063_s, /* 63 */ \
+		       right_064_s, /* 64 */ \
+		       right_065_s, /* 65 */ \
+		       right_065_s, /* 66 */ \
+		       right_068_s, /* 67 */ \
+		       right_068_s, /* 68 */ \
+		       right_070_s, /* 69 */ \
+		       right_070_s, /* 70 */ \
+		       right_072_s, /* 71 */ \
+		       right_072_s, /* 72 */ \
+		       right_072_s, /* 73 */ \
+		       right_072_s, /* 74 */ \
+		       right_077_s, /* 75 */ \
+		       right_077_s, /* 76 */ \
+		       right_077_s, /* 77 */ \
+		       right_077_s, /* 78 */ \
+		       right_077_s, /* 79 */ \
+		       right_082_s, /* 80 */ \
+		       right_082_s, /* 81 */ \
+		       right_082_s, /* 82 */ \
+		       right_082_s, /* 83 */ \
+		       right_086_s, /* 84 */ \
+		       right_086_s, /* 85 */ \
+		       right_086_s, /* 86 */ \
+		       right_086_s, /* 87 */ \
+		       right_086_s, /* 88 */ \
+		       right_090_s, /* 89 */ \
+		       right_090_s, /* 90 */ \
+		       right_090_s, /* 91 */ \
+		       right_090_s, /* 92 */ \
+		       right_095_s, /* 93 */ \
+		       right_095_s, /* 94 */ \
+		       right_095_s, /* 95 */ \
+		       right_095_s, /* 96 */ \
+		       right_095_s, /* 97 */ \
+		       right_099_s, /* 98 */ \
+		       right_099_s, /* 99 */ \
+		       right_101_s, /* 100 */ \
+		       right_101_s, /* 101 */ \
+		       right_101_s, /* 102 */ \
+		       right_101_s, /* 103 */ \
+		       right_101_s, /* 104 */ \
+		       right_101_s, /* 105 */ \
+		       right_101_s, /* 106 */ \
+		       right_101_s, /* 107 */ \
+		       right_101_s, /* 108 */ \
+		       right_101_s, /* 109 */ \
+		       right_101_s, /* 110 */ \
+		       right_101_s, /* 111 */ \
+		       right_101_s, /* 112 */ \
+		       right_101_s, /* 113 */ \
+		       right_101_s, /* 114 */ \
+		       right_101_s, /* 115 */ \
+		       right_101_s, /* 116 */ \
+		       right_101_s, /* 117 */ \
+		       right_101_s, /* 118 */ \
+		       right_101_s, /* 119 */ \
+		       right_101_s, /* 120 */ \
+		       right_101_s, /* 121 */ \
+		       right_101_s, /* 122 */ \
+		       right_101_s, /* 123 */ \
+		       right_101_s, /* 124 */ \
+		       right_101_s, /* 125 */ \
+		       right_101_s, /* 126 */ \
+		       right_101_s  /* 127 */
+
+
+
+
+
+// global block that declares tables 
+
+global { 
+
+  table left_031_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/031_G0KM56_S.wav"
+     );
+
+  table right_031_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/031_G0KM56_S.wav"
+     );
+
+  table left_035_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/035_B0KM56_S.wav"
+     );
+
+  table right_035_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/035_B0KM56_S.wav"
+     );
+
+  table left_038_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/038_D1KM56_S.wav"
+     );
+
+  table right_038_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/038_D1KM56_S.wav"
+     );
+
+  table left_042_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/042_F#1KM56_S.wav"
+     );
+
+  table right_042_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/042_F#1KM56_S.wav"
+     );
+
+  table left_045_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/045_A1KM56_S.wav"
+     );
+
+  table right_045_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/045_A1KM56_S.wav"
+     );
+
+  table left_051_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/051_D#2KM56_S.wav"
+     );
+
+  table right_051_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/051_D#2KM56_S.wav"
+     );
+
+  table left_054_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/054_F#2KM56_S.wav"
+     );
+
+  table right_054_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/054_F#2KM56_S.wav"
+     );
+
+  table left_058_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/058_A#2KM56_S.wav"
+     );
+
+  table right_058_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/058_A#2KM56_S.wav"
+     );
+
+  table left_060_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/060_C3KM56_S.wav"
+     );
+
+  table right_060_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/060_C3KM56_S.wav"
+     );
+
+  table left_063_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/063_D#3KM56_S.wav"
+     );
+
+  table right_063_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/063_D#3KM56_S.wav"
+     );
+
+  table left_064_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/064_E3KM56_S.wav"
+     );
+
+  table right_064_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/064_E3KM56_S.wav"
+     );
+
+  table left_065_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/065_F3KM56_S.wav"
+     );
+
+  table right_065_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/065_F3KM56_S.wav"
+     );
+
+  table left_068_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/068_G#3KM56_S.wav"
+     );
+
+  table right_068_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/068_G#3KM56_S.wav"
+     );
+
+  table left_070_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/070_A#3KM56_S.wav"
+     );
+
+  table right_070_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/070_A#3KM56_S.wav"
+     );
+
+  table left_072_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/072_C4KM56_S.wav"
+     );
+
+  table right_072_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/072_C4KM56_S.wav"
+     );
+
+  table left_077_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/077_F4KM56_S.wav"
+     );
+
+  table right_077_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/077_F4KM56_S.wav"
+     );
+
+  table left_082_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/082_A#4KM56_S.wav"
+     );
+
+  table right_082_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/082_A#4KM56_S.wav"
+     );
+
+  table left_086_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/086_D5KM56_S.wav"
+     );
+
+  table right_086_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/086_D5KM56_S.wav"
+     );
+
+  table left_090_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/090_F#5KM56_S.wav"
+     );
+
+  table right_090_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/090_F#5KM56_S.wav"
+     );
+
+  table left_095_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/095_B5KM56_S.wav"
+     );
+
+  table right_095_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/095_B5KM56_S.wav"
+     );
+
+  table left_099_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/099_D#6KM56_S.wav"
+     );
+
+  table right_099_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/099_D#6KM56_S.wav"
+     );
+
+  table left_101_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/left/101_F6KM56_S.wav"
+     );
+
+  table right_101_s
+    (sample, -1, 
+     "/Users/lazzaro/work/class/mu209/lec/feb23/saol/samples/right/101_F6KM56_S.wav"
+     );
+
+}
+
+
+// global block that sets pitch map
+
+#define MINUS10 (0.561231024)
+#define MINUS9  (0.594603558)
+#define MINUS8  (0.629960525)
+#define MINUS7  (0.667419927)
+#define MINUS6  (0.707106781)
+#define MINUS5  (0.749153538)
+#define MINUS4  (0.793700526)
+#define MINUS3 (0.840896415)
+#define MINUS2 (0.890898718)
+#define MINUS1 (0.943874313)
+#define ROOT   (1.0)
+#define PLUS1  (1.05946309)
+#define PLUS2  (1.12246205)
+#define PLUS3  (1.18920712)
+#define PLUS4  (1.25992105)
+#define PLUS5  (1.33483985)
+#define PLUS6  (1.41421356)
+#define PLUS7  (1.49830708)
+#define PLUS8   (1.58740105)
+#define PLUS9   (1.68179283)
+#define PLUS10   (1.78179744)
+#define PLUS11   (1.88774863)
+#define PLUS12   (2.0)
+#define PLUS13   (2.11892619)
+#define PLUS14   (2.2449241)
+#define PLUS15   (2.37841423)
+#define PLUS16   (2.5198421)
+#define PLUS17   (2.66967971)
+#define PLUS18   (2.82842712)
+#define PLUS19   (2.99661415)
+#define PLUS20   (3.1748021)
+#define PLUS21   (3.36358566)
+#define PLUS22   (3.56359487)
+
+
+global {
+  table s_pitch(data, 128, 
+	       /* 000 */   MINUS10, MINUS10,  MINUS10, MINUS10, MINUS10, 
+	       /* 005 */   MINUS10, MINUS10,  MINUS10, MINUS10, MINUS10,
+	       /* 010 */   MINUS10, MINUS10,  MINUS10, MINUS10, MINUS10,
+	       /* 015 */   MINUS10, MINUS10,  MINUS10, MINUS10, MINUS10,
+	       /* 020 */   MINUS10, MINUS10,  MINUS9,  MINUS8,  MINUS7,
+	       /* 025 */   MINUS6,  MINUS5,   MINUS4,  MINUS3,  MINUS2,
+	       /* 030 */   MINUS1, ROOT,   PLUS1,  PLUS2,  MINUS1,
+	       /* 035 */   ROOT,   PLUS1,  MINUS1, ROOT,   PLUS1,
+	       /* 040 */   MINUS2, MINUS1, ROOT,   PLUS1,  MINUS1,
+	       /* 045 */   ROOT,   PLUS1,  PLUS2,  PLUS3,  MINUS2,
+	       /* 050 */   MINUS1, ROOT,   PLUS1,  MINUS1, ROOT,
+	       /* 055 */   PLUS1,  PLUS2,  MINUS1, ROOT,   PLUS1,
+	       /* 060 */   ROOT,   PLUS1,  MINUS1, ROOT,  ROOT,
+	       /* 065 */   ROOT,   PLUS1,  MINUS1, ROOT,   MINUS1,
+	       /* 070 */   ROOT,   MINUS1, ROOT,   PLUS1,  PLUS2,
+	       /* 075 */   MINUS2, MINUS1, ROOT,   PLUS1,  PLUS2, 
+	       /* 080 */   MINUS2, MINUS1, ROOT,   PLUS1,  MINUS2,
+	       /* 085 */   MINUS1, ROOT,   PLUS1,  PLUS2,  MINUS1,
+	       /* 090 */   ROOT,   PLUS1,  PLUS2,  MINUS2, MINUS1,
+	       /* 095 */   ROOT,   PLUS1,  PLUS2,  MINUS1, ROOT,
+	       /* 100 */   MINUS1, ROOT,   PLUS1,  PLUS2,  PLUS3,
+  	       /* 105 */   PLUS4,  PLUS5,  PLUS6,  PLUS7,  PLUS7,
+	       /* 110 */   PLUS7,  PLUS7,   PLUS7,  PLUS7,  PLUS7,
+	       /* 115 */   PLUS7,  PLUS7,   PLUS7,  PLUS7,  PLUS7,
+	       /* 120 */   PLUS7,  PLUS7,   PLUS7,  PLUS7,  PLUS7,
+	       /* 125 */   PLUS7,  PLUS7,   PLUS7);
+
+}
+
+#undef MINUS10
+#undef MINUS9 
+#undef MINUS8 
+#undef MINUS7 
+#undef MINUS6 
+#undef MINUS5 
+#undef MINUS4 
+#undef MINUS3 
+#undef MINUS3
+#undef MINUS2
+#undef MINUS1
+#undef ROOT
+#undef PLUS1
+#undef PLUS2
+#undef PLUS3
+#undef PLUS4
+#undef PLUS5
+#undef PLUS6
+#undef PLUS7
+#undef PLUS8  
+#undef PLUS9  
+#undef PLUS10 
+#undef PLUS11 
+#undef PLUS12 
+#undef PLUS13 
+#undef PLUS14 
+#undef PLUS15 
+#undef PLUS16 
+#undef PLUS17 
+#undef PLUS18 
+#undef PLUS19 
+#undef PLUS20 
+#undef PLUS21 
+#undef PLUS22
+
+</pre>

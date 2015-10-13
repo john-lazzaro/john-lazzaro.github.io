@@ -1,0 +1,94 @@
+<head>
+<title>Music 209 Week 9: Spectral Methods</title>
+</head>
+<body>
+<h1>Music 209 Week 9: Spectral Methods</h1>
+<P>March 16, 2006.</P>
+<A HREF="../../index.html">Music 209</A> : 
+<A HREF="../index.html">Calendar</A> : Week 9
+<P>How to use compute spectral representations, and use them to
+perform signal processing tasks in concatenative synthesis.
+(David away)
+</P>
+<hr>
+
+<h2>Introduction</h2>
+
+<P>
+We began with a review of additive synthesis.  The review was
+based on this <A
+HREF="http://www.soundonsound.com/sos/jun00/articles/synthsec.htm"
+TARGET="_blank">article</A> in Sound on Sound.
+</P>
+
+<P>
+We then introduced the concept of the "common fate" of the parts of a
+sound model that belong to a particular note.  The spectrogram of the
+Reynolds/McAdams oboe sound shown in class was taken from one of the
+slides in this <A
+HREF="http://www.asru2005.org/talks/ellis_asru05.pdf"
+TARGET="_blank">talk</A> by Dan Ellis.
+
+<P> We also discussed how the maintenance of phase continuity between
+the noise and harmonic components of the Derenyi/Dannenberg
+resynthesized trumpet is an example of using common fate well.  This
+<A HREF="http://www.cs.cmu.edu/~rbd/papers/csis98/csis98.pdf"
+TARGET="_blank">paper</A> describes that system.
+
+<P> 
+We then showed an interesting spectrogram of a sparrow's call.  This
+spectrogram was an example file for the free software package <A
+HREF="http://tftb.nongnu.org/demos.html"
+TARGET="_blank">Time-Frequency Toolbox</A>.</P>
+
+<P>
+We then discussed the time/frequency reassignment algorithm for
+enhancing spectrograms.  The acoustic bass spectrograms shown in the
+lecture came from Kelley Fitz's <A
+HREF="http://moab.eecs.wsu.edu/~kfitz/timefrequency.html"
+TARGET="_blank">webpage</A>.  This <A
+HREF="http://moab.eecs.wsu.edu/~kfitz/papers/aes2001.pre.pdf"
+TARGET="_blank">paper</A> describes the algorithm.
+
+<P>
+We then discussed combining spectrograms that were processed using
+filterbanks with different time/frequency tradeoffs.  This <A
+HREF="http://ieeexplore.ieee.org/iel6/8362/26344/01168558.pdf?arnumber=1168558"
+TARGET="_blank">paper</A> by Hong Leung and Victor Zue describes the
+approach.
+
+<P>
+We then discussed a system from Dan Ellis's <A
+HREF="http://www.ee.columbia.edu/~dpwe/" TARGET="_blank">LabRosa</A>
+at Columbia, that computed multi-level maps.  This <A
+HREF="http://www.ee.columbia.edu/~dpwe/pubs/aistats05-defspec.pdf"
+TARGET="_blank"> paper</A> describes the system.
+
+<P>I then talked about hardware systems I helped build in the 1980s
+and 1990s.  This <A
+HREF="http://www.cs.berkeley.edu/~lazzaro/biblio/index.html"
+TARGET="_blank">page</A> summarizes that work.
+</P>
+
+<P>
+We ended the talk with a discussion of the "Audio Photoshop" approach
+to spectral methods (as contrasted with the "Auditory Scene Analysis"
+approach of conventional resynthesis).  We used the phase vocoder as
+an example.  Mark Dolson's classic 1986 tutorial on Phase Vocoding is
+available <A
+HREF="http://www.panix.com/~jens/stuff/pvoc/pvoc-tut.cgi?1"
+TARGET="_blank">here</A>.  The examples I played in class (and the
+software that produced them) are available <A
+HREF="http://www.panix.com/~jens/parse.cgi/pvoc.par"
+TARGET="_blank">here</A>.  Other good resources include
+this <A
+HREF="http://www.dspdimension.com/data/html/pshiftstft.html"
+TARGET="_blank">webpage</A> and Chapter 3
+of Jordi Sanhaume's Ph.D thesis, available
+<A HREF="http://www.iua.upf.es/mtg/publications/Phd-2002-Jordi-Bonada.pdf"
+TARGET="_blank">here</A>.
+
+<hr>
+<small>Questions on this web page?  Contact: <TT>john [dot] lazzaro [at] gmail [dot] com </small>
+</body>
+
