@@ -1,0 +1,178 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>Network Musical Performance</TITLE>
+<META name="keywords" content="John Lazzaro, John Lazaro, Jon Lazzaro,
+Jon Lazaro, John Lazarro, Jon Lazarro, John Lazzarro, Jon Lazzarro,
+John Lazzarow, John Wawrzynek, network musical performance, netjam,
+IETF, RTP, SIP, SDP, RSVP, real time protocol, real-time procotol,
+session initiation protocol, session description protocol, 
+MPEG, MPEG 4, MPEG-4, MP4, MPEG-4
+Structured Audio, MP4, SA, MP4-SA, MP4/SA, computational audio,
+structured audio">
+<META name="description" content="Home page for network music 
+performance research in the CS Division of UC Berkeley.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL><STRONG>nmp</STRONG></SMALL></FONT>
+</TD>
+</TR>
+</TABLE>
+
+<H1>Network Musical Performance</H1>
+<H3>By <A HREF="../index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek</A>, <A HREF="http://www.cs.berkeley.edu/">
+CS Division</A>, <A HREF="http://www.berkeley.edu/">UC Berkeley.</A></H3>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>Introduction</H2>
+
+<P>
+A Network Musical Performance (NMP) occurs when musicians in different
+locations interact over the Internet, to perform as they would if
+located in the same room.
+
+<P>
+An NMP system unavoidably introduces time delays between the
+musicians, due to the network latency of the links connecting the
+players and the local latency at each host. The total latency must be
+kept reasonably short for the NMP system to be usable.
+
+<P>
+However, some latency is always present in conventional musical
+performance -- the acoustic latency due to the speed of sound.  
+
+<P>
+One way to think about NMP is to consider the physical separation
+between network hosts that would yield the equivalent acoustic latency
+between players in a room. For example, data packets travel from the
+Stanford University campus to the UC Berkeley campus, located 40 miles
+apart, in the time it takes for sound to travel 2.4 feet.
+
+<P>
+However, the quality of NMP depends on the total system latency:
+network delays plus the local latency at each host. If we take local
+delays into account, we find a total latency between Berkeley and
+Stanford that corresponds to a musician separation of about 7 feet, a
+typical distance between two players in rehearsal.
+
+<H2>Resiliency vs. Latency</H2>
+
+<P>
+In many networks, occasional packet delays and losses are inevitable,
+as other users transiently consume resources. Internet telephony
+copes with congestion delay by using large audio buffers at the
+receiver.
+
+<P>
+Buffer delay is tolerable for telephony, but is not acceptable for
+network musical performance. A key research issue in NMP is to 
+design systems that handle lost and late packets gracefully, using
+methods that do not increase total system latency.
+
+</TD>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Gestural Coding</H2>
+
+<P>
+Concealing packet loss is easier if the musical performance is sent
+across the Internet at a higher level of abstraction, that describes
+the physical gestures musicians use to manipulate their instruments.
+
+<P>
+Gestural data sent across the network should be tagged with timestamps
+and sequence numbers, and should include contextual information about
+recently sent gestures, so that late and lost packets can be detected
+and concealed.
+
+<P>
+We have implemented a system for network musical performance based on
+these ideas. In this system, the musicians play electronic instruments
+that produce MIDI control data. MIDI data is sent to the remote
+players, using a resilient coding to protect against packet loss. Audio
+software on each host turns both local and remote MIDI data into
+sound.
+
+<H2>To Learn More</H2>
+
+<P>
+This <A
+HREF="../sa/pubs/pdf/nossdav01.pdf">
+paper,</A> presented at the <A
+HREF="http://www.nossdav.org">NOSSDAV</A> 2001 conference, describes
+our NMP system in detail.  
+
+<P>
+This <A
+HREF="../sa/pubs/pdf/aes117.pdf">
+paper,</A> presented at the 117th AES convention, describes the RTP
+MIDI payload format used by our NMP system.
+
+<P> RTP MIDI is an IETF Proposed Standard (<A
+HREF="../sa/pubs/txt/rfc6295.txt">RFC 6295</A> and <A
+HREF="../sa/pubs/txt/rfc4696.txt">RFC 4696</A>). Read
+about RTP MIDI <A HREF="../rtpmidi/index.html">here</A>.
+
+<P>
+Unfortunately, we no longer run the servers necessary to host NMP
+sessions, and so we have disabled networking support in <A
+HREF="../sa/sfman/index.html">sfront</A>.
+
+<P>
+Read about related work on NMP systems at <A
+HREF="http://www-ccrma.stanford.edu/groups/soundwire/">CCRMA</A>, <A
+HREF="http://cnmat.CNMAT.Berkeley.EDU/OSC/">CNMAT</A>, <A
+HREF="http://www.transjam.com/">SoftSynth</A>, and  <A
+HREF="http://www.postel.org/pipermail/end2end-interest/2001-August/001314.html">USC/ISI</A>.
+
+<H2>References</H2>
+
+<P>
+John Lazzaro and John Wawrzynek (2004). <B>An RTP Payload Format for MIDI.
+</B> <I>The 117th Convention of the Audio Engineering Society,</I> 
+October 28-31, 2004, San Francisco, CA.
+<A HREF="../sa/pubs/pdf/aes117.pdf">
+[PDF]</A>.
+
+<P>
+John Lazzaro and John Wawrzynek (2001). <B>A
+Case for Network Musical Performance.</B> <I>The 11th International
+Workshop on Network and Operating Systems Support for Digital Audio
+and Video (NOSSDAV 2001)</I> June 25-26, 2001, Port Jefferson, New York 
+<A HREF="../sa/pubs/pdf/nossdav01.pdf">
+[PDF]</A>
+<A HREF="../sa/pubs/psgz/nossdav01.ps.gz"
+>[ps.gz]</A> 
+<A HREF="../sa/pubs/ps/nossdav01.ps"
+>[ps]</A>.
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL><STRONG>nmp</STRONG></SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+</BODY>
+</HTML>
