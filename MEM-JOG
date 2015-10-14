@@ -3,4 +3,5 @@ git add [filenames]
 git commit -m 'X'
 git push -u origin master
 https://goo.gl/OUd4tN
+http://john-lazzaro.github.io
 
