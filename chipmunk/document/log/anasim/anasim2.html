@@ -1,0 +1,186 @@
+<TITLE> A Tour of the Analog Gates </TITLE>
+
+<H1> A Tour of the Analog Gates</H1>
+
+<PRE>
+
+   1.  Clock Icon (TIME).  This displays the current time and timestep.
+       It also has a square in the center that changes color to indicate
+       how the simulation is going:
+
+            Black       Simulation is turned off
+            Red         Computing the next timestep
+            Yellow      A timestep has been computed
+
+       If you configure the clock icon you will find that it can
+       display a few other time-related values, of interest mostly
+       to AnaLOG implementors only.  Note that TIME is not actually
+       part of the analog simulator---you can use it for the digital
+       simulator, too, but it's not very useful there since the
+       digital simulator has such a crude concept of time.
+
+
+   2.  VDD and GND.  Global power supply.  VDD defaults to +5V.
+       You can change the value of Vdd in the NUMBERS gate, but
+       Gnd is always zero, and Vdd is always positive. Vdd is an
+       idealized voltage source, that is able to source infinite
+       current; likewise, Gnd can sink infinite current. Use the
+       VDIFF or VSWITCH voltage sources if you need a finite 
+       output impedance.
+
+   3.  Terminals (TO, FROM).  These are the two arrow-shaped gates
+       in the Catalog.  They are equivalent except for appearance.
+       They are used for putting names on signals: to name a signal
+       FOO, connect a terminal to it, then tap the space next to
+       the arrow and type FOO.  If there are several terminals in
+       the circuit with the same names, they are all electrically
+       connected as if by wires.  Signal names are also used with
+       the Scope mode, to be described below.
+
+
+   4.  Scoreboard (NUMBERS).  This gate serves many purposes.  On
+       the screen it displays whether simulation is proceeding and
+       why; it gives controls for set/erase/exact/relaxed modes;
+       and, when you tap the center bar, it lets you configure
+       AnaLOG's "global" parameters, such as the value of VDD and
+       the maximum allowable timestep.  More on these parameters
+       below.
+
+
+   5.  Transistors. Both three-terminal (NFET7T, PFET7T) and 
+       four-terminal (NFET7F, PFET7F) transistor models are 
+       provided. Only geometric information and parameter 
+       variations are specified on the screens of these gates.
+       Other gates control the physical constants (PHYSICAL)
+       device technology parameters (DEVTECHP, DEVTECHN), and
+       fab-run specific parameter variations (RUNSPEC) of all
+       transistors in the FET7 series. In addition, the temperature
+       of all FET7 gates can be varied using the THERMAL gate. For
+       backward compatibility, earlier MOS models are also available
+       (NFET4, PFET4, NFET5, PFET5, PFET6) as well as FET models
+       (NSPC1, PSPC1, contributed by Bhusan Gupta) designed to be
+       used with the SPICE netlist tool (see LOGSPC section). Bipolar
+       transistor gates (NPN2, NPN2) are experimental Gummel-Poon models
+       with Early Effect by Tim Edwards; earlier experimental Ebers-Moll
+       models (NPN1, PNP1) are included for backward compatability,
+       along with a diode gate (DIODE1). The <TT>log/lib/mos.cnf</TT>
+       and <TT>log/lib/models.cnf</TT> hold default configuration
+       parameters for transistor models. 
+
+
+   6.  Capacitor (CAPFLOAT).  Typical capacitor, defaults to 1pF.
+       Notice that, like all circuit elements, it has a slight
+       parasitic capacitance to ground as well as the capacitance
+       between the two leads.
+
+
+   7.  Resistor (RESFLOAT).  A plain linear resistor. When changing the
+       resistance value, note that "m" denotes milliohms, and "Meg"
+       denotes Megohms; a common mistake is to type "6m" instead of
+       "6Meg" to create a 6 MegOhm resistor. For a more VLSI-like resistor,
+       see HRES below.
+
+   8.  Transconductance amplifiers (OPAMP, WRAMP).  These are
+       simulations of the narrow- and wide-range amplifiers in Carver's
+       book.  Their behavior is modelled after the circuits at the
+       transistor level (as modelled by AnaLOG's obsolete FET4 series),
+       at least if you use them in the normal range of voltages (between
+       0 and 5V).  A little red light turns on if the voltages go outside
+       the range in which the model is a safe approximation for the "real"
+       circuit. Note that the "Iset" pin at the bottom wants a voltage, not
+       a current.  If you want to set the current manually, connect
+       a voltage source to the pin and also to a standalone (FET4)
+       transistor, then measure the current through the transistor.
+
+
+   9.  Rectifiers (HWR, FWR).  These are half-wave and full-wave
+       rectifiers.  An HWR models an OPAMP driving a two-transistor
+       current mirror; an FWR models is like a pair of HWR's.
+
+
+  10.  Horizontal resistor (HRES).  This big ugly thing is the
+       "horizontal resistor" circuit, which predates the circuit in
+        Carver's book. Obsolete for new designs. 
+
+
+  11.  Ganglion (GANGLION).  This is the basic ganglion circuit,
+       as described in Carver's Book.
+
+
+  12.  Voltage/current meter (MMETER).  This meter displays the voltage
+       on whatever wire or pin it is connected to.  If you configure it
+       you can change it to a current meter, in which case it measures
+       current into the gate from whatever pin it is connected to.
+       (If you connect a current meter to the middle of a wire, it
+       doesn't work because the direction of the current is not well-
+       defined.)
+
+
+  13.  Special magic current meter (ISCOPE).  This is a widget for
+       use in plotting currents in Scope mode, and will be discussed
+       in the later section on Scope mode.
+
+
+  14.  Voltage source (VDIFF).  This gate creates a differential
+       voltage between its two pins (the bottom pin is typically
+       connected to ground).  It has a finite output resistance
+       (initially 50 ohms), so it is not an "ideal" source in the
+       sense of SPICE.  You can use it as a simple DC source with
+       a certain voltage (set by configuring the gate), or you can
+       set to output a pulsed or sinusoidal waveform.  This is all
+       described below, under Input Waveforms.  Voltage sources
+       display the current-limiting condition by lighting up a
+       little red light, just like the ones on the lab bench!
+       They also have a switch, in the lower-right, that you can
+       switch to freeze the waveform in time.
+
+
+  15.  Current source (IDIFF).  Basically a current-sourcing version
+       of the voltage source.  It can generate the same kinds of
+       waveforms.  It voltage-limits if the voltage across the pins
+       goes below the "crowbar voltage," 0.1V by default.
+
+
+  16.  Step generator (STAIRS).  A voltage source generating a
+       stairstep function, which moves from one voltage to another
+       in a certain number of steps, then repeats.
+
+
+  17.  Voltage switch (VSWITCH).  A voltage source that can be
+       manually switched between "on" and "off" voltage levels.
+       This one also has a tiny switch on its face, this time to
+       select which voltage is generated.  It can also be set in
+       "monostable" mode, in which a tap on the switch will turn
+       it on for a certain period of time, then back off again
+       automatically.  Note that voltages here are implicitly
+       relative to ground.
+
+
+  18.  Current switches (ISWITCH1, ISWITCH2).  Current-sourcing and
+       current-sinking versions of the VSWITCH.  The current source
+       (arrow pointing out) is like an IDIFF connected to VDD, and
+       the current sink (arrow pointing in) is like IDIFF connected
+       to GND.
+
+  19.  Piece-wise linear two-terminal element (PWL, contributed by
+       Harold Levy). Implements an arbitrary two-terminal element,
+       with an i-v transfer curve. Cd to the log/lib directory, 
+       start analog, and load the file pwl-test.lgf to learn more.
+
+  20.  Resonant tunneling diode (RTD, contributed by Harold Levy).
+       Models a class of quantum well devices. 
+
+
+</PRE>
+
+<UL>
+<LI> <A HREF="anasim3.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

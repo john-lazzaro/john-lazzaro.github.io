@@ -1,0 +1,198 @@
+<TITLE>  Digital gate definition language</TITLE>
+
+<H1>  Digital gate definition language</H1>
+
+<PRE>
+
+   1.  Simple digital gates in LOG can be described entirely in the
+       modest interpreted language described here.  For more complicated
+       functionality, for displays and user interaction, or for access
+       to the gate's attributes, you must write Pascal code using a
+       CALL statement.  The interpreted language is usually referred to
+       as "LOGED language," though it is really part of the digital
+       simulator, not of LOGED proper.  The language is also called
+       Gate Description Language, or GDL.
+
+   2.  A GDL program consists of a sequence of statements, displayed one
+       per line.  These statements are typically either assignments to
+       pins or variables, or IF/ELSE/END constructions.  GDL contains no
+       loops, arrays, or arithmetic.  The program is executed once per
+       LOG time-step, from top to bottom, performing boolean operations
+       on values in the gate.
+
+   3.  Resources available to a GDL program are pins, notated as in "#3";
+       internal nodes, notated as in "##6"; and state variables, such
+       as "A", "P", or "V26".  A state variable is much like a Pascal
+       variable; an assignment to it replaces the previously assigned
+       value, and lasts until the next assignment.  It is a 1-bit quantity
+       whose value is interpreted as a boolean logic 1 or 0.  A pin or
+       internal node is a true LOG node; it uses a five-valued logic
+       (One, Zero, undriven or "None", and weak One and Zero) and must be
+       assigned to once per time-step.  The assigned value does not show up
+       on the node until the next time-step.  If the gate uses only nodes
+       (no state variables), the order of execution of statements within
+       the gate is essentially arbitrary.
+
+   4.  Pin numbers range from 1 to the number of pins on the gate.
+       The 16 state variables A through P are always available.  For
+       internal nodes and additional state variables, you can use the
+       INST statement described below.  All state variables are initially
+       Zero when the gate is created.
+
+   4.  Each GDL statement must be one of the following:
+
+
+       &lt variable &gt  =  &lt expression &gt
+                  Assign the value of the expression to the variable.
+                  The previous value of the variable is replaced.  This
+                  is exactly like a variable assignment in a conventional
+                  language.  If the value of the expression's value is
+                  None, the variable is set to One.
+
+
+       &lt node &gt  = &lt expression &gt 
+                  Output the value of the expression to the pin or
+                  internal node.  If two statements (in the same or
+                  different gates) output conflicting values to the
+                  node in the same time-step, a conflict is registered
+                  on the node.  Outputting None to a node has no effect.
+
+
+       &lt node &gt  = PULLUP   or   PULLDN
+                  Output a weak One or Zero (respectively) to the
+                  node.  This essentially registers a default value
+                  for the node; if no other GDL statement assigns a
+                  strong value to the node in this time-step, the
+                  weak default will be used.  A strong value overrides
+                  a weak value without conflict.  A conflict will be
+                  registered if the node is weakly pulled to One and
+                  Zero simultaneously.
+
+       &lt node &gt  '&lt ' &lt expression &gt 
+                  Output an open-collector value to the node.  If
+                  the expression's value is Zero, it is driven to the
+                  node.  If the expression's value is One or None,
+                  the node is left alone.
+
+
+       IF &lt condition &gt  &lt expression &gt 
+          &lt statements &gt 
+       ELSE
+          &lt statements &gt 
+       END
+                  If the condition is satisfied, the first set of
+                  statements are executed.  Otherwise, the second set
+                  (if any) are executed.  The conditions available
+                  cover all possibilities of One, Zero, and None
+                  values for the expression:
+
+                        IF x        True if x=One or None.
+                        IFONE x     True if x=One.
+                        IFZN x      True if x=Zero or None.
+                        IFZERO x    True if x=Zero.
+                        IFCONN x    True if x=One or Zero.
+                        IFNONE x    True if x=None.
+
+
+       CALL &lt procedure-name &gt 
+                  Call the Pascal procedure specified.  The name has the
+                  usual "modulename_procedurename" form.  If there are
+                  CALL statements in a gate's procedure, those procedures
+                  are called in order when the gate is simulated, drawn,
+                  tapped, created, destroyed, copied, configured, etc.
+
+
+       INST &lt num-nodes &gt  , &lt num-vars &gt 
+                  This statement, if used, must be the first statement of
+                  the program (before even comments and blank lines).
+                  The statement "INST 17,6" reserves 17 internal nodes,
+                  ##0 through ##16, and 6 additional state variables,
+                  V0 through V5, for the gate.  If the number of variables
+                  is zero, it and the comma can be omitted.
+
+
+   5.  GDL statements may also be blank lines or comments.  A comment
+       line begins with a "#" not followed by a digit.  Blank lines and
+       comments do have a small impact on the simulator's performance.
+
+
+   6.  A GDL expression is a series of "factors" joined by binary
+       operators.  All operators have the same precedence and are
+       evaluated left-to-right.  In the following list of operators,
+       X is any expression and Y is any factor.
+
+
+       x AND y    Boolean AND, OR, or exclusive OR of X and Y.  If
+       x OR y     either X or Y is None, the result is the other input.
+       x XOR y    If both are None, the result is None.
+
+
+       x NAND y   Equivalent to "NOT (x AND y)".
+
+
+       x NOR y    Equivalent to "NOT (x OR y)".
+
+
+       x SAME y   Both X and Y must be pins.  Equal to One if both
+                  pins are connected to the same electrical node, or
+                  Zero if the pins are not on the same node.
+
+
+   7.  A GDL factor is either an expression in parentheses, or one of
+       the following (X is any factor; P is any pin or internal node):
+
+
+       &lt var &gt       A state variable.  The result is One or Zero depending
+                  on the current value of the variable.
+
+
+       &lt node &gt      A pin number or internal node.  The result is either
+                  One, Zero, or None, depending on the value driven on
+                  the node in the previous time-step.
+
+
+       ONE        The constant value, One.  This can also be written
+                  "TRUE" or "1".
+
+
+       ZERO       The constant value, Zero.  Also "FALSE" or "0".
+
+
+       NOT x      The result is One if X is Zero, Zero if X is One, or
+                  None if X is None.
+
+
+       RISE p     The result is One if the specified node is receiving
+                  a rising transition, that is, the previous time-step
+                  drove the pin to a One, but the time-step before that
+                  drove it to a Zero.  Otherwise, the result is Zero.
+
+
+       FALL p     The result is One if the specified node is receiving
+                  a falling (One to Zero) transition.
+
+
+       FIX x      The value of X, with None converted to Zero.
+
+
+       STRONG p   The result is One or Zero if the specified node was
+                  driven by a strong (i.e., normal) value on the previous
+                  time-step, or None if the node was undriven or was only
+                  weakly driven.
+
+
+   8.  For examples of GDL programs, consult the many gates in the files
+       "log.gate" and "actel.gate".
+
+</PRE>
+
+<UL>
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

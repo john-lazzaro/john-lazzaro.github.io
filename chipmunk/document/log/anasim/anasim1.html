@@ -1,0 +1,125 @@
+<TITLE> Basics of Analog Simulation </TITLE>
+
+<H1> Basics of Analog Simulation </H1>
+
+<PRE>
+
+   1.  LOG and AnaLOG are simulating your circuit constantly, even
+       as you edit.  But unlike the digital simulator, AnaLOG requires
+       your circuit to be "complete" before it can simulate.  That is,
+       every pin must be connected to another pin, not left dangling.
+       If the circuit is incomplete, i.e., there are still unconnected pins
+       on some of the gates, AnaLOG will display a message to that effect
+       on its scoreboard.  As soon as the circuit is complete, the
+       scoreboard will switch to "Simulation in Progress".
+
+   2.  The gate that looks like a box with an arrow on it is the METER.
+       To monitor your simulation, sprinkle meters liberally around on
+       all of the interesting voltages.  There is no limit to the
+       number of meters you can have.  Remember that the meter's red
+       dot is at the tip of the arrow, so the tip must be exactly
+       touching the wire or pin of interest.  If the meter is
+       unconnected or unhappy, it will display a "~" sign.
+
+   3.  The "clock icon" is the round thing in the upper-right corner
+       that looks vaguely like a clock.  Its importance is in the two
+       numbers directly below it.  These are the current time and
+       current timestep, respectively.  At the beginning, these are
+       both zero.  As soon as the simulation begins, the current
+       time will start advancing.  How fast it is advancing is shown
+       as the current time-step, and may vary depending on how fast
+       things are happening in the circuit.
+
+   4.  A common error is to watch, say, a capacitor charging, then
+       go in and double the capacitance, and complain that it still
+       seems to be charging "at the same rate."  If you look at the
+       clock icon, though, you will find that the timestep is twice
+       what it used to be:  AnaLOG can simulate the ramp function
+       just as quickly in "real time," but the circuit is (correctly)
+       half as fast in "simulated time."  Make a habit of paying
+       attention to the clock so that your observations have the
+       correct frame of reference in time.
+
+   5.  Although simulation happens continuously, it is sometimes
+       necessary to "reset" the circuit back to its starting conditions.
+       For example, suppose you remove a wire from a running circuit and
+       the voltages that were in the circuit at the time are "impossible"
+       for the new circuit.  The simulator will work as hard as it can
+       to figure out what to do, but may eventually give up and print a
+       message.  Another example is that you may want to reset various
+       nodes to the initial voltages that you have programmed for them,
+       as described in the next paragraph.  In any case, all you have to
+       do is select RESET in the Misc menu, or press the "R" key.  This
+       sets the simulation clock back to 0 seconds, and returns the
+       voltages to their initial values.
+
+   6.  If you open any AnaLOG gate for configuration, one thing you will
+       find is a set of three attributes for every pin on the gate.
+       These attributes are present voltage, reset voltage, and parasitic
+       capacitance, respectively.  Every pin has a slight parasitic
+       capacitance to ground, initially 10fF.  This capacitance must
+       exist for the simulation to run, but you can set it lower if
+       you find that it's in your way.  The "present voltage" is an
+       actual indicator of the voltage currently on that pin, and it
+       changes while you watch during simulation.  You can enter new
+       values here if you wish, but the simulator may not like you if you
+       go around making instantaneous changes in the circuit's voltages.
+       The "reset voltage" is used by the RESET command.  If you leave
+       it blank, AnaLOG will solve for an appropriate initial voltage
+       at RESET time.  Notice that Present and Reset voltages are for
+       nodes, not gates: if you change a pin's reset voltage, then
+       open up another gate connected to that same node, the reset
+       voltage shows up there, too.
+
+   7.  When you reset, you will notice that the timestep jumps down,
+       usually to about 1E-18 seconds, then starts increasing.  This
+       is partly because AnaLOG is cautiously trying to discover how
+       fast it can safely proceed in the simulation, and partly
+       because it has to solve for unspecified initial voltages by
+       simulating the brief charge-up that would occur when you
+       powered up a real circuit from scratch.  If you push RESET
+       and the voltages seem to be frozen, don't depair -- wait for
+       the timestep to get out of the femtosecond range!
+
+   8.  The AnaLOG scoreboard has some words on its left and right
+       sides.  On the left is Memory, with indicators Set and Erase.
+       If you tap the word "Erase," all of your "reset voltages" will
+       be erased.  You might do this if editing has caused your reset
+       voltages to be no longer appropriate, and you want AnaLOG to
+       solve the circuit from scratch.  If you tap the word "Set,"
+       all of the present voltages in the circuit are copied into the
+       reset voltages.  For example, you might turn your input
+       waveforms off, let the circuit settle to a stable state, then
+       push Set so that next time you RESET, the circuit will start
+       out at that stable state and you won't have to wait again.
+
+   9.  AnaLOG is normally very cautious about voltage changes.  If it
+       is going along at a particular timestep and some node suddenly
+       starts changing more than about .1V per timestep, AnaLOG will
+       reduce the timestep and simulate in smaller chunks.  This is
+       because trying to simulate fast voltage changes all at once
+       results in ugly and inaccurate waveforms.
+
+  10.  Sometimes all you are looking for is a DC point anyway, and
+       you don't care how ugly your transient waveforms are.  In this
+       case, you can touch the word "Relaxed" on the scoreboard.  This
+       tells AnaLOG to take timesteps as large as it can regardless of
+       how fast the voltages are changing.  Touch "Exact" to return to
+       an accurate simulation.  Often what people do is touch Relaxed
+       right after a RESET so that the initial charge-up proceeds
+       quickly, then touch Exact when the timestep gets up to the
+       picosecond-nanosecond range.
+
+</PRE>
+
+<UL>
+<LI> <A HREF="anasim2.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

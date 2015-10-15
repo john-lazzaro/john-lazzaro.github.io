@@ -1,0 +1,42 @@
+<TITLE> Basics of Digital Simulation </TITLE>
+
+<H1> Basics of Digital Simulation </H1>
+
+<PRE>
+
+   1.  Digital LOG is simulating your circuit constantly, even as
+       you edit.  Every wire has a "state," corresponding to the
+       voltage on the wire:
+
+            Zero        a wire connected to ground,
+            One         a wire connected to Vdd,
+            Weak one    a wire connected to Vdd through a pullup resistor,
+            None        a wire that is floating (not connected)
+
+   2.  You send signals into the circuit using switches, and read
+       the state of the circuit using displays such as LED's.
+
+   3.  If you ever drive a node (wire) with both One and Zero at the
+       same time, the node starts flashing to indicate a "conflict."
+       Since this is not an analog circuit simulator, digital LOG can
+       not represent the correct value of the wire, so it flashes the
+       wire and picks either One or Zero arbitrarily.
+
+   4.  Digital LOG uses a "unit delay" simulation model.  All gates
+       are considered to have the same delay, whether they are NAND
+       gates or complex counters.  (The STABILIZE command may change
+       this behavior for short periods of time.)
+
+</PRE>
+
+<UL>
+<LI> <A HREF="digsim2.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

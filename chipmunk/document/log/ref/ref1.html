@@ -1,0 +1,579 @@
+<TITLE>   List of commands</TITLE>
+
+<H1>   List of commands</H1>
+
+<PRE>
+
+   1.  This is a partial list of commands that may be entered in their
+       full-length form (i.e., press ":", then type the command).
+       Many of these commands may also appear in the file "log.cnf"
+       which is read when LOG starts up.
+
+   2.  In this list, "ON/OFF" means either the word "ON", to turn an
+       option on, or "OFF", to turn an option off, or no word at all,
+       to "toggle" the option between on and off.
+
+   3.  Many commands have single-key equivalents.  The bindings shown
+       here are the defaults, which may be changed by the MACRO command.
+
+   4.  The following commands, when used in the form of single-key
+       commands, may be used even in the middle of drawing a wire,
+       selecting a rectangle, etc.:
+
+           ALTPOSN       GLOW           ON               SNAP
+           ARROW         GLOWSOLDER     PAGE n           TRACE
+           AVOID         GRID           PROBE            TRACEFILE
+           CLOSEFILES    HELP           QUIET            VERBOSE
+           CONFLICT      HOME           RESET            ZOOMDN
+           DOTS          INVISIBLE      RESPONSE         ZOOMUP
+           DUMP          INVLABEL       SHOWCONFLICTS
+           DUMPFILE      OFF            SIM/ONOFF/POWER
+
+       Other commands will cause any other operation in progress to
+       abort before the new command begins.
+
+   5.  Here is the complete list of LOG commands:
+
+
+       ABORT      (Control-C) Abort the current command, mode, or screen.
+
+
+       ALTPOSN    ("," key.)  Scroll to an alternate location on the
+                  page.  LOG essentially maintains two current locations
+                  on the page, like the "mark" in the Emacs text editor;
+                  this command exchanges them.
+
+
+       ARROW      Revert to the standard arrow-shaped cursor.  This undoes
+                  any previous PROBE or GRID command.
+
+       AUTOWINDOW Toggle a new window management mode. In this mode
+                  whenever text input into the newcrt window is necessary
+                  the newcrt window automatically rises in front of any
+		  windows that occlude it.  Once the window is  no longer
+		  needed, it returns to its previous condition.  
+
+       BOX        ("b" key.)  Draw a dashed box.
+
+
+       CAT        (Shift-"C" key.)  Switch to the Catalog screen.
+
+
+       CENTER     Shift the entire circuit so that it is centered in the
+                  LOG circuit universe, i.e., so that a Home command will
+                  home to the center of the circuit.  Note that this
+                  actually moves the circuit elements, whereas scrolling
+                  with the knob just changes your view on the elements.
+
+
+       CLEAR      Delete the entire circuit page.  Use with caution!
+
+
+       CLOSEFILES
+                  Close the "dump" and "trace" files, if they are open.
+                  These files will automatically be re-opened (for
+                  appending) if they are again used.  The dump file is
+                  used by the "Dump" command in the Scope.  The trace
+                  file is used by various LOG debugging commands.
+
+
+       CLOSEH     Enter "close-horizontal-space" mode, similar to OPENH
+                  except that it deletes the contents of the box you draw
+                  and shifts other things to the left.  DANGEROUS!
+
+
+       CLOSEV     Enter "close-vertical-space" mode, similar to OPENV.
+                  DANGEROUS!
+
+
+       CNFG       ("c" key.)  Switch gate-tapping mode to open a gate's
+                  configuration screen when it is tapped.
+
+
+       COLOR  screen-color  red-value  green-value  blue-value
+       COLOR  color-name  screen-color
+                  Customize the LOG color scheme.  LOG's colors are
+                  determined in two steps.  A "palette" of up to 16
+                  available colors is specified by the first form of
+                  the command.  "Screen-color" is either a number from
+                  0 to 15, or one of the names listed below.  Each of
+                  the red, green, and blue values run from 0 (black)
+                  to 255 (full intensity).  The second form of the
+                  COLOR command determines which of these 16 colors
+                  is used for various kinds of objects.  The color
+                  names defined by LOG are listed in a later section.
+
+                  Screen-colors:
+                     0  GRAY     4  MRED     8  BLACK    12 DCYAN
+                     1  RED      5  ORANGE   9  PINK     13 DRED
+                     2  GREEN    6  CYAN     10 DYELLOW  14 LGRAY
+                     3  YELLOW   7  WHITE    11 XGREEN   15 CRED
+
+                  On eight-color screens, all sixteen names or numbers
+                  may still be used; LOG combines similar colors
+                  internally.  The effect will be that changing the
+                  red/green/blue content of one of the above colors
+                  may affect other colors as well on an 8-color screen.
+
+
+       CONFLICT n
+       CONFLICT ON/OFF
+                  Turn conflict reporting on or off.  In Digital LOG,
+                  node conflicts are reported if one gate tries to drive
+                  a node to "1" while another is driving it to "0".
+                  AnaLOG does not report conflicts.  Conflicts are
+                  shown by a bright pulsating red.  If conflicts are
+                  turned off, they are not visible on the screen.  If
+                  an integer "n" is given, conflicts are turned on and
+                  the number of time steps to wait before reporting a
+                  given conflict is set to "n".  For example, if n=0,
+                  conflicts are reported immediately.  For n=1, each
+                  conflict must remain for at least two simulation
+                  timesteps before it is considered interesting.
+                  The default is conflict reporting on, with n=1.
+
+
+       COPY       ("/" key.)  Enter copy-area mode.
+
+
+       CSTOP ON/OFF
+                  Turn conflict-stopping mode on or off.  When this mode
+                  is on, the simulation stops (as if you had given an
+                  OFF command) the instant any conflict is reported.
+                  The CONFLICT command can be used to select how long a
+                  conflict must persist before it is reported.  This
+                  mode is off by default.
+
+
+       DEFINE     (Shift-"D" key.)  Display the simulator's definition for
+                  a gate-kind, specified either on the command line or by
+                  touching a representative gate.  Pressing shift-"D" in
+                  the Catalog screen also displays the definition for the
+                  gate the cursor is over.
+
+
+       DEL        ("d" key.)  Enter delete mode.
+
+
+       DOTS ON/OFF
+                  Control dots-visible mode.  When this is on (default),
+                  red connection dots on gates are always visible.  When
+                  this is off, red dots are usually visible only on pins
+                  that are not connected to wires.
+
+
+       DUMP       Write out a "debugging dump" to the printer.  For LOG
+                  maintainers only.
+
+
+       DUMPFILE filename
+                  Close any current dump file, then select "filename.text"
+                  as the new dump file.  If this file already exists, new
+                  text will be appended to it.
+
+
+       EXAMINE    ("e" or "x" key.)  Enter Probe mode temporarily.
+                  The cursor returns to normal as soon as you click the
+                  right button.  This is in contrast to the PROBE command,
+                  which turns the Probe cursor on until you explicitly
+                  turn it off again.
+
+
+       EXIT       Exit from LOG.  Also in the Misc menu, or on the Shift-Q,
+                  Shift-Z, and Control-D keys.
+
+
+       EXTRACT    Delete and re-paste the entire contents of the page.  If
+                  LOG's electrical connectivity information becomes corrupt,
+                  this will usually fix it.
+
+
+       FAST       ("f" key.)  Turn on fast mode.  This happens
+                  automatically after a certain amount of time passes with
+                  no mouse or keyboard inputs.
+
+
+       GET gatename gatename gatename ...
+                  Load the specified gates into the Catalog screen from
+                  the gate library.  The gate names may include wildcard
+                  characters '*' and '?'.
+
+
+       GLOW ON/OFF
+                  ("g" key.)  Turn glow mode on or off.
+
+
+       GLOWSOLDER ON/OFF
+                  Turn glowing-solder mode on or off.  This controls
+                  whether solder dots are visible while in GLOW mode.
+                  It is on by default; turning glowing-solder off may
+                  improve simulation performance in GLOW mode.
+
+
+       GRID       (Shift-"G" key.)  Change the cursor to a cross-hair
+                  shape.  If the cursor is already a cross-hair, change
+                  it back to the regular arrow cursor.
+
+
+       GROUP n "Name"
+                  Set the name that appears on the top of page number "n"
+                  of the Library screen.  The number "n" must be from 0
+                  to 8.  If the "Name" argument is omitted, this command
+                  instead selects which page number the Library screen
+                  will display next time it is entered.
+
+
+       HELP       ("?" key.)  Display this file using the Chipmunk
+                  Help System.
+
+
+       HOME       ("h" key.)  Reset the scroll and zoom amounts to the
+                  default position on the page.
+
+
+       IDENTIFY   Used by the LOG-to-NTK conversion tool.
+
+
+       INVISIBLE ON/OFF
+                  ("i" key.)  Turn "Invisible" mode on or off.  In this
+                  mode, wires and most gates are invisible.  However, labels,
+                  boxes, and switch/indicator gates are visible.  Also,
+                  operations that edit the circuit are disallowed.  Thus,
+                  a user can switch into Invisible mode and then operate a
+                  simulated "front panel" without confusion or fear of
+                  changing the circuit.
+
+
+       INVLABEL ON/OFF
+                  (Shift-"I" key.)  Turn "Invisible Labels" mode on or
+                  off.  In this mode, labels and boxes are invisible.
+
+
+       LABEL message
+                  ("l" key.)  Create a new label on the page.  If a
+                  "message" argument is supplied, a label with the
+                  specified text is created on the lower-left corner of
+                  the screen.  If no argument is supplied, LOG interactively
+                  enters the text for the label.
+
+
+       LIBRARY    ("l" key or LIBR item in the Catalog screen.)  Switch
+                  directly to the Gate Library screen.
+
+
+       LOAD filename
+                  (Shift-"L" key.)  Load the specified circuit file onto
+                  the current page, replacing anything that was on that
+                  page before.  If no file name is specified, LOG displays
+                  a list of files in the current directory and asks the
+                  user to select one, or type the name.  If the file name
+                  is '*', LOG simply asks the user to type the name.  The
+                  shift-L key is bound to "LOAD *".
+
+
+       LOGNTK     Start the LOG-to-NTK conversion tool.
+
+
+       LOGNTK: parameter value
+                  Set up a configuration parameter for the LOGNTK tool.
+                  Commands of this form usually appear in the file
+                  "/lib/log/logntk.cnf".
+
+
+       LPLOT: parameter value
+                  Set up a configuration parameter for the PLOT tool.
+                  Commands of this form usually appear in the file
+                  "/lib/log/lplot.cnf".
+
+
+       MACRO  key-name  command
+                  Associate the specified command with a key.  The key-name
+                  may be a single letter or other character (lower-case
+                  letters represent unshifted keys; upper-case letters
+                  represent shifted keys); or one of the words "bs", "tab",
+                  "sp" (space bar), or "cr" (Return or Enter); or a control
+                  key of the form "^A" or "^["; or a three-digit decimal
+                  ASCII code.  The "command" may be any of the commands
+                  listed here, and may include arguments.  If you give only
+                  a key-name, the computer displays the command that is
+                  currently bound to the key.  MACRO with no arguments
+                  displays a list of all current key bindings.
+
+
+       MAKE gate-name
+                  Bring a gate in from the catalog by name, and put it in
+                  the drawing area.  A shorthand for using the mouse in the
+                  the CAT and LIBR screens.  If the gate-name contains
+                  wildcard characters, multiple gates may be loaded into
+                  the Catalog but only one of them will be created on the
+                  circuit page.
+
+
+       MARKER ON/OFF
+                  ("m" key.)  Turn printing markers on or off.  The
+                  printing markers are used mainly by the "PLOT" command;
+                  they indicate the area of the circuit page which is to
+                  be fitted into the printed page.  The printing markers
+                  appear on the corners of the visible screen, and you
+                  can move them by regular editing operations to bracket
+                  any rectangular area of the page.
+
+
+       MESSAGE message
+                  Display the specified message in the "message area" of
+                  the screen.  The message area runs down the left edge
+                  of the screen; messages are drawn in yellow overlaying
+                  the drawing area.
+
+
+       MIRX       Select "mirror-in-X" gate-tapping mode.  When a gate is
+                  tapped in this mode, it is flipped across its vertical
+                  axis.  This works both in the menu area and in the
+                  drawing area, although some gates (such as switches)
+                  have special behaviors when tapped in the drawing area.
+
+
+       MIRY       Select "mirror-in-Y" gate-tapping mode.
+
+
+       MOVE       ("m" key.)  Move an area of the diagram.  This is
+                  similar to deleting the area with DEL, then pasting
+                  it back in a new location with PASTE.
+
+
+       NAME file-name
+                  See and/or change the "current file name" for the
+                  circuit page.  This is the file name that will be
+                  used by default in later "SAVE" commands.
+
+
+       OFF        Turn simulation OFF.
+
+
+       ON         Turn simulation ON.
+
+
+       OPENH      Enter open-horizontal-area mode.  Sweep out a rectangle;
+                  everything to the right of the lefthand edge of the
+                  rectangle is moved to the right by the amount of the
+                  width of the rectangle.  Wires straddling the left edge
+                  are stretched appropriately.  BEWARE:  This command
+                  may corrupt the LOG data structures if used in such a
+                  way as to break or make electrical connections in the
+                  circuit.  Unless you really know what you are doing,
+                  use the cut-and-paste method of moving things.
+
+
+       OPENV      Enter open-vertical-area mode, similar to OPENH.
+                  DANGEROUS!
+
+
+       PAGE n     Switch the display to circuit page "n", from 1 to 9.
+                  "n" may also be "+" or "-", to switch to the next or
+                  previous numbered page.
+
+
+       PASTE      Enter Paste mode.
+
+
+       PLOT       Run the circuit plotting tool.
+
+
+       POPUP  menu  position  kind  command  message
+                  Change one of the locations in the pop-up menus.  "Menu"
+                  is a number that selects which menu (1=Frills, 2=Editing,
+                  3=Cursor, 4=Misc); "position" is an integer from 1 to 8
+                  that identifies which spot in the menu:   [ 1  3  5  7 ]
+                                                            [ 2  4  6  8 ]
+                  "Kind" is normally zero; "command" is the command (from
+                  this list) that is to be executed if the menu is selected,
+                  enclosed in "quotes" if it contains spaces; and "message"
+                  is the wording for that menu element.  If "message" begins
+                  with '*' or '#', it will be colored red or light blue,
+                  otherwise it will be green.
+
+
+       PROBE      ("." key.)  Change to the Probe cursor.  If already
+                  using the Probe cursor, change back to an arrow.  In
+                  Probe mode, holding the cursor near a wire or gate pin
+                  displays the value on that electrical node, in a
+                  simulator-dependent way.  Holding the cursor near a
+                  gate in the drawing or menu areas displays the name
+                  of the gate on the screen.  Tapping a gate or node
+                  opens it for configuring, if it has anything to
+                  configure.  (Neither AnaLOG nor Digital LOG nodes
+                  are configurable, but many gates are.)  Tapping and
+                  configuring a gate in the menu area sets the defaults
+                  for newly created gates pulled out of that menu slot.
+                  Finally, tapping out in the drawing area draws a
+                  yardstick.  See also the EXAMINE command (on the
+                  "e" and "x" keys) which selects a temporary
+                  Probe mode.
+
+
+       QUIET      ("q" key.)  Turn sound prompting on or off.
+
+
+       READ  filename
+                  Read in a circuit from a file.  This is similar to the
+                  LOAD command, but it rebuilds the circuit's connectivity
+                  information as it loads, rather than simply reading it
+                  from the file.  As a result, READ is much slower than
+                  LOAD, but it is far more robust in case the file is
+                  corrupt or out of date.  For example, if you run LOGED
+                  and add more pins to a gate, then try to LOAD a circuit
+                  diagram containing that gate, LOG may crash since the
+                  connectivity recorded in the file is out of date.  But
+                  the READ command will read the file with no problems.
+                  In general, use the fast LOAD command unless you have
+                  a good reason not to.
+
+
+       REFRESH    (Space bar.)  Refresh the screen.
+
+
+       RESET      (Shift-"R" key.)  Send a Reset signal to the simulator(s).
+                  This resets simulation time back to zero, and has other
+                  simulator-dependent effects.  For AnaLOG, it resets all
+                  voltages to their initial values.  For Digital LOG,
+                  nothing happens except that the TO/FROM signal "Reset",
+                  if used, gets a brief "1" pulse.
+
+
+       RESPONSE  min  max  rate
+                  Set response-time parameters.  With no arguments,
+                  displays current parameters.  Initial values are
+                  2, 50, and 35, respectively.  During editing, LOG
+                  tries to check the mouse and keyboard at least every
+                  "min" centi-seconds.  If the user stops editing,
+                  this rate slowly increases until the maximum of
+                  "max" centi-seconds.  The rate of increase is
+                  one unit per "rate" centi-seconds of idle time.
+
+
+       ROT        Select "Rotate by 90 degrees" gate-tapping mode.  When
+                  a gate is tapped in this mode, it rotates 90 degrees
+                  counter-clockwise.  This works both in the menu area and
+                  in the drawing area, although some gates (such as
+                  switches) have special behaviors when tapped in the
+                  drawing area.
+
+
+       SAVE filename
+                  Save circuit page(s).  If a name is given, saves the
+                  current page in "name.LGF".  If the name is "*", prompts
+                  the user to enter the name to save.  If no name is
+                  given, re-saves all circuit pages which have been
+                  since last saved or loaded.  Shift-"S" is bound
+                  to "SAVE *".
+
+
+       SCOPE      ("s" key.)  Switches to the Scope screen.
+
+
+       SHELL shell-command    ( or:  !shell-command )
+                  (Also, "!" as a single-key command.)  Start a sub-Shell.
+                  If a shell-command is provided the shell executes this
+                  one command and returns.  If no shell-command is provided,
+                  you get an interactive sub-shell.  Type quit or press
+                  control-D to return from the sub-shell.
+
+
+       SHOWCONFLICTS
+                  ("k" key.)  Turn "ShowConflicts" mode on or off (toggling).
+                  Default is off.  In this mode, wires and most gates are
+                  invisible, similar to invisible mode.
+                  However, nodes that are in conflict remain visible to
+                  aid their identification.
+
+
+       SIM (or ONOFF or POWER)
+                  Turn simulation ON or OFF (toggling).
+
+
+       SNAP       ("$" key.)  Turn "snap-to-grid" mode on or off.  Default
+                  is off.  In this mode, the cursor arrow always jumps
+                  to the nearest spot on the LOG editing grid rather
+                  than moving smoothly.
+
+
+       STATUS     Enter the "Status" display.  Use the knob or arrow
+                  keys to switch among various pages.  A page-name may
+                  also be given with the STATUS command:
+
+                        LOG      General system status
+                        MEMORY   Memory usage status
+                        MACRO    Keyboard mappings
+                        16       Digital simulator
+                        32       Analog simulator
+                        LPLOT    Plotting tool
+                        LOGNTK   LOG-to-NTK tool
+
+
+       STEP n     Turn simulation OFF, if necessary, then step the
+                  simulation by one time-step.  If an integer "n" is
+                  provided, executes "n" time-steps before stopping.
+
+
+       TAPMODE    (menu selection, or shift-"M" key.)  Select the next
+                  gate-tapping mode, in order:  ROT, MIRX, MIRY, CNFG.
+
+
+       TOOL name  Send a "select" command to the specified tool.  Various
+                  tools respond to this in various ways; the default is
+                  to ignore the signal.  (The Digital LOG simulator, tool
+                  name "16", responds by putting up a configuration
+                  screen of digital-LOG parameters.)  If a TOOL command
+                  is given with no "name" argument, it puts up a screen of
+                  available tool names and "selects" whatever tool the
+                  user chooses with the mouse.  The shift-"T" key calls
+                  up an interactive TOOL command.
+
+
+       TRACE      Turn the debugging "wallpaper" mode on or off.  Please
+                  don't do this unless a LOG maintainer is there.  Trace
+                  output goes to the "Trace" file, which by default is an
+                  appropriate printer.
+
+
+       TRACEFILE filename
+                  Close any current trace file, then select "filename.text"
+                  as the new trace file.  If this file already exists, new
+                  text will be appended to it.
+
+
+       VERBOSE    ("v" key.)  Turn informational messages on or off.  These
+                  messages are mostly of the "Glow mode is now OFF"
+                  variety.
+
+
+       VMESSAGE   Similar to MESSAGE, but works only if in
+                  Verbose mode.
+
+
+       YARDSTICK  Draw a "yardstick", useful for measuring the spacing of
+                  objects in your diagram.
+
+
+       ZOOMDN     Zoom down, to view more of the circuit page.
+
+
+       ZOOMUP     Zoom up, to view part of the circuit in greater
+                  detail.
+
+</PRE>
+
+
+<UL>
+<LI> <A HREF="ref2.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+
+

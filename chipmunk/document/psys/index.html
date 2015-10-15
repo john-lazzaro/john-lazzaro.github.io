@@ -1,0 +1,100 @@
+<TITLE> Chipmunk and X </TITLE>
+
+<H1> Chipmunk and X: Color Depth </H1>
+
+<P> Chipmunk tools currently support monochrome, 8-bit, 16-bit, and
+24-bit displays. The 16-bit and 24-bit display modes are only known to
+work on the PC architecture (X11 under Linux and OS/2); see this <A
+HREF= "modes.html"> document </A> for more details on the current
+status of color support. </P>
+
+<P> By default, the Chipmunk tools select a color mode using these rules: </P>
+
+<UL>
+<LI> If Pseudo-Color mode is supported with a depth of at least 8 bits,
+the tool uses 8-bit mode. 
+<LI> If Pseudo-Color mode is not supported but TrueColor mode is 
+supported, the tool uses 24-bit depth if available, or 16-bit depth
+if 24-bit depth is not available.
+<LI> If all else fails, monochrome mode is selected. 
+</UL>
+
+<P> The user can force the color mode of a Chipmunk tool by setting
+the environment variable <TT>LOG_COLOR</TT> to be the string
+<TT>bw</TT> or <TT>8bit</TT> or <TT>16bit</TT> or <TT>24bit</TT>. </P>
+
+<H1> Chipmunk and X: Window Placement and Fonts </H1>
+
+<P> Manually placing and sizing the <TT>mylib</TT> and <TT>newcrt</TT>
+windows can quickly become tedious. The Chipmunk
+tools can automatically size and place these windows. To enable this
+feature, you'll need to add information to an X initialization file in
+your home directory, typically named <TT>.Xresources</TT>. Three
+resources are implemented for the Chipmunk tools:
+
+<DL>
+<DT> <TT>mylib.geometry: =AxB+C+D</TT>
+<DD> You can use this resource to set the size of the <TT>mylib</TT>
+window to have an X dimension of A pixels, and a Y dimension of B pixels,
+and have it automatically placed at the position indicated by C (x placement)
+and D (y placement). 
+<DT> <TT>newcrt.geometry: +C+D</TT>
+<DD> The size of the <TT>newcrt</TT> window is fixed for all Chipmunk tools.
+This resource automatically places the <TT>newcrt</TT>
+window at a position indicated by C (x placement) and D (y placement). 
+<DT> <TT>mylib.color black_and_white</TT>
+<DD> This X resource forces Chipmunk tools to generate monochrome 
+displays, even if the machine has a color monitor. 
+</DL>
+
+<P> By default, the <TT>mylib</TT> window uses the <TT>6x10</TT> font
+and the <TT>newcrt</TT> window uses the <TT>8x13</TT> font.  On some X
+servers, these fonts may not be available. These resources change the
+default fonts:</P>
+
+<DL>
+<DT> <TT>mylib.font: fontname</TT>
+<DT> <TT>newcrt.font: fontname</TT>
+</DL>
+
+<P> Alternatively, the default fonts may be specified at compile-time
+in the <tt>psys</TT> Makefile.</P>
+
+<P> 
+After changing the <TT>.Xresources</TT> file, run <TT>xrdb -merge
+.Xresources</TT> to activate the new behaviors.  If this command does
+not update your X server, you should exit and restart the X server.
+</P>
+
+<H2> Examples </H2>
+
+<P> My <TT>.Xresources</TT> for my color Sun IPC machine is as
+follows: </P>
+
+<P><TT>mylib.geometry: =1150x550+0+0</TT></P> 
+<P><TT>newcrt.geometry: +510+586</TT></P>
+
+<P> My <TT>.Xresources</TT> for my HP 712/80 machine, which
+has a higher-resolution monitor, is </P>
+
+<P><TT>mylib.geometry: =1278x682+0+0</TT></P> 
+<P><TT>newcrt.geometry: +638+710</TT></P>
+
+<P> Some versions of the NX server do not have the default
+Chipmunk fonts available.  The <TT>.Xresources</TT> entries
+below remedy the situation: </P>
+
+<P> <TT>mylib.font: 6x13</P>
+<P> <TT>newcrt.font: 6x13</P>
+
+<P> These features were added to the Chipmunk tools by Jim Clark at
+Harvard University, Tor Sverre Lande at IFI, and Michael Godfrey at
+Stanford University. Thanks to Derek Woolverton for documentation
+updates.</P>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

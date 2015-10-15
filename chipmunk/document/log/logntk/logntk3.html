@@ -1,0 +1,46 @@
+<TITLE> Identifying Things </TITLE>
+
+<H1> Identifying Things </H1>
+
+<PRE>
+
+   1.  Cells and nodes in the NTK file are assigned names automatically by
+       LOGNTK.  The one exception is that if a node has a signal name
+       associated with it, that name is used.  The :IDENTIFY command in
+       AnaLOG lets you find out what names correspond to what circuit
+       objects.  Type:
+
+            :IDENTIFY
+
+       and move the cursor over any node or gate.  The associated name
+       appears at the bottom of the screen.  The IDENTIFY command is
+       finished when you press the mouse left button down, or hit the
+       [CNTRL]-C or SELECT key.
+
+   2.  NOTE:  If you change anything in the circuit between :LOGNTK and
+       :IDENTIFY, the names chosen may not be the same for the two
+       commands.  This is true even if you changed it and then put it
+       back the way it was.
+
+   3.  You can also type:
+
+            :IDENTIFY name name name ...
+
+       to "light up" the gates or nodes corresponding to those names.
+       You can press the space bar to refresh the screen afterwards.
+
+
+</PRE>
+  
+<UL>
+<LI> <A HREF="logntk4.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

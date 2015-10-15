@@ -1,0 +1,200 @@
+<TITLE> Hierarchical Digital Simulation </TITLE>
+
+<H1> Hierarchical Digital Simulation </H1>
+
+<PRE>
+
+   1.  The Digital LOG simulator is capable of simulating hierarchical
+       designs.  That is, you can draw a complicated circuit on one
+       page, then include any number of "instances" of that circuit
+       on other pages in the form of single LOG gates.  While this
+       feature is specific to the digital simulator (AnaLOG has no
+       hierarchy, for example), the LOGNTK network file generator also
+       understands hierarchy using the same notation and conventions.
+
+   2.  The simplest way to build hierarchically is by using the
+       standard digital "instance" gates, INST1 through INST5.  These
+       gates look like blocks of various sizes, with connection pins
+       all along their rims.  They also have little arrows so you can
+       tell if they have been rotated or mirrored.  (NOTE: There are
+       also "general-purpose" instance gates GINST1 through GINST5
+       in the library.  They are not digital gates and the digital
+       simulator will not understand them!  These gates are for use
+       only with the LOGNTK program.)
+
+   3.  To create a new gate from a circuit diagram, simply put your
+       diagram into one of LOG's nine editing pages.  Now, take an
+       INSTn gate of an appropriate size and add it to your diagram.
+       Connect wires to the gate from the diagram in the same way
+       you plan to connect the gate "in real life".  For example,
+       you might have three input wires on the left edge, one output
+       on the right edge, and a clock input on the bottom edge.
+
+   4.  Exact positions don't matter for the instance gates.  They
+       simply divide your connections into four classes, "top",
+       "bottom", "left" and "right", and count the wires along
+       each edge.  When you use the gate in another circuit, you
+       must make the same number of connections on each edge.  The
+       order of the wires you connect matters, but not their exact
+       positions along the edge.
+
+   5.  Create a label (by pressing the "l" key) which is the
+       name you want to give this circuit, in double-quotes: "Joe".
+       This label can be located anywhere on the page that contains
+       the definition of "Joe".  (An alternate, older notation is
+       to make a label of the form:  < name: Joe > .)
+
+   6.  Switch to the CNFG (configuring) gate-tapping mode, then
+       tap the instance gate and enter the same name in the
+       "Instance of" field: Joe.  Quotes are optional, and
+       upper/lower case don't matter.  Since this gate has the
+       same name as the page it is on, it becomes a "template" or
+       "example" gate.  You now have a complete definition for
+       your new gate.
+
+   7.  To use this gate, create another instance gate on a different
+       page and configure its "Instance of" attribute to have the
+       name of the definition you want to use.  You do not need to
+       use the same size or shape of instance gate as you did before.
+       As long as you make the right number of connections, it will
+       work.  Instance gates will be dim until they are "happy", that
+       is, correctly connected and configured in order to match their
+       (also correct and complete) definition.
+
+   8.  If the generic instance gates are too boring, you can create your
+       own instance gate, with any picture you like, using the LOGED
+       program.  The easiest way is to copy a gate like INST1 from the
+       "log.gate" file (ask your local maintainer) into your own private
+       gate file, then throw away its picture and draw your own.  You can
+       use this gate in just the same way as the standard instance gates,
+       except that typically you will only include as many pins on the gate
+       as you actually plan to use.  If you want to place pins anywhere
+       in the gate, you can defeat the generic pin assignment method by
+       adding the following attribute to the gate's LABEL section:-
+
+          label "[is-generic] V No:Generic port assignment?"
+
+       The program actually looks for the variant at index 0, so only
+       offering a single option ensures a constant value.
+
+   9.  If you don't like template gates, you can instead use labels
+       containing "port lists."  This works well only for instance
+       gates you have drawn yourself.  Pins on a gate are numbered
+       from 1 to N, the total number of pins.  Include in your
+       definition, instead of the template or example gate,
+       a label of the form:  < Port: A B C D >  where "A B C D" is
+       a list of TO/FROM signal names.  In this example, A will be
+       associated with pin 1 of the instance gate, B with pin 2,
+       etc.  The port list must have exactly the right number of
+       names.  In general, port lists are more awkward to use than
+       templates.  They exist mostly for historical reasons only.
+
+  10.  If you run out of pages you might want to put more than one
+       definition on a single page.  Simply enclose each definition
+       in a dashed box (press the "b" key to draw one of those).
+       When Digital LOG looks for the "Joe" label to find the
+       definition called Joe, and that label is inside a dashed box,
+       then it considers only the things on that page which lie inside
+       the box to be part of that definition.  Since each page can be
+       scrolled essentially infinitely far, there is plenty of room
+       for all the definitions you need.
+
+  11.  Instances may be nested.  The definition for "A" can include
+       instance gates for definition "B"---as long as "B" does not
+       include instances of "A"!  Aside from circular references,
+       any combination is allowed.  (The template gate is a special
+       kind of "circular reference" which is excused.)
+
+  12.  If you include switches or keypads in your definition, they
+       will be propagated to all instances.  For example, if you make
+       a definition with a switch set to "0", then the equivalent
+       node inside every instance will also be "0".  If you flip the
+       switch, every instance of that definition will simultaneously
+       switch along with it.  LED's and other "display" gates have
+       no effect inside hierarchical definitions.
+
+  13.  If the definition includes a label of the form:  < Inert A B C >
+       then gate types A, B, and C are ignored if they appear in the
+       definition.  Every definition effectively includes the
+       command < Inert LED 7SEG >.  The word "Inert" and the names of
+       the gates are case-insensitive.
+
+  14.  Digital hierarchy works by compiling the behavioral descriptions
+       of all the gates in the definition into one big program which
+       simulates the instance gates.  Most gates' programs are written
+       purely in this language, which is described in the documentation
+       for the LOGED program.  However, some gates, such as the 8K static
+       RAM, are defined by Pascal procedures instead.  The digital
+       hierarchy compiler can not compile these gates, and will display
+       an error message if you try to use one in a definition.  Nearly
+       every SSI- and MSI-level gate in the standard library is written
+       purely in LOGED-language, though, so this is not often an issue.
+
+  15.  Every time you make any change to the definition, Digital LOG must
+       "recompile" the definition.  If the definition is large, this can
+       take time.  While you are editing a definition, you may wish to
+       turn simulation off (press the "o" key).  No digital gate
+       definitions will be recompiled until you turn the simulator back
+       on.
+
+  16.  To gain more control over the digital hierarchy compiler, include
+       a DIGH gate in your definition.  The DIGH gate displays the status
+       of the compilation of the definition it is in, and also has
+       controls that affect the kind of compilation that is performed.
+       You can see the results of the compilation by pressing Shift-D
+       (the DEFINE command) and tapping on any relevant instance gate
+       (including the template).
+
+  17.  Normally, Digital LOG applies many optimization steps when compiling
+       a definition which make the resulting instance program simpler.
+       Depending on what is in the definition, optimization can make the
+       gate substantially faster to simulate, both by making the overall
+       simulator faster, and by reducing the propagation delay of the gate.
+       Optimization may not be safe for definitions that include race
+       conditions or other effects dependent on exact gate delays; also, it
+       may be slow for large definitions.  You can configure the DIGH gate
+       (by tapping it while in CNFG mode, on the blue border of the gate)
+       to specify optimization only on request, in which case you must
+       touch the "Optimize" button on the DIGH gate in order to optimize
+       the definition.
+
+  18.  The DIGH gate's configuration screen also has a switch to disable
+       delay-folding optimizations; with these disabled, gate delay
+       characteristics of the defining circuit are exactly modelled,
+       with only simple local optimizations performed.
+
+  19.  Another useful optimization for instance programs involves the
+       FORCEDRV gate, which looks like a little diamond.  Placing this
+       diamond on any wire in a definition tells the digital instance
+       compiler to assume this node will always be driven with a "1" or
+       "0" during operation, that is, it will never be left floating.
+       You can still leave one of these nodes unconnected if you wish,
+       but the simulator will no longer guarantee that the results will
+       be the same as for original definition circuit.  In some cases
+       the presence of FORCEDRV's allows LOG to create a much more
+       compact and efficient instance program.  FORCEDRV's are ignored
+       if the optimizer is turned off.
+
+  20.  Configuring DIGH lets you control other aspects of the hierarchy
+       compiler.  In particular, you can set the "Dump mode" to "Write",
+       then specify the name of a file.  Then, if you touch "Write" on the
+       DIGH gate at some later time, the definition will be recompiled and
+       written into a file which LOGED can read.  This allows you to
+       convert your definition into a permanent gate in the library.
+       To configure the DIGH gate, touch around the blue-colored edges of
+       the gate, away from the buttons in the center of the gate. WARNING:
+       converting definitions into permanent gates is buggy, and is not
+       recommended. Expect this bug to be fixed in an upcoming release.
+
+</PRE>
+
+<UL>
+<LI> <A HREF="digsim4.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>

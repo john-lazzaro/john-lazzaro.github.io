@@ -1,0 +1,51 @@
+<TITLE>   X Display Preferences</TITLE>
+
+<H1>   X Display Preferences</H1>
+
+<PRE>
+
+<PRE>	
+	Log looks in your .Xresources file for geometry information.  If set
+	properly, this allows windows of a certain size to be automatically
+	placed at a particular place at every invocation of log; manual
+	placement of windows is no longer necessary. This feature was added by
+	Jim Clark at Harvard. Adding these lines to your .Xresources file:
+
+	mylib.geometry: =1150x550+0+0
+	newcrt.geometry: +510+586
+
+	will result in good placement and sizing for the color monitors
+	shipped with SPARC IPC's; for other screens, charge the numbers after
+	"+" signs for new positions, and change the numbers between the "x"
+	for modify the size of the mylib window. The newcrt window cannot be
+	modified; log expects it to be a fixed size.
+
+	Psys now senses if a display screen is black and white, and tries to
+	use stipple instead of colors. However, there are times where you want
+	to force the tools to display in black and white, even if the display
+	screen is color. To force a black and white display, add this line
+        to your .Xresources file:
+
+	mylib.color:  black_and_white
+
+	To make the change take effect, run "xrdb -merge .Xresources".  If 
+	the display doesn't change, try exiting your X server and restarting.
+	Black and white support was provided by Tor Sverre Lande (Oslo), and
+	the .Xresources flag was added by Mike Godfrey (Stanford).
+
+	For more information on X Display with Chipmunk, see 
+	this <A HREF= "../../psys/index.html">page</A>.
+</PRE>
+
+
+<UL>
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

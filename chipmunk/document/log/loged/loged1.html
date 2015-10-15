@@ -1,0 +1,67 @@
+<TITLE> Introduction to Loged </TITLE>
+
+<H1> Introduction to Loged </H1>
+
+<PRE>
+
+   1.  The LOGED program is responsible for maintaining the libraries of
+       gates stored in .GATE files.  When LOG starts, the GATES commands
+       in its configuration file specify which gate libraries to use.
+
+   2.  The "loged" command may be given by itself or with a the name of
+       a file to load initially.  Additional arguments are interpreted
+       as they would be for a LOAD command, as a list of gates to load
+       from the file.  Note that in LOGED terms, a "gate" is a kind of
+       gate, such as NAND or 74138, not an instance of the gate-kind.
+
+       To facilitate scripted LOGED operations, a -p switch may be
+       provided as the first argument to LOGED.  This directs the program
+       to read commands from the standard input instead of the newcrt window.
+
+   3.  To exit LOGED, type QUIT.  You will be given a chance to save the
+       gates in memory if they have been modified.  If the gates came from
+       one file originally, LOGED uses that name.  Otherwise, if no file
+       was loaded or several files were mixed together, LOGED prompts for
+       the file name to use.
+
+   4.  At any time in LOGED there is a "current gate."  Many commands
+       operate on the current gate.  The GATE, NEXT or PREV commands can
+       be used to select the current gate.  LOGED stores the following
+       information for each gate:
+
+          a. The name of the gate, up to eight characters (uppercase).
+          b. The group number (library-screen page number), from 0 to 8.
+          c. The gate's picture, including pins and grab box.
+          d. The "simtype" number, telling which simulator "owns" the gate.
+          e. The gate's definition or program, simulator-dependent.
+          f. Connectivity information in case pins are hard-wired together.
+          g. Miscellaneous flags affecting LOG's treatment of the gate.
+          h. The gate's labels screen, shown when configuring the gate.
+
+       Various commands described below manipulate all these parameters
+       for the current gate.
+
+   5.  Many commands accept gate-name arguments which may include
+       wildcard characters.  The '.' and '*' characters stand for exactly
+       one, or zero or more, characters respectively.  Use '%' or '?'
+       (respectively) instead for wildcards which prompt yes-or-no for
+       each potential match.  A terminating ';' followed by digits
+       matches only gates in the groups specified.  For example, the
+       pattern 'a*bc;23' matches only gates whose names begin with 'a'
+       and end with 'bc', and which are in groups 2 or 3.  If a list of
+       several names is given separated by spaces, gates which match
+       any of those names are accepted.
+
+</PRE>
+
+<UL>
+<LI> <A HREF="loged2.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>

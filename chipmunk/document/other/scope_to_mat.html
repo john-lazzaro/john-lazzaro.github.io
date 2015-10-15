@@ -1,0 +1,40 @@
+<TITLE> Scope_to_mat </TITLE>
+
+<H1> Scope_to_mat </H1>
+<H2> An anaLOG scope dump to Matlab .mat file converter </H2>
+
+<H2> <TT>Usage: scope_to_mat filename </TT></H2>
+
+<P>You should have dumped some variables from anaLOG scope mode using
+``dump'' and given the file a name (no extension). anaLOG will have
+created a file: <TT>filename.text</TT>.  Scope_to_mat will read this
+file and create a <TT>filename.mat</TT> file. The .mat format is used
+by the Matlab's ``save'' command; it is a dump of the current
+workspace.  Thus, after running scope_to_mat, you can enter Matlab and
+then execute: load filename. At this point the Matlab ``who'' command
+should list the variable names that were present on the scope back in
+anaLOG.  There will always be a variable ``TIME'' in the file, as
+anaLOG writes this as a record of the time points at which the other
+variables were recorded and plotted on the scope (sort of the scope
+horizontal axis).  Notice that the values of the variable ``TIME'' do
+not increase by constant increments. </P>
+
+<H2> For Bug Reports and Questions </H2>
+
+<P> This tool was contributed by Michael Godfrey, 
+Stanford University, <TT> godfrey@isl.stanford.edu </TT> </P>
+
+
+
+
+<UL>
+<LI> <A HREF="index.html">Return to Toolkit documentation page.</A> 
+</UL>
+
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

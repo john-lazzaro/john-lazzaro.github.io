@@ -1,0 +1,750 @@
+##
+## "VIEW", a data viewing program,
+##   Copyright (C) 1987, 1990 California Institute of Technology.
+##   Original authors: Dave Gillespie, port by Rick Koshi
+##   Unix Port Maintainer: John Lazzaro
+##   Maintainers's address: lazzaro@hobiecat.cs.caltech.edu;
+##                          CB 425/ CU Boulder/Boulder CO 91125. 
+##
+##
+##This program is free software; you can redistribute it and/or modify
+##it under the terms of the GNU General Public License as published by
+##the Free Software Foundation (Version 1, Feb 1989).
+##
+##This program is distributed in the hope that it will be useful,
+##but WITHOUT ANY WARRANTY; without even the implied warranty of
+##MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##GNU General Public License for more details.
+##
+##You should have received a copy of the GNU General Public License
+##along with this program; see the file ../COPYING.  If not, write to
+##the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
+##
+##
+## caged_process='view -c $F >$B.out$M'
+## cagedx_process='view -c $F$M'
+## set trace=1
+set log=examples.log
+
+## Sample inputs for "readln" and "readnum" commands below
+typeahead 7\n1 2 3\n4 5\n\n$$y $$x\nbar\nDave\n\n$$foo G.\n
+
+
+
+
+
+
+
+#############################  Some Examples  #############################
+#########################           of             ########################
+########################  View Language Constructs  #######################
+
+
+## Table of contents:
+
+##    Reader (";;", "\\", and "##" notations)
+##    Expander ("$" notations)
+##    Arithmetic expressions
+##    Conditional statements: if, switch
+##    Looping statements: for, while, repeat
+##    Input and output statements
+##    Defining your own commands
+##    Defining your own math functions
+##    Fun examples
+
+
+## Note: This entire file is executable.  Every command (except those
+##       commented out) works exactly as shown.
+
+
+
+
+
+
+
+##############################  Reader  ###################################
+
+
+##########  Multiple statements per line
+
+print 'foo' ;; print 'bar'       ## Prints 'foo' then 'bar'
+
+if 1>2 ;; print 1 ;; else ;; print 2 ;; endif      ## Prints: 2
+
+
+##########  Multiple lines per statement
+
+print \\                ## Prints 'foo'
+   'foo'                ## Note: \\ must be last thing on line except comments
+
+
+##########  Comments
+
+print 'foo'             ## You are now reading a comment
+print '## hello'        ## Prints: ## hello     (quotes protect special chars)
+# Another command          Single # allowed at beginning of a line
+                        ## Double ## allowed anywhere.  Preferred usage is
+                        ## to write ## exclusively.
+
+
+
+
+
+
+#############################  Expander  ##################################
+
+
+###########  The basic idea
+
+foo = 'bar'
+bar = 42
+print foo               ## Prints: bar    (PRINT evaluates its arguments)
+print $foo              ## Prints: 42
+
+echo foo                ## Prints: foo    (ECHO just echoes the argument line)
+echo $foo               ## Prints: bar
+
+
+###########  Mixing expansions into names
+
+i = 5 ;; a5 = 43
+print a$i               ## Prints: 43
+
+j = 8 ;; a5_8 = 19
+print a${i}_$j          ## Prints: 19
+                        ## Note: a$i_$j would not work since "i_" would be
+                        ## interpreted as the variable name instead of "i"
+
+
+###########  Expanding arithmetic expressions
+
+i = 5
+echo $i                 ## Prints: 5
+echo ${i+3}             ## Prints: 8
+echo ${'hi'+'there'}    ## Prints: hithere
+
+
+###########  Nested expansions
+
+a3_4 = 7 ;; b7 = 4 ;; i = 3 ;; j = 4 ;; k = 7
+echo    a${i}_$j        ## Prints: a3_4
+print   a${i}_$j        ## Prints: 7
+echo  b${a${i}_$j}      ## Prints: b7
+print b${a${i}_$j}      ## Prints: 4
+
+echo          b$k       ## Prints: b7
+print         b$k       ## Prints: 4
+echo  a${i}_${b$k}      ## Prints: a3_4
+print a${i}_${b$k}      ## Prints: 7
+
+echo 'foo$i'            ## Prints: 'foo$i'   ($ not expanded inside ' ')
+echo "foo$i"            ## Prints: "foo3"    ($ is expanded inside " ")
+echo $$foo              ## Prints: $foo      ($$ expands to $)
+
+
+###########  Format specifiers
+
+name = '  Foo  '  ;;  food = 'spam'   ;;  blank = ''
+i = -16.3e+12     ;;  j = 6
+
+echo *$name*            ## Prints: *  Foo  *
+echo *${name}*          ## Prints: *  Foo  *    (the same thing)
+echo *${name:t}*        ## Prints: *Foo*        (trimmed)
+echo *${name:u}*        ## Prints: *  FOO  *    (uppercase)
+echo *${name:l}*        ## Prints: *  foo  *    (lowercase)
+echo *${name:q}*        ## Prints: *'  Foo  '*  (quoted)
+echo *${name:v}*        ## Prints: *name*       (verbatim)
+echo foo${i}            ## Prints: foo-16.3e+12 (not a valid variable name)
+echo foo${i:n}          ## Prints: foo_16.3e12  (convert number -> safe name)
+echo *${blank}*         ## Prints: **
+echo *${blank::yow}*    ## Prints: *yow*        (default)
+echo *${name::yow}*     ## Prints: *  Foo  *    (default used only if blank)
+echo *${blank::$i}*     ## Prints: -16.3e+12    (expansions within default)
+## echo *${i/0}*        ## fails with "Division by zero"
+echo *${i/0:e}*         ## Prints: **           (any errors -> blank)
+echo *${i/0:e:$i}*      ## Prints: *-16.3e+12*  (any errors -> default)
+echo *${i/0:e:i}*       ## Prints: *i*          (a common mistake -- beware!)
+echo *${zoo:e:yow}*     ## Prints: *yow*        (here 'zoo' is undefined)
+echo *${pi}*            ## Prints: *3.141592*   (pi is a built-in name)
+echo *${pi:5w}*         ## Prints: *3.142*      (set width)
+echo *${j:5w}*          ## Prints: *    6*      (numbers padded on left)
+echo *${food:5w}*       ## Prints: *spam *      (strings padded on right)
+echo    ${j:q}          ## Prints: '6'
+echo *${${j:q}:5w}*     ## Prints: *6    *      (trick for right-padded nums)
+echo *${pi:5d}*         ## Prints: *3.14159*    (set number of decimal places)
+echo *${pi:2d6w}*       ## Prints: *  3.14*     (set width + digits)
+echo *${pi:2d${j}w}*    ## Prints: *  3.14*     (for variable widths, etc.)
+echo *${food}*          ## Prints: *spam*
+echo *${food:2F}*       ## Prints: *pam*        (set "From" position)
+echo *${food:3T}*       ## Prints: *spa*        (set "To" position)
+echo *${food:2F3T}*     ## Prints: *pa*         (From-To substring)
+echo *${food:2F1L}*     ## Prints: *p*          (From-Length substring)
+echo z=${food:q}        ## Prints: z='spam'     (building up a combination)
+echo z=${food:uq}       ## Prints: z='SPAM'
+echo z=${food:6wuq}     ## Prints: z='SPAM  '
+echo z=${food:3F6wuq}   ## Prints: z='AM  '
+echo z=${food:3F3L6wuq} ## Prints: z='AM '
+
+
+
+
+
+
+
+
+#######################  Arithmetic Expressions  ##########################
+
+
+## Note: Certain operators ('@', '=', ':') are treated by View as
+##       punctuation characters and so must be enclosed in parentheses
+##       when use in the context of some View commands.  See examples below.
+
+
+###########  Simple arithmetic
+
+print 1+2               ## Prints: 3            (addition)
+print 'hi'+'there'      ## Prints: hithere      (concatenation)
+print 1-2               ## Prints: -1           (subtraction)
+print 3*2               ## Prints: 6            (multiplication)
+print 3/2               ## Prints: 1.5          (real division)
+print 3^2               ## Prints: 9            (powers)
+
+
+###########  Integer operations
+
+print 1234\100          ## Prints: 12           (integer division)
+print 1234%100          ## Prints: 34           (modulo)
+print 10&6              ## Prints: 2            (binary 1010 AND 0110 = 0010)
+print 10|6              ## Prints: 14           (binary 1010 OR  0110 = 1110)
+print (10@6)            ## Prints: 12           (binary 1010 XOR 0110 = 1100)
+print ~6                ## Prints: -7           (binary NOT 000110 = 111001)
+print 6<<2              ## Prints: 24           (arithmetic shift left)
+print 6>>2              ## Prints: 1            (arithmetic shift right)
+
+
+##########  Comparisons
+
+print (6=7)             ## Prints: 0            (0 = "false")
+print (7=7)             ## Prints: 1            (1 = "true")
+print (6<>7)            ## Prints: 1            (not equal to)
+print (6<7)             ## Prints: 1            (less than)
+print (6<=7)            ## Prints: 1            (less than or equal to)
+print (6>7)             ## Prints: 0            (greater than)
+print (6>=7)            ## Prints: 0            (greater than or equal to)
+
+print ('a'<'b')         ## Prints: 1            (strings use in ASCII order)
+print (''<='any str')   ## Prints: 1
+print ('foo'<'fool')    ## Prints: 1
+
+print 1+(6<7)           ## Prints: 2            (using conditions in math)
+
+print (1=1||2=3)        ## Prints: 1            (logical OR)
+                        ##                      (Parens are to enclose '=')
+print (1=1&&2=3)        ## Prints: 0            (logical AND)
+print !(1=1)            ## Prints: 0            (logical NOT)
+
+
+##########  Conditional operators
+
+print 67||23            ## Prints: 67           (general use of logical OR)
+print 0||23             ## Prints: 23           (0 = false, nonzero = true)
+
+print 67&&23            ## Prints: 23           (general use of logical AND)
+print 0&&23             ## Prints: 0
+
+print 'foo'||'bar'      ## Prints: foo          (logical AND/OR on strings)
+print ''||'bar'         ## Prints: bar          (blank = false)
+
+print (1?67:23)         ## Prints: 67           (if-then-else construct)
+print (0?67:23)         ## Prints: 23
+print (2=3?67:23)       ## Prints: 23
+print (i<1?1:i>10?10:i)    ## Prints i clipped to within [1..10]
+
+print (1?'foo':'bar')   ## Prints: foo
+print (0?'foo':'bar')   ## Prints: bar
+
+print (''?67:23)        ## Prints: 23           (blank = false)
+print ('yow'?'a':'b')   ## Prints: a            (non-blank = true)
+
+## print 1?67:23        ## Syntax error: parentheses needed in a PRINT command
+                        ## because PRINT uses colons for something else
+
+
+##########  Curve-related functions
+
+basis b1 = 0:10:2       ## Create a basis curve with 6 data points
+print cvlen('b1')       ## Prints: 6            (note curve name in quotes!)
+mycurve = 'b1'
+print cvlen(mycurve)    ## Prints: 6
+print cvidx('b1',1)     ## Prints: 0            (first y-value of b1)
+print cvidx('b1_x',2)   ## Prints: 2            (second x-value of b1)
+print cvidx('b1', \\    ## Prints: 10           (last y-value of b1)
+         cvlen('b1'))
+
+c1 = b1 + cvrelidx('b1',1)    ## Each i'th value of c1 is the sum of
+                              ## the i'th and i+1'st values of b1
+                              ## (The last value will be undefined: "X")
+
+c1 = cvrelidx('b1',1)         ## This command FAILS because View does not
+                              ## know which basis to use for the computation.
+                              ## (The name 'b1' is in quotes).
+
+c1 = cvrelidx('b1',1) : b1    ## This command works: it means "evaluate
+                              ## with respect to the basis of b1."
+
+c1 = 0 : b1                   ## Create a curve with b1's basis, all y's = 0.
+
+
+
+
+
+#######################  Conditional Statements  ##########################
+
+
+if 2 = 2
+   print 'hello'        ## Prints: hello
+endif                   ## Note: indentation is optional but recommended!
+
+if 2 = 3
+   print 'hello'        ## Skips this statement
+endif
+
+
+if i = 0
+   print 'true'         ## Prints this if i is zero
+else
+   print 'false'
+endif
+
+
+if i = 0
+   print 'zero'
+elseif i < 0            ## Multiple choices
+   print 'negative'
+else
+   print 'positive'
+endif
+
+
+if i = 0
+   print 'zero'
+else
+   if i < 0             ## Alternate method using nested if's
+      print 'negative'
+   else
+      print 'positive'
+   endif
+endif
+
+
+switch i+1              ## The SWITCH statement is patterned after C
+   case 1
+      print 'one'
+      break
+   case 2
+      print 'two'       ## No BREAK statement, so this will fall through
+   case 3               ## and do the next case, too.
+   case 4
+      print 'two, three or four'
+      break
+   otherwise            ## If OTHERWISE is omitted, the SWITCH construct
+      print 'I dunno'   ## is ignored if no cases match
+endswitch
+
+
+name = 'joe'
+switch name
+   case 'Joe'
+      print 'Joe'       ## Not printed: strings are case-sensitive
+      break
+   rcase jo*hn          ## Regular expression case
+      print 'jhn, john, joohn, jooohn, etc.'
+      break
+   pcase j*             ## Wildcard pattern case
+      print 'Name starts with "j"'     ## This one will be printed
+endswitch
+
+
+switch [ci] name        ## Case-insensitive switch
+   case 'Joe'
+      print 'Hi, Joe.'  ## This time it is printed
+endswitch
+
+
+
+
+
+#########################  Looping Statements  ############################
+
+
+for i = 1:5             ## Count from 1 to 5, default step is 1
+   print i
+endfor
+
+for i = 5:1             ## Never executes, since 5 > 1
+   print i
+endfor
+
+for i = 1:5:2           ## Count by 2: prints 1, 3, 5
+   print i
+endfor
+
+for i = 5:1:-1          ## Count down by -1
+   print i
+endfor
+
+for i = 0:1:0.1         ## Count by 0.1: loop executes 11 times
+   print i
+endfor
+
+i = 1
+while i <= 5            ## Also counts 1, 2, 3, 4, 5
+   print i
+   i = i + 1
+endwhile
+
+i = 1
+repeat                  ## Also counts 1, 2, 3, 4, 5
+   print i
+   i = i + 1
+until i > 5
+
+i = 1                   ## Also counts 1, 2, 3, 4, 5
+while                   ## "Infinite" loop
+   print i
+   if i = 5 ;; break ;; endif    ## BREAK jumps out of the loop
+   i = i + 1
+endwhile
+
+i = 1
+while i > 5             ## False right away: skips the body of the loop
+   print i ;; i = i - 1
+endwhile
+
+
+repeat                  ## Get a value in a reasonable range
+   readnum size : Enter size of boulders:
+until size > 0 && size < 1e6     ## "&&" = logical AND
+
+
+j = 5
+for i = 1 : j           ## Prints 1, 2, 3, 4, and 5
+   print i
+   j = 2                ## Doesn't affect loop since j is copied at the start
+endfor
+
+
+for i = 1 : 5          ## Prints 1, 2, 3, 4, 5
+   print i
+   if i = 2 ;; i = 4 ;; endif  ## Changing the loop variable inside the loop
+endfor                         ##   has no effect either
+
+
+for i = 1:10
+   for j = 1:10
+      break
+   endfor               ## BREAK jumps to the innermost ENDFOR
+endfor
+
+for i = 1:10
+   for j = 1:10
+      break 2
+   endfor
+   print 'never printed'
+endfor                  ## BREAK 2 jumps to the second innermost ENDFOR
+
+
+
+
+
+#######################  Input/Output Statements  #########################
+
+
+##########  Echoing a line
+
+echo This is   a message.        ## Prints: This is   a message.
+foo = 'This is   a message.'
+echo $foo                        ## Prints: This is   a message.
+
+
+##########  Printing the values of expressions
+
+print 'This is   a message.'     ## Prints: This is   a message.
+print 3+2 3-2                    ## Prints: 5 1    (adds one space btwn nums)
+## print 3 + 2                   ## Syntax error: spaces not allowed in exprs
+print (3 + 2)                    ## Prints: 5      (parens enclose spaces)
+
+
+##########  Formatting expressions (see also Expander's "$" formats)
+
+print pi                ## Prints: 3.141592
+print '*' pi:5 '*'      ## Prints: *3.142*      (set width)
+print '*' 16:5 '*'      ## Prints: *   16*      (numbers padded on left)
+print '*' pi::5 '*'     ## Prints: *3.14159*    (set decimal places)
+print '*' pi:6:2 '*'    ## Prints: *  3.14*     (set width + digits)
+
+name = 'Joe'
+print '*' name:5 '*'      ## Prints: *Joe  *    (strings padded on right)
+print '*' ${1+2:q}:5 '*'  ## Prints: *3    *    (trick for right-padded nums)
+
+
+
+##########  Reading numbers
+
+readnum x y z                 ## Gets three numbers from keyboard.
+                              ## User may enter any three values or
+                              ## expressions separated by commas or spaces.
+
+readnum x y : Position?       ## Prompt string for input
+
+readnum [opt] x y             ## Optional input: if user enters a blank
+                              ## line, variables are left unchanged (rather
+                              ## than asking again).
+
+readnum [exp] x y             ## Do "$" expansions on input line
+
+
+
+##########  Reading strings
+
+readln foo                    ## Gets a line and stores in variable foo
+
+readln foo : What is your name?     ## Prompt string
+
+readln [opt] foo              ## If user enters a blank line, variable is
+                              ## left unchanged (rather than made blank).
+
+readln [exp] foo              ## Do "$" expansions on input line
+
+
+
+
+
+#####################  Defining Your Own Commands  ########################
+
+
+## Define a command to list all curves whose names begin with 'z':
+
+define listz
+   echo Curves beginning with z:
+   ls z*
+enddef
+
+
+
+## Command to increment a variable
+
+define incr var
+   $var = $var + 1
+enddef
+
+
+
+## Command to print "hello" a certain number of times
+
+define hello n
+   local i
+   for i = 1 : $n    ## Note "$" because arguments are passed as strings
+      print 'Hello'
+   endfor
+enddef
+
+
+
+## Command to make an exponential basis
+
+define ebasis curve = min : max
+   local temp
+   basis temp = log($min) : log($max)
+   temp = 10^temp
+   splice $curve = temp : temp
+enddef
+
+
+
+## Define an alternate syntax for EBASIS command
+
+define [after] ebasis curve = max   ## [after] = add this defn after old one
+   ebasis $curve = 1 : $max         ## Can define the command in terms of
+enddef                              ##   a different form it itself!
+
+
+
+## Add exponential bases as an option to normal BASIS command
+
+define [before] basis "[exp]" curve = min : max
+   ebasis $curve = $min : $max
+enddef
+
+basis linb = 1:10                   ## This will use built-in definition
+basis [exp] logb = 1:10             ## This will use new definition
+
+
+
+## Command to reverse a curve (from front to back)
+
+define reverse newcurve = curve
+   local i len                ## Local variables
+   local xc = ${curve}_x      ## Local variables with initialization
+   local yc = $curve
+   len = cvlen(curve)         ## No "$", since cvlen wants a string
+   for i = 1 : len
+      poke yc @ i = cvidx(curve,      len-i+1)
+      poke xc @ i = cvidx(curve+"_x", len-i+1)
+   endfor
+   splice ${newcurve} = xc : yc
+enddef
+
+define [after] reverse curve
+   reverse $curve = $curve    ## Default is to reverse the curve in-place
+enddef
+
+
+
+## Command to exchange the x- and y-values of a curve
+
+define swapxy newcurve = curve
+   local xvalues
+   xvalues = ${curve}_x
+   splice $newcurve = $curve : xvalues
+enddef
+
+define [after] swapxy curve ;; swapxy $curve = $curve ;; enddef
+
+
+
+## Command to adjust constants in a curve using PLOT-mode "c" command
+
+define tweak {curves} : {vars}      ## { } matches multiple words
+   tweak_cvs = curves               ## Save names to use as defaults later
+   tweak_vrs = vars
+   typeahead c ${vars}\n            ## Put text + newline into typeahead buffer
+   plot $curves                     ##   so that the PLOT command will see it
+enddef
+
+define [after] tweak {vars}         ## Must be [after], not [before]
+   tweak $tweak_cvs : $vars         ##   since this template will match
+enddef                              ##   "x:y" as well as "x".  In fact,
+                                    ##   "{vars}" will match any arguments!
+
+define [before] tweak               ## This must be [before] so that it is
+   tweak $tweak_cvs : $tweak_vrs    ##   checked before "{vars}".
+enddef
+
+
+
+## Command to convolve a curve against a simple box filter
+
+define boxfilter newcurve = curve
+   $newcurve = ($curve + cvrelidx(curve,1) + cvrelidx(curve,-1))/3
+enddef
+
+define [after] boxfilter curve
+   boxfilter $curve = $curve        ## Convolve the curve in-place
+enddef
+
+
+
+## Command to convolve a curve against a variable-width box filter
+
+define filter newcurve = curve : width
+   local i expr
+   expr = curve
+   for i = 1 : $width
+      expr = expr + "+cvrelidx(curve,$i)+cvrelidx(curve,-$i)"
+   endfor
+   $newcurve = ($expr)/(1+2*($width))
+enddef
+
+## For example, in "filter a=b:2" the final assignment looks like:
+##   a=b+(cvrelidx(curve,1)+cvrelidx(curve,-1)+   \\
+##        cvrelidx(curve,2)+cvrelidx(curve,-2))/(1+2*(2))
+
+## Beware: View strings can only grow to 255 characters; if "expr" gets
+##   too large you must resort to drastic kludgery.
+
+define [after] filter newcurve = curve
+   filter $newcurve = $curve : 3
+enddef
+
+define [after] filter curve : width
+   filter $curve = $curve : $width
+enddef
+
+define [after] filter curve
+   filter $curve = $curve
+enddef
+
+
+
+
+
+####################  Defining Your Own Functions  ########################
+
+
+## Compute the average of two numbers
+avg(x,y) = (x+y)/2
+print avg(3,5)          ## Prints: 4
+
+
+## Define factorials using the built-in gamma function
+factorial(x) = gamma(x+1)
+
+
+## Step function: 0 for x<0, 1 for x>=0
+step(x) = x>=0 ? 1 : 0                 ## Using if-then-else operator
+
+
+## Another step function: 0 for x<0, 1 for x>0, 0.5 exactly at 0
+step2(x) = x>0 ? 1 : x<0 ? 0 : 0.5     ## Two if-then-else operators
+
+
+## Smooth step function between 0 and 1, this time using a tanh
+gain = 10
+smstep(x) = (tanh($gain*x)+1)/2        ## Use value of "gain" that is current
+                                       ##   when the function is defined
+smstep(x) = (tanh(gain*x)+1)/2         ## Use value of "gain" that is current
+                                       ##   when the function is used
+
+
+## Function that returns a random lower-case letter
+letters = 'abcdefghijklmnopqrstuvwxyz'
+rletter() = strsub(letters, irand(1,26))
+print rletter()         ## Prints, e.g.: j
+print rletter           ## Alternate form for zero-argument functions
+
+
+
+
+
+
+############################  Fun Examples  ###############################
+
+
+## This section is open for contributions!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## End.
+
+

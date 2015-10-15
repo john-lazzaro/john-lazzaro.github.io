@@ -1,0 +1,93 @@
+<TITLE> Details of the MOS Models </TITLE>
+
+<H1> THE FET7 MOS Models in Analog</H1>
+
+<P> This release features a new family of MOS models, the FET7 series
+(three-terminal gates PFET7T and NFET7T, and four-terminal gates
+PFET7F and NFET7F) as well as several supporting gates. These models
+are different from previous MOS models in analog, in structure as well
+as form. This Web page is a quick introduction to these models; for
+complete details, see this paper [<A HREF="../mos.ps.gz">Postscript,
+300 KByte compressed</A>] [<A HREF="../mos.pdf">Adobe PDF, 680 KByte,
+requires Acroread 3.0</A>].</P>
+
+<P> The model on which these gates are based is parameterized in a new
+way. The parameters are properties of the physical construction of
+devices. In addition, they are independent properties. Therefore, it
+makes sense to vary one parameter while the others are left fixed. This
+is useful in terms of finding values which give a good fit to a given
+process, and also as a way of exploring the effect of process values
+on device and circuit behavior.</P>
+
+<P> The simulator has been modified so that the simulation environment itself 
+holds information
+about MOS physics and fabrication; in previous models, each gate held
+this information redundantly. This information has been broken up into
+several categories: </P>
+
+<UL>
+<LI> <B> Temperature</B> The THERMAL gate lets the user view and
+change the ambient chip temperature. Temperature-dependent quantities
+in the MOS modeling system are automatically updated to reflect
+temperature changes.Unfortunately, the ambient temperature set by the
+THERMAL gate is not presently used by gates outside the FET7 family,
+such as the DIODE1 gate. 
+<LI> <B> Physical Constants</B> The PHYSICAL gate holds fundamental
+physical quantities, such as the Boltzmann constant, and derived
+quantities from these constants, such as kT/q. Derived quantities are
+denoted by the annotation (Computed) in the parameter description.
+These derived quantities cannot be directly changed by the user, but
+will automatically be updated if the user changes their underlying
+parameters.
+<LI><B> Fabrication Parameters</B> The channel-specific fabrication
+parameters for N- and P-channel devices, along with derived quantities
+of interest, are displayed in the DEVTECHN and DEVTECHP gates. Several
+channel-independent fabrication parameters are in the PHYSICAL gate.
+<LI><B>Run-Specific Parameters</B> The parameters in the DEVTECHN and
+DEVTECHP gates are relatively constant from run to run of a given
+process. In contrast, a small number of channel-specific parameters
+do vary significantly from run to run, and from transistor to
+transistor. The gate RUNSPEC provides a way to change these parameters
+for all transistors in the simulation; in addition, these parameters
+can be varied on a per-transistor basis, to simulate various forms of
+device mismatch.
+<LI><B>Transistor-Specific Parameters</B> The user can change the
+geometry of each FET7 gate (drawn width and length in lambda, source
+and drain area in square microns), and the offset parameters mentioned
+above. Derived parameters (which may be voltage and temperature
+dependent) are displayed for each transistor (Vt, kappa, Early voltage
+and linear-lumped capacitances). These parameters cannot be directly
+changed, but reflect changes in their underlying parameters and
+voltages in real time.
+</UL>
+
+<P> At start-up, the simulator reads in the default parameters for
+the FET7 series from the file log/lib/mos.cnf. The default mos.cnf
+file contains parameter values suitable for the MOSIS SCN 1.2u 
+process (SCN12, fab run N52V);
+this file also appears as mosscn12.cnf. Parameter files for the HP
+CMOS26G 0.8um process (mos26g.cnf) and the HP CMOS14TB 0.5um process
+(mos14tb.cnf) are also supplied. </P>
+
+<P> The annotated file mos_example.cnf explains the process of
+converting MOSIS-supplied documentation for a process to a cnf
+file. We hope users will create cnf files for other processes, and
+send them along to us for inclusion in later releases.  
+
+<P> The LOGSPC utility for creating Spice files from Log
+schematics has been updated to be FET7-aware. See the file 
+log/lib/spctest.lgf for an example of using FET7 transistors for
+SPICE-deck creation. </P>
+
+
+
+<UL>
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

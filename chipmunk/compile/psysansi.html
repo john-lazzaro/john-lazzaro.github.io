@@ -1,0 +1,38 @@
+<TITLE> ANSI Header Problems in Psys </TITLE>
+
+<H1> ANSI Header Problems in Psys </H1>
+
+
+<P> Symptoms of ANSI header problems include mention of the
+<TT>stdlib.h</TT> and <TT>stddef.h</TT> header files in the error
+message, and mention of the <TT>_SIZE_T</TT> and <TT>_PTRDIFF_</TT>T
+defines in the error message. There are several possible solutions to
+this problem, depending on your machine configuration; they are listed
+in order of probability of working: </P>
+
+<OL>
+<LI> Make a file <TT>stdlib.h</TT> in the directory
+<TT>psys/include,</TT> that contains one line: the string
+<TT>#include &lt;sys/types.h&gt;.</TT> This file may help for the
+compilation of some files but break the compilation of other files; if
+so, delete and re-make the file as needed.
+<LI> Undo the change described in 1. above, and add <TT>-D_SIZE_T
+-D_PTRDIFF_T</TT> to the <TT>CFLAGS</TT> definition in the Makefile.
+<LI>  Undo the change described in 2. above, and add the empty files 
+<TT>stddef.h</TT> and <TT>stdlib.h</TT> in the directory 
+<TT>psys/include.</TT>  These files may help for the
+compilation of some files but break the compilation of other files; if
+so, delete and re-make the files as needed.
+</OL>
+
+<P> Please send me email if you needed to use the information on this
+page. I'm pretty sure this particular bug never happens in the field
+anymore, it primarily affects SunOS users with early Sparcstations that
+have never had software upgrades. </P>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

@@ -1,0 +1,250 @@
+
+<TITLE> List of Commands </TITLE>
+
+<H1>  List of Commands</H1>
+
+<PRE>
+   1.  A complete list of LOGED top-level commands follows.  Some
+       commands are discussed in detail in later sections.
+
+   2.  Command and gate names are case-insensitive.  Commands can
+       usually be abbreviated to one or two letters.
+
+   3.  In addition to these commands, you can execute any Shell
+       command by preceding it with a '!' character, or enter an
+       interactive sub-shell by typing '!' alone.  Type QUIT to
+       the sub-shell to return to LOGED.
+
+
+       CONNECT  num num num ...
+                  Connect the specified pins together in the current
+                  gate.  When an instance of the gate is made in LOG,
+                  these pins will be forced to the same electrical node.
+                  For example, the CROSS gates in the standard library
+                  emulate crossing wires by having pairs of connected
+                  pins.  The pins of a gate are divided into connectivity
+                  classes; initially every pin is in its own class.  The
+                  CONNECT command with two or more numbers joins the
+                  classes of the specified pins.  CONNECT with one pin
+                  number unconnects the pin, splitting it back into its
+                  own class.  CONNECT with no arguments displays the
+                  current connectivity of the gate.
+
+
+       COPY  new-name
+                  Make a copy of the current gate under the specified
+                  name.  All aspects of that gate are identical to the
+                  current gate, except the name.  The new copy becomes
+                  the new current gate.
+
+
+       DEF        Edit the simulator's definition for this gate.  Exact
+                  effect depends upon the current simtype of the gate.
+                  This command only works of the relevant simulator is
+                  available.  The type 0, 1, and 7 DEF commands always
+                  work; type 16 and 32 commands work only if DIGLOG or
+                  ANALOG have been permed, respectively.  (Note that
+                  ANALOG actually supports both simulators.)
+
+
+       DELETE     Delete the current gate.  Given a name, deletes all
+                  gates which match the name.
+
+
+       DO  name  command-line
+                  For each gate that matches the specified name, make
+                  it the current gate and execute the LOGED command
+                  shown.  This command must not delete or rename the
+                  gate; to delete multiple gates, use DELETE directly.
+
+
+       DRAW       Edit the current gate's picture.  Defined below.
+
+
+       DUMP       Print a "data sheet" for the current gate on the laser
+                  printer.  If a file name is given, the PostScript for
+                  the data sheet is written to the file.
+
+
+       EDIT       Edit the current gate's information using the text
+                  editor, CAGED.  Given a name, edits all gates which
+                  match the name.  The information is written into a
+                  temporary text file as if by the WRITE command;
+                  CAGED is run on the file; when the editor returns,
+                  the file is reloaded as if by a READ command.
+
+
+       FLAG  flag-name
+                  Turn the specified flag on or off for the current gate.
+                  Flag names are case-insensitive and may be abbreviated.
+
+                        NOFLIP   This disables flipping or rotation of
+                                 the gate.  Tapping on the gate always
+                                 acts as if CNFG mode were selected.
+
+                        TOGGLE   The gate is a toggle switch.  When an
+                                 instance is tapped, it always mirrors
+                                 about its (original) y-axis.  The gate
+                                 can still be rotated in the menu area.
+
+                        VISIBLE  The gate is visible even in Invisible
+                                 gates mode.
+
+                        NAMED    The gate has an editable signal name,
+                                 like TO or FROM.  Should be used only
+                                 for simtype 1 gates.
+
+                        NRIGHT   The gate's name is on the right, as in
+                                 the TO gate.  Used with NAMED, above.
+
+                        NOSOLDER When plotted, the gate should not have
+                                 solder blobs added for T-connections
+                                 involving the pins.
+
+                        USER1    A user-definable flag.  A simulator, tool,
+                                 or individual gate program can interpret
+                                 this flag in any way desired.  Currently,
+                                 this flag is unused.
+
+                        USER2    Another user-definable flag.
+
+                  With no argument, this command just displays the current
+                  flag settings.
+
+
+       GATE       Switch to a new current gate.  If the specified gate does
+                  not exist, a new "blank" gate is created.  (Often it is
+                  easier to create a new gate by copying an existing,
+                  similar one.)  The NEXT command can be used to switch to
+                  a new gate with no danger of accidentally creating one.
+
+
+       GROUP n    Set the current gate's group number to "n", an integer
+                  from 0 to 8.  With no argument, displays the current
+                  group number.  The group number determines which
+                  library page the gate appears in.  Group numbers for
+                  the standard libraries are:
+
+                        0        General-purpose gates
+                        1        Generic digital gates
+                        2        7400's series digital gates
+                        3        (unassigned)
+                        4        Analog gates
+                        5        Digital VLSI gates
+                        6        Digital ACTEL gates
+                        7        (unassigned)
+                        8        (obsolete gates)
+
+
+       HELP       Run the Chipmunk Help System on this help file.
+
+
+       LABEL      Edit the current gate's labels and attributes.  See
+                  below.
+
+
+       LIB        Display a list of all gates, or the gates which match
+                  the specified names.
+
+
+       LOAD  file-name  gate-name gate-name ...
+                  Load the gates in a file into memory.  If gate-names are
+                  specified, only those gates which match the names are
+                  loaded.  By default a ".gate" extension is added to the
+                  name; to load from a textual file, specify ".text"
+                  explicitly.
+
+
+       MEMORY     Display the amount of memory free.
+
+
+       NEXT       Switch to the next gate in alphabetical order, or to the
+                  next gate which matches the specified name.
+
+
+       PREV       Switch to the previous gate in alphabetical order, or to
+                  the previous gate that matches the specified name.
+
+
+       QUIT       (or EXIT.)  Leave the LOGED program.  If any gates have
+                  been changed, you are given the option to save them first.
+
+
+       READ       Much the same as LOAD, except the default file name
+                  extension is ".def", typically a file written by the
+                  "Write" option of the digital hierarchy compiler.
+
+
+       RENAME  new-name
+                  Change the name of the current gate to the new name.
+                  If a gate by that name already exists in memory, you
+                  are given the option to replace it.
+
+
+       SAVE  file-name  gate-name gate-name ...
+                  Save all gates in memory, or only the specified gates,
+                  into a file.  With no arguments, saves all gates back
+                  into the original file.  A ".gate" extension is appended
+                  by default.  If the extension is not ".gate", the file
+                  is written in a textual format readable by humans.
+
+
+       SIMTYPE n  Set the simulator number of the gate to "n".  This is
+                  an integer from 0 to 255 which identifies the simulator
+                  responsible for the gate.  Currently assigned simtypes
+                  include:
+
+                        0        General-purpose, "inert" gates.  Used
+                                 labelling (e.g., ARROW) and connection
+                                 (e.g., CRUNCH) gates.
+
+                        1        Signal-name gates.  Pin 1 of the gate
+                                 is connected to a certain signal name,
+                                 which is either hard-wired (as in VDD
+                                 and GND) or configurable (as in TO
+                                 and FROM).
+
+                        7        Self-sufficient Pascal gates.  The
+                                 code which defines this gate is given
+                                 complete access to LOG's simulator
+                                 interface.  For example, the TIME gate
+                                 is a general-purpose simulation timing
+                                 and performance monitor.
+
+                        16       Digital gates.  Simulation definition
+                                 is written in a simple language specific
+                                 to the digital simulator.  This language
+                                 includes a CALL statement for calling
+                                 more general Pascal procedures to
+                                 simulate the gate.
+
+                        32       Analog gates.  Definition consists of
+                                 the name of a Pascal procedure for
+                                 simulating the gate.
+
+                        33       Analog current-mode simtype.  This type
+                                 is used internally by the analog simulator
+                                 to support current meters.
+
+                  The gate's simtype defines which procedure is called
+                  when you give a DEF command.  This command is defined
+                  in greater detail below.
+
+
+       WRITE      Similar to SAVE, except the default file extension is
+                  ".text", and if no arguments are given, the current
+                  gate is saved in a file named after the gate.
+
+</PRE>
+
+<UL>
+<LI> <A HREF="loged3.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

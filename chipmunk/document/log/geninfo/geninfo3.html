@@ -1,0 +1,109 @@
+<TITLE> Circuit Editing  </TITLE>
+
+<H1>  Circuit Editing  </H1>
+
+
+<P>At the bottom of the screen are several circuit symbols.  In
+Log lingo, these are called gates.  The area above the blue
+lines is the drawing area, where you draw your circuit
+diagrams.  When you start Analog, two very special gates, the
+the clock icon and the Analog <B>scoreboard</B>, show up automatically.
+You are welcome to move these around or delete them if you like,
+but you will find them extremely handy to have nearby.  (If you
+are using Log as a digital simulator these gates will not appear.) </P>
+
+<P>  To begin drawing a circuit, choose the circuit symbol you want,
+press down on it and drag it (still holding down)
+to the desired place.  To move a gate, just press and drag.
+To delete a single gate, just "throw it away" by moving it to
+the bottom corners of the screen. </P>
+
+<P> If you don't see the gate you want in the menus, tap the word
+<TT>CAT</TT> to see the "gate catalog."  You can then press and drag any
+of these gates to add it to your circuit.  If you will be using
+a lot of a particular kind of gate, you can drop it into one of
+the several menu slots to replace another less interesting gate.
+If you get into the catalog by accident, press an empty part of
+the screen, or, as usual, hit <TT>Control-C</TT> to get out.
+
+<H2> More about gates </H2>
+
+<P>If you look closely at a gate that has been put into the drawing
+area, you will see some red dots.  These are called the gate's red
+dots, or pins, and they are the places to connect other circuit
+elements.  The easiest way to connect two gates together is to put
+them down with the appropriate red dots on top of each other. </P>
+
+<P> The single most common <B>mistake</B> in Log is to stick two
+gates, e.g. a capacitor and a ground, so close together that they look
+connected but their red dots pass through each other.  The gates are
+NOT connected, and the circuit will NOT simulate correctly.  The
+solution is to nudge the gates apart a bit, then refresh the screen
+(space bar) to make sure the red dots are aligned.</P>
+
+<P> If the gate comes in an awkward orientation, you can tap it to
+rotate it by 90 degrees.  This works for gates in the circuit as well
+as for menu-area gates.  Notice that Log distinguishes between tapping
+a gate, to rotate it, and pressing a gate, to move it.  Practice a few
+times until you can tap and press at will, without getting confused.
+(Some gates, like switches, do special things when you tap them in the
+circuit.  These can only be rotated in the menu area.)</P>
+
+<H2> Wires </H2>
+
+<P>A much neater way to connect things is with wires.  To draw a
+wire, just tap the place you want to start, move horizontally
+or vertically, then tap the endpoint.  This automatically starts
+a new wire at the endpoint, so you can make a chain of connected
+wires.  To finish the chain, just tap the right mouse button.  The
+whole sequence of tap-tap-rest takes a few minutes to learn but
+soon feels very natural.</P>
+
+<P>You can move wires by pressing and dragging, just like gates.
+If you press in the middle of the wire, you move it from side
+to side but keep the same length.  If you press one of the ends,
+you also get to stretch that end.  As usual, to delete a wire
+just grab it and drag to the edge of the screen.</P>
+
+<P>Wires are connective along their whole lengths, so you can be
+sloppy about connecting to gates as long as you at least overlap
+the red dot.  Wires and gates are drawn in slightly different
+colors so you can tell them apart if you need to. </P>
+
+<P> If you connect wires in a "T", Log "solders" them automatically.
+If you cross them in a +, Log assumes they are unconnected, so you
+must go back and tap the intersection to solder them.  Because of
+this, "T"-connections are preferable. 
+
+<P>To break a long wire, use the <A HREF="geninfo5.html"> Delete</A>
+function to cut a small wire segment from the wire. </P>
+
+<H2> Moving around schematics </H2>
+
+<P>If you should run out of room on the screen for your circuit,
+you have several options:  press &lt or &gt to "zoom" in or out
+on the circuit (these are also available in the Frills menu),
+or use the arrow keys to "scroll" up, down, left, or right.  The
+drawing area is essentially infinitely large; so large, in fact,
+that you can get lost due to excessive scrolling.  If this
+happens, <B>Home</B> in the <B>Cursor</B> menu will take you back to the
+center of the drawing universe. </P>
+
+<P>Log can keep up to 9 circuit diagram "pages" in memory at a time.
+Each page is associated with a different file.  To switch to a
+new page, press one of the digit keys 1 through 9. Depending on 
+your keyboard, the numbers on the numeric keypad may or may not
+function in this fashion; however, the numbers on the main keyboard
+always will.</P>
+
+<UL>
+<LI> <A HREF="geninfo4.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

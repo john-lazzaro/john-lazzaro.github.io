@@ -1,0 +1,56 @@
+<TITLE>  Support for High Resolution Color</TITLE>
+
+<H1> Support for High Resolution Color </H1>
+
+<H2> (by Michael Godfrey, <TT>godfrey@isl.stanford.edu</TT>) </H2>
+
+<P> This Web page describes the implementation of X11 color visuals with
+color depth greater than 8 bits. </P>
+
+<P> The purposes of these changes are: </P>
+
+<UL>
+<LI>Try to select the "best" visual on systems which offer choices.
+The previous releases of the Chipmunk tools used the default mode,
+and crashed if the color depth was greater than 8.
+<LI> Support operation using TrueColor at 16 or 24 bits.
+</UL>
+
+<P> The changes require X11R5 or above. I do not know what will happen
+if older X11's are used, but it is not likely to be useful. </P>
+
+<P> We have done limited testing on available platforms. At present the
+results are:
+
+<UL> 
+<LI>As far as we know the "old way" (8 bit pseudocolor) works exactly
+as before.
+<LI> The Linux (accelerated-X, and some others) and OS/2
+(Hummingbird X) function at 16 and 24 bit.
+<LI> OpenWindows on Solaris fails at 16 and 24 bit.
+</UL>
+
+<P> Some servers (like Solaris X11) offer 8 bit pseudocolor as well as
+high resolutions, so the SUN failure is not too serious. </P>
+
+<P> In detail the changes are:
+<UL> 
+<LI>Call XGetVisualInfo() to find out what visuals the X-server has
+to offer.
+<LI> Look at the optional environment variable LOG_COLOR. If it is
+present try to use the requested visual. Valid requests are:
+setenv LOG_COLOR [bw | 8bit | 16bit | 24bit]. If the 
+requested visual is not offered LOG terminates. If there is no
+LOG_COLOR variable set try: 8bit PseudoColor, 24bit TrueColor, 16bit
+TrueColor in that order.
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+
+
+
+

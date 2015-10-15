@@ -1,0 +1,135 @@
+<TITLE> LABEL command </TITLE>
+
+<H1>  LABEL command</H1>
+
+<PRE>
+
+   1.  To edit the text shown when the user taps on a gate in CNFG mode,
+       use the LABEL command.  This command runs a simple text editor.
+       To exit the editor, press Control-C.
+
+   2.  The labels editor lets you move the cursor with the arrow keys,
+       delete or insert a line using the Control-F and RETURN keys, insert
+       characters, or erase characters with Control-G.  (Currently, there
+       is no way to recover a deleted line, or to move or copy lines except
+       by retyping them.)
+
+   3.  Any line without a colon (":") is displayed as-is on the screen
+       when the gate is configured.  To include a colon in a label, use
+       a double colon ("::").
+
+   4.  If a line does contain a colon, it describes an attribute.
+       Everything to the left of the colon is a coded string showing
+       the name, type, and default value of the attribute.  Everything
+       after the colon is shown as-is as the label for the attribute.
+       Blanks are ignored between parts of the attribute information.
+
+            <name> <variant> <precision> <type> <default> ':' <label>
+
+   5.  The name is optional, and must be enclosed in square brackets.
+       Actually, several bracketed names may be used if for some
+       reason the attribute must have several names.  The code for a
+       gate may refer to an attribute by its name, or by an integer
+       index ranging from 1 to the number of attributes.
+
+   6.  The type is a single capital letter.  The following types are
+       defined:
+
+            I     Integer.  If a precision is given, the number is
+                  blank-padded to at least that width when displayed.
+                  If a default is given, it becomes the initial value
+                  of the attribute for newly created gates.  If there
+                  is no default, the attribute is initially blank.
+
+            H     Hexadecimal integer.  The number is zero-padded to at
+                  least the specified width; if no precision is given
+                  but there is a default, the precision is equal to the
+                  number of digits in the default.
+
+            R     Real number.  The precision gives the number of decimal
+                  places shown on the number; if no precision is given
+                  the number will be shown in floating format.  Large
+                  and small numbers are shown in scientific notation.
+
+            U     Real number with units.  The default is of the form,
+
+                        <units-string> ',' <default>
+
+                  where the comma and default may be omitted if the
+                  attribute should be blank by default.  The number is
+                  shown followed by the units-string; large and small
+                  numbers are shown using standard engineering notation
+                  abbreviations.  The attribute:
+
+                        [clock-freq] 2FHz,10000:Clock frequency::
+
+                  will display its default as "10KHz".
+
+            F     Real number with units, scientific notation.  This is
+                  just like "U" format except large and small numbers
+                  are shown in scientific notation with the units-string
+                  appended.
+
+            C     String attribute.  The precision specifies the number
+                  of characters of length the string may have; with no
+                  precision the string length is unlimited.  The default
+                  may be any string of characters, unmodified except that
+                  leading and trailing blanks are removed.
+
+            A     String attribute.  To the user, this is just like a
+                  "C" type attribute with no precision specified.
+                  Internally, this is stored as a variable-length
+                  string, whereas a "C" type attribute is stored as a
+                  fixed length string.  Precision is ignored.
+
+            B     Boolean value.  The default may be "Y" or "N" (or "T"
+                  or "F") to specify true or false.  If the default is
+                  blank (or "X"), the attribute is initially blank.
+                  If the default is "T" or "F" or "X", the attribute is
+                  displayed as "True" or "False".  If the default is
+                  "Y" or "N" or blank, the attribute is displayed as
+                  "Yes" or "No".
+
+            V     Variant.  This attribute represents a choice among
+                  several named options.  The default string is actually
+                  a sequence of comma-separated phrases.  These phrases
+                  are numbered from 0.  The precision actually specifies
+                  the default variant shown; with no precision, variant 0
+                  is the default.  If the attribute should be able to be
+                  blank, simply leave one of the phrases empty.
+
+                        1 V , Yes, No, Maybe : What do you think?
+
+                  This attribute takes on one of the four values blank,
+                  Yes, No, or Maybe; it is initially Yes.
+
+   7.  A variant name may be included in any attribute, followed by a
+       semicolon.  The name must be one of the options for a variant
+       attribute that precedes this attribute in the list.  The attribute
+       will be invisible unless the proper variant was selected.
+
+            V Square,Circle: Kind of shape::
+            Square; R:Width::
+            Square; R:Height::
+            Circle; R:Radius::
+
+   8.  If the type letter is preceded by the letter 'O', the attribute is
+       optional and can be made blank by typing a blank line.  An attribute
+       with no default is always optional.  If the attribute has a default
+       and is not optional, then it must always have a nonblank value.  (This
+       is true even of string attributes.)  Entering a blank line for a
+       nonoptional attribute restores the default value.
+
+</PRE>
+
+<UL>
+<LI> <A HREF="loged5.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

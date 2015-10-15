@@ -1,0 +1,46 @@
+##
+## "VIEW", a data viewing program,
+##   Copyright (C) 1987, 1990 California Institute of Technology.
+##   Original authors: Dave Gillespie, port by Rick Koshi
+##   Unix Port Maintainer: John Lazzaro
+##   Maintainers's address: lazzaro@hobiecat.cs.caltech.edu;
+##                          CB 425/ CU Boulder/Boulder CO 91125. 
+##
+##
+##This program is free software; you can redistribute it and/or modify
+##it under the terms of the GNU General Public License as published by
+##the Free Software Foundation (Version 1, Feb 1989).
+##
+##This program is distributed in the hope that it will be useful,
+##but WITHOUT ANY WARRANTY; without even the implied warranty of
+##MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##GNU General Public License for more details.
+##
+##You should have received a copy of the GNU General Public License
+##along with this program; see the file ../COPYING.  If not, write to
+##the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
+##
+##
+## caged_process='do $F$M'
+
+define reverse curve
+   local i len xc yc
+
+   xc = ${curve}_x
+   yc = $curve
+   len = cvlen(${curve:q})
+   for i = 1 : len
+      poke yc @ i = cvidx(${curve:q},      len-i+1)
+      poke xc @ i = cvidx(${curve:q}+"_x", len-i+1)
+   endfor
+   splice n${curve} = xc : yc
+enddef
+
+
+
+
+
+
+
+
+

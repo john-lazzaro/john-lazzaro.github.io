@@ -1,0 +1,233 @@
+<TITLE> Logntk Commands </TITLE>
+
+<H1> Logntk Commands</H1>
+
+<PRE>
+
+   1.  LOGNTK diagrams often contain additional commands in the form of
+       labels.  These labels are always surrounded by "<" and ">" brackets.
+       Any labels of this form, but with commands that LOGNTK cannot
+       recognize, are simply ignored.  LOGNTK assumes these commands belong
+       to some other program, such as Digital LOG's hierarchy compiler.
+
+   2.  You can also include these commands in your "log.cnf" file,
+       preceded by "logntk:".  For example, the label < global clock* >
+       defines global signals just for one cell; the CNF command
+       "logntk: global clock*" defines global signals permanently.
+       Finally, you could also press the ":" and type the
+       "logntk: global clock*" command during your LOG session.
+
+   3.  Certain arguments may include wildcard characters.  LOGNTK uses the
+       same kinds of wildcards as Unix: "?" matches any character, "*"
+       matches any zero or more characters, and "[ABC]" matches either
+       A, B, or C.  Also, most names in LOGNTK are case-insensitive, but
+       LOGNTK still strives to duplicate the upper/lower-casing that you
+       use into the output file, and always capitalizes all the uses of a
+       name consistently.
+
+   4.  Every LOGNTK definition needs at least some commands.  To create a
+       named cell, you need a NAME command (or a quoted label; see below),
+       and either a PORT command or a template gate.  For an unnamed
+       top-level cell, you need at least a FILE command.
+
+   5.  Here is the list of LOGNTK commands.  The ":" following the command
+       names are optional.
+
+
+       GLOBAL: signal-names
+                  This command lists names which should be "global" to
+                  the entire project.  For example, VDD and GND are made
+                  global by the standard "logntk.cnf" file.
+                  This means that if you create a cell which includes
+                  VDD and GND gates, those nodes will automatically be
+                  made into "hidden" ports on the cell.  Instances of
+                  that cell will gate VDD and GND wired to them
+                  automatically.  All you have to do is used VDD and GND
+                  naturally, and let the system keep track of it for you.
+                  You can declare your own TO/FROM signal names to be
+                  global in the same way.  The "signal-names" are case-
+                  insensitive, and may include wildcard characters.
+
+
+       PORT: signal-names
+                  This command gives the list of ports in the cell.  It
+                  may be used in place of a "template" or "example" gate.
+                  Port lists are supported for historical compatibility,
+                  but future designs should probably use template gates
+                  instead.
+
+                  Each name in the list should correspond to a signal name
+                  in the circuit diagram.  VDD and GND refer to the VDD and
+                  GND circuit symbols.  The position of a name in the port
+                  list, not counting global names, corresponds to the pin
+                  number of the associated instance gate.  For example, if
+                  the .GATE picture for an inverter has the input as pin 1
+                  and the output as pin 2, then the appropriate command for
+                  the inverter's circuit diagram would be:
+
+                        < port: in out vdd gnd >     or
+                        < port: gnd vdd in out >     or whatever.
+
+                  The positioning and ordering of global names in the list
+                  is irrelevant, but any global signal that is used by the
+                  cell or by its sub-cells must be present.  (When you use
+                  a template gate instead of a port list, LOGNTK manages
+                  all this for you.)  If you give a ":LOGNTK" command and
+                  their is neither a port label nor a template gate in the
+                  definition, LOGNTK will sort the signal names into
+                  alphabetic order and create a PORT label.  You will
+                  probably need to edit this command to put the ports in
+                  the proper order.
+
+                  If several PORT labels appear in the cell definition,
+                  they are appended together in an undefined order.  If
+                  you don't mind this uncertainty, LOGNTK can handle an
+                  unlimited number of ports.
+
+
+       ORPHAN: gate-names
+                  This command gives the gate(s) which are used to
+                  represent "orphan" nodes, i.e., nodes that are not
+                  connected to any transistors or subcells.  By default,
+                  the built-in gate CIRC1 is considered an orphan gate, so
+                  that a circuit with five CIRC1's will have five orphan
+                  nodes in its NTK file.  The gate-names may use wildcards.
+
+
+       IGNORE: gate-names
+                  This command gives a list of gates to be ignored.  This
+                  is rarely necessary, because if LOGNTK sees a gate which
+                  has not been defined as a transistor or cell, and for
+                  which no "gatename.NTK" file exists, then it will
+                  automatically ignore that gate with a warning message.
+                  This command suppresses the warning.  The gate-names
+                  may include wildcards.
+
+
+       NAME: cell-name
+                  This specifies the name of the cell in the NTK file.
+                  This is an alternate form for the quoted "cell-name"
+                  label.  There must be exactly one such label for each
+                  cell.
+
+
+       FILE: file-name
+                  This specifies the name of the output file.  The suffix
+                  ".NTK" will be added if necessary.  If you omit the FILE
+                  command, the file name will be taken from the cell name.
+                  (Every LOGNTK page must specify either a cell name or
+                  a file name, or both.)
+
+
+       CELL: gate-name  cell-name  file-name
+                  This command links gates in the circuit diagram
+                  to the NTK files they represent.  A good idea is
+                  to use the same name for the gate, cell, and file;
+                  if you give only one name in the command, that
+                  name will be used for all three.  One time you
+                  might need to give the long form is if the NTK
+                  file is not in the standard directories, so you
+                  need to give a full path for it:
+
+                        < cell: opamp tc_amp /lib/wollib/stdlib/opamp >
+
+                  In this example, OPAMP gates, or generic instance
+                  gates programmed as OPAMP's, will convert to calls
+                  to the cell TC_AMP, which may be found in the .NTK
+                  file specified.  CELL commands describing cells that
+                  are never instantiated in a file are ignored.
+
+
+       LIB: directories
+                  This command names directories in which .NTK files
+                  for sub-cells may be found.  LOGNTK looks first in
+                  the current directory, then in each of these
+                  directories in turn.
+
+
+       SIZE: number
+                  This specifies the sizes of nodes.  Currently,
+                  there is no way to override this for particular
+                  nodes.  The default size of 1 should be sufficient
+                  for CMOS users.  Most NTK-reading programs ignore
+                  node sizes, anyway.
+
+
+       STRENGTH: number
+                  This specifies the strengths for transistors.
+                  This can be overridden as described for TRANS.
+                  The default strength is 2.  Most NTK-reading
+                  programs ignore transistor strengths.
+
+
+       TRANS: gate-name  type  strength
+                  This command declares transistor symbols.  If you
+                  need to make your own transistor gates, you will
+                  need to use this command.  The "type" is one of
+                  N, P, or D.  The strength is optional; if it is
+                  a positive number N, then the strength of the
+                  transistor is N; if it is missing, the strength
+                  is the default value; if it is -N, the strength
+                  is found in attribute number N of the transistor
+                  gate, which must be an integer-valued attribute.
+                  The file logntk.cnf contains TRANS commands
+                  for all the standard LOG transistors.
+
+
+       PRIMITIVE: gate-name  cell-name
+                  This command declares primitive gates, gates which
+                  should be converted into instances of cells which
+                  have no definition.  If the gate has N pins, then
+                  the output file will call the cell with N ports,
+                  in order of pin numbers on the gate.  For example,
+
+                        < primitive: a_and2 and2 >
+
+                  Causes the ACTEL gate A_AND2 to convert to a call
+                  to cell AND2.  Both names may contain wildcards;
+                  the actual commands in logntk.cnf are:
+
+                        logntk:  primitive  a_*  *
+                        logntk:  primitive  a_tribuf  tribuff
+
+                  which maps A_AND2 to AND2, A_DFC to DFC, etc.,
+                  and A_TRIBUF to TRIBUFF (a special case).  Note
+                  that more specific names come after more general
+                  names.  The command PRIMITIVE may be abbreviated
+                  as PRIM.
+
+
+       TOP        Force this to be a top-level NTK file, that is,
+                  after the main cell has been defined, one "call"
+                  to the cell is also written into the file.  The
+                  NETCMP program can only read top-level NTK files.
+                  This mode is the default; you only need the TOP
+                  command to override an earlier LEAF command.
+
+
+       LEAF       Force this to be a leaf-level NTK file, that is,
+                  only the cell's definition is included (plus
+                  definitions for any subcells used).  There is
+                  usually no reason to use LEAF, since most programs
+                  can read top-level NTK files and ignore the top part.
+
+
+       NOTOP      Set a compatibility mode in which a LOGNTK command
+                  on a page with no NAME command (or quoted name label)
+                  will produce an error instead of creating a top-
+                  level NTK file. 
+
+</PRE>
+  
+<UL>
+<LI> <A HREF="logntk3.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

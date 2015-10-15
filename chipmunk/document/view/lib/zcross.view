@@ -1,0 +1,87 @@
+##
+## "VIEW", a data viewing program,
+##   Copyright (C) 1987, 1990 California Institute of Technology.
+##   Original authors: Dave Gillespie, port by Rick Koshi
+##   Unix Port Maintainer: John Lazzaro
+##   Maintainers's address: lazzaro@hobiecat.cs.caltech.edu;
+##                          CB 425/ CU Boulder/Boulder CO 91125. 
+##
+##
+##This program is free software; you can redistribute it and/or modify
+##it under the terms of the GNU General Public License as published by
+##the Free Software Foundation (Version 1, Feb 1989).
+##
+##This program is distributed in the hope that it will be useful,
+##but WITHOUT ANY WARRANTY; without even the implied warranty of
+##MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##GNU General Public License for more details.
+##
+##You should have received a copy of the GNU General Public License
+##along with this program; see the file ../COPYING.  If not, write to
+##the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
+##
+##
+# caged_process='do $F$M'
+# View log file written on Dec 28, 1988 7:36 pm by SYLVIE
+
+define isostart  fname  offset
+   rewritefile [append] isofile = fname+'.dat'
+   isooff = $offset
+   print [file=isofile] "1"
+   print [file=isofile] ""
+   print [file=isofile] "pairs"
+   print [file=isofile] "iso" isooff
+   print [file=isofile] "Hz"
+   print [file=isofile] "dB"
+enddef
+
+define isoend
+   print [file=isofile] ""
+   close isofile
+enddef
+
+define isofind  curve
+   local a b c d dbar e i j1 j2 val
+   local e1 e1_m e1_b e1_x0
+
+   val = ${strpart(curve, 6, 99)}  ## 6=index of first digit in curve name
+   copy a = $curve            ## make a working copy of the curve
+   a = a - isooff             ## subtract off zeros
+   sort a                     ## eliminate duplicate basis values
+   b = a * cvrelidx("a",1)    ## shifts basis of "a" by 1 index
+                              ## zero crossing algorithm
+                              ## b neg @ zero crossing, +  everywhere else
+   c = b <= 0                 ## c=1 @  zero crossing
+   d = c | cvrelidx("c", -1)  ## getting two points for regression
+   e = a / d                  ## filter
+   dbar = 1 - d               ## dbar = logical "not" of d
+   i = 0                      ## set up to loop over zero crossings
+   j2 = 1
+   while
+      j1 = cvsearch("d", j2)     ## find next "1" in d
+      if j1 = 0;; break;; endif  ## done?
+      j2 = cvsearch("dbar", j1)  ## find next "0" in d
+      if j2 = 0;; j2=cvlen("d")+1;; endif   ## at end?
+      if j1 >= j2-1;; continue;; endif
+      range e1 = e [cvidx("d_x", j1) : cvidx("d_x", j2-1)]    ## sub-curve
+      regress e1                 ## find x-intercept of sub-curve
+      i = i + 1
+      ${curve}_x$i = e1_x0       ## record x-intercept
+      print [file=isofile]  e1_x0  log(val)*20
+   endwhile
+   ${curve}_num = i           ## record total number of zero crossings found
+
+#Old algorithm: for exactly two zero-crossings; never tested!
+#   f = c_x * c                ##basis vector weighted by "c" bits
+#   center = cvsum("f") / cvsum("c")   ## "center of gravity" of zero crossings
+#   range e1 = e [0:center]
+#   range e2 = e [center:1E60]
+#   regress e1
+#   regress e2
+#   ${curve}_x1 = e1_x0
+#   ${curve}_x2 = e2_x0
+#   ${curve}_xmid = center
+
+enddef
+
+

@@ -1,0 +1,54 @@
+<TITLE> Compiling Mosis </TITLE>
+
+<H1> Compiling Mosis </H1>
+
+	<P> This document assumes that you have successfully compiled
+the <A HREF="psys.html"> Psys </A> libraries.  This
+document also assumes that you have uncompressed and untarred the 
+Mosis file, and installed it in the <TT>chipmunk</TT>
+directory. Note that Mosis has not been ported to OS/2.</P>
+
+	<P> Begin by descending to the <TT>mosis</TT> directory.
+No <TT>Makefile</TT> customization is necessary. However, customization
+of the file <TT>mosis.c</TT> is necessary, since details in the
+desired mailing file (account #, name, address, etc) are very site
+dependent. </P>
+
+	<P> To do this customization, edit the file <TT>mosis.c</TT>,
+and search for all instances of the word <TT>CUSTOM.</TT> This word
+will be in comments next to <TT>printf</TT> statements that print
+site-specific parts of the MOSIS header file. If you have sent a chip
+out to MOSIS manually you will recognize these lines; if not, you should
+ask a more experienced person for assistance. </P>
+
+	<P> After this customization has been done,  execute the command </P>
+
+<P> <TT> make install </TT> </P>
+
+	<P> If things are working correctly, a short series of
+compilations, linkings, and file movements should occur without error.
+The program <TT>chipmunk/bin/mosis</TT> will be created, ready for
+use to send mail messages to MOSIS. To learn about using this program, see
+the <A HREF="../document/wol/index.html"> user documentation. </A> </P>
+
+<P> If you have problems compiling or using this program, I'd be happy to
+offer suggestions; press <A HREF="helpme.html"> here </A> for more
+information about asking for help. </P>
+
+<UL>
+<LI> <A HREF="../compile/compile.html#place">Return to 
+compilation instructions. </A> 
+<LI> <A HREF="../index.html">Return to home page.</A> 
+<LI> <A HREF="../document/document.html">User documentation for Chipmunk 
+tools.</A> 
+<LI> <A HREF="../pickup/pickup.html">To pick up the distribution. </A> 
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+
+
+

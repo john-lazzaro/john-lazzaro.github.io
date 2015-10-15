@@ -1,0 +1,214 @@
+<TITLE>New for 2003</TITLE>
+
+<H1>Chipmunk Updates  -- March 2003</H1>
+
+<UL> 
+<LI><B>OS X Support.</B> Log, analog, diglog, 
+view, until, and wol known to work under 
+OS X 10.2.4 with Apple's X11.app beta 2.
+</UL>
+
+<H1>Chipmunk Updates  -- September 2001</H1>
+
+<UL> 
+<LI><B>Log Stability Improvements.</B> Many code fixes
+to improve Log stability (Peter Welch), and Y2K 
+fixes (Michael Godfrey, Peter Welch).
+<LI><B>Until Bug Fixes.</B> Edit-extend editing of 
+label orientation now works on little-endian 
+machines.
+</UL>
+
+<H1>Chipmunk Updates  -- October 1998</H1>
+
+<UL> 
+<LI><B>New Bipolar Transistor Models.</B> NPN2 and PNP2 
+features full Gummel-Poon model and Early Effect 
+(Tim Edwards, Johns Hopkins).
+<LI><B>Port of DEC Alpha/OSF 4.0.</B> Complements existing
+DEC Alpha/Linux port (Robert Moniot, Fordham).
+<LI> <B>Bug fixes.</B> Minor changes to until.
+</UL>
+
+<H1>Chipmunk Updates  -- March 1997</H1>
+
+<H2>Improvements and Bug-Fixes</H2>
+
+<UL>
+<LI><B>Support for 16/24-bit displays.</B> TrueColor mode is now
+supported. Chipmunk programs autoconfigure by default; an environment
+variable (LOG_COLOR = bw | 8bit | 16bit | 24bit) forces a particular
+depth (Michael Godfrey, Stanford University).
+<LI><B>New MOS models.</B> <A
+HREF="../document/log/anasim/anasim5.html">New</A> MOS transistor
+gates.  (Michael Godfrey, Stanford University).
+<LI> <B>Scope improvements.</B> Edge-triggered scope function now
+works in Diglog (Bob Moniot, Fordham College at Lincoln Center).
+<LI> <B>Lplot Enhancements.</B> New Lplot commands (PSFILE and FILE)
+allow specification of printer and file names (Tobi Delbruck, Caltech
+and Tim Edwards, Johns Hopkins). Lplot command HEADER now works
+correctly (Michael Godfrey, Stanford University).
+<LI> <B>TO/FROM Enhancement.</B> TO/FROM gate editing improved (Tim
+Edwards, Johns Hopkins).
+<LI> <B>Bug fixes.</B> Memory leak fixed in digital hierarchial
+simulation (Olivier Teman, Versailles University); reset operation
+fixed for several analog gates (Joel White, Tufts University).
+</UL>
+
+<H2>Ports (<A HREF="platforms.html">updated platform list</A>)</H2>
+<UL>
+<LI> <B> Linux/Alpha.</B> New port. (Kazushige Goto,
+goto@statabo.rim.or.jp)
+<LI> <B> MachTen.</B> MachTen port updated (Greg Bond,
+University of British Columbia)
+<LI> <B> OS/2. </B> OS/2 port updated (Michael Godfrey, Stanford University)
+<LI> <B>AmigaOS</B> All Chipmunk tools ported to AmigaOS, requires
+ADE or AmiWin X server. Binary distribution also supported.
+(Marco Gigante, Pisa University).
+</UL>
+
+<H2>Miscellaneous</H2>
+
+<UL>
+<LI> <B> New MOS models. </B> Detailed paper [<A
+HREF="../document/log/mos.ps.gz">Postscript, 300 KByte compressed</A>]
+[<A HREF="../document/logmos.pdf">Adobe PDF, 680 KByte, requires
+Acroread 3.0</A>] explaining the new MOS models
+(Michael Godfrey, Stanford University, and John Lazzaro, UCB).
+<LI> <B> Xcircuit </B> New <A
+HREF="../document/log/xcircuit/xcircuit.html">supplementary</A> tool for
+printing schematics (Tim Edwards, Johns Hopkins).
+</UL>
+
+<H1>Chipmunk Updates  -- May 1996</H1>
+
+<H2>Improvements and Bug-Fixes</H2>
+
+<UL>
+<LI><B>Diglog schematic corruption bugfix.</B> A major bug that caused
+Diglog to occasionally core dump on large hierarchial circuits has
+been fixed; Diglog is safer to use for larger projects. [Ingo Cyliax
+(Indiana University), Lars Larsson (Hamburg U.), Dave Gillespie]
+<LI> <B>Lower load-averages for Log. </B> Log no longer runs a unity
+load average indiscriminantly. If simulation is turned off, 
+an analog circuit is "incomplete," or a diglog circuit is the null
+schematic, Log will consume few cycles if the user isn't interacting
+with the program. [Nick Bailey (U. Leeds, UK), Dave Gillespie]
+<LI> <B>Analog gate improvements.</B> Bugs in the NPN1 and PNP1
+bipolar transistors were found and fixed [Jamie Honan, Australia] as
+were bugs in the Diode gate [Shudi Gu, Beijing].
+<LI> <B>XNF file support.</B> New <A HREF="../document/log/logxnf/logxnf.html">
+tools</A> for supporting Xilinx designs [Ingo Cyliax (Indiana University)].
+<LI> <B>Log display support.</B> When launched on a machine with inadequate or
+unsupported display hardware, Log reverts to monochrome display
+instead of core-dumping [Huiling, CSU Fresno].
+</UL>
+
+<H2>Ports (<A HREF="platforms.html">updated platform list</A>)</H2>
+<UL>
+<LI> <B> MachTen. </B> Analog now runs under MachTen, a BSD 
+for MacOS. [James Yang, UC Davis]
+<LI> <B> Updates for existing platforms. </B> SGI [John Krivitsky,
+Curtin University of Technology], FreeBSD [Mark N. Martin, Johns
+Hopkins], and Linux [Luc Claeys, Belgium, Aubrey Jaffer, MIT] had
+compatibility problems fixed.
+<LI> <B>MS-DOS</B> Alpha release available for the MS-DOS port of Log
+[Luigi Rizzo and collaborators, University of Pisa, Italy].
+</UL>
+
+<H2>Documentation</H2>
+
+<UL>
+<LI> <B> Diode gate model. </B> New <A
+HREF="../document/log/diode.html">document</A> explaining the diode
+gate model in analog. [Jamie Honan, Australia]
+<LI> <B> Making new Analog gates </B> New <A
+HREF="../document/log/newanagate/index.html">document</A> on adding new
+gates to Analog.
+</UL>
+
+<H1> New Chipmunk Features -- February 1995</H1>
+
+	<P> One major change for 1995 is the conversion of most
+Chipmunk documentation into HTML, and the integration of these files
+into a unified system with many cross-links. </P>
+
+	<P> Other major changes are ports to new architectures, and
+updates to existing ports to maintain compatibility with changing
+operating systems. Here is the list of support changes for this
+release, along with the contributor(s). </P>
+
+<UL>
+<LI> <B>OS/2.</B> Mike Godfrey of the Information Systems Laboratory at
+Stanford University ported the Psys and Log packages to OS/2. Other 
+packages remain to be ported, but the Psys port should make these ports
+much easier to accomplish.
+<LI> <B>Sun Solaris 2.X.</B> Reinhard Koehn of TU-Berlin ported Log and Psys
+packages to Solaris 2.X running under the SPARC processor architecture. 
+The other tools seem to compile well in the Solaris 2.X environment, but I
+haven't tested them thoroughly. Solaris 1.X (SunOS 4.X) support 
+is unaffected by this port.
+<LI>  <B> FreeBSD.</B> Dan Andersson of the Chalmers University of Technology
+(Sweden) ported the Chipmunk tools to FreeBSD; John Utz
+at the University of Washington and Luigi Rizzo at the Universita' di Pisa
+also contributed to the port. 
+<LI> <B> SGI. </B> Tor Sverre Lande at IFI in Oslo ported the Chipmunk
+tools to a SGI Challenger, and Michael Morrison of the University of
+Iowa ported the tools to an SGI machine running IRIX. I combined these
+two ports, and tested the result on an Indigo. All the tools seem to
+work, but I haven't tested them thoroughly.
+<LI>  <B> IBM RS/6000. </B> Fernando Pineda of the Applied Physics Lab
+at Johns-Hopkins updated the Chipmunk distribution to compile on more
+recent OS versions for the IBM RS/6000, building on the earlier port by
+Gary Liu of Caltech. I tested Fernando's port on a RS/6000 and it seemed
+to work. 
+<LI>  <B> Linux. </B> Geir Harris Hedemark at IFI at Norway, and Jack Zvonik
+of TRW in Redondo Beach updated the Linux port to work under more recent
+Slackware distributions.
+<LI> <B> HP 700 Series. </B> All Chipmunk tools now compile with gcc on HP
+700 series workstations. It's no longer necessary to use the HP compiler,
+with the extra-cost ANSI option, in order to run Chipmunk on HP 700 series
+machines. 
+</UL>
+	
+	<P> In addition to these ports, several new features were added to
+various Chipmunk tools: </P>
+
+<UL>
+
+<LI> <B>Postscript updates.</B> All Chipmunk tools now produce
+encapsulated postscript that is compatible with the psfig macros
+distributed with TeX.  John Platt and Dave Gillespie of Synaptics,
+Michael Godfrey at ISL, Himanshu R. Pota of ADFA in Australia, and
+gary@minster.york.ac.uk contributed to these improvements.
+<LI> <B>Logspc updates.</B> Harold Levy of Caltech contributed a new
+version of Logspc, the SPICE netlist tool for Log, that contains new
+features and bug fixes.
+<LI> <B>MATLAB support.</B> Michael Godfrey of ISL contributed a filter
+program for converting data files produced by Log into files suitable for
+MATLAB.
+<LI> <B> New CIF tools.</B> Several new tools are included for CIF
+filtering, including Boxify by Tor Sverre Lande.
+<LI> <B>Improved documentation.</B> Michael Godfrey of ISL contributed
+several new Postscript documents for documenting Log, included a detailed
+explanation of the MOS models currently used in analog.
+<LI> <B>Major DigLog bugfix.</B> Micah Beck of the University of
+Tennessee helped trace down a major bug in DigLog, that was
+responsible for schematic corruption of large files. Many users were
+bitten by this bug in the past. Until new users report back, we won't
+know for sure if this change completely solves schematic corruption
+for large designs when DigLog simulation is occuring: it's hard to
+test for bugs that only occur only in large designs.
+</UL>
+	<P> In addition to these major improvements, lots of little
+bug fixes and enhancements have been added in the release. </P>
+
+<UL>
+<LI> <A HREF="../pickup/pickup.html">Return to pickup information page.</A> 
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>

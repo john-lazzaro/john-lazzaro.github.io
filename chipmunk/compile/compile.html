@@ -1,0 +1,93 @@
+<TITLE> Setting up the Chipmunk System </TITLE>
+
+<H1> Chipmunk System Setup </H1>
+
+	<P> The first part of setting up a Chipmunk system is to
+choose a place in your directory tree for the tools. Chipmunk can be
+installed in a user directory; you do not need to install it in a
+public place like <TT> /usr/local/.</TT>  Once you've decided on a
+place, create a directory called <TT>chipmunk.</TT> Now move all
+the Chipmunk tar files to the <TT>chipmunk</TT> directory, and
+uncompress them using <TT>gzip</TT> if necessary.</P>
+
+	<P> Next, un-tar the files using the <TT>tar</TT> command,
+with the options appropriate for your system. For most Unix systems,
+the command </P>
+
+<P> <TT>tar -xf file.tar</TT> </P>
+
+<P> untars the file <TT>file.tar.</TT> Once this is complete, a
+directory listing of <TT>chipmunk</TT> should include the following
+directories </P>
+ 
+<P> <TT>webdoc/ psys/</TT> </P>
+
+<P> as well as some of the following directories, depending on which 
+applications you pickup up. </P>
+
+<P> <TT>log/ mosis/ netcmp/ until/ util/ view/ wol/ wolcomp/</TT> </P>
+
+<P> <A NAME="place"> At </a> this point, you may wish to continue
+reading these instructions from the copy of this text in 
+<TT>webdoc/.</TT> The file you are reading is 
+<TT>chipmunk/webdoc/compile/compile.html#place.</TT> You can use the <I>
+Open Local </I> command in your WEB browser to find and open this
+file. </P>
+
+<H2> Chipmunk Compilation </H2>
+
+<P> Psys is the first package you should compile; press 
+<A HREF="psys.html"> here </A> for instructions on compiling the
+Psys package. Once Psys is compiled, you should proceed to compile the
+other tools in your Chipmunk directory. </P>
+
+<P> The compilation process for Psys also creates the directory 
+<TT>chipmunk/bin.</TT> The compilation process for all the Chipmunk tools
+will deposit executables in this directory. Users of Chipmunk tools
+should put this directory in their path. The compilation process for
+Psys also creates the directory <TT>chipmunk/lib.</TT> Many (but not
+all) Chipmunk tools deposit configuration and example files in this
+directory. </P>
+
+<P> Once Psys is compiled, you can compile the other Chipmunk tools in
+any order you like. Click on the package name below for compilation
+instructions for this package: </P>
+
+<UL>
+<LI> <A HREF="log.html"> Log</A> 
+<LI> <A HREF="view.html">View</A> 
+<LI> <A HREF="until.html">Until</A> 
+<LI> <A HREF="wol.html">Wol</A> 
+<LI> <A HREF="wolcomp.html">Wolcomp</A> 
+<LI> <A HREF="netcmp.html">Netcmp</A> 
+<LI> <A HREF="mosis.html">Mosis</A> 
+<LI> <A HREF="util.html">Supplementary Tools</A> 
+</UL>
+
+<P> Finally, you may want to retrieve a global Makefile for the entire
+Chipmunk toolset, so that you can recompile all the tools with a
+single command.  Click 
+<A HREF="http://john-lazzaro.github.io/chipmunk/pickup/sources/Makefile"
+>here</a> to view the Makefile, and use the <B>Save As</B> feature of
+your browser to pick up a copy.  Press <A HREF="makefile.html">
+here </A> for information about customizing and using the
+Makefile. </P>
+
+<P>Once the tools are installed, you can start exploring the 
+<A HREF="../document/document.html">user documentation </A> for the
+Chipmunk tools. </P>
+
+<UL>
+<LI> <A HREF="../index.html">Return to home page.</A> 
+<LI> <A HREF="../document/document.html">User documentation for Chipmunk 
+tools.</A> 
+<LI> <A HREF="../pickup/pickup.html">To pick up the distribution. </A> 
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+
+

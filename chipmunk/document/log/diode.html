@@ -1,0 +1,159 @@
+<TITLE> The Diode Model </TITLE>
+
+<H1> The Diode Model </H1>
+
+<H2> by Jamie Honan</H2>
+
+<PRE>
+
+Essential to the running any sort of simulation are the 
+questions:
+
+
+What am I trying to model?
+
+How well does my model fit the actual device?
+
+For what range of what parameters is my model valid?
+
+
+It is difficult to get any meaning from a simulation unless you
+have some understanding of the model used. These notes attempt
+to help understand the diode model used in the `analog' component
+of the Chipmunk package.
+
+The equation used to model the diode is:
+
+
+
+  Id = Is * (exp(Vd * lamda) - 1) * BLEND + 
+           (1 - BLEND) * ((Is * Vd) / Vcrow) * exp(lamda * Vcrow)
+
+  where
+     BLEND = 1 / (1 + exp(lamda * Vd) * exp(-lamda * Vcrow))
+    or     = 1 / (1 + exp(lamda * (Vd - Vcrow)))
+
+  lamda = 1 / (n * (k * T)/ q)
+
+  Id is the current flowing through the diode
+  Vd is the voltage difference between diode terminals
+  The value  (k * T)/q is a constant, generally taken to be 
+  about 25 / 1000.
+
+
+
+This leaves the variables n, Vcrow and Is to be explained.
+
+Before I do that, the model itself needs some explanation,
+particularly in the light of simple models such as
+
+        Id = Is * (exp(Vd * lamda) - 1)
+
+which is the traditional model used.
+
+The traditional model does not take into account two aspects 
+of static diode behaviour.
+
+The exponential rise predicted by exp(lamda * Vd) covers diode
+behaviour up until large voltages, which in our model are 
+voltages above Vcrow. The exponential function also does not 
+cover the reverse breakdown voltage.
+
+The large forward behaviour is modeled by our model somewhat 
+better. Instead of exp(lambda * Vd) rising ever onwards and 
+upwards, there is a kink in diode behaviour at Vcrow. Beyond 
+this voltage, the current flowing through the diode behaves 
+in a more resistor like manner. This voltage, Vcrow, is fixed
+for a particular diode.
+
+This kink is achieved in our model by the BLEND function. 
+There are two distinct parts to the model, the part multiplied 
+by BLEND and the part multiplied by (1 - BLEND).  BLEND is 
+controlled by exp(Vd - Vcrow). When Vd equals Vcrow, BLEND is 
+0.5. When Vd is much larger than Vcrow, the exp(Vd - Vcrow) becomes
+exponentially larger, making BLEND tend towards 0. In this case 
+the first part of the model becomes insignificant, and the model
+tends towards ((Is * Vd) / Vcrow) * exp(lamda * Vcrow).  Vcrow is
+a fixed value, as is Is and lambda, so this part of the model is 
+simply a constant times Vd.
+
+When Vd is very much smaller than Vcrow, the exp(Vd - Vcrow) 
+becomes exponentially smaller, with BLEND tending towards 1. 
+In this case, the first part of the model dominates, with the 
+second part dropping out, our model returning to the traditional
+model described above.
+
+The reverse breakdown voltage is not modeled by our system, (in
+common with the traditional model) so the model is only valid up
+until this reverse breakdown voltage.
+
+This still leaves us with the variables n and Is.
+
+The variable n is the `emission coefficient' or `ideality factor',
+with values around 2. This is related to the doping levels of the
+materials used in the pn junction. Later we'll see how to derive 
+this number.
+
+`Is' is the leakage current, or reverse saturation current.
+
+How do we tie these variables to a particular diode's 
+characteristics? I have a table listing VR, IF, VF @ IF, IR @ VR
+for different diodes. Crowbar voltages, n, and Is seem to 
+be missing.
+
+For our model, the important values are the VF @ IF values, and 
+the IR @ VR values.  The IR gives the reverse saturation current,
+while the reverse voltage has not yet reached reverse breakdown. 
+This IR value becomes our Is value directly.
+
+The VF @ IF values give the crowbar voltage (Vcrow) and we can 
+derive the n variable using the current given.
+
+To derive n, at Vd = Vcrow our model becomes:
+
+         Id = Is * (exp(lambda * Vcrow) - 1)
+
+(At this voltage, the -1 could be dropped. The C code has the 
+dropped for the part of the model controlled by (1 - BLEND).)
+
+This becomes
+
+         lambda = ln(Id / Is + 1) / Vcrow
+
+	 n * (k * T)/ q = Vcrow / ln (Id / Is + 1)
+	 n = 40 * Vcrow / ln (Id / Is + 1)
+
+In my table for an 1N4148, IR is 0.025 uA, IF is 1 volt and IF is
+10 mA.
+
+
+	 Id = 10 * 10 ^ -3
+	    = 10 ^ -2
+	 Is = 0.025 * 10 ^ -6
+	    = 25 * 10 ^ -9
+	 Id / Is = (10 ^ -2) * (4 * 10 ^ 7)
+	         = 4 * 10 ^ 5
+         n = 40 / ln ((4 * 10 ^ 5) + 1)
+	   = 40 / 12.9
+	   = 3.1
+
+
+The value requested for nkT_q then would be 3.1 * 0.025 = 0.0775.
+(crowbar voltage would be 1, Is is 0.025 uA, as indicated above).
+
+</PRE>
+
+
+<UL>
+<LI> <A HREF="index.html">To return to Log documentation.</A>
+</UL>
+
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+
+
+

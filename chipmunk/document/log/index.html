@@ -1,0 +1,140 @@
+<TITLE> Log </TITLE>
+
+<H1> Log </H1>
+
+<P> The Log manual was originally written in a hypertext system that
+Dave Gillespie wrote for the <A HREF="../../describe/hp9836.html"> HP
+9836C</A> systems at Caltech. Dave also wrote the manual. The manual
+was translated into <A HREF="log.doc">raw</A> ASCII during the Unix
+port.  The following version of the manual returns the hyperlinks to
+parts of the document. Eventually, the entire manual will have the
+look-and-feel of the <B>General Information</B> section. </P>
+
+<H2> The Log Reference Manual </H2>
+
+<UL>
+<LI> <A HREF="geninfo/geninfo1.html"> General information</A>
+ <UL>
+ <LI> <A HREF="geninfo/geninfo1.html"> Getting started</A>
+ <LI> <A HREF="geninfo/geninfo2.html"> Using the program </A>
+ <LI> <A HREF="geninfo/geninfo3.html"> Circuit editing </A>
+ <LI> <A HREF="geninfo/geninfo4.html"> Configuring gates</A>
+ <LI> <A HREF="geninfo/geninfo5.html"> More about editing</A>
+ <LI> <A HREF="geninfo/geninfo6.html"> LOG survival tips </A>
+ </UL>
+<LI> <A HREF="digsim/digsim1.html"> Digital simulator</A>
+ <UL>
+ <LI> <A HREF="digsim/digsim1.html"> Basics of digital simulation</A>
+ <LI> <A HREF="digsim/digsim2.html"> A tour of the digital gates</A>
+ <LI> <A HREF="digsim/digsim3.html"> Hierarchical digital simulation</A>
+ <LI> <A HREF="digsim/digsim4.html"> Digital VLSI simulation</A>
+ </UL>
+<LI> <A HREF="anasim/anasim1.html"> Analog simulator</A>
+ <UL>
+ <LI> <A HREF="anasim/anasim1.html"> Basics of analog simulation</A>
+ <LI> <A HREF="anasim/anasim2.html"> A tour of the analog gates</A>
+ <LI> <A HREF="anasim/anasim3.html"> Analog input waveforms</A>
+ <LI> <A HREF="anasim/anasim4.html"> Other simulation features</A>
+ <LI> <A HREF="anasim/anasim5.html"> Details of the MOS Models </A>
+ </UL>
+<LI> <A HREF="lplot/lplot1.html"> Plotting circuits and data</A>
+ <UL>
+ <LI> <A HREF="lplot/lplot1.html"> Plotting a circuit</A>
+ <LI> <A HREF="lplot/lplot2.html"> Plotting your data</A>
+ <LI> <A HREF="lplot/lplot3.html"> Customizing your plots</A>
+ </UL>
+<LI> <A HREF="xcircuit/xcircuit.html">Publication-quality circuit plots</A>
+<LI> <A HREF="logntk/logntk1.html"> LOG-to-NTK conversion</A>
+ <UL>
+ <LI> <A HREF="logntk/logntk1.html"> Overview</A>
+ <LI> <A HREF="logntk/logntk2.html"> Logntk commands</A>
+ <LI> <A HREF="logntk/logntk3.html"> Identifying things</A>
+ <LI> <A HREF="logntk/logntk4.html"> Logntk messages</A>
+ <LI> <A HREF="logntk/logntk5.html"> Notes</A>
+ </UL>
+<LI> <A HREF="logspc/logspc.html"> LOG-to-SPICE conversion</A>
+<LI> <A HREF="logxnf/logxnf.html"> LOG-to-XNF conversion</A>
+<LI> <A HREF="loged/loged1.html"> Creating your own gates</A>
+ <UL>
+ <LI> <A HREF="loged/loged1.html"> Introduction to Loged</A>
+ <LI> <A HREF="loged/loged2.html"> List of commands</A>
+ <LI> <A HREF="loged/loged3.html"> DRAW command</A>
+ <LI> <A HREF="loged/loged4.html"> LABEL command</A>
+ <LI> <A HREF="loged/loged5.html"> DEF command</A>
+ <LI> <A HREF="loged/loged6.html"> Digital gate definition language </A>
+ </UL>
+<LI> <A HREF="ref/ref1.html"> Reference material</A>
+ <UL>
+ <LI> <A HREF="ref/ref1.html"> List of commands</A>
+ <LI> <A HREF="ref/ref2.html"> Configuration files</A>
+ <LI> <A HREF="ref/ref3.html"> Digital simulator commands</A>
+ <LI> <A HREF="ref/ref4.html"> Analog simulator commands</A>
+ <LI> <A HREF="ref/ref5.html"> Single-key commands</A>
+ <LI> <A HREF="ref/ref6.html"> Color names</A>
+ <LI> <A HREF="ref/ref7.html"> Command-line options</A>
+ <LI> <A HREF="ref/ref8.html"> X Display Preferences</A>
+ </UL>
+</UL>
+
+<H2> Other Documents for Analog Users</H2>
+
+<P>The Log reference manual above covers all aspects of the Log system. Users
+only interest in circuit simulation may want to first read some of the
+following documents. </P>
+
+<DL>
+<DT> <B> Postscript manual </B> 
+<DD> Michael Godfrey converted parts of the Log manual into a guide for analog
+simulation users, in Postscript. Press <A HREF="analog-man.ps">here</A> to
+view the document. This document does not include information
+on the new FET7 transistor models (see below).
+<DT> <B> Interactive lessons </B>
+<DD> A series of 5 
+annotated circuit schematics, <TT>log/lib/lesson1.lgf</TT> through
+<TT>log/lib/lesson5.lgf,</TT> form an interactive way to learn about
+Analog by using Analog. Developed by Dave Gillespie. 
+<DT> <B> Pocket reference </B>
+<DD> A set of 28 tips for the novice Analog user. Most ways novices get
+stuck while learning Analog are in this <A HREF="cheat.html">guide</A>,
+written by Dave Gillespie.
+<DT> <B>Device model details </B>
+<DD> The new FET7 series MOS models are explained and characterized in
+this paper [<A HREF="mos.pdf">Adobe PDF, 680 KByte, requires Acroread
+3.0</A>] by Michael Godfrey and John Lazzaro (draft 2.2). The obsolete
+FET5/FET6 models are described in this <A HREF="model.ps">paper</A> by
+Michael Godfrey.  Jamie Honan has written a document describing the
+diode model used in analog; press <A HREF="diode.html"> here </A> to
+read this document.
+<DT> <B>Simulation engine details </B>
+<DD>For information on how the simulation engine in analog works, see <A
+HREF="analog-tr.ps">this</A> Postscript document by John Lazzaro --
+note the transistor models described in this document are no longer
+used in analog. The models described are the obsolete <TT>NFET4</TT>
+and <TT>PFET4</TT> gates, included in analog only for backwards
+compatibility.
+<DT> <B>Adding new gates to Analog </B>
+<DD> I'm often asked how to add new gates to analog. I've prepared this
+<A HREF="newanagate/index.html">description</A> of the process. 
+</DL>
+
+<H2> For Advanced Users </H2>
+
+<P> Advanced users will want to check out the examples package, which
+contains a VLSI chip design and an Actel FPGA design. These examples
+show Log in use in a practical way. Press <A HREF=
+"../../pickup/pickup.html"> here </A> for information on picking up
+the examples package. </P>
+
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+
+
+
+
+
+
+

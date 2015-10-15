@@ -1,0 +1,151 @@
+<TITLE> Digital VLSI Simulation </TITLE>
+
+<H1> Digital VLSI Simulation </H1>
+
+<PRE>
+
+   1.  The group of gates whose names begin with "V_" are intended to
+       emulate digital CMOS transistors and structures in the Digital LOG
+       simulator.  Naturally they are not as accurate a simulation as
+       AnaLOG's transistors, but they have the advantages that the digital
+       simulator is much faster, and that they can be used in combination
+       with all the other digital gates in the library.
+
+   2.  The basic VLSI gates are V_NFET and V_PFET, the CMOS transistors.
+       These gates can model most digital CMOS circuits which do not
+       involve charge sharing or other "analog" effects.  The transistors'
+       gate pins have "capacitance" which holds the last charge stored on
+       them, allowing you to build dynamic as well as static registers.
+       The transistors are symmetric:  You don't have to worry about which
+       end is the source and which is the drain.
+
+   3.  V_NFET conducts zeros between its source and drain pins whenever its
+       gate pin is one.  It does not conduct logic ones at all.  Similarly,
+       V_PFET conducts logic ones when its gate is zero.  In other words,
+       V_NFET and V_PFET act just like CMOS transistors, as far as most
+       digital applications are concerned, and that's all you need to know.
+       If you are interested in a detailed understanding of how the CMOS
+       simulation works in LOG, read the following few paragraphs.
+
+   4.  Because Digital LOG is a gate-level simulator, it needs to know at
+       any given time which pins are "inputs" and which are "outputs".
+       Since transistors are symmetrical devices which can conduct in
+       either direction, the V_NFET and V_PFET gates are implemented as
+       bidirectional buffers which can change their direction of transfer
+       according to their environment.  Specifically, any time a V_NFET
+       sees a zero on its output, and an undriven node on its input, it
+       changes direction so that it can conduct the zero onto the undriven
+       node.  This change of direction occurs only if the gate is switched
+       on.  Likewise, the V_PFET switches direction in order to conduct a
+       one onto an undriven node.  In most circuits, this all happens
+       automatically and you can ignore it.  But if a particular V_NFET or
+       V_PFET looks like it is getting confused, you might swap it for a
+       V_NFETD or V_PFETD (described below).
+
+   5.  The "gate capacitance" is implemented by driving a "weak" one or
+       zero onto the gate, according to the last "strong" value seen there.
+       A weak one or zero is the kind of signal produced by a TIE (resistor
+       to Vdd) or TIEGND (resistor to Gnd) gate.  If another circuit drives
+       an actual value onto the gate, this strong value overrides the weak
+       "capacitative" value.  To avoid undesirable charge-sharing problems,
+       the sources and drains of transistors treat weakly driven ones or
+       zeros as if they were undriven.  This means, for example, that a
+       value stored dynamically on the gate of a transistor will not leak
+       back through any "pass" transistors connected to that gate.
+
+   6.  There are also "directional" transistors, V_NFETD and V_PFETD.
+       These gates are similar to V_NFET and V_PFET, respectively, except
+       that they conduct in a fixed direction.  Information is always
+       propagated *from* the pin with the arrow, *to* the other pin.  In
+       terms of current, the directions of the arrows show the direction of
+       current flow.
+
+   7.  Finally, there are V_NFETX and V_PFETX.  They are directional
+       transistors that do not "weakly" drive their gates to show the
+       dynamically stored value there.  Instead, they record the value in
+       a hidden internal state variable in the transistor.  V_NFETX and
+       V_PFETX are provided as a minimal-frills transistor, in case the
+       fancier transistors are too "smart" to work properly in your
+       circuit.  Also, since the programs for V_NFETX and V_PFETX are
+       simple they will simulate faster, especially in hierarchical
+       designs.
+
+   8.  V_NFETX and V_PFETX can pass weakly driven signals as well as
+       strongly driven ones.  As a result, you can use them to simulate
+       NMOS circuits.  Use V_NFETX for enhancement devices, and the
+       standard TIE gate as a depletion (pull-up) device.  The fancier
+       transistors will not work in this way because the the weak one from
+       the TIE gate will not be able to overpower the weak one or zero
+       being driven by the transistor's capacitance.
+
+   9.  The following additional gates are provided in the VLSI library:
+
+       V_BUF      VLSI buffer.  This gate acts like a non-inverting
+                  buffer made out of V_NFETX and V_PFETX transistors.  That
+                  is, it does not affect its input pin in any way, but the
+                  output pin gets a copy of the most recently driven input
+                  value.  You can use V_BUF to get a visible indication of
+                  what value is stored on the hidden gate capacitances of
+                  V_NFETX's and V_PFETX's on the same wire.
+
+       V_INV      VLSI inverter.  This gate acts like a usual digital
+                  inverter.  The difference between V_INV and the standard
+                  INV gate is that V_INV's input is dynamic in the same way
+                  as the V_NFET and V_PFET transistors' gates.  V_INV
+                  weakly drives its input according to the capacitively
+                  stored value.  It is provided simply as a shorthand to
+                  drawing the two transistors.
+
+       V_AND, V_OR, V_NAND, V_NOR
+                  VLSI AND, OR, NAND, and NOR gates.  These gates have
+                  capacitive inputs, just as in V_INV.
+
+       V_TRANS, V_TRANSN
+                  CMOS transmission gates (with active-high or active-low
+                  control).  These gates act much like V_NFET's and
+                  V_PFET's connected together to form the traditional CMOS
+                  "pass" gate.  They require only a single control input,
+                  generating the inverted control signal internally.  For
+                  V_TRANS, the gate conducts ones or zeros in either
+                  direction whenever the control is one, and is an open
+                  circuit when the control is zero.  For V_TRANSN, the gate
+                  conducts only when the control is zero.  If the gates get
+                  confused and you need a directional transmission gate,
+                  you can use the 74125 and 74126 "tri-state buffer" gates
+                  from the library.
+
+       V_CSRL     Complementary Set-Reset Logic element.  This is a one-bit
+                  latch designed to emulate a CSRL gate.  If the "latch"
+                  input is high, then a zero on the upper data input clears
+                  the latch and a zero on the lower data input sets the
+                  latch.  If the latch input is low, or if both data inputs
+                  are high or undriven, the latch remembers its previous
+                  value.  The result is undefined if the latch is high and
+                  both data inputs are low.  The latched value and its
+                  complement are driven on the outputs.
+
+       V_CSRL0    To get a complete two-phase master-slave flip-flop,
+                  connect two V_CSRL's in series.  The V_CSRL0 gate is
+                  electrically equivalent to V_CSRL, but with the control
+                  pin in a different place so that parallel "phase 1" and
+                  "phase 2" clock busses can be used.
+
+       V_CSRL2    Two-bit parallel CSRL latch.
+
+       V_CSRL4    Four-bit parallel CSRL latch.
+
+       V_CSRLN    CSRL latch with active-low control.
+
+
+</PRE>
+
+<UL>
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

@@ -1,0 +1,87 @@
+<TITLE> Compiling Psys </TITLE>
+
+<H1> Compiling Psys </H1>
+
+	<P> This document assumes you are compiling the Psys libraries
+for one of the currently <A HREF="../pickup/platforms.html"> supported </A>
+machines, and that you have the required support software detailed
+in this document. This document also assumes that you have uncompressed
+and untarred the <TT> Psys </TT> file, and installed it in the 
+<TT> chipmunk </TT> directory. </P>
+
+	<P> Begin by descending to the <TT> psys/src </TT> directory. 
+At this point OS/2 users <B> only </B> should execute the following
+command. </P>
+
+<P> <TT> cp Makefile.os2 Makefile </TT> </P>
+
+	<P> All users should now edit the Makefile, and make any
+necessary changes. Comments in the Makefile will guide you through 
+these changes; the changes are labeled with the markers (1), (2), (3), 
+etc. Once these changes are made, execute the command </P>
+
+<P> <TT> make install </TT> </P>
+
+	<P> If things are working correctly, a long series of compilations,
+linkings, and file movements should occur without error. When these 
+operations complete, Psys is successfully installed. </P>
+
+<H1> Problems and Solutions </H1>
+
+<P> It is quite possible that compilation did not proceed smoothly. Here are
+some problems that could have happened, along with suggestions.
+</P>
+
+<DL>
+<DT> <B> ANSI header problems </B>
+<DD> Sometimes, not all the <TT>/usr/include/*.h</TT> files are ANSI
+standard, especially in older machines.  Symptoms of this problem
+include mention of the <TT>stdlib.h</TT> and <TT>stddef.h</TT> header
+files in the compilation error message, and mention of the <TT>_SIZE_T</TT> and
+<TT>_PTRDIFF_T</TT> defines in the compilation error message. There are several
+possible <A HREF="psysansi.html">solutions </A> to this problem.
+<DT> <B> Ranlib problems </B>
+<DD> On some systems, it may be necessary to run <TT>ranlib</TT> on the
+file <TT>libp2c.a</TT> for linking to be successfull. 
+<DT> <B> Font problems </B> 
+<DD> The Chipmunk system expects the X fonts
+<TT>8x13</TT>and <TT>6x10</TT> to be available. Some minimal systems
+don't have these. If you don't have them, edit the section of the
+<tt>psys</TT> Makefile that configures the default fonts, and change the
+definitions to be similarly-sized fonts that are in your system.
+<DT> <B> Gcc installation problems </B> 
+<DD> Sometimes Gcc is installed incorrectly in a system, and the
+Chipmunk tools are the first program that reveal the incorrect
+installation. Examples problems include Gcc using the cc preprocessor
+instead of its own preprocessor, and Gcc is looking in the wrong place
+for include files. When compiling the Chipmunk tools, a symptom of
+these problems often involves problems with accessing the system
+include file <TT>varargs.h.</TT>
+<DT> <B> Putc definition problems (Linux users only) </B>
+<DD> The <TT>putc</TT> definition in <TT>newcrt.c</TT> is set up for
+the current Slackware distribution of Linux. If <TT>newcrt.c</TT> does
+not compile for you under Linux, search in <TT>newcrt.c</TT> for the
+word <TT>dreaded</TT> for more information.
+<DT> <B> Make hangs (OS/2 users only) </B>
+<DD> Be sure to use <TT>nmake</TT>, not <TT>make</TT>. 
+</DL>
+
+	If these suggestions don't help you compile Psys, I'd be happy
+to offer suggestions; press <A HREF="helpme.html"> here </A> for 
+more information about asking for help.
+
+<UL>
+<LI> <A HREF="../compile/compile.html#place">Return to 
+compilation instructions. </A> 
+<LI> <A HREF="../index.html">Return to home page.</A> 
+<LI> <A HREF="../document/document.html">User documentation for Chipmunk 
+tools.</A> 
+<LI> <A HREF="../pickup/pickup.html">To pick up the distribution. </A> 
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

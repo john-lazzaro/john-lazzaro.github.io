@@ -1,0 +1,244 @@
+<TITLE> Other Simulation Features </TITLE>
+
+<H1> Other Simulation Features</H1>
+
+<PRE>
+
+SIMULATION GOODIES
+
+   1.  If there are any circuit elements with unconnected pins, AnaLOG
+       will refuse to simulate.  If you meant to leave the pin
+       unconnected, you must connect it to something like a "dummy"
+       capacitor to ground.  If there are unconnected gates, the
+       NUMBERS icon will display a message of the form "OPAMP is
+       unconnected".  Digital LOG doesn't mind unconnected pins on
+       gates.
+
+   2.  If you give a ":DIM" command, AnaLOG gates will be drawn in dim
+       colors until they are fully connected.  Another ":DIM" turns this
+       mode off.  This command only works with the analog simulator.
+
+   3.  Select Probe in the Cursor menu (or press the "." key) to enable
+       Probe mode.  The cursor changes to a different style arrow; when
+       you move this arrow over a gate or wire, a message below the
+       AnaLOG NUMBERS icon shows the internal state of the gate and/or
+       node.  In Digital LOG, the lines at the bottom of the screen light
+       up according to the state of the node being probed.  Probe mode
+       also displays the name of a gate being touched.  Select again
+       to turn the mode off.  You can also press "e" or "x"
+       ("Examine") for a temporary Probe mode which turns off
+       automatically when you click the right button.
+
+   4.  Select Glow in the Cursor menu (or press the "g" key) to enable
+       Glow mode.  Wires "glow" in colors according to the voltages
+       they carry.  In AnaLOG:
+
+            Black       means at (or below) ground.
+            Dark red    means within one transistor threshhold of ground.
+            Red         means an intermediate voltage.
+            Pink        means within one transistor threshhold of VDD.
+            White       means at (or above) VDD.
+            Green       means the wire is not driven by an analog gate.
+
+       In digital LOG:
+
+            Black       means the wire carries a Zero.
+            Red         means the wire carries a One.
+            Green       means the wire is not driven.
+
+       Glow mode may be left on at all times, though it may make the
+       simulation a little slower.
+
+   5.  Select Simulation in the Misc menu (or press the "o" key)
+       to turn the simulator off or back on again.  When simulation is
+       off, the gates and nodes of the circuit appear to freeze at their
+       last simulated values.  Turning the simulator back on resumes the
+       simulation.
+
+   6.  Press the "t" key to simulate for one time-step, then stop.
+       You can press t as many time as you wish to see the simulation
+       evolve, then press o to turn full-speed simulation back on.
+
+   7.  LOG tries to balance simulation speed against response time for
+       the mouse and keyboard.  If you let go of the mouse and don't press
+       any keys, LOG slowly shifts the balance to prefer simulation.
+       When you again use the mouse or keyboard the balance reverts to
+       favoring editing.  You can press the "f" key to switch
+       immediately to "fast" mode (preferring simulation over editing).
+
+
+
+"SCOPE" MODE
+
+   1.  Numbers are great, but real people like to see plots of their
+       output waveforms.  In LOG, the mechanism for this is called
+       Scope mode.  To use it, first connect terminals (TO or FROM)
+       to each signal to be monitored and give the signals unique
+       names, then select SCOPE in the Misc menu, or press the "s"
+       key.  The scope can display both digital and analog signals.
+
+   2.  The Scope screen consists of a large field of dots representing
+       the "divisions" on a normal scope face, an area to the left of
+       the dots where signal names can go, and some menu words at the
+       bottom.  Use the mouse as usual to select menu words for the
+       functions that you want.  In particular, touch QUIT (there's
+       one on each side, for your convenience!) or hit Control-C to
+       return to the circuit diagram.
+
+   3.  To display a certain signal on the scope, just type the name
+       of the signal and press ENTER.  The name will appear somewhere
+       at the left edge.  You can use the mouse to press and drag the
+       name to any vertical location.  To remove a signal name, drag
+       it off the top or bottom edge.
+
+   4.  Initially, the scope is not "triggered," so nothing is
+       displayed.  To begin taking data, touch Trigger.  The scope
+       also automatically triggers when you reset the simulation; there
+       is a handy Reset on the menu too.  A few moments after you
+       trigger the scope, lines to the right of the signal names
+       will begin to appear.
+
+   5.  In all probability, the lines will be absurdly wide or
+       ridiculously thin.  In other words, the time scale is wrong.
+       To fix this, press the "<" or ">" keys to shrink or expand
+       (respectively) the plot until it fits nicely on the screen.
+       You can also use the arrow keys to scroll around the plots in time;
+       by scrolling and expanding you can focus in on any part of the
+       simulation history.
+
+   6.  Touch Config to change the various Scope mode parameters.
+       You will find here the seconds-per-division and seconds-at-
+       left-edge parameters that the zoom and scroll commands
+       manipulate graphically; you can set them numerically if you
+       prefer.  The current time and timestep are displayed for
+       your reference in setting these values.
+
+   7.  Scope mode has a limit on the number of data points it will
+       take before stopping, initially 2000.  You can set this in
+       the Config screen, but beware that if you set it too high
+       AnaLOG will run out of memory and lose ALL of your data!.
+       This screen also displays the number of data points taken
+       so far.  What happens when this reaches the maximum depends
+       on the "trigger mode" attribute:
+
+            Manual:        Scope starts taking data when you touch
+                           "Trigger," and stops when you touch "Trigger"
+                           again, or when all the data points are used.
+                           Beware that when memory fills, there is no way
+                           to resume taking data except by retriggering
+                           and losing all of your old data!  LOG prints
+                           warning messages when you are about to run
+                           out of data points.
+
+            On Reset:      Like Manual, but also triggers automatically
+                           on RESET.  This is the default mode.
+
+            Triggered:     Like Manual, but also triggers automatically
+                           when a triggering pulse is detected on the
+                           signal that you specify.  Not relevant for
+                           AnaLOG, because triggering on analog signals
+                           has not yet been implemented.
+
+            Continuous:    Triggers manually or on RESET.  When data
+                           memory is full, old data points are removed
+                           from the left and new ones added to the
+                           right.  Never stops triggering unless you
+                           turn it off by hand.
+
+       On Reset mode is typically used when you are interested in the
+       first data points of a long simulation; Continuous mode is for
+       when you are interested in the most recent data points.
+
+       Note that the word "Trigger" is lit whenever the Scope is taking
+       data, and unlit otherwise.
+
+   8.  Normally, Scope mode records exactly one data point per timestep
+       returned by the simulator.  The "minimum timestep" and "maximum
+       timestep" attributes can modify this.  If you would like to
+       conserve memory and take data points only at, say, 100us intervals,
+       you could set "minimum timestep" to 100us.  Scope mode will then
+       record a data point only if it's been at least 100us since the last
+       point was taken.  The other attribute, "maximum timestep," does
+       not work with the analog simulator.
+
+   9.  When you touch (instead of dragging) a signal name on the left edge,
+       you Configure the parameters for that signal's particular trace.  In
+       AnaLOG, you can set volts-per-division, plus an "origin" voltage for
+       plotting small signals (for example, if you have a signal that
+       varies slightly around 2V, set the origin to 2V and the scale to,
+       say, 50mV per division).  You can also change the color of the
+       trace, very helpful for plotting several traces on top of one
+       another.  You can also set logarithmic mode, in which case you
+       specify "Vzero" which is the voltage to plot at the origin, with one
+       decimal order of magnitude per division above and below.
+
+  10.  To plot an AnaLOG current, you must take an ISCOPE gate, which is
+       the funny-looking meter with a hook coming out the back, connect it
+       to the pin to be measured, and connect a terminal (TO or FROM) to
+       the "hook." Now, when you monitor that name in Scope mode, you will
+       measure Amps instead of Volts.  Note that the "hook" pin of the
+       ISCOPE is a special "current-mode" data type, and any attempt to
+       connect it to a normal analog signal will fail.  If an ISCOPE ever
+       appears to undergo spontaneous combustion, it is because you put it
+       down with the hook touching an analog wire.
+
+  11.  If you try pressing down the mouse anywhere in the grid of dots,
+       you will get a horizontal and/or vertical line whose meaning
+       depends on two indicators at the bottom of the screen:
+
+            Absolute:      Display the value of time, or of the
+                           currently-selected signal, that corresponds
+                           to the mouse position.
+
+            Delta:         Display the difference in time or signal
+                           value that corresponds to the distance between
+                           the current mouse position, and the position at
+                           which it was first pressed down.
+
+            Value:         Display the value of the current signal as
+                           of the time that corresponds to the mouse
+                           position.  For example, you move the mouse to
+                           the "2.3ns" point, and the Scope displays the
+                           value that the current signal had at that time.
+
+            Slope:         Display the slope of the line between the
+                           starting and current mouse positions, where
+                           rise is measured in the units of the current
+                           signal, and run is measured in seconds.
+
+               Time        Display absolute or delta time, in seconds.
+
+               Freq        Display delta time, in Hz (= 1/seconds).
+
+               Signal      Display the value of the signal whose name is
+                           highlighted, in Volts or Amps.  As you touch
+                           this word, each signal is highlighted one by
+                           one.  You can also select a current signal
+                           by tapping its trace on the screen.
+
+  12.  The word ON is a "power switch" for the simulation.  If you touch
+       it, it changes to OFF and the simulation halts.  When you touch it
+       again, simulation continues.  (In the circuit-diagram screen, this
+       function is called Simulation in the Misc menu.)
+
+  13.  When you touch Dump, the Scope writes out all of the data into a
+       file in a standard format.  You may want to do this in order to
+       use a more hefty data analysis tool with data generated by AnaLOG.
+       The CNS 182 "View" program is one such tool, with a special "aload"
+       command for loading AnaLOG dump files. MATLAB is another possibility;
+       Michael Godfrey has written a <A HREF="../../other/scope_to_mat.html">tool</A> to convert Dump output to 
+       MATLAB format.
+
+</PRE>
+
+<UL>
+<LI> <A HREF="anasim5.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

@@ -1,0 +1,92 @@
+<TITLE> Log-To-SPICE Conversion </TITLE>
+
+<H1> Log-To-SPICE Conversion</H1>
+
+<PRE>
+
+  DESCRIPTION
+
+        Harold Levy of Caltech modified the LOGNTK program to create a
+  new program, LOGSPC, that creates SPICE decks instead of .ntk files.
+  The tool is used identically to LOGNTK, so the manual section above
+  describes LOGSPC also. The command to invoke the tool is :logspc, and
+  configuration information is in the file lib/logspc.cnf. The FET7
+  series works with LOGSPC, supported by the LAMBDA command. The FET
+  models NSPC1 and PSPC1, contributed by Bhusan Gupta at Caltech, are
+  perfect for use with LOGSPC.  These gates also simulate in analog;
+  however, these models are considered "experimental" as opposed to
+  "standard" models in analog, and are not supported by the chipmunk
+  maintainers.
+
+  LOGSPC ADDITIONS
+ 
+        A few additional commands have been built into LOGSPC to better
+  support SPICE capabilities.  Note that the SIZE and STRENGTH commands
+  of LOGNTK are ignored in LOGSPC, and that the following commands are
+  used instead:
+ 
+ 
+          NBULK: signal-name
+          PBULK: signal-name
+                    These commands assign explicit names to the implicit
+                    bulk terminals for 3-terminal FET (e.g. p/n-FETs 4 and 5)
+                    and bipolar (e.g. NPN1, PNP1) models.  The signal-name
+                    is output in capitals unless quoted.
+ 
+          LAMBDA: number
+                    This command assigns an explicit lambda value (in
+                    microns) to the FET7 model series.
+ 
+          CHLEN: number
+                    This command assigns an explicit channel length (in
+                    microns) to FET models using w/l ratios (e.g. p/n-FETs
+                    4, 5, and 6).
+ 
+          PRE: filename
+          POST: filename
+
+		    Specifies a file for inclusion into .spc files before
+                    and after netlist.
+
+ 
+  Also note that as of LOGSPC version 0.5b the ability to extract VDIFF
+  gates is provided.  This feature may be shut off with the command
+ 
+           LOGSPC: IGNORE VDIFF
+
+  Finally, the TRANS command has been extended, to supporting adding new
+  gate types to logspc, as shown in the example below.
+
+  EXAMPLE 
+
+  Copy the files chipmunk/log/lib/{spctest.lgf,pre.spc,post.spc} to your
+  directory, and examine and run logspc on spctest.lgf, to see the features
+  described above in action.
+  
+  FILE CONVERSIONS
+
+	The supplementary toolkit includes companion programs to LOGSCP,
+  that simplify using LOGSPC output with other tools. These tools are located
+  in the spc-tools subdirectory of the toolkit. Three scripts are included:
+
+         sf:  Flattens hierarchical LOGSPC (version 1.0) output.
+
+         ss:  Converts output from "sf" into UCB SIM format for use with
+              UW's "gemini" layout-versus-schematic (LVS) comparison program.
+
+     ucbsim:  Appends "format: UCB" to the first line of SIM files generated
+               by ext2sim.
+
+
+</PRE>
+
+<UL>
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>

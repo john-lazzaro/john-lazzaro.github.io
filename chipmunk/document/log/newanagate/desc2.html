@@ -1,0 +1,588 @@
+
+
+<TITLE> Annotated <TT>resfloat.c</TT> [2]</TITLE>
+
+<H1> Annotated <TT>resfloat.c</TT> [2]</H1>
+
+<PRE>
+
+
+	This is a description of resfloat.c, embedded into the file
+itself. This file won't compile because I didn't bother to enclose my
+comments in /* */'s. 
+
+
+...resfloat.c ...
+
+
+
+/* "LOG", the circuit editing and simulation system,
+   "DigLOG", the digital simulator for LOG.
+   Copyright (C) 1985, 1990 David Gillespie.
+
+   "AnaLOG", the analog simulator for LOG.
+   Copyright (C) 1985, 1990 John Lazzaro.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation (any version).
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; see the file COPYING.  If not, write to
+the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
+
+/* Output from p2c, the Pascal-to-C translator */
+/* From input file "gates.text" */
+
+
+
+
+#include <p2c/p2c.h>
+
+
+
+
+
+#define RESFLOAT_G
+
+... change this to be your gates's .h file. Copy resfloat.h, and change
+all instances to resfloat to newgate and all instances of RESFLOAT to
+NEWGATE
+
+#include "resfloat.h"
+
+.. these are definitions for the "attribute" screen. Define your attributes
+as N_attributename, numbered in the same order they appear in your gate
+definition that you do in loged. After your last attribute, include a 
+#define Cstart as is done here, this is used to indicate the start of
+the "state attributes" for the nodes of the gate. Also define gatename to
+be the name of your gate.
+
+
+#define N_Res           1
+#define Cstart          2
+
+#define Gatename        "Resistor"
+
+... this structure holds constants your code computes from the attributes,
+for use in the model. For resfloat, for example, Conductance = 1/Resistance
+is computed once, rather than doing a division hundreds of times.
+
+typedef struct ResfloatConst {
+  double Conductance;
+} ResfloatConst;
+
+.. this structure holds the Initial value of the attributes on startup.
+Should start with IC by convention. 
+
+typedef struct ICResfloat {
+  double ICRes;
+} ICResfloat;
+
+
+
+
+/****************************************************************************/
+/*            Procedure To Simulate Cell In Algorithm                        */
+/****************************************************************************/
+
+... this is the procedure that actually simulates the gate
+
+
+Local Void Ex_Resfloat(act)
+Analog_32_action *act;
+{
+
+... note how for each pin you define a various current and voltage
+vaiables, including partial derivitives dI#dV# ...
+
+  double MinI1, MinI2, dI1dV1, dI1dV2, dI2dV1, dI2dV2;
+  AnaExt_rec *Pin1Ptr;
+  long Pin1;
+  double VPin1;
+  AnaExt_rec *Pin2Ptr;
+  long Pin2;
+  double VPin2;
+  ResfloatConst *ResfloatVar;
+  Anainstlist *A_Gate;
+  log_grec *WITH;
+  AnaMatRec *WITH2;
+
+
+  WITH = act->inst;
+
+... This section just loads up the variables above from the appropriate
+data structures, and can be extended by rote ...
+
+  A_Gate = (Anainstlist *)WITH->info;
+  ResfloatVar = (ResfloatConst *)A_Gate->InstVar;
+  Pin1Ptr = (AnaExt_rec *)WITH->pin[0]->info;
+  Pin1 = Pin1Ptr->nodenum;
+  VPin1 = Pin1Ptr->last;
+  Pin2Ptr = (AnaExt_rec *)WITH->pin[1]->info;
+  Pin2 = Pin2Ptr->nodenum;
+  VPin2 = Pin2Ptr->last;   
+
+...This is the actual computing of I=V/R, using the voltages on the
+pins (VPin1 and VPin2), and the precomputed conductances. Note you 
+computing -I1 and -I2   
+
+
+  MinI1 = ResfloatVar->Conductance * (VPin2 - VPin1);
+  MinI2 = -MinI1;
+
+... This computer the partial derivitive of I1 and I2 w/respect to the V's.
+Its just symbolically taking the derivitive of the above equation ...
+
+  dI1dV1 = ResfloatVar->Conductance;
+  dI1dV2 = -ResfloatVar->Conductance;
+  dI2dV1 = -ResfloatVar->Conductance;
+  dI2dV2 = ResfloatVar->Conductance;
+
+This is another section that can be copied and extended by rote, it loads
+up the solution matrix with the result of the above computation. If some
+of your derivitives or currents are zero, delete the MatNZ assigment, do
+not write "false".
+
+  WITH2 = AnaSystem;
+  WITH2->Mat[Pin1][AnaSysCol] += MinI1;
+  WITH2->Mat[Pin2][AnaSysCol] += MinI2;
+  WITH2->Mat[Pin1][Pin1] += dI1dV1;
+  WITH2->Mat[Pin1][Pin2] += dI1dV2;
+  WITH2->Mat[Pin2][Pin1] += dI2dV1;
+  WITH2->Mat[Pin2][Pin2] += dI2dV2;
+  WITH2->MatNZ[Pin1][AnaSysCol] = true;
+  WITH2->MatNZ[Pin2][AnaSysCol] = true;
+  WITH2->MatNZ[Pin1][Pin1] = true;
+  WITH2->MatNZ[Pin1][Pin2] = true;
+  WITH2->MatNZ[Pin2][Pin1] = true;
+  WITH2->MatNZ[Pin2][Pin2] = true;
+
+This executes the parasitic capacitors on each node automatically. They
+must be included for the simulator to be happy, although you can decrease
+the value of them in your models.cnf code from the default if you wish.
+
+  AnaCapex(act->inst);   /*Does execution of node capacitors*/
+}  /*Ex_Resfloat*/
+
+
+/****************************************************************************/
+/*          Procedure To Supply Current  Out of a Cell To Current Meters    */
+/****************************************************************************/
+
+
+Local Void Iin_Resfloat(act)
+Analog_32_action *act;
+{
+  AnaExt_rec *Pin1Ptr;
+  double VPin1, VMem1;
+  AnaExt_rec *Pin2Ptr;
+  double VPin2, VMem2;
+  ResfloatConst *ResfloatVar;
+  Anainstlist *A_Gate;
+  log_grec *WITH;
+
+This routine calculates the current through a pin; used by "probemode".
+
+
+  WITH = act->inst;
+  A_Gate = (Anainstlist *)WITH->info;
+  ResfloatVar = (ResfloatConst *)A_Gate->InstVar;
+  Pin1Ptr = (AnaExt_rec *)WITH->pin[0]->info;
+  VPin1 = Pin1Ptr->now;
+  VMem1 = A_Gate->Pininfo[0].Vmem;
+  Pin2Ptr = (AnaExt_rec *)WITH->pin[1]->info;
+  VPin2 = Pin2Ptr->now;
+  VMem2 = A_Gate->Pininfo[1].Vmem;
+  switch (act->pin) {
+
+Current calculation as above, note derivitives aren't needed ...
+
+  case 1:
+    WITH = act->inst;
+    act->Iin = ResfloatVar->Conductance * (VPin1 - VPin2) + act->Iin;
+    AnaCapIin(act);
+    break;
+
+  case 2:
+    WITH = act->inst;
+    act->Iin = ResfloatVar->Conductance * (VPin2 - VPin1) + act->Iin;
+    AnaCapIin(act);
+    break;
+
+  default:
+    printf("Data Structure Corruption\n");
+    _Escape(1002);
+    break;
+  }
+}  /*Iin_Resfloat*/
+
+
+Local Void GetCnf_Resfloat(NewIC)
+ICResfloat *NewIC;
+{
+  boolean Found;
+  Char Arg[256], Keyword[256];
+  long Dummy;
+  ICResfloat *WITH;
+  Char *STR1;
+
+Reads the models.cnf commands associated with your gate, look at a gate
+with more attributes to get a feel of how it generalizes. The TRY
+RECOVER macros are used to you can assume the arguments are numbers,
+do the computation you want, and if it fails put in a default. Not sure
+what the Dummy line is doing, this is 10 year old code :-)
+
+  WITH = NewIC;
+  do {
+    AnaGetcommand("RESFLOAT", Arg, &Found);
+    if (Found) {
+      (*AnaLogglobals->hook.getword)(Arg, Keyword);
+      if (!strcmp(Keyword, "RES")) {
+	TRY(try1);
+	  WITH->ICRes = strtod(Arg, &STR1);
+	  Dummy = STR1 - Arg + 1;
+	RECOVER(try1);
+	  WITH->ICRes = 1000.0;
+	ENDTRY(try1);
+      }
+    }
+  } while (Found);
+}
+
+
+/****************************************************************************/
+/*                          Installation Procedure                           */
+/****************************************************************************/
+
+Local Void initlib_Resfloat(act)
+Analog_32_action *act;
+{
+  AnaCell_rec *NewCell;
+  ICResfloat *NewIC;
+
+called when analog is launched to install resfloat.
+
+this line mallocs the holder for state info
+
+  NewCell = NULL;
+  NewCell = (AnaCell_rec *)Malloc(sizeof(AnaCell_rec));
+
+copy these verbatim, they are flags. Phase set to something else for gates
+that have "little red lights" on them, check out vswitch.c for an example.
+
+  NewCell->simulatable = true;
+  NewCell->intr_cell = 0;
+  NewCell->phase = Anasimple;
+
+copy this verbatim
+
+  NewCell->plist_cell = (Anapinrec *)Malloc(sizeof(Anapinrec) * act->kind->numpins);
+
+extend to number of pins in your gate
+
+  NewCell->plist_cell[0].standalone = false;
+  NewCell->plist_cell[0].active = true;
+  NewCell->plist_cell[1].standalone = false;
+  NewCell->plist_cell[1].active = true;
+
+copy this verbatim
+
+  NewIC = (ICResfloat *)Malloc(sizeof(ICResfloat));
+
+inititalize all your IC's to sane values -- will be overriden by models.cnf
+
+  NewIC->ICRes = 1000.0;
+
+copy this verbatim
+
+  GetCnf_Resfloat(NewIC);
+  NewCell->Ainfo = (Anyptr)NewIC;
+  act->kind->info = (Anyptr)NewCell;
+}  /*Resfloat_Initlib*/
+
+
+
+Local boolean Resfloatcheck(Inst, Attrnum)
+log_grec *Inst;
+long Attrnum;
+{
+  boolean Result;
+  ResfloatConst *ResfloatVar;
+  Anainstlist *A_Gate;
+
+does error checking when a user types in a new attribute, and sets the
+computed variable (Conductance here) to reflect new state. "Result" 
+determines if you accept or reject users input.
+
+
+  Result = true;
+  A_Gate = (Anainstlist *)Inst->info;
+  ResfloatVar = (ResfloatConst *)A_Gate->InstVar;
+  switch (Attrnum) {
+
+  case N_Res:
+    if (Inst->attr[Attrnum - 1].UU.r <= 0 || Inst->attr[Attrnum - 1].blnk ||
+	Inst->attr[Attrnum - 1].UU.r > AnaResTooBig)
+      Result = false;
+    else
+      ResfloatVar->Conductance = 1 / Inst->attr[N_Res - 1].UU.r;
+    break;
+  }
+  return Result;
+}
+
+
+Local Void Attr_Resfloat(act)
+Analog_32_action *act;
+{
+  long Attrnum;
+
+  Attrnum = act->pin;
+  if (Attrnum >= Cstart && Attrnum <= Cstart + 5)
+    AnaCapattrinsert((long)Cstart, Attrnum, act->inst, &act->ok);
+  else
+    act->ok = Resfloatcheck(act->inst, Attrnum);
+}
+
+
+Local Void Newgate_Resfloat(act)
+Analog_32_action *act;
+{
+  ResfloatConst *ResfloatVar;
+  Anainstlist *A_Gate;
+  AnaCell_rec *Cellptr;
+  ICResfloat *ICptr;
+  log_grec *WITH;
+
+Called everytime a user makes a new instance of a gate, loads in the
+attributed with IC values, and initializes some structures.
+
+  Cellptr = (AnaCell_rec *)act->inst->kind->info;
+  ICptr = (ICResfloat *)Cellptr->Ainfo;
+  ResfloatVar = (ResfloatConst *)Malloc(sizeof(ResfloatConst));
+  ResfloatVar->Conductance = 1 / ICptr->ICRes;
+  A_Gate = (Anainstlist *)act->inst->info;
+  A_Gate->InstVar = (Anyptr)ResfloatVar;
+  AnaCapInit(act->inst);
+  WITH = act->inst;
+  WITH->attr[N_Res - 1].UU.r = ICptr->ICRes;
+  WITH->attr[N_Res - 1].blnk = false;
+  WITH->attr[N_Res - 1].changed = true;
+}
+
+Local Void Copygate_Resfloat(act)
+Analog_32_action *act;
+{
+  ResfloatConst *ResfloatVar, *Old_Resfloatvar;
+  Anainstlist *A_Gate, *A_Oldgate;
+
+Called everytime a user copies a gate on the screen, copy verbatim ...
+
+
+  A_Oldgate = (Anainstlist *)AnaLogglobals->actgate2->info;
+  Old_Resfloatvar = (ResfloatConst *)A_Oldgate->InstVar;
+  ResfloatVar = (ResfloatConst *)Malloc(sizeof(ResfloatConst));
+  *ResfloatVar = *Old_Resfloatvar;
+  A_Gate = (Anainstlist *)act->inst->info;
+  A_Gate->InstVar = (Anyptr)ResfloatVar;
+  /*Always Do*/
+  AnaCapCopy(act->inst);
+}
+
+Local Void Dispose_Resfloat(act)
+Analog_32_action *act;
+{
+  ResfloatConst *ResfloatVar;
+  Anainstlist *A_Gate;
+
+Copy verbatim, deletes datastructures
+
+  A_Gate = (Anainstlist *)act->inst->info;
+  ResfloatVar = (ResfloatConst *)A_Gate->InstVar;
+  Free(ResfloatVar);
+  AnaCapDispose(act->inst);   /*7*/
+}
+
+Local Void Readgate_Resfloat(act)
+Analog_32_action *act;
+{
+  ResfloatConst *ResfloatVar;
+  Anainstlist *A_Gate;
+  log_grec *WITH1;
+
+Called after reading a file, reset your internal variables (like 
+Conductance here) to reflect attributes just read.
+
+  AnaCapattrread((long)Cstart, act->inst);   /*Read capacitors*/
+  A_Gate = (Anainstlist *)act->inst->info;
+  ResfloatVar = (ResfloatConst *)A_Gate->InstVar;
+  WITH1 = act->inst;
+  ResfloatVar->Conductance = 1 / WITH1->attr[N_Res - 1].UU.r;
+}
+
+
+Local Void Probe_Resfloat(act)
+Analog_32_action *act;
+{
+  Anainstlist *A_Gate;
+  AnaExt_rec *Node1Ptr, *Node2Ptr;
+  double Node1, Node2, Pin1, Pin2, d;
+  Char Name1[256], Name2[256];
+  log_grec *WITH;
+  Char STR1[22];
+  Char STR2[256];
+  Char STR3[256];
+
+Handles the display on NUMBERS Icon when probemode is called. This is a frill
+and can be deferred till later, easiest way to understand whats going on is
+to use probe mode with resfloat, note the behavior, and translate it to the
+parts of this code.
+
+
+  WITH = act->inst;
+  A_Gate = (Anainstlist *)WITH->info;
+  Pin1 = A_Gate->Pininfo[0].Vmem;
+  Pin2 = A_Gate->Pininfo[1].Vmem;
+  Node1Ptr = (AnaExt_rec *)WITH->pin[0]->info;
+  Node2Ptr = (AnaExt_rec *)WITH->pin[1]->info;
+  Node1 = Node1Ptr->ltimestep;
+  Node2 = Node2Ptr->ltimestep;
+  if (Node1 != Pin1 || Node2 != Pin2 || Node1 == AnaNotyet || Node2 == AnaNotyet) {
+    sprintf(STR1, "%s <undefined>", Gatename);
+    AnaScoreboard(STR1, (long)AnaMessGate1);
+    AnaScoreboard("$", (long)AnaMessGate2);
+    return;
+  }
+  d = Pin1 - Pin2;
+  if (d >= 0) {
+    strcpy(Name1, " (+)");
+    strcpy(Name2, " (-)");
+  } else {
+    d = -d;
+    strcpy(Name1, " (-)");
+    strcpy(Name2, " (+)");
+  }
+  switch (AnaLogglobals->probepin) {
+
+  case 0:
+    AnaScoreboard(Gatename, (long)AnaMessGate1);
+    break;
+
+  case 1:
+    sprintf(STR2, "%s%s", Gatename, Name1);
+    AnaScoreboard(STR2, (long)AnaMessGate1);
+    break;
+
+  case 2:
+    sprintf(STR2, "%s%s", Gatename, Name2);
+    AnaScoreboard(STR2, (long)AnaMessGate1);
+    break;
+  }
+  sprintf(STR2, "dV = %s", AnaProbeVoltStr(STR3, d));
+  AnaScoreboard(STR2, (long)AnaMessGate2);
+}
+
+
+/*==========================================================================*/
+/*                 Library Listing For  Cell Resfloat                    */
+/*==========================================================================*/
+
+
+Void Log_resfloat_initlib_32(act)
+Analog_32_action *act;
+{
+  /*Main Procedure*/
+
+
+the dispatch procedure ....
+
+  switch (act->action) {
+
+  case Analog_act_newkind:
+    initlib_Resfloat(act);
+    break;
+
+  case Analog_act_ex:
+    Ex_Resfloat(act);
+    break;
+
+  case Analog_act_update:   /*8*/
+    AnaCapUpdate(act->inst);
+    break;
+
+  case Analog_act_pass1:
+    AnaCappass1(act->inst);
+    break;
+
+  case Analog_act_pass2:
+    AnaCappass2(act->inst);
+    break;
+
+  case Analog_act_attrchange:
+    Attr_Resfloat(act);
+    break;
+
+  case Analog_act_reset:
+    AnaCapReset(act->inst);
+    break;
+
+  case Analog_act_newgate:
+    Newgate_Resfloat(act);
+    break;
+
+  case Analog_act_copygate:
+    Copygate_Resfloat(act);
+    break;
+
+  case Analog_act_disposegate:
+    Dispose_Resfloat(act);
+    break;
+
+  case Analog_act_openconfig:
+    AnaCapattrload((long)Cstart, act->inst, act->ok);
+    break;
+
+  case Analog_act_readgate:
+    Readgate_Resfloat(act);
+    break;
+
+  case Analog_act_writegate:
+    AnaCapattrwrite((long)Cstart, act->inst);
+    break;
+
+  case Analog_act_Iin:
+    Iin_Resfloat(act);
+    break;
+
+  case Analog_act_probe:
+    Probe_Resfloat(act);
+    break;
+  }
+}
+
+#undef N_Res
+#undef Cstart
+#undef Gatename
+
+
+
+
+/* End. */
+</PRE>
+
+<UL>
+<LI> <A HREF="index.html">To return main document.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

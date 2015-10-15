@@ -1,0 +1,68 @@
+<TITLE>   Analog simulator commands</TITLE>
+
+<H1>   Analog simulator commands</H1>
+
+<PRE>
+
+   1.  The following additional ":" commands are available with the
+       AnaLOG simulator.
+
+
+       DIM ON/OFF
+                  Turn dim-unconnected-gates mode on or off.
+
+
+       ERASE      Same as touching Erase on the "Scoreboard" gate.
+                  If you are selecting Set and Erase often, you might
+                  want to use the MACRO command to put SET and ERASE on
+                  a pair of keys, for convenience.
+
+
+       EXACT      Same as touching Exact on the "Scoreboard" gate.
+
+
+       NEWMODEL   Set non-saving device-model mode, in which modelling
+                  parameters for transistors, and simulation constants
+                  such as "Vdd", are reset to their default values
+                  rather than being loaded from each circuit file.
+
+
+       OLDMODEL   Set the default device-model mode, in which modelling
+                  parameters for transistors, and simulation constants
+                  such as "Vdd", are saved in circuit files along with
+                  the transistor and "Scoreboard" (NUMBERS) gates.
+
+
+       PROBEPREC digits
+                  Set the number of decimal digits for voltages displayed
+                  by the "probe" cursor.  Default is 3.
+
+
+       RELAXED    Same as touching Relaxed on the "Scoreboard" gate.
+
+
+       SET        Same as touching Erase on the "Scoreboard" gate.
+
+
+
+   2.  Also, a great many AnaLOG parameters may be set in ".CNF" files.
+       These commands all begin with the prefix "32:".  Defaults appear
+       in the file "models.cnf" in the analog /lib directory -- ask
+       your local maintainer for details
+
+
+</PRE>
+
+
+<UL>
+<LI> <A HREF="ref5.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

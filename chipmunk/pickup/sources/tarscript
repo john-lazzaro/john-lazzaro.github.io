@@ -1,0 +1,19 @@
+
+## run this script to uncompress and untar the entire distribution
+
+gunzip *.gz
+tar -xvf webdoc-1.50.tar
+tar -xvf psys-1.60.tar
+tar -xvf log-5.65.tar
+tar -xvf view-1.15.tar
+tar -xvf until-1.15.tar
+tar -xvf wol-1.15.tar
+tar -xvf wolcomp-1.15.tar
+tar -xvf netcmp-1.14.tar
+tar -xvf mosis-1.15.tar
+tar -xvf util-1.12.tar
+tar -xvf examples.tar
+
+
+
+

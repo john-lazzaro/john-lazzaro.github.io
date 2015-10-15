@@ -1,0 +1,64 @@
+<TITLE> Notes </TITLE>
+
+<H1> Notes </H1>
+
+<PRE>
+
+   1.  LOG nodes which are not connected to any transistors or cells
+       are ignored.  Thus, you can not get orphan nodes just by drawing
+       stray wires.  You must explicitly use "orphan" gates as described
+       above under ORPHAN.
+
+
+   2.  Cells which pass "global" nodes to their subcells, but which do
+       not actually use those nodes themselves, must include those
+       global names in their own port lists.  For example, if a
+       higher-level cell does not use GND and VDD but its subcells do,
+       you must include GND and VDD in this cell's PORT list.  (Note
+       that if you are using the recommended "template gate" method
+       rather than writing a PORT list, this is all handled for you
+       automatically.)
+
+
+   3.  LOGNTK is case-insensitive, but case-preserving.  That is, if you
+       call something FOO in some places, and Foo in others, the names
+       will be considered the same, and one of the names will be chosen
+       for use everywhere in the output file.  Which name is chosen is
+       arbitrary, except that preference is given to usage in the PORT
+       command.  Note that LOG itself is case-sensitive in some ways,
+       for example, TO/FROM signal names "Vdd" and "VDD" are considered
+       to be different by LOG but this difference is not acknowledged by
+       LOGNTK.  This sort of disagreement can cause LOGNTK to produce
+       strange or erroneous output files.
+
+
+   4.  The "VDD" and "GND" symbols are exactly equivalent to TO's or
+       FROM's with the names Vdd and Gnd, respectively.
+
+
+   5.  In LOGED, you can use the CONNECT command to cause two pins to be
+       connected internally.  (For example, the crossing-wires gate
+       CROSS2 and the toggle switch SW2 work this way.) If you use such
+       a gate as an instance in LOGNTK, only the lowest-numbered of the
+       connected pins corresponds to a port in the PORT list; the other
+       pins in the connection group are skipped when being matched to
+       ports, in the same way as global ports are skipped when being
+       matched to pins.  Once again, using a template gate to describe
+       your ports handles this automatically.
+
+   6.  GINST gate symbols include an arrow -- this arrow signifies the
+       pin which is numbered "pin 1". Pins are numbered consecutively
+       from this pin, moving in a clockwise direction. 
+
+</PRE>
+  
+<UL>
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

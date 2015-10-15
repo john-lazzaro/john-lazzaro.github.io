@@ -1,0 +1,81 @@
+<TITLE> Adding New Gates to Analog </TITLE>
+
+<H1> Adding New Gates to Analog  </H1>
+
+<P>Adding a new gate to analog involves several different tasks: the
+creation of a set of C functions that describe the behavior of the
+gate, the creation of a new gate icon, and the rebuilding of an analog
+executable that includes this gate. </P>
+
+<P>The RESFLOAT gate is the simplest gate in analog that does a useful
+function: a two-terminal device that implements a linear resistor.  An
+easy introduction to adding gates to analog is adding a new
+two-terminal gate to the library, using RESFLOAT as a template; in
+this example, we'll call the new gate FOOFLOAT. By copying and
+modifying the C source and gate icon for resfloat to create FOOFLOAT,
+and linking it into a new analog executable, you'll learn the
+mechanics of adding gates to analog. </P>
+
+<H2> Creating the Foofloat Icon  </H2>
+
+<P>Use <B>Loged</B> to read the file <TT>log/lib/ana.gate.</TT> The
+ana.gate file holds all the icons used in analog simulation. Type
+the command <TT>gate resfloat</TT> to bring up the RESFLOAT gate.
+Then, type <TT>copy foofloat</TT> to create your new gate icon.</P>
+
+<P>At the very least, you'll need to change the "definition" of
+FOOFLOAT; the definition is a text string used link the C function
+describing gate behavior with a gate icon. Simple type the command
+<TT>def</TT> and answer "y" to the question
+"Default[FOOFLOAT](y/n)?". This is the only change necessary; however,
+you may want to use the graphical editor to alter the icon, or use the
+label editor to alter the attribute screen (however, don't change the
+number of attributes for this example). See the Loged <A
+HREF="../loged/loged1.html"> manual </A> for details on these
+editors. Be sure to save <TT>ana.gate</TT> before exiting. </P>
+
+<H2> Creating the Foofloat C file  </H2>
+
+<P> Go to the directory <TT>log/src/ana</TT> and copy the file
+<TT>resfloat.c</TT> to <TT>foofloat.c.</TT> Edit the file foofloat.c
+and change all capitalized variants of resfloat (i.e.  resfloat,
+Resfloat, ResFloat, and RESFLOAT) to their foofloat equivalents.
+Depending on your editor, this may be easiest to do manually. </P>
+
+<P> Also, edit the file log/lib/models.cnf, and clone all the
+Resfloat lines to make a set of Foofloat parameter calls. </P>
+
+
+<H2> Creating a new executable  </H2>
+
+<P> Edit the file <TT>log/src/Makefile</TT> and add foofloat to the
+ANAOBJ list. Also edit the file <TT>log/src/ana/Makefile</TT> and add
+foofloat to the GATESOBJ list. Delete the files
+<TT>log/src/tooldir.c</TT> and <TT>log/src/simdir.c,</TT> then do a
+<TT>make clean install</TT> in the <TT>log/src</TT> directory. </P>
+
+<P> If all goes well, a new analog executable should result. To test
+the new foofloat gate, type ":make foofloat" to create an instance of
+foofloat in analog; it should simulate identically to Resfloat.</P>
+
+<H2> Behavior of <TT>resfloat.c</TT> </H2>
+
+<P> The previous sections have described the mechanics of adding a new
+gate to analog, but haven't described the actual functions of the
+resfloat.c file. These two documents (<A HREF="desc1.html">1,</A> <A
+HREF="desc2.html">2</A>)are different annotations of the resfloat.c
+file, highlighting different aspects of the C functions that describe
+the behavior of the resfloat gate. Examining these annotated files, as
+well as examining other gate descriptions in the <TT>log/src/ana</TT>
+directory, should help explain the details of gate simulation
+behavior. </P>
+
+
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>

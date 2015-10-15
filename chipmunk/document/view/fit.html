@@ -1,0 +1,67 @@
+<TITLE> Documentation for Fit </TITLE>
+
+<H1> Documentation for Fit </H1>
+
+<P> <B> Fit </B> is a native view command added by Harold Levy, for fitting
+arbitrary nonlinear functions to data. Here is what is printed in
+view in response to "help" for fit. </P>
+
+<PRE>
+
+fit  &lt data &gt   &lt function &gt   &lt param1 &gt   &lt param2 &gt  ...
+  Fit a computed function to a data curve with the same
+  basis.  This is done via simplex minimization of chi^2
+  over the specified parameters of the function.  The
+  constant "fit_tol" is used to specify the goodness
+  of fit, and is created with a default value of 0.001
+  if not previously set.  Output can be redirected to a
+  specified file if the "  &gt  file_name" convention is
+  appended to the command line.
+
+</PRE>
+
+<P> Here is a simple example to type in to understand fit: </P>
+
+<PRE>
+
+here is a simple example to type in to understand "fit"
+
+basis i = 1:100:1   ## make a straight line curve
+a = 10              ## make up some variables
+b = 100             ## make up some variables
+y == a*i + b        ## set up a model equation for a straight line
+fplot y i           ## note how parameter a and b are a bad fit to data i
+fit i y a b         ## run the fit program
+fplot y i           ## note the better fit
+
+</PRE>
+
+<P> Here is a more intense example ... </P>
+
+<PRE>
+basis v=0:5:1                                   ## independent variable
+i = 1.23e-6 * log(1+exp((v-.67)/.05))^2         ## here's the data
+i0 = 1                                          ## make up some variables
+vt = 1                                          ## make up some variables
+f == i0 * log(1+exp((v-vt)/.05))^2              ## here's the model
+fplot i f                                       ## look at initial bad fit
+fit i f i0 vt                                   ## fit with fit_tol = 1e-3
+fplot i f                                       ## look at better fit
+fit_tol = 1e-12                                 ## try for even better
+fit i f i0 vt                                   ## fit with better guess
+style 1 circ                                    ## here's new plot style
+fplot i@1 f                                     ## look at best fit
+list i0 vt                                      ## dump the values
+
+</PRE>
+
+<UL>
+<LI> <A HREF="index.html">Return to View documentation page.</A> 
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

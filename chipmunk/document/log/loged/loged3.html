@@ -1,0 +1,111 @@
+<TITLE> DRAW command</TITLE>
+
+<H1> DRAW command</H1>
+
+<PRE>
+
+   1.  The "DRAW" command puts you in a graphical editor mode for drawing
+       the visible picture of the gate.  It also allows you to place the
+       gate's pins and "grab box".
+
+   2.  To exit the DRAW command, press "q" or the Control-C key.  (On
+       the Bobcat keyboard, this key is marked "Select".)
+
+   3.  Gate pictures are made up of many kinds of objects.  Initially,
+       you are set to draw the usual cyan vectors (line segments).
+       Tap the mouse at two locations to draw a new vector between those
+       points (analogous to drawing a wire in LOG).  Grab the body of
+       the vector to move it; grab an endpoint to change its direction
+       and size.  Move the vector off the grid to delete it.
+
+   4.  Tap the mouse on the color or shape name to change.  Circles and
+       ellipses are defined by a vector; an ellipse's diameters equal
+       the sides of the bounding box of the vector, and a circle's
+       diameter equals the larger of the two sides.  Filled ellipses
+       are also available.  Filled polygons are defined by four points;
+       to make a triangle, put two points in the same place; to make a
+       larger polygon, combine several triangles or quadrilaterals.
+       Rounded boxes are rectangles with circular arcs for corners.
+       "Curves" are Bezier curves defined by four points; the two
+       inner points govern the curve's slope at its endpoints.  Text
+       objects contain a string of characters of a particular size;
+       LOG will draw the characters at that size if possible, but
+       will not draw them at all if there is no font small enough.
+       Point-markers and box-markers are invisible placeholders which
+       a gate's program may use to specify the location of some
+       dynamic display such as an LED.
+
+   5.  Some aspects of a picture can not be edited graphically.  These
+       include the radius of the corners of a rounded box, and the size,
+       orientation and contents of a text object.  To edit the picture
+       textually, you can press the "e" key.  This is analogous to
+       the EDIT command of LOGED; it runs the text editor CAGED on a
+       temporary file containing the gate's definition.  See below for
+       a description of this format.
+
+   6.  The gate's "grab box" is a dotted yellow box that starts out at
+       the edges of the drawing grid.  This box defines what portion of
+       the picture is considered the gate's "body", for purposes of
+       tapping and dragging the gate in LOG.  It should generally be as
+       large as possible, but must not enclose any pins.  (If a pin were
+       inside the box, it would not be possible to draw a wire to touch
+       the pin.)  To move the grab box, press on any edge or corner of
+       the box.
+
+   7.  The pins of a gate are numbered consecutively from 1.  To create
+       a new pin, grab one of the numbers on the left edge of the screen
+       and drag it into place.  Only one pin of a given number may exist
+       at a time, and when the gate is saved, the pin numbers must be
+       contiguous (if there are "n" pins, they must be numbered 1 through
+       "n").  Pins are forced to multiple-of-five pixel grid lines, as are
+       the user's editing actions while in LOG; this makes it easier for
+       the user to connect exactly to the pins.
+
+   8.  To move all objects in a given rectangular area, just press the
+       mouse at one corner of the area (with no objects under it) and
+       drag out a rectangle, then move the objects into place and press
+       the mouse again.  This is analogous to LOG's MOVE command.  To
+       cancel the move, click the right button.
+
+   9.  To copy another gate's picture, press "c", then give the name
+       of the gate to be copied.  The current gate's picture is replaced
+       by the picture, pins, and grab box of that gate.  Other aspects of
+       the current gate (such as the name, labels, and definition) are
+       not affected.
+
+  10.  If you are drawing a gate which must look similar to another gate,
+       you can press "s" to "shadow" that gate.  Its picture will
+       appear dimly in the background of the editing grid.  To remove the
+       shadow, press "s" and enter a blank name.
+
+  11.  By default the editing grid is the exact size of a cell in the
+       Catalog screen or menu area.  To draw a larger gate, press "<" and
+       ">" to zoom up or down.  If the gate is larger than the default
+       grid, it will be shrunk to fit in a Catalog or menu area space, but
+       will be shown full-size in an actual drawing.
+
+  12.  If you need more pins than there are numbers for on the screen,
+       press "[" and "]" to change the range of pin numbers shown.
+       Pin numbers may currently range up to 255.
+
+  13.  To switch to the next or previous gate in alphabetical order, press
+       the "n" or "p" key.  On a Bobcat, you can press the Next and Prev
+       keys.  This is exactly like leaving DRAW mode, typing NEXT or PREV,
+       and giving another DRAW command.
+
+  14.  Other keys you can press are space bar to refresh, "!" to start a
+       sub-shell, and "?" for help.
+
+</PRE>
+
+<UL>
+<LI> <A HREF="loged4.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>

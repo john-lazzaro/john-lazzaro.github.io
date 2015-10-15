@@ -1,0 +1,189 @@
+<TITLE>  Configuration files</TITLE>
+
+<H1>  Configuration files </H1>
+
+<PRE>
+
+   1.  LOG reads the file "log.cnf" every time it starts up.  If you do
+       not have one in the current directory, it uses "/lib/log/log.cnf".
+       You can give the "-c" command-line switch to specify your own
+       configuration file.  The "use log" script actually loads the
+       program "diglog" into the computer and aliases the "log" command
+       to "diglog -cdlog", causing "dlog.cnf" (in the current directory
+       or in /lib/log) to be used.  Similarly, "use analog" loads the
+       program "analog" and aliases "log" to "analog -calog".
+
+   2.  To create your own configuration file, the best approach is to
+       make a file named "log.cnf", "alog.cnf", or "dlog.cnf", whichever
+       is appropriate, in your current directory.  In that file, put a
+       line something like "include /lib/log/alog.cnf", followed by any
+       additional commands to override the system defaults.  Do not
+       copy the system CNF files if you can avoid it; these files are
+       subject to change at any time.
+
+   3.  For example, your CNF file might look like this:
+
+               { A comment saying what this is used for }
+               include /lib/log/dlog.cnf     { Inherit from Digital LOG }
+               gates + ~me/log/mygates       { Add on my own gates file }
+               menu a b c d e vdd gnd        { Choose my own menu gates }
+               glow on                       { Turn on "glow" mode }
+
+       In this example, the "+" in the GATES command means to add the
+       name(s) to the existing list of gates files.  Since the MENU
+       command does not have a "+", it replaces the list from the
+       other file.  This notation works with the GATES, GET, GETGROUP,
+       and MENU commands in configuration files.
+
+   4.  The following ":" commands may also be used in a "log.cnf"
+       configuration file:
+
+           AVOID         GLOWSOLDER    OFF           QUIET
+           COLOR         GROUP         ON            RESPONSE
+           CONFLICT      INVISIBLE     SIM           SNAP
+           DOTS          INVLABEL      POPUP         VERBOSE
+           GLOW          MACRO         PROBE
+
+   5.  The following additional commands are allowed in configuration
+       files:
+
+
+       BOBCAT  command-line
+       CHIPMUNK  command-line
+                  Process the command only if LOG is being run on the
+                  specified kind of computer.  The "command-line" here
+                  is any of the commands listed in this section; in other
+                  words, the words BOBCAT and CHIPMUNK are prefixes that
+                  can be added to any command in a CNF file.
+
+
+       COMMAND  toolname  command command command ...
+                  Register that the listed commands are handled by the
+                  indicated tool.  If a command is given and its owning
+                  tool has not been initialized, that tool will be
+                  initialized.
+
+       DO command-line
+                  Add the command-line to a list of ":" commands to be
+                  done as soon as LOG is started.  These commands are
+                  executed as if typed from the keyboard, i.e., they
+                  may be commands which are ordinarily forbidden in
+                  CNF files.  The "DO" commands are executed in the
+                  order they originally appeared in the CNF files.
+
+
+       GATES filename filename filename ...
+                  Register the specified ".gate" files into the LOG
+                  gate library.  Files are searched for a given gate
+                  starting at the first filename of the first GATES
+                  command in the CNF file.  Ordinarily, the presence
+                  of the first GATES command in a given CNF file
+                  overrides all GATES commands in previously read
+                  CNF files (i.e., INCLUDE files).  If the first
+                  word after GATES is "+", the listed filenames will
+                  instead be added to the existing list of gates
+                  files.  If no explicit directory is given, LOG
+                  looks first in the current directory, then in
+                  the "home" directory, then in /lib/log.  If the
+                  gates file is not found, it is ignored.
+
+
+       GET gate gate gate ...
+                  Load the specified gates into the gate catalog.  The
+                  gate names may include wildcard characters "*" and "?",
+                  and may also specify one or more group numbers from
+                  0 to 8:  "GET A*;34" gets all gates whose names begin
+                  with A, which are found on pages 3 or 4 of the Library.
+                  If this is the first GET command in its CNF file, it
+                  overrides any previous GET commands from other files
+                  unless GET is followed by the word "+".  (The obsolete
+                  word LOAD is accepted as a synonym for GET.)
+
+
+       GETGROUP gate gate gate ...
+                  Load the specified group of gates into the gate catalog.
+                  This like a normal GET command, except the gates are
+                  guaranteed to be placed together (provided there's
+                  room), and a box is drawn around them on the catalog
+                  screen.
+
+
+       HELP filename
+                  Name of a ".help" file to be used when the user
+                  asks for help.
+
+
+       HOME directory-name
+                  Specify a directory to be used as the "home"
+                  directory.  If a CNF file, gates file, help file,
+                  or news file is not found in the current directory,
+                  LOG looks next in this "home" directory, then
+                  finally in "/lib/log".  The default "home" directory
+                  is "~/log", that is, the "log" subdirectory of the
+                  user's home directory.
+
+
+       INCLUDE cnf-file
+                  Read commands from the specified ".cnf" file, then
+                  resume reading from this file.  Include files may
+                  be nested.
+
+
+       MENU gate gate gate ...
+                  Load the specified gates into the menu area.  If
+                  there are more gate names than menu slots, only the
+                  first few names are used.  The first word may be
+                  "+" to add the specified gates to a list from a
+                  previous CNF file.
+
+
+       NEWS file-name
+                  Name of a ".text" file whose contents are displayed
+                  when LOG begins.
+
+
+       SIGNALS number
+                  (or NODES.)  Specifies the maximum number of TO/FROM
+                  signal names that can exist at one time during the
+                  LOG session.  Default is 200.
+
+
+       TABLET number
+                  Set the HP-IB address of the graphics tablet to be
+                  used.  Default is 0, which means look for the tablet
+                  on the HP-HIL or at the standard address.
+
+
+       TOOL tool-name "full-name"
+                  Register a tool name so that the run-time TOOL command
+                  will display its name.  (Ordinarily, tools are
+                  automatically registered as soon as they are needed.)
+
+
+       UNDO       Delete all "DO" commands registered up to this point.
+
+
+       tool-name: tool-command
+                  This directs a command to a particular LOG "tool".
+                  The standard tool names are:
+
+                        16       Digital simulator
+                        32       Analog simulator
+                        LPLOT    Plotting tool
+                        LOGNTK   LOG-to-NTK tool
+
+</PRE>
+
+
+<UL>
+<LI> <A HREF="ref3.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

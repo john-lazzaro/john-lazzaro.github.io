@@ -1,0 +1,145 @@
+<TITLE> Compiling Log </TITLE>
+
+<H1> Compiling Log </H1>
+
+	<P> This document assumes that you have successfully compiled
+the <A HREF="psys.html"> Psys </A> libraries.   This
+document also assumes that you have uncompressed and untarred the 
+<TT>Log</TT> file, and installed it in the <TT>chipmunk</TT>
+directory. </P>
+
+<H2> Step 1: Initialization </H2>
+
+	<P> Begin by descending to the <TT>log/src</TT> directory. 
+At this point OS/2 users <B>only</B> should execute the following
+commands. </P>
+
+<P> <TT>cp Makefile.os2 Makefile</TT> </P>
+<P> <TT>cp ana/Makefile.os2 ana/Makefile</TT> </P>
+
+<H2> Step 2: Makefile Editing </H2>
+
+	<P> All users should now edit the files <TT>Makefile</TT>
+and <TT>ana/Makefile</TT>, and make any necessary changes. Comments
+in the Makefile will guide you through these changes; the changes are
+labeled with the markers (1), (2), (3), etc. </P>
+
+<H2> Step 3: Munch replacement </H2>
+
+	<P> Once Makefile edits are made, check to see if your platform
+is listed below. If it is, execute the command under the platform
+name in the <TT>log/src</TT> directory. </P>
+
+<DL>
+<DT>   Apple Mac AU/X (NOT Mac OS X, which needs no changes) 
+<DD> <TT>cp munch.coff munch</TT> 
+<DT>   HP Series 700, HPUX
+<DD> <TT>cp munch.hp800 munch</TT> 
+<DT>   IBM RS/6000
+<DD> <TT>cp munch.rs6000 munch</TT> 
+<DT>   Sun SPARC, Solaris 2.X (SunOS 5.X)
+<DD> <TT>cp munch.solaris2 munch</TT> 
+</DL>
+
+<H2> Step 4: Compilation </H2>
+
+<P> Once these changes are made, execute the command </P>
+
+<P> <TT>make install</TT> </P>
+
+	<P> If things are working correctly, a long series of
+compilations, linkings, and file movements should occur without error.
+This will create the programs <TT>chipmunk/bin/diglog,</TT>
+<TT>chipmunk/bin/analog,</TT> and <TT>chipmunk/bin/loged.</TT> To
+check basic functionality, try to run these three programs. For
+each program, two windows should appear on program launch, one called
+<TT>newcrt</TT> and one called <TT>mylib</TT>. Type <TT>:exit</TT> in
+the <TT>newcrt</TT> window to leave <TT>analog</TT> and
+<TT>diglog.</TT> Type <TT>exit</TT> in the <TT>newcrt</TT> to leave
+<TT>loged.</TT> See the <A HREF="../document/log/index.html"> user
+documentation </A> for information on using these tools.
+
+<H1> Problems and Solutions </H1>
+
+<P> Its quite possible that compilation did not proceed smoothly, or
+that execution problems happen while using the tool.  Here are some
+possible ways that things could have went wrong, along with
+suggestions.  </P>
+
+<DL>
+<DT> <B> The Log windows appear, and then the program exits.</B>
+<DD> This symptom usually means that you moved the log source code
+directory after compling the program.  To solve this problem, set the
+LOGLIB environment variable to the absolute location of this directory.
+For example, on my system, using the tcsh shell, I solve the problem using:
+<pre>
+setenv LOGLIB /Users/lazzaro/work/legacy/chipmunk/log/lib
+</pre>
+<DT> <B> Log comes up in monochrome -- too few colors available</B>
+<DD> This symptom could indicate several conditions. If you display
+hardware has less that 4 bits per pixel, Log can't use the small
+number of colors available effectively, and reverts to monochrome
+display. If your display has greater than 4 bits per pixel, perhaps
+a color-hungry program (like Netscape) is monopolizing the colormap.
+To test this hypothesis, exit Netscape then restart Log. See the
+Netscape FAQs for information on improving the color-allocation
+manners of the program. 
+<DT> <B> Log comes up in monochrome -- too many colors available</B>
+<DD> Log now has code to handle displays with 16 bits per pixel and 24
+bits per pixel. However, this code hasn't been extensively tested on
+many X servers, and may be buggy. See this <A
+HREF="../document/psys/index.html">document</A> for information
+on working around these bugs.  Alternatively, try switching your
+display driver to "8 bits per pixel" mode.
+<DT> <B> File system problems </B>
+<DD> The symptom is that Log runs fine for a few days (weeks, months),
+but one day it stops working. Another symptom is that Log runs on the
+machine it was compiled on, but not on other machines in a NFS
+cluster. The cause of these problems often traces to Log noting where
+its absolute location is during compile time, using <TT> pwd </TT>
+commands in its Makefiles. If your disk is reorganized, Log will be
+confused, and recompilation (Psys and Log) will be necessary. Also, if
+your system uses the NFS automounter, the results of the <TT>pwd</TT>
+command may not be correct for every machine on your cluster, or may
+change with time. In this case, replacing the <TT>pwd</TT> commands in
+the log Makefiles with hard-coded paths, or with the environment
+variable <TT>PWD,</TT> is a good idea.
+<DT> <B> <TT>log.c</TT> won't compile  </B>
+<DD> This file breaks many compilers because of its length, in many
+different ways. Possible solutions include compiling with or without
+optimization on, and directing the compiler to place temporary files
+in a disk partition with more free space. 
+<DT> <B> Print spooling is broken </B>
+<DD> Pressing <B>File</B> in the Log preview screens should send a
+Postscript file to a local printer, by writing a file to
+<TT>/tmp</TT>, and printing the file using <TT>lpr</TT>.  This may be
+incorrect for your system. If so, change line 2868 (Unix) or 2865
+(OS/2) of the file <TT>log/src/lplot.c</TT> to conform to your
+environment.
+<DT> <B> Problems finding libraries or include files </B>
+<DD> Some OS installations don't have X11 or other needed libraries
+in the include path and/or the linking path. Look in the Makefile for
+tips on solving this problem, at the definitions of LIBX11 and
+XINCLUDEDIR. 
+</DL>
+
+<P>If these suggestions don't help you compile Log, I'd be happy to
+offer suggestions; press <A HREF="helpme.html"> here </A> for more
+information about asking for help. </P>
+
+<UL>
+<LI> <A HREF="../compile/compile.html#place">Return to 
+compilation instructions. </A> 
+<LI> <A HREF="../index.html">Return to home page.</A> 
+<LI> <A HREF="../document/document.html">User documentation for Chipmunk 
+tools.</A> 
+<LI> <A HREF="../pickup/pickup.html">To pick up the distribution. </A> 
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+
+

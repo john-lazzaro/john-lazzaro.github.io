@@ -1,0 +1,73 @@
+
+<TITLE> Configuring Gates  </TITLE>
+
+<H1>  Configuring Gates </H1>
+
+<P> Once you have drawn, say, a capacitor, you may wonder what its
+capacitance is, and how to set the capacitance you want.  The
+way to do this is called <B>configuration</B>. </P>
+
+<P>Each kind of gate has a set of <B>attributes,</B> usually numbers,
+that tell more specifically what kind of circuit element it is.
+For example, AnaLOG capacitors have a "capacitance" attribute,
+and transistors have a hatfull of attributes about width/length,
+kT/q, parasitic capacitances, etc. </P>
+
+<P>In the digital world, most gates do not have attributes.  An
+exception is the clock generator, CLOCK, which you can configure to
+control the clock frequency and waveform.  Also, many digital gates
+have text on their attribute screens that describes how to use the
+gate.
+
+<H2>  Exploring Configuration Mode </H2>
+
+<P>In the lower-right corner of the screen is the word ROT with a
+curving arrow.  This tells Log that when you tap a gate, it should
+rotate it by 90 degrees.  If you press the word ROT, it changes to
+MIR.  Now if you tap a gate it mirrors itself left-to-right.
+Pressing MIR leads to MIR with a bar (up-down mirroring), then to
+CNFG in yellow, then back to ROT.  If you tap a gate while in CNFG
+mode, instead of reorienting it you open it up for configuration. </P>
+
+<P>When a gate is open for configuration, its attributes are
+displayed.  Notice that of the attributes is highlighted.  To
+highlight a different attribute, press the up- and down-arrow keys. To
+enter a new value for an attribute, highlight it, then just type in
+the value you desire. </P>
+
+<P>Some attributes can have scale factors, e.g., "m" for milli-
+and "u" for micro-.  These will show up as, say, "1.2mV",
+meaning 1.2 millivolts.  When you type a new value, you can
+always leave off the V since that part is obvious, but don't
+forget to include the "m" if that's what you want!  A common
+mistake is to change 20pA to 30A, thus seriously perturbing
+the operation of the simulated circuit.  When in doubt, you
+can always type scientific notation in "1.2E-4" format. </P>
+
+<P>Some attributes are choices instead of numbers.  For example,
+voltage sources let you choose a waveform of either "DC,"
+"Pulse," or "Sine."  You can type whole words to change these
+attributes, or use the arrow keys to cycle through the choices. </P>
+
+<P>To return an attribute to its default value, just press <B>Enter</B>
+all by itself on that line.  Some attributes can be blank, in
+which case whatever feature they correspond to is disabled.
+Others must have values, and Log will use some default if you
+try to enter "blank."</P>
+
+<P>To finish configuring a gate, press the right mouse button again, or
+hit Control-C.</P>
+
+
+<UL>
+<LI> <A HREF="geninfo5.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

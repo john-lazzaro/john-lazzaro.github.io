@@ -1,0 +1,73 @@
+##
+## "VIEW", a data viewing program,
+##   Copyright (C) 1987, 1990 California Institute of Technology.
+##   Original authors: Dave Gillespie, port by Rick Koshi
+##   Unix Port Maintainer: John Lazzaro
+##   Maintainers's address: lazzaro@hobiecat.cs.caltech.edu;
+##                          CB 425/ CU Boulder/Boulder CO 91125. 
+##
+##
+##This program is free software; you can redistribute it and/or modify
+##it under the terms of the GNU General Public License as published by
+##the Free Software Foundation (Version 1, Feb 1989).
+##
+##This program is distributed in the hope that it will be useful,
+##but WITHOUT ANY WARRANTY; without even the implied warranty of
+##MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##GNU General Public License for more details.
+##
+##You should have received a copy of the GNU General Public License
+##along with this program; see the file ../COPYING.  If not, write to
+##the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
+##
+##
+## caged_process='do filter$M'
+
+
+## Command to convolve a curve against a simple box filter
+
+define boxfilter newcurve = curve
+   local tcurve
+   tcurve = $curve + cvrelidx(curve,1)
+   tcurve = tcurve + cvrelidx(curve,-1)
+   $newcurve = tcurve / 3
+enddef
+
+define [after] boxfilter curve
+   boxfilter $curve = $curve        ## Convolve the curve in-place
+enddef
+
+
+
+## Command to convolve a curve against a variable-width box filter
+
+define filter newcurve = curve : width
+   local i
+   tcurve = $curve
+   for i = 1 : $width
+      tcurve = tcurve + cvrelidx(curve,$i)
+      tcurve = tcurve + cvrelidx(curve,-$i)
+   endfor
+   $newcurve = tcurve/(1+2*($width))
+enddef
+
+## For example, in "filter a=b:2" the final assignment looks like:
+##   a=b+(cvrelidx(curve,1)+cvrelidx(curve,-1)+   \\
+##        cvrelidx(curve,2)+cvrelidx(curve,-2))/(1+2*(2))
+
+## Beware: View strings can only grow to 255 characters; if "expr" gets
+##   too large you must resort to drastic kludgery.
+
+define [after] filter newcurve = curve
+   filter $newcurve = $curve : 3
+enddef
+
+define [after] filter curve : width
+   filter $curve = $curve : $width
+enddef
+
+define [after] filter curve
+   filter $curve = $curve
+enddef
+
+

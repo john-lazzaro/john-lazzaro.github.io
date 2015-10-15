@@ -1,0 +1,158 @@
+<TITLE> Logntk Messages </TITLE>
+
+<H1> Logntk Messages </H1>
+
+<PRE>
+
+   1.  LOGNTK displays the following messages at the top of the screen
+       during operation.  If there is a "fatal" message, the output NTK
+       file will not be complete.
+
+
+       Can't understand command: FOO
+                  This command appeared in a LOGNTK: line in the LOG.CNF
+                  file, and it is not one of the command words listed
+                  above.  Unrecognized commands in < > labels are
+                  ignored, since it is assumed that they belong to some
+                  other LOGNTK-like program.
+
+
+       Syntax error in TRANS command
+                  The transistor-type argument is missing or wrong.
+
+
+       Cell file FOO.NTK not found     (fatal, unless next message
+                                        is shown too)
+                  The file named in a CELL command does not exist.
+
+
+       Using file FOO.NTK instead of file BAR.NTK
+                  The CELL command listed a file which does not exist,
+                  but the "gatename.NTK" algorithm found the file.  You
+                  should edit the label accordingly.  (The above example
+                  corresponds to a command of < cell:  foo xxx bar >.)
+
+
+       < cell: FOO >
+                  This is a label added if the "gatename.NTK" algorithm
+                  worked and there was no CELL command for this gate.
+                  This just serves as a reminder that LOGNTK made this
+                  assumption for you.
+
+
+       No cell or file name!                             (fatal)
+       < file: (place file name here) >
+                  There were no < name: xxx >, < file: xxx > or "xxx" labels
+                  on the page.  LOGNTK assumes you are making a top-level
+                  file, and creates a < file > label which you can edit.
+                  If you are making a cell instead, throw away the < file >
+                  label and make a cell-name label.
+
+
+       No cell name!                                     (fatal)
+       < name: (place cell name here) >
+                  No name was specified for this cell.  You are given a
+                  label which you can edit to specify the cell name.
+                  This error occurs only in NOTOP mode.
+
+
+       More than one < name: xxx > or "xxx" label on the page!     (fatal)
+                  Multiple cell-name labels appeared, not enclosed in
+                  dashed boxes.
+
+
+       Cell FOO is recursively defined!                  (fatal)
+                  LOGNTK detects some, but not all, such errors.
+
+
+       Warning: Port FOO does not appear in the circuit
+                  A name in the PORT command does not correspond to any
+                  signal name in the circuit.  This may be because your
+                  subcells use GND and VDD but you don't explicitly use
+                  them here (not an error), or it may be because you
+                  forgot to label part of your circuit.
+
+
+       Signal FOO is missing from the port list          (fatal)
+       Global node FOO is not a port
+                  You used a cell that requires a certain global signal,
+                  such as VDD or GND, which you omitted from your own
+                  PORT list.  All global signals used by a cell must be
+                  passed down through all higher-level cells in the
+                  hierarchy.
+
+
+       Warning: FOO appears more than once on port list
+                  You included the same name more than once in a PORT
+                  command.  The NTK file format has no way to express
+                  that two ports of a cell are shorted together, so
+                  LOGNTK can not write an NTK file for such a cell.
+                  The later occurrence of the name on the port list
+                  is ignored.
+
+
+       Template has pins shorted together                (fatal)
+                  Analogous problem as "FOO appears more than once
+                  on port list", but for template-defined gates.
+
+
+       Warning: Template gate has no connections
+                  This is not strictly an error, but in NTK a cell
+                  with no ports is usually a sign of trouble.
+
+
+       Using port list: A B C D
+                  If the cell was defined with a template gate, this
+                  message shows the order in which the signals were
+                  assigned as ports, just for your information.
+
+
+       Port list ignored for top-level NTK file
+                  This is a top-level file (not a cell), but there
+                  was a PORT command present.  The PORT command is
+                  ignored.
+
+
+       More ports than pins in cell FOO                  (fatal)
+       Too few connections in cell FOO                   (fatal)
+                  The NTK file for subcell FOO listed more non-global
+                  ports than there are pins (on an instance gate
+                  created in LOGED) or connections (on a generic
+                  instance gate).  This could be because the .GATE
+                  and .LGF files for that subcell are out of sync, or
+                  because you forgot to list some of the ports as
+                  GLOBAL.
+
+
+       More pins than ports in cell FOO                  (fatal)
+       Too many connections in cell FOO
+                  The NTK file for subcell FOO listed too few non-global
+                  ports.
+
+
+       Warning: Gate FOO was ignored
+                  A gate of type FOO was ignored because no definition
+                  for it could be found, but that gate was not listed
+                  in an IGNORE command.
+
+
+       No nodes or gates called FOO
+                  An :IDENTIFY command gave a name which does not exist.
+
+
+   2.  There are also a few "informational" messages which can be turned
+       off by giving a ":VERBOSE OFF" command in LOG.
+
+</PRE>
+  
+<UL>
+<LI> <A HREF="logntk5.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

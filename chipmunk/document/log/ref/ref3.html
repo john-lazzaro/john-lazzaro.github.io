@@ -1,0 +1,71 @@
+<TITLE>   Digital simulator commands</TITLE>
+
+<H1>   Digital simulator commands</H1>
+
+<PRE>
+
+
+   1.  The following additional ":" commands are available with the
+       Digital LOG simulator.  Except for STABILIZE they may be used
+       in "log.cnf" files by preceding them with the word "16:", as
+       in "16: stabdelay 2.5".
+
+
+       DIGON      Turn digital simulation ON.  This is the normal case.
+
+
+       DIGOFF     Turn digital simulation OFF.  This command is similar
+                  the regular OFF command, except only the digital
+                  simulator is affected.  If several simulators are
+                  being run at once (say, digital and analog), the
+                  other simulators will proceed unaffected.
+
+
+       DIGONOFF ON/OFF
+                  Turn digital simulation ON or OFF.
+
+
+       STABDELAY time
+                  Set amount of time to wait for circuit stabilization
+                  (see STABILIZE) to "time" seconds.  Default is 5.0.
+                  With no argument, the command shows the current value.
+
+
+       STABILIZE  Attempt to stabilize an oscillating circuit.  Because
+                  all digital gates have identical, exact propagation
+                  delays, oscillations can develop in feedback circuits
+                  that would never arise in a real circuit, where the
+                  propagation delays are not so exactly balanced.  The
+                  STABILIZE command randomizes the propagation delays of
+                  gates in order to kill such oscillations.  Of course,
+                  a circuit that really is oscillating will continue
+                  to do so.  The "stabilization" effect wears off after
+                  about five seconds, usually plenty of time.
+
+
+       DIGSTEP time-step
+                  Set the amount of simulated time per digital timestep.
+                  Since every digital time step is the same, this value
+                  normally does matter unless you are using the digital
+                  simulator along with another simulator which has a more
+                  concrete idea of time (such as AnaLOG).  The default
+                  value is "10ns", i.e., 1E-8 seconds.  The value may
+                  be specified in engineering or real-number notation.
+                  With no argument, the command shows the current value.
+
+
+</PRE>
+
+
+<UL>
+<LI> <A HREF="ref4.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

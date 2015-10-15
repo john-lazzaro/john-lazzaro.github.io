@@ -1,0 +1,46 @@
+<TITLE> Mconvert and Unmconvert </TITLE>
+
+<H1> Mconvert and Unmconvert</H1>
+
+<PRE>
+
+The script mconvert converts cif produced by wol into cif that magic can read
+using the "cif read" command in magic. Given a file wolfile.cif,
+
+mconvert wolfile.cif 
+
+Changes the file wolfile.cif so that the layer names are appropriate for magic.
+Note that this is destructive! Another script, unmconvert, converts the 
+transformed file back into a form that wol can read; i.e.
+
+mconvert wolfile.cif
+unmconvert wolfile.cif
+
+Results in a file wolfile.cif that wol will read correctly. To real wol cif
+into magic (typically for DRC'ing), for a file wolfile.cif that has been
+treated with mconvert, do the following:
+
+magic
+:cif istyle lambda=1.0(oldnwell)
+:cif read wolfile
+
+Several caveats:
+
+  -- This assumes lambda=1.0 in the original wolfile.cif
+  -- Many spurious errors will be found, if each individual cell in wolfile.cif
+     is not design-rule correct, even if the composition of all cells are in
+     fact correct. To avoid this, flatten the cif file in wol first, using the
+     FLATTEN menu in the XTRACT menu of the composition buffer.
+
+</PRE>
+
+<UL>
+<LI> <A HREF="index.html">Return to Toolkit documentation page.</A> 
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

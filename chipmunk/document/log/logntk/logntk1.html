@@ -1,0 +1,75 @@
+<TITLE> Overview of Logntk </TITLE>
+
+<H1> Overview of Logntk</H1>
+
+<PRE>
+
+   1.  LOGNTK is a program to convert diagrams in AnaLOG (.LGF files)
+       into network descriptions of circuits (.NTK files).  When you give
+       the ":LOGNTK" command in AnaLOG, it reads the diagram on the
+       screen, treating the AnaLOG or Digital LOG transistors as NTK
+       transistors, other Analog gates as NTK cells, and certain labels as
+       LOGNTK commands.  Only labels surrounded by < and > or in quotation
+       marks are significant to LOGNTK.
+
+   2.  LOGNTK manages hierarchical definitions.  The notation used for
+       hierarchy is the same as that used by the Digital LOG simulator.
+       LOGNTK sees the world as cells; each cell turns into one NTK
+       file.  To define a cell, draw a circuit diagram, add a label which
+       consists of the cell name enclosed in quotes (as in "Fred"), then
+       define the cell's connectivity either with a template gate or with
+       a port list label.  To put several definitions on a page, enclose
+       each definition in a dashed box (from the Frills menu).  All of this
+       is described in the documentation for the digital simulator.
+
+   3.  One difference is that while in Digital LOG you normally use INST
+       gates (like INST3), in LOGNTK you normally use "generic instance"
+       GINST gates (like GINST3) instead.  LOGNTK recognizes both families
+       of instance gates, but the INST gates can connect only to digital
+       components, whereas the GINST gates can connect to anything.
+
+   4.  A complete project in LOGNTK may include any number of cells.  The
+       top-level cell describes the whole circuit and includes instances
+       of the other cells, which may themselves contain instances, etc.
+       Anything goes, as long as no circular references exist among the
+       instances.  At the bottom of the hierarchy are transistors and/or
+       primitive gates.  Examples of transistors are the AnaLOG gates
+       NFET5 and PFET5, and the Digital LOG gates V_NFET and V_PFET.
+       Examples of primitive gates are all the A_ gates from the ACTEL
+       gate library.
+
+   5.  Each NTK file produced by LOGNTK is completely self-contained.
+       When you LOGNTK a cell that has instances of another cell, the
+       program copies the definition of that cell into the output file.
+       An NTK file consists of any number of cell definitions, followed
+       by a "main program" which calls the outermost cells.  If your
+       top-level LOGNTK page does not include a cell name, that page
+       defines the "main program" for the project.  If you do name your
+       top-level page, LOGNTK puts that page in a cell as usual, and
+       then creates a dummy main program which "calls" that cell once.
+       Most simple programs like NETCMP, the NTK file comparator, do
+       not care about this distinction.
+
+   6.  When you give the ":LOGNTK" command, LOG converts the definition
+       on the current page into an NTK file.  The file name is usually
+       derived from the cell name, with ".ntk" appended.  (The name of
+       the LGF file that contains the circuit diagram is irrelevant.)
+       If there are several cell definitions on the page, LOGNTK does
+       each of them in turn.  You can also pick a specific definition
+       by typing ":LOGNTK cell-name", where "cell-name" is one of the
+       definitions on the current page.  (You can give a list of cell
+       names, and the names may include "*" and "?" wildcards.)
+
+</PRE>
+  
+<UL>
+<LI> <A HREF="logntk2.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

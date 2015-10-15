@@ -1,0 +1,246 @@
+<TITLE> A Tour of the Digital Gates </TITLE>
+
+<H1> A Tour of the Digital Gates</H1>
+
+<PRE>
+
+   1.  The standard gates in the Digital LOG library provide all
+       of the logic functions you will need to build a digital
+       circuit.  If you need a function that is not provided, you
+       can design it yourself with the LOGED program, or using
+       digital hierarchy.
+
+   2.  All the standard library gates use consistent conventions for
+       their pins.  For example, when a row of pins carries a binary
+       number, the most significant bit is on the left or bottom end
+       of the row.  Signals are active-high unless a "bubble" shows
+       otherwise.
+
+   3.  Input/output devices and controls:
+
+       SWITCH     Looks like a small pointed box.  It is a voltage
+                  source that drives either One or Zero onto its
+                  output.  The center lights up black or red to
+                  indicate the state of the switch.  Touch the switch
+                  to change its state.
+
+       SWITCH2    A smaller switch suitable for packing into tight
+                  rows.
+
+       PULSE      Pulse switch.  Looks like a double-pointed box.
+                  It acts much like SWITCH, except that when you
+                  touch it it goes to One only briefly, then back
+                  to Zero.
+
+       LED        Digital display; small square box.  It lights up
+                  according to the value being driven on it:  red for
+                  One (or weak One), black for Zero, and background
+                  gray for undriven wires (None).  It has connection
+                  points all around so you can connect to it from any
+                  direction.  (Note:  This means that placing two
+                  LED's right next to each other will short their
+                  pins together.)
+
+       LED2       Structurally the same as LED, but the input pins
+                  are treated a little differently.  In LED, all
+                  eight pins are connected together.  Thus touching
+                  LED's will short each other out.  In LED2, the
+                  eight pins are independent.  If any of them is
+                  driven high, the LED2 glows red.  If any is driven
+                  low, it glows black.  If some drive high and some
+                  low at the same time, the LED2 does not glow.
+                  Since the pins are not internally connected, you
+                  can let LED2's touch and they won't mind.
+
+       LED3       This is a miniature LED useful for tightly packed
+                  situations.  Connect to it by running the wire
+                  right through the center.
+
+       EDGE       Edge detector.  This is the differently-pointed box.
+                  It lights up red whenever it sees any change on its
+                  input, and only resets to black when you touch it.
+
+       KEYPAD     Numeric keypad.  This is a 16-key keypad that generates
+                  a binary number from 0000 to 1111 when you press one
+                  of the 16 keys on the keypad.  The lowest output is
+                  most significant.  There is also a "strobe" output
+                  on the bottom, that generates a pulse each time a
+                  key is pressed.
+
+       7SEG       Numeric display.  This is a 7-segment LED display,
+                  which displays the symbols 0 through F for inputs
+                  0000 through 1111.  It has two equivalent sets of
+                  inputs, for your convenience.  The most significant
+                  bit is on the left, and at the bottom.  (The two
+                  sets of pins are equivalent; you may use either.)
+
+       ASCKBD     ASCII keyboard.  Analogous to KEYPAD, but with an
+                  alphanumeric keyboard instead which generates
+                  8-bit ASCII codes.  Tap a key to generate its
+                  ASCII code (plus a strobe signal).  Tap SH, then
+                  a key, to shift that key.  CT is the Control key.
+                  Configure the gate and select Key-Codes mode to
+                  generate positional codes for all the keys instead
+                  of ASCII.  This lets you handle Shift and Control
+                  yourself, if you like.
+
+       ASCDISP    ASCII terminal display.  Shows 16x64 characters.
+                  To print a character, put its ASCII code on the
+                  data pins and pulse the Strobe pin.  Above Strobe
+                  is the Clear pin, which resets the terminal.  This
+                  terminal understands most standard Chipmunk control
+                  codes such as Carriage Return and Line Feed.  Form
+                  Feed clears the screen.  Certain variations on the
+                  control codes can be had by Configuring the gate.
+
+       CLOCK      This is a two- or four-phase clock generator or
+                  oscillator.  By default, it is a two-phase square
+                  wave generator in which the outputs are CLK and
+                  not-CLK; the output changes on every time step
+                  (i.e., once per standard gate delay).  You can
+                  reconfigure it to take several time steps per clock
+                  phase, or to clock according to real, physical time,
+                  or to be a "synchronous" clock which changes as
+                  soon as the rest of the circuit has settled down
+                  from the last change.  Also, you can change the
+                  waveform to four-phase mode, where the outputs are
+                  completely non-overlapping CLK1 and CLK2, each with
+                  25% duty cycle.
+
+       BREAK      Breakpoint.  This is a box with an X in it.  This
+                  gate is the circuit equivalent of a software
+                  "breakpoint."  When its inputs see a positive- or
+                  negative-going edge (respectively), it turns the
+                  simulation off so you can examine what was the state
+                  of the system at the instant the transition
+                  occurred.
+
+       TIE        Pullup resistor.  This generates a weak One, which
+                  can be overridden without conflict by an open-
+                  collector output pulling down.
+
+       TIEGND     Pulldown resistor.  Generates a weak Zero.
+
+
+   4.  Connection gates:
+
+       VDD        Power supply.  Provides a constant One signal.
+
+       GND        Ground.  Provides a constant Zero signal.
+
+       TO/FROM    Terminals.  These are the two arrow-shaped gates
+                  in the Catalog.  They are equivalent except for
+                  appearance.  They are used for putting names on
+                  signals:  To name a signal FOO, connect a terminal
+                  to it, then tap the space next to the arrow and type
+                  FOO.  If there are several terminals in the
+                  circuit with the same names, they are all
+                  electrically connected as if by wires.  TO/FROM
+                  names can be used to pass signals between circuit
+                  pages.  Signal names are also used with the Scope
+                  mode, to be described below.  Dropping a TO/FROM
+                  into the menu area preserves its programmed name;
+                  if the name ends in a number, each fresh gate pulled
+                  from the slot gets a new number.  Predefined signal
+                  names include "Gnd" and "Vdd", equivalent to the
+                  GND and VDD gates, and "Reset", which is normally
+                  grounded but receives a pulse every time you do a
+                  Reset command (in the Misc menu).
+
+
+   5.  Standard digital gates:
+
+       AND, OR, NAND, NOR, XOR, XNOR
+                  Standard two-input logic gates.  Also, AND3, NOR4,
+                  etc. are multiple-input gates, and INV is an
+                  inverter.
+
+       ANDX, ORX  etc.  These are versions of AND, OR, etc. whose
+                  pictures have been transformed according to
+                  DeMorgan's theorem of logic, which says that an AND
+                  gate is just like an OR gate with its output and all
+                  its inputs inverted.
+
+       COMPL      This is a complementary-output buffer.  Its two
+                  outputs provide the input and its complement, with
+                  identical propagation delays.
+
+       DNEG, DPOS, JKNEG, JKPOS, TNEG, TPOS
+                  Flip-flops.  Each kind comes in negative- and
+                  positive-edge-triggered flavors.  There is a choice
+                  of D flip-flops (which latch a Data bit on each
+                  clock), or J-K flip-flops (which set, reset, toggle,
+                  or stay the same on each clock), or Toggle flip-
+                  flops (which toggle or stay the same on each
+                  clock).
+
+       LATCH      A level-sensitive latch.  When G is One, the output
+                  follows the D input.  When G is Zero, the output
+                  freezes at the last D input value that was followed.
+
+       SHIFT      A four-bit shift register.  On a falling clock
+                  transition, it either loads from the parallel inputs
+                  (if M is One), or shifts in the direction of the
+                  arrow (if M is Zero).
+
+       SRAM8K     Static RAM or ROM, storing 8K bytes of 8 bits.
+                  Address inputs are on the left (MSB lowest).  Data
+                  input/output pins are at the bottom (MSB on the
+                  the left).  Control pins are Chip Enable (CE), Read,
+                  and Output Enable (OE).  If Read is high and CE and
+                  OE are low, the addressed byte is driven on the Data
+                  pins.  If Read and CE are low (regardless of OE),
+                  the value on the Data pins is stored in the RAM.
+                  Otherwise, the Data pins are undriven and ignored.
+                  (To make a ROM, simply leave Read unconnected.)
+
+                  Configuring the SRAM8K allows you to examine or
+                  change any byte in the memory, control whether the
+                  memory contents should be recorded in saved circuit
+                  files, and save or load the memory to ".hex" data
+                  files.  SRAM8K has the same unit propagation delay
+                  as all Digital LOG gates---bear in mind that real
+                  memory chips are much slower!
+
+
+   6.  There is also a large number of 7400's series TTL gates to choose
+       from in the gate library.  These are all intended to be close
+       models of their true counterparts, but there are no guarantees.
+       In particular, remember all propagation delays are the same.
+
+   7.  A set of gates for simulating digital VLSI transistors exists.
+       All of these gates begin with "V_" and are described below.
+
+   8.  The gates whose names begin with "A_" are for use with the ACTEL
+       design system.  This is a special box which takes network files
+       produced by LOGNTK from circuits consisting of "A_" gates, and
+       programs gate array chips while-U-wait to produce fast, custom
+       digital chips for prototyping.  Use of the ACTEL system is beyond
+       the scope of this document.
+
+   9.  The gates DIGH, FORCEDRV, and INST1 through INST5 are intended
+       for use with hierarchical definitions, described in the next
+       section.
+
+  10.  To view the "program" that the simulator uses for a gate, press
+       the shift-D key, then touch the gate in the circuit diagram.
+       A small window pops up containing the program.  Press somewhere
+       not on a gate to exit this mode.  To erase the definitions, just
+       hit the space bar to refresh the screen.  Notations like "#4"
+       refer to pin numbers; letters like "E" refer to internal state
+       variables of the gate.  For further documentation, see the
+       LOGED manual.
+
+</PRE>
+
+<UL>
+<LI> <A HREF="digsim3.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

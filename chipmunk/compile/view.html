@@ -1,0 +1,95 @@
+<TITLE> Compiling View </TITLE>
+
+<H1> Compiling View </H1>
+
+	<P> This document assumes that you have successfully compiled
+the <A HREF="psys.html"> Psys </A> libraries.  This
+document also assumes that you have uncompressed and untarred the <TT>
+View </TT> file, and installed it in the <TT> chipmunk </TT>
+directory. Note that view has not been ported to OS/2.</P>
+
+	<P> Begin by descending to the <TT> view </TT> directory.
+Edit the file <TT> Makefile, </TT> and make any necessary
+changes. Comments in the Makefile will guide you through these
+changes; the changes are labeled with the markers (1), (2), (3),
+etc. Once these changes are made, execute the command </P>
+
+<P> <TT> make install </TT> </P>
+
+	<P> If things are working correctly, a long series of
+compilations, linkings, and file movements should occur without error.
+This will create the program <TT> chipmunk/bin/vc. </TT> The name
+is changed from <TT> view </TT> during the copy to <TT> chipmunk/bin/ </TT>
+because an existing Unix tool uses that name. </P>
+
+<P>To do a quick test, start view by executing <TT> chipmunk/bin/vc </TT>
+and typing the following test program into the program. </P>
+
+<P> <TT> basis i = 1:10:1</TT> </P>
+<P> <TT> y = i*i</TT> </P>
+<P> <TT> fplot i y </TT> </P>
+<P> <TT> quit</TT> </P>
+
+<P>After the "fplot" command, a window should pop up with the curves, one
+a straight line and one a curve. To learn more about using view, see the
+<A HREF="../document/view/index.html"> user documentation. </A> </P>
+
+<H1> Problems and Solutions </H1>
+
+<P> Its quite possible that compilation did not proceed smoothly, or
+that execution problems happen while using the tool.  Here are some
+possible ways that things could have went wrong, along with
+suggestions.  </P>
+
+<DL>
+<DT> <B> Plotting doesn't work </B>
+<DD> If you have a monochrome machine, you will notice a bug in the plotting
+routines that results in blank on-screen plots. I've spent some time trying
+to find this without success. Note that the problem is purely in display;
+Postscript produced by the plot portion of view will be correct, but you'll
+be flying blind while creating the plot.
+</DL>
+
+<P> The view source distribution includes routines for using view as a
+test instrument control environment using GPIB. These routines are no
+longer used by the maintainer, but are included in the package as a
+starting point for someone to continue development on the GPIB portion
+of view. The directories <TT> mt/ </TT> and <TT> tek2430/ </TT> are
+there for GPIB users, and can be safely ignored by everyone else. If
+you have an HPIB card in your workstation and want to try resurrecting
+these tools, type <TT> make clean myinstall </TT> in the <TT>view</TT>
+directory, and be prepared to start detective work! </P>
+
+<P> If you have problems compiling view, or need guidance in a GPIB
+development, I'd be happy to offer suggestions; press <A
+HREF="helpme.html"> here </A> for more information about asking for
+help. </P>
+
+<UL>
+<LI> <A HREF="../compile/compile.html#place">Return to 
+compilation instructions. </A> 
+<LI> <A HREF="../index.html">Return to home page.</A> 
+<LI> <A HREF="../document/document.html">User documentation for Chipmunk 
+tools.</A> 
+<LI> <A HREF="../pickup/pickup.html">To pick up the distribution. </A> 
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

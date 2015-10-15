@@ -1,0 +1,58 @@
+<TITLE> Analog Input Waveforms </TITLE>
+
+<H1>  Analog Input Waveforms</H1>
+
+<PRE>
+
+   1.  DC.  This is just a constant amount of voltage or current.
+
+   2.  Pulse.  Depending on how you set it up, this can be a square wave,
+       triangle, or sawtooth.  Referring to the attributes for Pulse mode,
+       the output waveform starts at "initial voltage," then, after
+       "delay time" (plus "reset time" for the first cycle), it begins
+       ramping to "pulsed voltage," at a rate determined by "rise time."
+       It stays at that voltage for "pulse width," then ramps back to the
+       "initial voltage" in "fall time."  The cycle repeats the the period
+       specified.  NOTES:  If rise and fall time are both relatively
+       small, you get a square wave.  If one is large and the other small,
+       you get a sawtooth.  If both are large, and the pulse width is zero,
+       you get a triangle.
+
+   3.  Sine.  This generates a sine wave, with the frequency, offset, and
+       amplitude desired.  The "phase" is specified in degrees.  If the
+       "delay" is nonzero, the wave waits that amount of time after RESET
+       before it begins to change.
+
+   4.  Stairs.  Starts at "initial voltage," waits there for "time per
+       step" time, then ramps to next voltage in time "rise/fall time."
+       This occurs "number of steps" times, for a total of "steps"+1
+       voltages between "initial voltage" and "ending voltage,"
+       inclusive.  After the cycle, it ramps all the way back to
+       "initial voltage," again in "rise/fall time," and starts over.
+       If "initial delay" is nonzero, the waveform remains constant
+       for that long before beginning.
+
+   5.  Bistable switch.  If the switch is "off," output is "initial
+       voltage."  If it is "on," output is "pulsed voltage."  When the
+       switch is changed, output switches from initial to pulsed
+       voltage in time "rise time," or from pulsed to initial voltage
+       in time "fall time" (regardless of whether the voltage was
+       actually increasing or decreasing).  On RESET, the switch is
+       set to on or off according to "reset state."
+
+   6.  Monostable switch.  Output is normally "initial voltage."  When
+       switch is tapped, output ramps to "pulsed voltage" in time
+       "rise time," holds for "pulse width," them ramps back in time
+       "fall time."
+
+</PRE>
+<UL>
+<LI> <A HREF="anasim4.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>

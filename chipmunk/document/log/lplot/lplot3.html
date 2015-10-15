@@ -1,0 +1,217 @@
+<TITLE> Customizing Your Plot </TITLE>
+
+<H1> Customing Your Plot </H1>
+
+<PRE>
+
+   1.  When LOG starts up, it reads lplot.cnf in the /lib directory (ask
+       your local anaLOG maintainer), which contains certain commands for
+       setting up the plotting system.  This file in turn reads pens.cnf,
+       which has mappings of colors onto pen numbers.  Each of these
+       commands begins with "lplot:", which signifies that the command is
+       intended for the LOG plotting tool.
+
+   2.  You can give these commands yourself, either while LOG is running
+       by pressing ":" and then typing, e.g., "lplot: size B", or by
+       including such a line in your own "log.cnf" file.
+
+   3.  The most interesting configurable thing for the plotting tool
+       is color.  LPLOT uses a two-step method for determining color.
+       Each kind of object has a particular "color-name".  These
+       color names (like GATE or WIRE) are looked up in the color-name
+       table to produce a pen-name (like RED or BLACK), which in turn
+       is looked up in the pen-name table to get the actual pen
+       number to use for pen plotters.
+
+   4.  The following commands may be used after the word "lplot:".
+
+
+       LPLOT: BORDERSTYLE style
+                  Specify the line style used to draw the border.
+                  Default is 1.
+
+
+       LPLOT: BOXSTYLE style
+                  Specify the line style used to draw the boxes.
+                  Default is 2.
+
+
+       LPLOT: COLOR  color-name  pen-name
+                  This maps a given color-name onto a given pen-name.
+                  Standard pen names are "black", "red", "green",
+                  "purple", "blue", "yellow", and "none" (which
+                  suppresses drawing of that color).  You can also
+                  specify a second color-name in place of a pen-name,
+                  in which case the first color-name uses the same
+                  pen as the one which was recorded for the second.
+
+
+       LPLOT: COLORS
+                  Display a list of all color names that have been
+                  recorded in "LPLOT: COLOR" commands.
+
+
+       LPLOT: CONFIG
+                  Open up the plotter configuration attribute screen.
+                  This is the same as touching "Config" while in the
+                  plot mode.
+
+
+       LPLOT: DOTS  gate-name  gate-name  ...
+                  Undo the effect of previous "NODOTS" commands for
+                  the specified gates.
+
+
+       LPLOT: FILE psfilename
+                  Specify the filename for saving or printing a PostScript
+                   plot.  The ".ps" is automatically postpended.
+
+
+       LPLOT: FONT  font-file
+                  Use the specified font file for text.  The default
+                  file is "lplot.font" in the /lib directory for log.
+
+
+       LPLOT: GATEFONTSIZE size
+                  Specify the size of the gate font.  Default is 12.  
+
+
+       LPLOT: GATETEXTLIMIT size
+                  Specify the minimum size of gate text attributes to
+                  display on the screen.  Default is 60.  
+
+
+       LPLOT: INVISIBLE  gate-name  gate-name  ...
+                  Add the specified gates to the list of gates which
+                  do not show up in plots.  By default, TIME, NUMBERS,
+                  and DIGH are on this list.
+
+
+       LPLOT: LABELFONT  font-number
+                  Specify the font number to use for text labels in
+                  plots.  For the standard font file, this should be
+                  a number from 1 to 13.  Common numbers are 1 for a
+                  very simple font, 2 for a standard Roman font, and
+                  3 for Roman italics.  Default is 2.
+
+
+       LPLOT: LABELFONTSIZE size
+                  Specify the size of label text.  Default is 16.  
+
+
+       LPLOT: LINEWIDTH width
+                  Specify the width of lines drawn by a Postscript plot.
+                  Default is 7.
+
+
+       LPLOT: NODEFONTSIZE size
+                  Specify the size of node number text.  Default is 8.  
+
+
+       LPLOT: NODOTS  gate-name  gate-name  ...
+                  Add the specified gates to the list of gates for
+                  which extra solder blobs will not be generated.
+                  By default, only the digital LED gate is on this
+                  list.
+
+
+       LPLOT: PENCOLOR  pen-name  pen-number
+                  This specifies the mapping of pen names (such as RED or
+                  BLACK) onto pen numbers for the plotter.  The standard
+                  configuration file "pens.cnf", which is included by all
+                  the standard "log.cnf" files, contains good default
+                  PENCOLOR commands.
+
+
+       LPLOT: PENS
+                  Display a list of all pen names that have been
+                  recorded in "LPLOT: PENCOLOR" commands.
+
+
+       LPLOT: PLOTTER  hpib-address
+                  When using a pen plotter on the HPIB bus, this
+                  command specifies the HPIB address of the plotter.
+                  Default is 5.
+
+
+       LPLOT: PSFILE psfilename
+                  Specify the filename or command for saving or
+                  printing a PostScript plot.  This can either be
+                  a regular filename, such as "plot.ps", or a
+                  filename piped to a command, such as "/tmp/*.ps | lpr *"
+                  (the default).  
+
+
+       LPLOT: SIGFONT  font-number
+                  Specify the font number to use for signal names
+                  in plots.  (See LABELFONT command.)  Default is 2.
+
+
+       LPLOT: SIGNALFONTSIZE size
+                  Specify the size of signal text.  Default is 18.  
+
+
+       LPLOT: SIZE  paper-size
+                  Set the size for paper in pen plotters.  Other output
+                  devices, such as the laser printer, compute the size
+                  on their own.  Size A is standard 8.5" by 11" sheets;
+                  size B is about 11" by 17".  Size AUTO means to
+                  compute the size automatically.
+
+
+       LPLOT: VISIBLE  gate-name  gate-name  ...
+                  Remove the specified names from the list of
+                  INVISIBLE gates.
+
+
+   5.  Here is a list of gate-color names used by LPLOT.  Where an
+       alternate name is given, LPLOT looks up that color-name if
+       the main color-name is not found.  The ultimate default is
+       pen-name BLACK.  Except for SCOPE and BORDER, all of these
+       apply only to circuit-diagram plots.
+
+
+       BORDER     Color of the dotted border on the screen that indicates
+                  the limits of the page.  Default in "lplot.cnf"
+                  is RED.
+
+       DASHBOX    (Alternate: LABELTEXT.)  Color of "yellow boxes" (as
+                  gotten from the Frills menu).
+
+       GATE       Color of regular gates.
+
+       LABELTEXT  (Alternate: DASHBOX.)  Color of labels (as gotten
+                  from the Frills menu).
+
+       NODE       (Alternate: GATE.)  Color of node names, drawn when
+                  requested by the Options screen for gate plotting.
+                  Node names are invented by LPLOT and do not
+                  correspond to node names used by any other program.
+
+       OFFLED     (Alternate: GATE.)  Color of digital LED's and other
+                  readouts which are "off".  Default is YELLOW.
+
+       ONLED      (Alternate: GATE.)  Color of digital LED's and other
+                  readouts which are "on".  Default is RED.
+
+       SCOPE      Color of data plots.
+
+       SIGNAL     (Alternate: GATE.)  Color of signal names in TO and FROM.
+
+       SOLDER     (Alternate: WIRE.)  Color of solder blobs.
+
+       WIRE       Color of wires.
+
+</PRE>
+ 
+<UL>
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+

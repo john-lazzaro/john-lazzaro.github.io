@@ -1,0 +1,114 @@
+
+<TITLE> More About Editing  </TITLE>
+
+<H1> More About Editing </H1>
+
+<P>In the Editing menu there are commands for doing large-scale
+circuit editing that would be unreasonable with just the basic
+mouse motions:
+
+<DL>
+<DT> <B> Delete </B>
+<DD> Press <B>Editing</B>, drag to <B>Delete</B>, release left mouse button.
+Now when you move up into the drawing area, the cursor is shaped
+like a pair of scissors.  You can now delete individual things by
+touching them (with the point where the blades of the scissors
+cross), or you can delete everything in a rectangular region by
+pressing at one corner of the region and dragging to the opposite
+corner.  Press the right button to exit Delete mode.  You can also
+press the "d" key to get the Delete mode scissors. Due to an
+intermittent bug, you may need to click the right button a second
+time for the scissors to appear.
+<DT> <B> Paste </B>
+<DD>After you have deleted a group of objects, you can
+select <B>Paste</B> to "paste" down copies of what was in that region.
+The Paste command highlights the region that was actually
+deleted; you can paste back in there for a simple "undelete,"
+or you can paste other places for moving or replicating a chunk
+of the circuit.  This is also on the "*" key.
+<DT> <B> Copy </B>
+<DD>This is similar to Delete, except that it doesn't actually
+delete the contents of the rectangle.  It is for making copies
+of something without disturbing the original.  After you have
+copied your object or area of objects, you are automatically
+switched into Paste mode.  This is also on the "/" key.
+<DT> <B> Move </B>
+<DD>Move an area.  This command is like a Delete followed by
+a Paste; it moves an object, or all the objects in a given area,
+to a new location.  It is also on the "m" key.  Note that
+the pressing "m" and tapping on a wire moves the wire in a
+different (often useful) way than simply grabbing the wire.
+<DT> <B> Implicit Move/Copy</B>
+<DD> Pressing in empty space and dragging out a
+box automatically does a combination Move and Copy command.  The
+first place you select moves the contents of the box to that place;
+if you press at additional places, extra copies are drawn there.
+</DL>
+
+<H2> Loading and Saving Circuits </H2>
+
+<P>To save your circuit, select <B>Save</B> in the <B>Misc</B> menu, then type
+the file name to use.  It's a good idea to hit Shift-S, or type
+":save", periodically to save the circuit under the previous name
+if any changes have been made.  ":save" with no file name argument
+saves all pages which have been editing back into their original
+files.  Circuits are saved in files ending with ".lgf" (for Log
+Format).  The previous version of the file is backed up under the
+same name but with ".lfo".</P>
+
+<P>To load a circuit you have saved before, select <B>Load</B> from
+the <B>Misc</B> menu, and type the name of the file you wish to load.
+Analog saves the complete simulation state along with the circuit, but
+you may want to do a RESET after loading anyway.</P>
+
+<H2> Annotating Circuits </H2>
+
+<P> The <B>Labels</B> command in the <B>Frills</B> menu lets you add
+text labels to your diagram.  Select Labels, type the label you want,
+then grab it and drag it, as usual, into place.  You can edit a label
+by tapping it, then using the keyboard.  Labels generally have no
+effect on the simulation, but they make plots look much nicer.  Also,
+certain tools such as Logntk and the Digital Log hierarchical
+simulation gates can read the labels for additional information about
+the circuit.</P>
+
+<P>The <B>Boxes</B> command in the <B>Frills</B> menu adds yellow dashed boxes
+to the diagram, again for cosmetic purposes only.  Once you're
+in Boxes mode, you can drag out boxes in the usual fashion.
+To edit boxes, grab a corner for reshaping or an edge for
+moving.  Both labels and boxes can be deleted by throwing them
+off the bottom corners of the screen. </P>
+
+<H2> Visual Aids for Editing </H2>
+
+<P>The <B>Grid</B> command in the <B>Cursor</B> menu switches between the
+usual arrow cursor and a cross-hair cursor which is useful for
+aligning things. </P>
+
+<P>The <B>Yardstick</B> command in the <B>Frills</B> menu lets you draw an
+arrow on the screen which you can use to check the geometric
+arrangement of objects on the screen.  The yardsticks are not
+"real"---they go away when you refresh the screen.  You can also
+press the "y" key to get a yardstick. </P>
+
+<H2> Status </H2>
+
+<P>If you select <B>Status</B> from the <B>Misc</B> menu, you get a
+set of screens describing various aspects of the Log system.  Move
+from screen to screen with the arrow keys.  The first screen includes
+the date and time, amount of memory free (approx.), plus various other
+stuff.  Later screens display the status of the Log editing buffers
+and keyboard mappings, then there is a screen for the Lplot program
+(that handles the Plot command), and for the analog simulator. </P>
+
+<UL>
+<LI> <A HREF="geninfo6.html">To the next section of the manual.</A> 
+<LI> <A HREF="../index.html">To return to Table of Contents.</A>
+</UL>
+
+<ADDRESS>
+<DL>
+<DT> Email <DD> john [dot] lazzaro [at] gmail [dot] com
+</DL>
+</ADDRESS>
+
