@@ -1,0 +1,1566 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>Sfront Reference Manual: Part II/3: Audio Drivers</TITLE>
+<META name="keywords" content="MP4-SA, SASL, SAOL, MP4, sfront,
+command line options.">
+<META name="description" content="A part of the Sfront reference
+manual, that is a collection of reference materials. Sfront is a 
+program that translates MP4-SA files into C programs.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+sfront reference manual</A>->
+<STRONG>audio drivers</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The <TT>sfront</TT> Reference Manual</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part II/3: Audio Drivers</H1>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="70%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#structure">Driver Structure</A>.</B> How audio drivers work.
+<LI>
+<B><A HREF="#init">Initialization</A>.</B> Device setup.
+<LI>
+<B><A HREF="#output">Passive Audio Output</A>.</B> Receive samples from
+<B>output_bus</B>.
+<LI>
+<B><A HREF="#input">Passive Audio Input</A>.</B> Send samples to <B>input_bus</B>
+<LI>
+<B><A HREF="#active">Active Drivers</A>.</B> Support for callback systems.
+<LI>
+<B><A HREF="#sync">Synchronization</A>.</B> Updating <TT>cputime</TT>.
+<LI>
+<B><A HREF="#shutdown">Shutdown</A>.</B> Ending a session.
+<LI>
+<B><A HREF="#register">Registration</A>.</B> Linking drivers to sfront.
+<LI>
+<B><A HREF="#summary">Summary</A>.</B> 
+</UL>
+</TD>
+<TD WIDTH="30%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Audio Driver Functions</H2>
+
+<A HREF="#init">asys_osetup</A>&nbsp
+<A HREF="#init">asys_isetup</A>&nbsp
+<A HREF="#init">asys_iosetup</A>&nbsp
+<A HREF="#output">asys_preamble</A>&nbsp
+<A HREF="#output">asys_putbuf</A>&nbsp
+<A HREF="#input">asys_getbuf</A>&nbsp
+<A HREF="#active">asys_main</A>&nbsp  
+<A HREF="#active">asys_orun</A> &nbsp 
+<A HREF="#active">asys_iorun</A>&nbsp
+<A HREF="#sync">ksyncinit</A>&nbsp
+<A HREF="#sync">ksync</A>&nbsp
+<A HREF="#shutdown">asys_oshutdown</A>&nbsp
+<A HREF="#shutdown">asys_ishutdown</A>&nbsp
+<A HREF="#shutdown">asys_ioshutdown</A>&nbsp
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+In this chapter, we describe how to add support for new audio file
+formats and audio hardware devices to <TT>sfront</TT>. Adding a new
+format or device involves writing an <I>audio driver</I> that is
+included in the C file sfront creates.
+
+<P>
+Users select the new audio driver through the
+<TT><HREF="../../user/cmdline/index.html#ain">-ain</A></TT> and
+<TT><HREF="../../user/cmdline/index.html#aout">-aout</A></TT> command line
+options.
+
+<P>
+We begin the chapter by discussing the structure of an audio
+driver. We describe the functions that an audio driver declares to
+handle initialization, data movement, and synchronization.
+
+<P>
+We also describe how to register a new driver with sfront, so that a
+command-line invocation results in the inclusion of the audio driver
+into the <TT>sa.c</TT> file.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="structure">Driver Structure</A></H2>
+
+<P>
+An audio driver is a file containing a set of C functions. This file
+is embedded into the sfront executable during compilation, and is
+copied into the C program sfront creates. Look in 
+<TT>sfront/src/lib/asys/</TT> to see examples of audio driver files.
+
+<P>
+The right panel shows the set of functions contained in an audio
+driver. In this chapter, we describe the semantics for these
+functions.
+
+<P>
+Not all audio drivers use all of the functions listed on the
+right hand panel. Several factors determine the subset of 
+functions that are in use:
+
+<UL>
+<LI><B>User directives.</B>
+Users may request that an audio driver to do audio output, audio input,
+or both. The functions a driver declares depends on this request. A
+driver uses the symbols
+<TT>ASYS_HASOUTPUT</TT> and <TT>ASYS_HASINPUT</TT> to determine its
+role.
+<LI><B>Callback support.</B>
+In many cases, a simple method suffices for the transfer of audio
+samples between the driver and sfront: the driver declares functions
+to send and receive data, and sfront calls these functions to do
+I/O. We call these simple drivers <I>passive drivers</I>.  However,
+some operating systems use a callback technique for audio access: an
+application registers a function with the operating system, that is
+called whenever new data is needed for input or output. Sfront
+supports a second audio driver approach (called <I>active drivers</I>)
+to handle callback interfaces.
+<LI><B>Synchronization.</B>
+Audio drivers may define functions that act to keep the SAOL program
+execution synchronized with audio input and output.  These functions
+also act to update the SAOL standard name <TT>cputime</TT>, which SAOL
+programs use to avoid output glitches.
+</UL>
+
+<H4>Naming conventions</H4>
+
+<P>
+Audio drivers must be careful when defining functions, variables, and
+pre-processor symbols for its own use, to avoid name-space
+collisions.
+
+<P>
+Audio drivers may define elements that begin with
+<TT>asysn_drivername_</TT>&nbsp and <TT>ASYS_DRIVERNAME_</TT>&nbsp,
+where <TT>drivername</TT> is the name of the audio driver file
+(<I>sans</I> extension) located in <TT>sfront/src/lib/asys/</TT>
+
+<P>
+If <TT>ASYS_KSYNC</TT> exists, elements that begin with
+<TT>sync_</TT>&nbsp and <TT>SYNC_</TT>&nbsp are also permissible.
+
+<P> 
+In addition, if <TT>ASYS_HASOUTPUT</TT> exists, elements that begin
+with <TT>asyso_</TT> or <TT>ASYSO_</TT> are permissible.  If
+<TT>ASYS_HASINPUT</TT> exists, elements that begin with
+<TT>asysi_</TT> or <TT>ASYSI_</TT> are permissible. 
+
+<P>
+If both
+<TT>ASYS_HASINPUT</TT> and <TT>ASYS_HASOUTPUT</TT> exist, elements
+that begin with <TT>asysio_</TT> or <TT>ASYSIO_</TT> are permissible.
+
+</UL>
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>Audio Driver Functions</TT></H2>
+
+<TT>
+<pre>
+
+(function arguments not shown)
+
+<A HREF="#init">Initialization</A>
+
+int asys_osetup();
+int asys_isetup();
+int asys_iosetup();
+
+<A HREF="#output">Passive Audio Output</A>
+
+int asys_preamble();
+int asys_putbuf();
+
+<A HREF="#input">Passive Audio Input</A>
+
+int asys_getbuf();
+
+<A HREF="#active">Active Drivers</A>
+
+/* declared by driver */
+
+void asys_main();  
+
+/* called by driver */
+
+int asys_orun();  
+int asys_iorun();
+
+<A HREF="#sync">Synchronization</A>
+
+int ksyncinit();
+int ksync();
+
+<A HREF="#shutdown">Shutdown</A>
+
+int asys_oshutdown();
+int asys_ishutdown();
+int asys_ioshutdown();
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="init">Initialization</A></H2>
+
+<P>
+Users select audio input and output drivers through the
+<TT><HREF="../../user/cmdline/index.html#ain">-ain</A></TT> and
+<TT><HREF="../../user/cmdline/index.html#aout">-aout</A></TT> command
+line options.
+
+<P>
+Depending on the selection, a particular audio driver may be
+required to supply audio input, audio output, or both audio
+input and audio output.
+
+<P>
+An audio driver determines its role in an <TT>sa.c</TT> file by
+detecting if certain pre-processor symbols have been defined, using
+the pre-processor utilities &nbsp<TT>ifdef</TT>&nbsp or
+&nbsp<TT>defined</TT>&nbsp.
+
+<P>
+Specifically, if both <TT>ASYS_HASINPUT</TT> and
+<TT>ASYS_HASOUTPUT</TT> symbols are defined, an audio driver should
+perform audio input and audio output. If only one of these symbols is
+defined, the audio driver should only perform audio input
+(<TT>ASYS_HASINPUT</TT> defined) or audio output
+(<TT>ASYS_HASOUTPUT</TT> defined).
+
+<H4>Initialization functions</H4>
+
+<P>
+An audio driver declares an initialization function, which is called
+at the start of program execution. The exact form of the
+initialization function depends on the status of
+<TT>ASYS_HASINPUT</TT> and <TT>ASYS_HASOUTPUT</TT> symbols; see the
+right panel for details.
+
+<P>
+The initialization function should perform the initial setup needed
+for the audio file type or the audio hardware. If this setup is
+successful, the function should return ASYS_DONE, a pre-defined 
+constant. If driver setup failed, the function should return ASYS_ERROR.
+
+<P>
+The arguments passed by the initialization function describe the
+audio input and output environment; the argument list may include:
+
+<UL>
+<LI><B><TT>srate.</TT></B> Audio sampling rate of the SAOL orchestra.
+<LI><B><TT>ochannels.</TT></B> The number of output audio channels (equal
+to the pre-defined constant ASYS_OCHAN).
+<LI><B><TT>ichannels.</TT></B> The number of input audio channels (equal
+to the pre-defined constant ASYS_ICHAN).
+<LI><B><TT>*oname.</TT></B> The output file name, if applicable, or else NULL.
+<LI><B><TT>*iname.</TT></B> The input file name, if applicable, or else NULL  
+<LI><B><TT>osample.</TT></B> Output data representation for a sample, see below. 
+<LI><B><TT>isample.</TT></B> Input data representation for a sample, see below.
+<LI><B><TT>toption.</TT></B> Has the value ASYS_RENDER
+(offline processing), ASYS_PLAYBACK (real-time mode) or ASYS_TIMESYNC
+(alternative real-time mode). See the <A HREF="#sync">synchronization</A>
+section for details. The pre-defined constant ASYS_TIMEOPTION has the
+same value as <TT>toption</TT>. 
+</UL>
+
+<P>
+The exact argument list depends on the function type.
+
+<H4>Audio data types</H4>
+
+<P>
+The audio driver states its data type preference as part of the <A
+HREF="#register">registration</A> procedure. This preference is coded
+in the <TT>osample</TT> and <TT>isample</TT> variables, which may take on
+the pre-defined constant values ASYS_SHORT (for 16-bit signed
+integers) or ASYS_FLOAT (for 32-bit floats).
+
+<P>
+The pre-defined constant ASYS_OTYPENAME has the same value as <TT>osample</TT>,
+and the pre-defined constant ASYS_ITYPENAME has the same value as
+<TT>isample</TT>.
+
+<P>
+The correct C keywords for the input and output datatypes are held in
+the symbols ASYS_OTYPE and ASYS_ITYPE, and may be used in variable
+declarations.
+
+<H4>Driver identity symbols</H4>
+
+<P>
+In some situations, an audio driver may need to know the presence of
+other drivers active in the system. The symbols
+<TT>ASYS_OUTDRIVER_XX</TT>, <TT>ASYS_INDRIVER_YY</TT>, and
+<TT>CSYS_CDRIVER_ZZ</TT> are defined if an audio output driver, audio
+input driver, or a control driver is present in the system. 
+
+<P>
+The actual strings for <TT>XX</TT>, <TT>YY</TT>, and <TT>ZZ</TT> are
+the fully-capitalized versions of the driver names (either the full
+symbol following <TT>-cin</TT>, <TT>-ain</TT>, and <TT>-aout</TT>, or
+the extension for filename drivers).
+
+<H4>Run-time options</H4>
+
+<P>
+An audio driver may define command-line options. Users types these
+options when executing an <TT>sa.c</TT> program that contains the
+driver, to dynamically configure driver parameters (for example,
+setting a maximum file size).
+
+<P>
+The right panel describes audio driver parameters in detail.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>Initalization Functions</TT></H2>
+
+<TT>
+<pre>
+The audio driver declares
+one of three functions for
+initialization, depending
+on user requests. This 
+function will be called
+once, at the start of 
+program execution.
+
+If the user requests only
+output driver service, the
+symbol ASYS_HASOUTPUT is 
+defined, and the driver
+should declare:
+
+int asys_osetup(int srate,
+                int ochannels,
+                int osample,
+                char * oname,
+                int toption) 
+
+If the user requests only
+input driver service, the
+symbol ASYS_HASINPUT is 
+defined, and the driver
+should declare:
+
+int asys_isetup(int srate, 
+                int ichannels, 
+                int isample, 
+	        char * iname, 
+                int toption)
+
+If the user requests both
+input and output driver 
+service, both ASYS_HASINPUT
+and ASYS_HASOUTPUT are
+defined, and the driver
+should declare:
+
+int asys_iosetup(int srate, 
+                 int ichannels,
+                 int ochannels,
+		 int isample,
+                 int osample, 
+		 char * iname, 
+                 char * oname, 
+                 int toption)
+
+These functions should return
+ASYS_DONE if the driver is 
+able to operate, and ASYS_ERROR
+if the initialization failed.
+
+See left panel for description
+of function parameters.
+</pre>
+</TT>
+
+<H2><TT>Audio Driver Parameters</TT></H2>
+
+<TT>
+<pre>
+An audio driver may parse the 
+command line of its <TT>sa.c</TT> file
+it is contained in, by accessing:
+
+int asys_argc;
+char ** asys_argv
+
+An audio driver may define its own
+command-line flags, so that users
+can configure drivers at runtime.
+A driver must use this convention:
+
+  -asys_xxx[_yyy] [p1 p2]   
+
+where:
+
+xxx   is the driver name
+yyy   is the option name (if needed)
+p#    is a parameter for the 
+      option. options can have
+      zero, one, or more than one
+      parameters. a parameter can
+      not start with a - (except
+      as the sign of a number) 
+      and may not contain spaces.
+
+For example, the linux driver 
+could define:
+
+  -asys_linux_size p1
+
+as an option for setting the size 
+of the output data, where
+
+  -asys_linux_size 8bit
+  -asys_linux_size 16bit
+
+are the legal parameter values. 
+</pre>
+</TT>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="output">Passive Audio Output</A></H2>
+
+<P>
+In this section, we describe the functions <TT>asys_preamble</TT> and
+<TT>asys_putbuf</TT> (see right panel for function definitions).
+Passive audio drivers define these functions to handle audio output.
+
+<P>
+A passive audio driver does not always define the audio output
+functions: in some cases, the user may only wish to perform audio
+input.  Passive audio drivers should define the audio output functions
+only if the symbol <TT>ASYS_HASOUTPUT</TT> is defined.
+
+<H4>Basic operation</H4>
+
+<P>
+The <TT>asys_preamble</TT> function is called once, at the start of
+audio playback. The audio driver uses this call to allocate a buffer
+for audio data, whose location and size it returns to the calling
+program.
+
+<P> 
+The first call to <TT>asys_putbuf</TT> returns this buffer to the
+audio driver, filled with audio sample data. The audio driver outputs
+the audio data, and returns a memory buffer to be filled with more
+samples. This cycle repeats until the program ends.
+
+<H4>Starting Silence</H4>
+
+<P>
+An audio output driver that controls a soundcard device should output
+a period of silence to the soundcard during the <TT>asys_preamble</TT>
+call. The silent period provides an extra margin of time that sfront
+may use to compute new sound samples without overruning the
+soundcard. The silent period also sets the latency of the system.
+
+<P>
+The appropriate length to choose for the silence period depends on the
+application. Interactive applications demand latencies of a few
+milliseconds; audio playback applications work best with several
+hundred milliseconds of latency.
+
+<P>
+The pre-defined symbol <TT>ASYS_LATENCYTYPE</TT> indicates the
+application type, taking on values <TT>ASYS_HIGHLATENCY</TT> (audio
+streaming) or <TT>ASYS_LOWLATENCY</TT> (real-time interaction).
+
+<P>
+Audio drivers may use the application type to determine an appropriate
+latency value, or may use the suggested latency value
+<TT>ASYS_LATENCY</TT>, which is a floating-point constant with units
+of seconds. If the pre-defined symbol <TT>ASYS_USERLATENCY</TT> is set
+to 1, the value of <TT>ASYS_LATENCY</TT> is a user suggestion; if
+<TT>ASYS_USERLATENCY</TT> is set to 0, the value is a system default
+value.
+
+<H4>Buffer Management</H4>
+
+<P>
+Passive audio output drivers set the nominal buffer size of an audio
+output operation, by choosing the return value of <TT>*osize</TT> in
+the <TT>asys_preamble</TT> and <TT>asys_putbuf</TT> functions.
+
+<P>
+In a real-time system, the buffer size should be set to be a small
+integral fraction of the starting silence period. For example, if
+a silent period of 3 ms is chosen, a good choice for the buffer 
+size is the amount of storage needed to hold 0.75 ms of audio. 
+This approach maximizes the efficiency of sfront execution, while
+minimizing the risk that a single late buffer can overrun the system.
+
+<H4><A NAME="ahead">Compute-Ahead Issues</A></H4>
+
+<P>
+If an <TT>sa.c</TT> program is set up as a real-time system, the
+penalty for computing audio buffers too slowly is obvious: if 
+the interval between <TT>asys_putbuf</TT> calls is too long, 
+the audio buffer may underrun, producing clicks and glitches.
+
+<P>
+However, computing audio buffers too quickly also brings problems.
+For interactive applications, computing ahead too quickly increases
+the latency between user action and sound output. For streaming
+applications, computing too far ahead results in too much memory usage
+to hold the future audio.  To avoid these problems, real-time audio
+drivers should take steps to limit the compute-ahead of the program.
+
+<P>
+One way to limit the compute-ahead is to allocate a fixed number of
+buffers during the <TT>asys_preamble</TT> call, whose combined audio
+time equals the starting silence period. Buffers from this pool are
+passed to <TT>asys_putbuf</TT> to be filled, then passed to the
+soundcard to be played, which returns them once the audio plays out.
+If no free buffers are available to return to <TT>asys_putbuf</TT>,
+the audio driver sleeps until the soundcard returns a buffer. 
+
+<P>
+This scheme limits the compute-ahead of the program, without the use
+of explicit timekeeping; it works best with soundcard interfaces such
+as <A HREF="http://www.linux.org.uk/OSS/">OSS</A> which maintain fixed
+buffer pools internally.
+
+<P>
+An alternative way to limit the compute-ahead is to explicitly keep
+track of elapsed time inside the audio driver, using operating system
+time functions. Audio drivers that use this approach may find it
+easiest to perform compute-ahead monitoring in the <A
+HREF="#sync"><TT>ksync</TT></A> function, described in a later section
+of this chapter.
+
+ 
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>asys_preamble</TT></H2>
+
+<TT>
+<pre>
+int asys_preamble(
+    ASYS_OTYPE * asys_obuf[]
+    int * osize
+    ) 
+
+Called once, at the start of
+audio playback. When called, 
+*asys_obuf will be set to NULL,
+and *osize will be set to 0. 
+
+On return, *asys_obuf must 
+point to an array of ASYS_OTYPE,
+and *osize must be set to the 
+number of elements in the array 
+to be filled with audio. The 
+*osize value must be evenly 
+divisible by the number of 
+audio output channels, and 
+must not be zero.
+
+Return value should be ASYS_DONE
+if preamble succeeded, ASYS_ERROR
+to terminate the calling program.
+
+</pre>
+</TT>
+
+<H2><TT>asys_putbuf</TT></H2>
+
+<TT>
+<pre>
+int asys_putbuf(
+    ASYS_OTYPE * asys_obuf[]
+    int * osize
+    ) 
+
+asys_obuf points to an array
+of audio samples to send to
+the audio output. It is 
+guaranteed to be filled on
+channel-contiguous boundaries.
+
+asys_obuf points to the buffer
+returned by asys_putbuf() on
+the previous call, or for the
+first call to asys_putbuf(), 
+the buffer returned by 
+sys_preamble().
+
+In most cases, *osize will be
+identical to the requested
+*osize from the last call.
+In some cases (such as the
+end of the orchestra) it may
+be smaller (but never greater).
+
+On return, *asys_obuf must point
+to an array of ASYS_OTYPEs, and
+*osize must be set to the number
+of elements in the array to be
+filled with audio. The *osize
+value must be divisible by the
+number of audio output channels,
+and must not be zero.
+
+Return value should be ASYS_DONE
+if preamble succeeded, ASYS_ERROR
+to terminate the calling program.
+
+</pre>
+</TT>
+
+
+<H2><TT>ASYS_TIMEOPTION</TT></H2>
+
+<TT>
+<pre>
+The pre-defined constant 
+ASYS_TIMEOPTION codes the
+temporal mode of the 
+program. It may reflect
+the presence of the 
+-render, -playback,
+or -timesync option on the
+sfront command line; if
+these flags do not appear
+on the command line, sfront
+chooses a default value.
+
+The -render option requests
+off-line file processing:
+ASYS_TIMEOPTION has the
+value ASYS_RENDER.
+
+The -playback and -timesync
+options requests real-time
+processing: ASYS_TIMEOPTION
+takes on the value 
+ASYS_PLAYBACK or ASYS_TIMESYNC
+in this case.
+
+If an audio output driver 
+that interfaces to a soundcard
+finds that -render is in 
+effect, it is probably a user
+error: the program may ignore
+the request, or may force an
+exit via an ASYS_ERROR return
+during initialization.
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="input">Passive Audio Input</A></H2>
+
+<P>
+Passive audio input drivers route
+audio input data from a sound file
+or audio device into the 
+<TT>input_bus</TT> of a SAOL program.
+
+<P>
+The function <TT>asys_getbuf</TT> embodies
+the passive audio input driver.  See the 
+right panel for a complete description of
+this function.
+
+<P>
+An audio driver should only define the <TT>asys_getbuf</TT> function
+if the <TT>ASYS_HASINPUT</TT> symbol is defined, indicating the driver
+was selected via the <TT>-ain</TT> sfront command-line argument.
+
+<H4>Buffer management</H4>
+
+<P>
+As described on the right panel,
+the calling program does not 
+request a specific number of 
+audio samples, and does not 
+provide a buffer to fill.
+
+<P>
+Instead, the audio input driver
+is free to create an input 
+buffering scheme that works
+well with the underlying 
+file format or hardware device.
+
+<H4>Compute-Ahead Issues</H4>
+
+<P>
+If an audio input driver 
+supports a real-time input
+device, the <TT>asys_getbuf</TT>
+may be called before new
+input samples are ready. 
+
+<P>
+In this case, the audio input
+driver should not return 
+control to the calling 
+program until the new
+samples are ready. If 
+possible, the driver should
+block while waiting for new
+data, so that other processes
+may run on the machine.
+
+<P>
+Note that by holding control
+in the fashion, the audio
+input driver acts to 
+prevent the SAOL program
+from computing ahead too
+far. 
+
+<P>
+As a result, real-time
+passive audio drivers
+usually do not need to
+provide explicit compute-ahead
+protection if both <TT>ASYS_HASINPUT</TT>
+and <TT>ASYS_HASOUTPUT</TT> are
+defined.
+
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>asys_getbuf</TT></H2>
+
+<TT>
+<pre>
+int asys_getbuf(
+    ASYS_ITYPE * asys_ibuf[],
+    int * isize
+    );
+
+The function asys_getbuf is
+called when the sa.c program
+needs new input_bus samples
+in order to continue SAOL 
+processing. 
+
+On the first call to asys_getbuf,
+*asys_ibuf will be set to NULL 
+and *isize will be set to 0. Upon
+return, *asys_ibuf should point
+to a buffer of *isize audio 
+samples, filled with data from
+the input device. ASYS_ITYPE is
+is the sample type indicated by
+isample during initialization.
+
+On subsequent calls to asys_getbuf,
+*asys_ibuf and *isize hold the 
+values provided in the previous
+call. Upon return, *asys_ibuf 
+should point to a buffer of fresh
+audio samples, of size *isize.
+
+The contents of the buffer that
+asys_getbuf should not be changed
+by the audio driver until the next
+call to asys_getbuf.
+
+An *isize return value of 0 
+indicates EOF.
+
+asys_getbuf() should return 
+ASYS_DONE if it was possible 
+to process the request, 
+including the EOF case.
+
+ASYS_ERROR should be returned
+for non-EOF error conditions
+(filesystem error, etc).
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="active">Active Drivers</A></H2>
+
+<P>
+The passive audio driver concept is not a good match for a
+soundcard interface that uses callback semantics, such as MacOS X <A
+HREF="http://developer.apple.com/audio/pdf/coreaudio.pdf">coreaudio</A>.
+
+<P>
+In a callback architecture, applications supply a callback function to
+the soundcard interface as part of the initialization process. The
+soundcard interface invokes the callback function whenever an audio
+data transfer is needed.
+
+<P>
+To support callback semantics, sfront provides an 
+<I>active driver</I> interface as an alternative to normal
+passive drivers. An audio driver identifies itself as passive
+or active as part of the <A HREF="#register">registration</A> procedure.
+
+<P>
+Users specify active drivers using the same
+<TT><HREF="../../user/cmdline/index.html#ain">-ain</A></TT> and
+<TT><HREF="../../user/cmdline/index.html#aout">-aout</A></TT> command
+line options as passive drivers use. 
+
+<P>
+An active driver may be selected for input while a passive driver is
+selected for output, or vice versa; in addition, the same active
+driver type may be specified as the input and the output driver.
+However, two different different active drivers may not be selected
+for use at the same.
+
+<H4><TT>asys_main</TT></H4>
+
+<P>
+Active output drivers declare the single function <TT>asys_main</TT>,
+shown on the right panel. This function is called after the SAOL
+program is initialized, and after all <TT>asys_setup</TT> functions
+are called. 
+
+<P>
+Once <TT>asys_main</TT> is called, it is the responsibility of the
+active audio driver to control SAOL program execution; the driver
+exercises this control by calling a service function to compute
+audio samples. The audio driver exits the <TT>asys_main</TT>
+function once the SAOL program completes execution.
+
+<P>
+We first discuss active audio drivers that interact with SAOL programs
+that do not use the <TT>input_bus</TT>. In this case, the symbol
+<TT>ASYS_ACTIVE_O</TT> is defined, and the service function
+<TT>asys_orun</TT> is provided to compute new audio samples.  See the
+right panel for a full description of <TT>asys_orun</TT>.
+
+<P>
+To support a callback system, an active audio driver would define a
+callback function for the soundcard interface to call. This callback
+function would in turn call <TT>asys_orun</TT> to generate the
+required number of audio samples on demand.
+
+<P>
+In this approach, the <TT>asys_main</TT> function would go to sleep once 
+the callback function was installed. The callback function would awaken
+the <TT>asys_main</TT> function once the SAOL program ended, so that 
+the <TT>asys_main</TT> function could return control to the calling
+program. The callback function becomes aware of the end of the SAOL
+program by checking the return value of the <TT>asys_orun</TT> function,
+which returns <TT>ASYS_EXIT</TT> once the program ends.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>asys_main</TT></H2>
+
+<TT>
+<pre>
+void asys_main(void)
+
+This function is called
+after SAOL program 
+initialization is complete,
+and after all asys_setup
+functions are called.
+
+When asys_main returns, 
+asys_shutdown functions
+are called, and the program
+exits.
+
+</pre>
+</TT>
+
+<H2><TT>asys_orun</TT></H2>
+
+<TT>
+<pre>
+int asys_orun(
+    ASYS_OTYPE obuf[], 
+    int * osize)
+
+asys_orun is a service 
+function, provided for use
+by the active audio driver
+if the SAOL program does
+not use the input_bus. This
+function exists if the 
+symbol ASYS_ACTIVE_O exists.
+
+asys_orun takes the sample
+buffer pointer obuf as an
+argument, writes at most
+the next *osize channel-
+interleaved sample values
+into the buffer, and returns.
+
+The *osize value received by
+asys_orun must correspond to
+an integral number of audio 
+sample periods. The return 
+value of *osize is the actual
+number of ASYS_OTYPE
+samples written into obuf. 
+
+If the SAOL program is still
+running, asys_orun returns
+ASYS_DONE; if the SAOL program
+has finished, asys_orun returns
+ASYS_EXIT.
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>SAOL programs that use <TT>input_bus</TT></H4>
+
+<P>
+If the SAOL program uses the <TT>input_bus</TT>,
+sfront provides the <TT>asys_iorun</TT> service
+function for active drivers to use (see right
+panel for details). This function
+accepts two audio buffers: an input array to 
+route to <TT>input_bus</TT>, and an output array
+to hold generated <TT>output_bus</TT> samples.
+
+<P>
+An active audio driver senses the presence of
+the <TT>asys_iorun</TT> function by testing
+to see if the symbol <TT>ASYS_ACTIVE_IO</TT>
+is defined. If <TT>ASYS_ACTIVE_IO</TT> is
+defined, <TT>ASYS_ACTIVE_O</TT> is not 
+defined, and <TT>asys_orun</TT> is not
+available.
+
+<P>
+If an active audio driver is expected to provide
+audio input and audio output from its device,
+the symbols <TT>ASYS_HASINPUT</TT> and 
+<TT>ASYS_HASOUTPUT</TT> are defined. In this
+case, the driver simply passes the audio input
+to <TT>asys_iorun</TT> as it becomes available,
+and routes audio output to its device each time
+<TT>asys_iorun</TT> returns.
+
+<P>
+However, if <TT>ASYS_HASINPUT</TT> or 
+<TT>ASYS_HASOUTPUT</TT> is not defined,
+the user has specified a passive driver
+for input or output. In this case, the
+active driver calls the passive driver
+functions, in keeping with the semantics
+of the audio passive driver interface. 
+
+<P>
+For example, if <TT>ASYS_HASINPUT</TT>
+is not defined, the active audio driver
+calls the <TT>asys_getbuf</TT> function,
+and passes the buffer returned by this
+function to <TT>asys_iorun</TT>.
+
+<P>
+If <TT>ASYS_HASOUTPUT</TT> is not defined,
+the active audio driver calls 
+<TT>asys_preamble</TT> to initialize the
+passive audio output driver, and then
+uses <TT>asys_putbuf</TT> to process
+the audio buffers returned by <TT>asys_iorun</TT>.
+
+<P>
+Basic information about the passive driver, 
+such as channel size and sample data format,
+may be discovered by examining pre-defined
+constants such as <TT>ASYS_OCHAN</TT> and 
+<TT>ASYS_OTYPE</TT>.  See the 
+<A HREF="#init">initialization</A> section
+for a description of these constants.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>asys_iorun</TT></H2>
+
+<TT>
+<pre>
+int asys_iorun(
+    ASYS_ITYPE ibuf[],
+    int * isize,
+    ASYS_OTYPE obuf[], 
+    int * osize)
+
+asys_iorun is a service 
+function, provided for use
+by the active audio driver
+if the SAOL program uses
+the input_bus. This
+function exists if the 
+symbol ASYS_ACTIVE_IO exists.
+
+asys_iorun takes two 
+audio sample buffers as
+input. 
+
+The buffer pointer
+ibuf supplies audio input
+data to route to the SAOL
+input_bus. it contains 
+*isize samples, which must
+correspond to an integral
+number of sample periods.
+
+asys_iorun also takes 
+the sample buffer pointer
+obuf as an argument. it
+writes, at most, the next
+*osize channel-interleaved
+sample values into the 
+buffer, and returns.
+
+asys_iorun handles any 
+combination of *isize and
+*osize buffers well -- 
+it computes new audio
+samples until ibuf is
+exhausted, obus is fill,
+or the SAOL program ends.
+
+If the SAOL program is still
+running, asys_iorun returns
+ASYS_DONE; if the SAOL program
+has finished, asys_iorun returns
+ASYS_EXIT.
+
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="sync">Synchronization</A></H2>
+
+<P>
+SAOL programs may read the k-rate standard name <TT>cputime</TT>, to
+sense the real-time performance of the program. This floating-point
+variables has a range of 0.0 to 1.0, and codes CPU utilization as in
+percentage terms.  A <TT>cputime</TT> value of 1.0 indicates the edge
+of real-time performance: any additional load may cause a buffer
+overrun.
+
+<P>
+Audio drivers can take responsibility for estimating the
+<TT>cputime</TT> value seen by the SAOL program. A driver requests
+this task as part of the <A HREF="#register">registration</A>
+procedure; if this request is granted, the audio driver finds the
+symbol <TT>ASYS_KSYNC</TT> defined. See the right panel for
+details about the selection algorithm sfront uses for <TT>cputime</TT>
+duties.
+
+<P>
+If <TT>ASYS_KSYNC</TT> is defined, the audio driver defines the
+<TT>ksync</TT> and <TT>ksyncinit</TT> functions (see right panel
+for details). 
+
+<P>
+The <TT>ksync</TT> function is called once per execution cycle, after
+all audio samples have been computed. The return value of
+<TT>ksync</TT> is the new estimate of <TT>cputime</TT>. The
+<TT>ksyncinit</TT> function is called once, right before SAOL program
+execution begins.
+
+<H4>Computing <TT>cputime</TT></H4>
+
+<P>
+To compute <TT>cputime</TT>, audio drivers estimate the real time used
+to compute the audio samples, and normalize by the total amount of
+audio generated during the cycle. The predefined floating-point
+constant <TT>KTIME</TT> indicates the length of audio generated each
+execution cycle, in units of seconds.
+
+<H4>Compute-ahead issues</H4>
+
+<P>
+Audio drivers may need to actively limit the length of audio
+compute-ahead during program execution (we discuss compute-ahead
+issues in detail in an earlier <A HREF="#ahead">section</A> of this
+chapter). The <TT>ksync</TT> function is a convenient place to 
+limit compute-head time. 
+
+<P>
+To limit compute-ahead, the audio driver compares the elapsed
+real time with the computer audio time during each <TT>ksync</TT>
+invocation, and sleeps (or less preferably, spins) if the 
+compute-ahead time exceeds the desired latency of the system.
+
+<P>
+A user may explicitly request this type of active compute-head
+limit, by using the <TT>-timesync</TT> sfront command-line option.
+If this option is selected, the constant <TT>ASYS_TIMEOPTION</TT>
+has the value <TT>ASYS_TIMESYNC</TT>.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Selection Algorithm</H2>
+<TT>
+<pre>
+Sfront allocates cputime
+calculation chores using
+the following algorithm.
+
+If offline render mode is
+in effect (ASYS_TIMEOPTION
+set to ASYS_RENDER), the
+cputime is always set to
+0, and no audio driver 
+is assigned cputime duties.
+
+Elsewise, the audio
+output driver has first
+priority for cputime
+calculation, the audio
+input driver has second
+priority, and a default
+UNIX-only algorithm for
+cputime calculation is
+used if neither audio
+driver requests cputime
+duties.
+
+</pre>
+</TT>
+<H2><TT>ksyncinit</TT></H2>
+
+<TT>
+<pre>
+void ksyncinit(void)
+
+This function is called at
+the start of SAOL program
+execution. 
+
+Audio drivers may use this
+call to initialize global
+state variables. Audio 
+driver state variables and
+functions related to 
+synchronization should use
+names that begin with sync_
+
+</pre>
+</TT>
+
+<H2><TT>ksync</TT></H2>
+
+<TT>
+<pre>
+float ksync(void)
+
+This function is called at
+the end of the audio 
+output creation phase of
+each execution cycle. 
+
+The return value for this
+function is the cputime
+value presented to the
+SAOL program during the
+next execution cycle. It
+should be a number in
+the range [0.0, 1.0]
+
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2><A NAME="shutdown">Shutdown</A></H2>
+
+<P>
+An audio driver declares a shutdown function, which is called at the
+end of SAOL program execution. Audio drivers use the shutdown function
+to cleanly close audio files and hardware devices.
+
+<P>
+The name of the shutdown function depends on the status of
+<TT>ASYS_HASOUTPUT</TT> and <TT>ASYS_HASINPUT</TT>, as described on
+the right panel.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>Shutdown Functions</TT></H2>
+
+<TT>
+<pre>
+The audio driver declares
+one of three functions for
+shutdown, depending on its
+role as an input driver,
+output driver, or input and
+output driver.
+
+If the user requests only
+output driver service, the
+symbol ASYS_HASOUTPUT is 
+defined, and the driver
+should declare:
+
+void asys_oshutdown(void)
+
+If the user requests only
+input driver service, the
+symbol ASYS_HASINPUT is 
+defined, and the driver
+should declare:
+
+void asys_ishutdown(void)
+
+If the user requests both
+input and output driver 
+service, both ASYS_HASINPUT
+and ASYS_HASOUTPUT are
+defined, and the driver
+should declare:
+
+void asys_ioshutdown(void)
+
+These functions should do
+an orderly shutdown of the
+audio hardware or file 
+processing operations.
+
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+<H2><A NAME="register">Registration</A></H2>
+
+<P>
+The right panel shows how to register your audio driver with the
+<TT>sfront</TT> sources. Registration is necessary in order for sfront
+to add your control driver flag to the permissible arguments to the <A
+HREF="../../user/cmdline/index.html#ain"> <TT>-ain</TT></A> and <A
+HREF="../../user/cmdline/index.html#aout"> <TT>-aout</TT></A>
+command line options.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2> Step 1: Create Libraries </H2>
+
+<TT>
+<pre>
+[1] Place your audio driver foo
+in sfront/src/lib/asys/mydriver.c
+
+[2] cd sfront/src/lib
+
+[3] Edit Makefile, and add 
+name of your control driver
+to the ASYS list. 
+
+[4] Type "make". This will
+create:
+
+sfront/src/asyslib.c 
+sfront/src/asyslib.h
+
+which includes an embedded
+version of your driver. Search
+in the files for your driver
+name to verify.
+
+[5] Whenever you change your
+driver code in sfront/src/lib/asys
+you will need to remake the
+asyslib.c file.
+
+</pre>
+</TT>
+
+<H2> Step 2: Edit <TT>sfront/src/audio.c</TT> </H2>
+
+<TT>
+<pre>
+In sfront/src/audio.c, make
+these additions, to add driver
+"mydriver".
+
+[1] Add the constant definition
+
+#define ADRIVER_MYDRIVER 
+
+top the top of the file. Give it
+the current numerical value of
+ADRIVER_END, and then increase
+the value of ADRIVER_END by 1.
+
+[2] Add a printf line to the
+function
+
+void printaudiohelp(void)
+
+that describes the mydriver
+flags. This will be printed out
+when "sfront -help" is invoked.
+
+[3] Add if statements to the
+aoutfilecheck and ainfilecheck
+functions, to register the
+driver. If the driver is an
+active driver, add the lines
+
+aoutflow = ACTIVE_FLOW;
+
+to the aoutfilecheck addition
+and add
+
+ainflow = ACTIVE_FLOW;
+
+to the ainfilecheck addition.
+Also in ainfilecheck, set 
+ainlatency to indicate 
+interactive input (like a
+microphone):
+ 
+ainlatency = LOW_LATENCY_DRIVER;
+
+or streaming input (like a
+fileread):
+
+ainlatency = HIGH_LATENCY_DRIVER;
+ 
+[4] Add an entry for your driver
+to:
+
+  makeaudiotypeout  
+  makeaudiotypein
+  makeaoutsync
+  makeainsync
+  makeaouttimedefault
+  makeaintimedefault
+  makeainparams
+
+if needed.
+
+[5] Add your driver to:
+
+void makeaudiodriver(int num)
+
+  case DRIVER_MYDRIVER:
+    makemydriver();
+    break;
+
+This call actually does the code
+insertion into the sa.c file: it
+calls the function created in 
+asyslib.c from your driver file,
+which is named makemydriver.
+
+</pre>
+</TT>
+
+<H2> Step 3: Compile <TT>sfront</TT> </H2>
+
+<TT>
+<pre>
+Type "make" in sfront/src to 
+compile sfront with your driver.
+
+During driver development, you 
+should edit your original driver
+source in
+
+sfront/src/lib/asys/mydriver.c
+
+then to test first:
+
+cd sfront/src/lib/
+make
+
+and then:
+
+cd sfront/src
+make
+</pre>
+</TT>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="summary">Summary</A></H2>
+
+<P>
+For now, this is the end of the sfront reference manual. Soon, I hope
+to add new chapters describing <TT>sfront</TT> and <TT>sa.c</TT>
+internals.
+
+<P>
+Return to <A HREF="../../index.html">Table of Contents.</A></H2>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+sfront reference manual</A>->
+<STRONG>adding drivers</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>

@@ -1,0 +1,1611 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>Sfront Reference Manual: Part II/2C: Writing Control Drivers</TITLE>
+<META name="keywords" content="MP4-SA, SASL, SAOL, MP4, sfront,
+command line options.">
+<META name="description" content="A part of the Sfront reference
+manual, that is a collection of reference materials. Sfront is a 
+program that translates MP4-SA files into C programs.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../../index.html">mp4-sa</A>-><A HREF="../../../index.html">
+sfront reference manual</A>->
+<STRONG>writing control drivers</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../../index.html">The <TT>sfront</TT> Reference Manual</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part II/2C: Writing Control Drivers</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="70%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#convent">Conventions</A>.</B> Explains
+naming conventions, and shows syntax of the simple functions that
+a control driver defines.
+<LI>
+<B><A HREF="#simple">The simple <TT>csys</TT>
+functions.</TT></A>.</B> The <TT>csys_setup</TT>, <TT>csys_newdata</TT>
+and <TT>csys_shutdown</TT> functions.
+<LI>
+<B><A HREF="#midi">Writing <TT>csys_midievent</TT></A>.</B> Shows
+how to send MIDI control commands.
+<LI>
+<B><A HREF="#sasl">Writing <TT>csys_saslevent</TT></A>.</B> Shows
+how to send SASL and special control commands.
+<LI>
+<B><A HREF="#register">Registering your control driver</A>.</B> Explains
+how to tell the sfront source code about your driver.
+<LI>
+<B><A HREF="#bugs">Bug Reports</A>.</B> Tell us if you have problems
+or suggestions.
+</UL>
+</TD>
+<TD WIDTH="30%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>MIDI Commands</H2>
+<A HREF="#MIDI_NOTEON">NoteOn</A>,
+<A HREF="#MIDI_NOTEOFF">NoteOff</A>,
+<A HREF="#MIDI_PTOUCH">Poly Aftertouch</A>,
+<A HREF="#MIDI_CC">Control Change</A>,
+<A HREF="#MIDI_PROGRAM">Program Change</A>,
+<A HREF="#MIDI_CTOUCH">Channel Aftertouch</A>,
+<A HREF="#MIDI_WHEEL">Pitch Wheel</A>,
+<A HREF="#MIDI_NOOP">No-op</A>,
+<A HREF="#MIDI_NEWTEMPO">NewTempo</A>,
+<A HREF="#MIDI_ENDTIME">EndTime</A>.
+
+<H2>SASL Commands</H2>
+<A HREF="#SASL_INSTR">Instr</A>,
+<A HREF="#SASL_CONTROL">Control</A>,
+<A HREF="#SASL_TABLE">Table</A>,
+<A HREF="#SASL_ENDTIME">Endtime</A>,
+<A HREF="#SASL_TEMPO">Tempo</A>,
+<A HREF="#SASL_NOOP">No-op</A>.
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+This section describes the process of writing a
+control driver in detail, building on the 
+data structure and architecture descriptions of
+the two previous chapters.
+
+<P>
+We begin by describing the programming conventions
+control drivers should follow, concerning issues
+such as variable, function, and file names. We
+then describe how to write the functions that
+control drivers must supply. These functions
+are introduced in an <A HREF="../intro/index.html#fstr">
+earlier section</A> of this chapter.
+
+<P>
+We conclude by describing the registration process
+for a new control driver, which involves making
+several small changes in the sfront source code
+distribution.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Previous Sections</H2>
+
+<P>
+<A HREF="../intro/index.html">Part II/2A: Control Driver Overview</A>
+<BR>
+<A HREF="../data/index.html">Part II/2B: Control Drivers Data Structures</A>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="convent">Conventions</A></H2>
+
+<P>
+Each control driver needs a name. The name
+is the string that follows <TT>-cin</TT> on
+the sfront command line. It also is the name
+of the C file that contains the driver. This
+driver file should be placed in the directory:
+
+<TT>
+<pre>
+sfront/src/lib/csys/
+</pre>
+</TT>
+
+<P>
+The right panel shows the control driver
+naming convention for the file streaming
+decoder that is a part of the sfront 
+distribution.
+
+<P>
+The control driver may include macro
+and constant defines. These defines must
+begin with the string <TT>CSYSI_</TT>. 
+
+<P>
+
+The control driver may also include C or
+C++ global variable and type definitions,
+as well as internal C or C++ function
+definitions. The names of these elements
+must begin with <TT>csysi_</TT>. 
+
+<P>
+
+We will use the <TT>csysi_</TT> and
+<TT>CSYSI_</TT> naming convention to enable backward
+compatible support of multiple control
+drivers in a future sfront release (presently
+sfront only supports a single control
+driver flag). If your control driver
+violates this naming scheme, it may break
+somewhere down the line.
+
+<P>
+Control driver functions that begin
+with <TT>csys_</TT> are called by the
+main <TT>sa.c</TT> program. The right
+panel lists the <TT>csys_</TT> that a
+control driver may define. The bulk
+of this chapter describes these 
+functions in detail.
+
+<P>
+Note that either <TT>csys_midievent</TT>
+or <TT>csys_saslevent</TT> may be omitted
+from a control driver (but not both).
+
+<P>
+Finally, a control driver may let the user specify command-line
+options for the <TT>sa.c</TT> program. We describe the <A
+HREF="../data/index.html#cmdline">naming conventions</A> for control
+driver command-line options in an earlier section of this chapter..
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Control Driver Names</H2>
+
+<TT>
+<pre>
+Example:
+
+File streaming encoder (<B>fstr</B>).
+
+
+sfront invocation:
+
+sfront -cin <B>fstr</B>
+
+
+driver file/location:
+
+sfront/src/lib/csys/<B>fstr</B>.c
+
+</pre>
+</TT>
+
+<H2>Inside Control Drivers:</H2>
+
+<TT>
+<pre>
+
+symbolic constants and
+macros must begin with:
+
+<B>CSYSI_</B>
+
+
+global variables must 
+begin with:
+
+<B>csysi_</B>
+
+
+internal functions must 
+begin with:
+
+<B>csysi_</B>
+
+
+All control drivers must
+define:
+
+int <B>csys_setup</B>(void) {}
+int <B>csys_newdata</B>(void) {}
+void <B>csys_shutdown</B>(void) {}
+
+
+control drivers that can 
+return MIDI commands must 
+define:
+
+int <B>csys_midievent</B>(...) {}
+
+
+control drivers that can 
+return SASL commands must 
+define:
+
+int <B>csys_saslevent</B>(...) {}
+
+
+see <A HREF="../data/index.html#cmdline">Part II/2B</A> for the
+conventions for
+command-line flags a
+control driver defines
+for the sa.c file.
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="simple">Simple <TT>csys</TT> Functions</A></H2>
+
+<P>
+The three <TT>csys</TT> functions shown on the right panel
+must be defined in all control drivers. In this section, 
+we describe the semantics of these functions.
+
+<H3><TT>csys_setup</TT></H3>
+
+<P>
+The <TT>csys_setup</TT> function is called near the start of execution
+of the <TT>sa.c</TT> file. A control driver usually initializes its
+own internal variables and opens files and devices during the
+<TT>csys_setup</TT> call. It may also parse <TT>sa.c</TT> command-line
+arguments, as described in an <A
+HREF="../data/index.html#cmdline">earlier section</A>.
+
+<P>
+If the control driver is able to support the execution of the
+<TT>sa.c</TT>, <TT>csys_setup</TT> should return the value
+<TT>CSYS_DONE</TT>.  To signal an initialization problem (for example,
+not being able to open a file or device), <TT>csys_setup</TT> should
+return the value <TT>CSYS_ERROR</TT>. On receipt of <TT>CSYS_ERROR</TT>,
+the <TT>sa.c</TT> prints a generic error message indicating control
+driver failure on <TT>stderr</TT>, and terminates with a -1 error
+code.
+
+<H3><TT>csys_newdata</TT></H3>
+
+<P>
+The <TT>csys_newdata</TT> function is called once per i-pass.
+The return value of the function tells the <TT>sa.c</TT> program
+if there are new MIDI or SASL events the control driver wishes
+to execute on this i-pass. The right panel described the four
+return values (CSYS_NONE, CSYS_MIDIEVENTS, CSYS_SASLEVENTS,
+and CSYS_EVENTS) that the <TT>csys_newdata</TT> function
+may use.
+
+<P>
+In some applications, the control driver may need to know
+the current execution time of the <TT>sa.c</TT> program,
+in order to determine if events are ready. A previous
+section of this chapter describes <A HREF="../data/index.html#system">
+global variables</A> that the <TT>csys_newdata</TT> function 
+may access for this purpose.
+
+<H3><TT>csys_shutdown</TT></H3>
+
+<P>
+The <TT>csys_shutdown</TT> function is called near the end of execution
+of the <TT>sa.c</TT> program. The control driver can close files and
+devices, and do other tasks to ensure an orderly shutdown.
+
+<P>
+This function is usually called as a part of the normal termination
+process. Normal termination happens when the current score time exceeds
+the value of the 
+<A HREF="../data/index.html#system"><TT>endtime</TT></A> variable.
+
+<P>
+Since the <TT>endtime</TT></A> variable is available to the control
+driver to read, and can be changed during a <TT>csys_midievent</TT>
+or <TT>csys_saslevent</TT> call, the control driver can monitor and
+influence the total execution time of the <TT>sa.c</TT>
+program. However, by the time <TT>csys_shutdown</TT> is called, there
+is no way for the control driver to reverse the termination decision.
+
+<P>
+If sfront is invoked with the <A HREF="../../../user/cmdline/index.html#except">
+<TT>-except</TT></A> option, the <TT>csys_shutdown</TT> option is
+also called in the event of the abnormal end of execution. An
+abnormal termination may happen if the SAOL program causes a 
+floating-point exception, if the <TT>sa.c</TT> program process 
+is terminated by the operating system, or for other reasons. 
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>csys_setup</TT></H2>
+
+<TT>
+<pre>
+int csys_setup(void) { }
+
+Called once, near the start
+of execution of the sa.c 
+file. Return values:
+
+CSYS_DONE : if control driver
+            initialization is
+            successful.
+
+CSYS_ERROR: if control driver
+            wishes to terminate
+            the sa.c file due
+            to initialization
+            problems.
+</pre>
+</TT>
+
+<H2><TT>csys_newdata</TT></H2>
+
+<TT>
+<pre>
+int csys_newdata(void) {}
+
+Called at the start of each
+i-pass. Legal return values:
+
+CSYS_NONE:  
+
+  No new MIDI or SASL events
+  for this i-pass. The sa.c 
+  file will not call the 
+  csys_midievent() or the
+  csys_saslevent() function
+  on this i-pass. 
+
+CSYS_MIDIEVENTS:
+
+  New MIDI events, but no
+  new SASL events, on this
+  i-pass. The sa.c file will
+  call csys_midievent() to
+  receive the event(s).
+
+CSYS_SASLEVENTS:
+
+  New SASL events, but no
+  new MIDI events, on this
+  i-pass. The sa.c file will
+  call csys_saslevent() to
+  receive the event(s).
+
+CSYS_EVENTS:
+
+  New MIDI events and 
+  new SASL events on this
+  i-pass. The sa.c file will
+  call csys_midievent() and
+  csys_saslevent() to 
+  receive the events.
+
+</pre>
+</TT>
+
+
+<H2><TT>csys_shutdown</TT></H2>
+
+<TT>
+<pre>
+void csys_shutdown(void) {}
+
+Called at the normal end of
+execution of the <TT>sa.c</TT>
+program, so that the control
+driver may close devices and
+files. 
+
+If the sfront command-line 
+option -except is invoked, the 
+csys_shutdown function is also
+called in the case of abnormal
+termination, such as a floating
+point exception.
+
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2><A  NAME="midi"><TT>csys_midievent</TT></A></H2>
+
+<P>
+The <TT>csys_midievent</TT> function is called
+during an i-pass if the return value for the
+<TT>csys_newdata</TT> call is CSYS_MIDIEVENTS
+or CSYS_EVENTS.
+
+<P>
+As shown on the right panel, the arguments for
+the <TT>csys_midievent</TT> function are
+all pointers. This function places information
+about the new MIDI event into the variables
+pointed to by these arguments.
+
+<P>
+A <TT>csys_midievent</TT> call communicates a single MIDI event. If there
+is another pending MIDI event, the <TT>csys_midievent</TT> function
+should return CSYS_EVENTS to request another <TT>csys_midievent</TT>
+call. The <TT>csys_midievent</TT> function is repeatedly called until
+it returns the value CSYS_NONE.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>csys_midievent</TT></H2>
+
+<TT>
+<pre>
+int csys_midievent(
+
+    unsigned char * cmd,
+    unsigned char * ndata,
+    unsigned char * vdata,
+    unsigned short * extchan,
+    float * fval);
+
+Place MIDI event information 
+in pointer, i.e:
+
+   *cmd = CSYS_MIDI_NOTEON;
+   *ndata = 40;
+   *vdata = 64;
+   *extchan = 1;
+   *fval = 0.0F;
+
+Return values:
+
+   CSYS_EVENTS:
+
+      Requests another call to
+      csys_midievent on this 
+      i-pass, to communicate
+      another MIDI event.
+
+   CSYS_NONE:
+
+      Indicates there are no
+      more MIDI events for this
+      i-pass.
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>Command Syntax</H4>
+
+<P>
+The right panel lists the possible <TT>*cmd</TT> values for
+<TT>csys_midievent</TT>.  These values code the MIDI commands
+supported by the MP4-SA standard, as well as several special commands.
+
+<P>
+The numeric values for the MIDI commands match the syntax of MIDI
+events sent on a wire. However, the lower nibble of MIDI commands,
+which holds the MIDI channel number, is ignored by the <TT>sa.c</TT>
+program.
+
+<P>
+Instead, the <TT>*extchan</TT> variable is used to code the MIDI
+channel information. This variable can be used to code multiple ports
+of 16-channel MIDI streams, using the formula shown on the right
+panel. The maximum number of MIDI channels for a control driver is
+arbitrary, and is specified as part of the registration process.
+
+<P>
+The implementation of running status (where
+consecutive identical MIDI commands
+on a wire can skip the command byte)
+is the responsibility
+of the control driver. The <TT>sa.c</TT>
+program expects a valid <TT>*cmd</TT>
+value on every call.
+
+<H4>MIDI Channel Number Spaces</H4>
+
+<P>
+In the MP4 file format, it is possible to include a complete MIDI
+File in the configuration part of the file. The channel number space
+of this MIDI File is independent from the channel number space of
+the MIDI control driver. This independence is in keeping with the
+MP4-SA specification, and lets programmers use the control driver
+interface to write compliant MP4-SA streaming applications.
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>*cmd</TT> values</H2>
+
+<TT>
+<pre>
+MIDI commands:
+
+  symbolic         hex
+
+CSYS_MIDI_NOTEOFF   80   
+CSYS_MIDI_NOTEON    90   
+CSYS_MIDI_PTOUCH    A0   
+CSYS_MIDI_CC        B0   
+CSYS_MIDI_PROGRAM   C0   
+CSYS_MIDI_CTOUCH    D0   
+CSYS_MIDI_WHEEL     E0   
+
+Special commands:
+
+CSYS_MIDI_NOOP      70
+CSYS_MIDI_NEWTEMPO  71
+CSYS_MIDI_ENDTIME   72
+
+</pre>
+</TT>
+
+<H2><TT>*extchan</TT></H2>
+
+<TT>
+<pre>
+The <TT>*extchan</TT> field 
+should be set to the extended
+MIDI channel for the command.
+For a simple system (a single
+MIDI stream with 16 channels)
+set <TT>*extchan</TT> to the
+MIDI channel number (0 to 15).
+
+For a complicated system with
+several 16-channel MIDI ports,
+set <TT>*extchan</TT> to
+
+16*P + N
+
+where P is the MIDI port 
+(numbered from 0) and N is
+the MIDI channel number (0-15).
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>Command Semantics</H4>
+
+<P>
+The right panel shows the semantics for
+each command supported by the 
+<TT>csys_midievent</TT> function. The
+description specifies the meaning
+of the <TT>*ndata</TT>, <TT>*vdata</TT>,
+and <TT>*fval</TT> fields for each
+command.
+
+<P>
+The MIDI program command is used to
+select the SAOL instrument that 
+is created in response to the MIDI
+NoteOn command. The program number
+specified by the MIDI program
+command is mapped into a SAOL preset
+number, which unambiguously denotes
+a SAOL instrument. 
+
+<P>
+To map MIDI program numbers into 
+SAOL instrument preset numbers,
+use this formula:
+
+<TT>
+<pre>
+preset = program + bank*128
+</pre>
+</TT>
+
+<P>
+where <TT>bank</TT> is the MIDI program
+bank number. This value defaults to 0,
+and may be changed by using the MIDI
+control change command for controller
+0.
+
+<P>
+In addition, as described in an <A HREF="../data/index.html#preset">
+earlier section</A>, the control driver may access data structures that
+map SAOL preset numbers to SAOL instrument names.
+
+<P>
+Use these links to jump to a particular command:
+
+<UL>
+<LI>
+<A HREF="#MIDI_NOTEON">MIDI NoteOn Command</A>
+<LI>
+<A HREF="#MIDI_NOTEOFF">MIDI NoteOff Command</A>
+<LI>
+<A HREF="#MIDI_PTOUCH">MIDI Poly Aftertouch Command</A>
+<LI>
+<A HREF="#MIDI_CC">MIDI Control Change Command</A>
+<LI>
+<A HREF="#MIDI_PROGRAM">MIDI Program Change Command</A>
+<LI>
+<A HREF="#MIDI_CTOUCH">MIDI Channel Aftertouch Command</A>
+<LI>
+<A HREF="#MIDI_WHEEL">MIDI Pitch Wheel Command</A>
+<LI>
+<A HREF="#MIDI_NOOP">Special No-op Command</A>
+<LI>
+<A HREF="#MIDI_NEWTEMPO">Special NewTempo Command</A>
+<LI>
+<A HREF="#MIDI_ENDTIME">Special EndTime Command</A>
+</UL>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><A NAME="MIDI_NOTEON"><TT>CSYS_MIDI_NOTEON</TT></A></H2>
+
+<TT>
+<pre>
+Start a MIDI note on *extchan.
+
+*cmd = CSYS_MIDI_NOTEON
+*ndata = [note number, 0-127]
+*vdata = [velocity, 0-127]
+
+Note: *vdata = 0 treated as a 
+CSYS_MIDI_NOTEOFF.
+
+</pre>
+</TT>
+
+<H2><A NAME="MIDI_NOTEOFF"><TT>CSYS_MIDI_NOTEOFF</TT></A></H2>
+
+<TT>
+<pre>
+End a MIDI note on *extchan.
+
+*cmd = CSYS_MIDI_NOTEOFF
+*ndata = [note number, 0-127]
+
+Note: MP4-SA does not support
+release velocity.
+
+</pre>
+</TT>
+
+
+<H2><A NAME="MIDI_PTOUCH"><TT>CSYS_MIDI_PTOUCH</TT></A></H2>
+<TT>
+<pre>
+Polyphonic aftertouch on *extchan.
+
+*cmd = CSYS_MIDI_PTOUCH
+*ndata = [note number, 0-127]
+*vdata = [touch value, 0-127]
+
+</pre>
+</TT>
+
+<H2><A NAME="MIDI_CC"><TT>CSYS_MIDI_CC</TT></A></H2>
+<TT>
+<pre>
+Controller change on *extchan
+
+*cmd = CSYS_MIDI_CC
+*ndata = [controller number, 0-127]
+*vdata = [controller value, 0-127]
+
+Note: See <A HREF="../data/index.html#midi">this section</A>
+for symbolic MIDI controller 
+numbers.
+</pre>
+</TT>
+
+<H2><A NAME="MIDI_PROGRAM"><TT>CSYS_MIDI_PROGRAM</TT></A></H2>
+
+<TT>
+<pre>
+Change program on *extchan
+
+*cmd = CSYS_MIDI_PROGRAM
+*ndata = [program number, 0-127]
+
+Note: See left panel for 
+MP4-SA semantics.
+
+</pre>
+</TT>
+
+<H2><A NAME="MIDI_CTOUCH"><TT>CSYS_MIDI_CTOUCH</TT></A></H2>
+<TT>
+<pre>
+Channel aftertouch on *extchan.
+
+*cmd = CSYS_MIDI_CTOUCH
+*ndata = [touch value, 0-127]
+
+</pre>
+</TT>
+
+<H2><A NAME="MIDI_WHEEL"><TT>CSYS_MIDI_WHEEL</TT></A></H2>
+<TT>
+<pre>
+Pitch wheel value on *extchan.
+
+*cmd = CSYS_MIDI_WHEEL
+*ndata = [wheel LSB, 0-127]
+*vdata = [wheel MSB, 0-127]
+
+Note: Value of MIDIbend will
+be read as (*vdata)*128 +
+(*ndata). Coding follows the
+MIDI command syntax for easy
+parsing.
+
+</pre>
+</TT>
+
+<H2><A NAME="MIDI_NOOP"><TT>CSYS_MIDI_NOOP</TT></A></H2>
+<TT>
+<pre>
+Do nothing.
+
+*cmd = CSYS_MIDI_NOOP
+
+</pre>
+</TT>
+
+<H2><A NAME="MIDI_NEWTEMPO"><TT>CSYS_MIDI_NEWTEMPO</TT></A></H2>
+<TT>
+<pre>
+Change the tempo value.
+
+*cmd = CSYS_MIDI_NEWTEMPO
+*fval = [new tempo, beats/min]
+
+Note: The current tempo is
+available in the global
+variable <A HREF="../data/index.html#system">tempo</A>.
+
+</pre>
+</TT>
+
+
+<H2><A NAME="MIDI_ENDTIME"><TT>CSYS_MIDI_ENDTIME</TT></A></H2>
+<TT>
+<pre>
+Change the endtime value
+
+*cmd = CSYS_MIDI_ENDTIME
+*fval = [endtime, in beats]
+
+Note: <A HREF="../data/index.html#system">Global variables</A>
+are available that tell the
+current endtime status. To
+halt execution after the 
+current execution cycle, set
+*fval to the value of the
+global variable scorebeats.
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2><A  NAME="sasl"><TT>csys_saslevent</TT></A></H2>
+
+<P>
+The <TT>csys_saslevent</TT> function is called
+during an i-pass if the return value for the
+<TT>csys_newdata</TT> call is CSYS_SASLEVENTS
+or CSYS_EVENTS.
+
+<P>
+As shown on the right panel, the arguments for
+the <TT>csys_saslevent</TT> function are
+all pointers. This function places information
+about the new SASL event into the variables
+pointed to by these arguments.
+
+<P>
+A <TT>csys_saslevent</TT> call communicates a single SASL event. If there
+is another pending SASL event, the <TT>csys_saslevent</TT> function
+should return CSYS_EVENTS to request another <TT>csys_saslevent</TT>
+call. The <TT>csys_saslevent</TT> function is repeatedly called until
+it returns the value CSYS_DONE.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>csys_saslevent</TT></H2>
+
+<TT>
+<pre>
+int csys_saslevent(
+
+    unsigned char * cmd, 
+    unsigned char * priority,
+    unsigned short * id, 
+    unsigned short *label, 
+    float * fval, 
+    unsigned int * pnum, 
+    float ** p)	
+
+
+Place SASL event information 
+in pointer, i.e:
+
+   *cmd = CSYS_SASL_TEMPO;
+   *fval = 61.0F;
+
+Return values:
+
+   CSYS_EVENTS:
+
+      Requests another call to
+      csys_saslevent on this 
+      i-pass, to communicate
+      another SASL event.
+
+   CSYS_NONE:
+
+      Indicates there are no
+      more SASL events for this
+      i-pass.
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>Command Syntax</H4>
+
+<P>
+The right panel lists the possible <TT>*cmd</TT> values for
+<TT>csys_saslevent</TT>.  These values code the command set
+of the SASL language, as well as special commands. The
+numeric values for the SASL values maps to the MPEG 4
+binary coding of <TT>class score_line</TT>.
+
+<P>
+The <TT>*priority</TT> field of <TT>csys_saslevent</TT>
+can take two values. A zero value codes <I>normal
+priority</I>. It indicates that if CPU cycles are a
+scarce commodity, the <TT>sa.c</TT> should feel free
+to ignore the command.
+
+<P>
+If the <TT>*priority</TT> field is set to 1, the SASL
+command is considered a <I>high
+priority</I> command, and is given preference for 
+execution if computational resources are running low. 
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>*cmd</TT> values</H2>
+
+<TT>
+<pre>
+SASL commands:
+
+  symbolic         hex
+
+CSYS_SASL_INSTR    0x00 
+CSYS_SASL_CONTROL  0x01 
+CSYS_SASL_TABLE    0x02 
+CSYS_SASL_ENDTIME  0x04 
+CSYS_SASL_TEMPO    0x05 
+
+Special commands:
+
+CSYS_SASL_NOOP     0x06
+
+Note that hexadecimal 
+values for the SASL 
+command encoding matches
+the MP4-SA binary encoding
+for class score_line.
+
+</pre>
+</TT>
+<H2><TT>*priority</TT> values</H2>
+
+<TT>
+<pre>
+Normal priority commands:
+
+*priority = 0;
+
+High priority commands:
+
+*priority = 1;
+
+See right panel for details.
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>Command Semantics</H4>
+
+<P>
+The right panel shows the semantics for each command supported by the
+<TT>csys_saslevent</TT> function. The description specifies the
+meaning of the <TT>*id</TT>, <TT>*label</TT>, <TT>*fval</TT>,
+<TT>*pnum</TT>, and <TT>*p</TT> fields for each command.
+
+<P>
+The right panel descriptions include many hyperlinks to the <A
+HREF="../data/index.html">data structure descriptions</A> in the
+previous section. These data structures map the <TT>sa.c</TT> coding of
+instruments and variables (the <TT>index</TT> field) to the SASL
+coding of instruments and variables (MP4 symbols and ASCII names).
+
+<P>
+Use these links to jump to a particular command:
+
+<UL>
+<LI>
+<A HREF="#SASL_INSTR">SASL Instr Command</A>
+<LI>
+<A HREF="#SASL_CONTROL">SASL Control Command</A>
+<LI>
+<A HREF="#SASL_TABLE">SASL Table Command</A>
+<LI>
+<A HREF="#SASL_ENDTIME">SASL Endtime Command</A>
+<LI>
+<A HREF="#SASL_TEMPO">SASL Tempo Command</A>
+<LI>
+<A HREF="#SASL_NOOP">Special No-op command</A>
+</UL>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><A NAME="SASL_INSTR"><TT>CSYS_SASL_INSTR</TT></A></H2>
+
+<TT>
+<pre>
+Create a SAOL instr instance.
+
+*cmd   = CSYS_SASL_INSTR
+*id    = [instr to create]
+*label = [label for instr]
+*fval  = [duration, or -1]
+*pnum  = [number of parameters]
+*p     = [pointer to float array]
+
+
+Notes:
+
+[1] The *id field specifies
+the SAOL instr to create, by
+using the <A HREF="../data/index.html#instr">csys_instr</A>[].index
+number. 
+
+[2] The *label field is the
+SASL label, if any, of the
+instrument. Use the constant
+CSYS_NOLABEL to signify an
+unlabelled instrument, use a
+constant value greater than
+CSYS_LABELNUM to create unique
+new labels, or see this 
+<A HREF="../data/index.html#labels">section</A> for details on how
+to specify label names from a
+SASL score in the configuration
+block.
+
+[3] The *fval field is the
+duration of the instr, in
+units of scorebeats, or is
+-1 if the instr has indefinite
+duration.
+
+[4] The *p field points to a
+<B>float</B> array of size *pnum that
+holds the parameter values for
+the instr.  The <A HREF="../data/index.html#instr">csys_instr</A>
+structure has information on the
+number and names of the instr
+parameters.
+
+</pre>
+</TT>
+
+<H2><A NAME="SASL_CONTROL">Global <TT>CSYS_SASL_CONTROL</TT></A></H2>
+
+<TT>
+<pre>
+Updates a SAOL global variable.
+
+*cmd   = CSYS_SASL_CONTROL
+*id    = CSYS_SASL_NOINSTR
+*label = CSYS_NOLABEL
+*pnum  = [variable to change]
+*fval  = [new variable value]
+
+
+[1] Set *pnum to the 
+<A HREF="../data/index.html#global">csys_global[].index</A>
+value of the variable to be
+changed.
+
+[2] Set *fval to the new value of
+this variable.
+
+</pre>
+</TT>
+
+
+
+<H2>Labelled <TT>CSYS_SASL_CONTROL</TT></H2>
+
+<TT>
+<pre>
+Updates an <B>imports</B>
+variable in a labelled 
+instance of a SAOL instr.
+The variable must not 
+have a matching variable
+in the global block.
+
+
+*cmd   = CSYS_SASL_CONTROL
+*label = [label name]
+*id    = [instr name]
+*pnum  = [variable to change]
+*fval  = [new variable value]
+
+
+[1] The *label field is
+set to the label number
+of the target instr 
+instances. If the control
+driver is labelling its 
+CSYS_SASL_INSTR commands
+using unique labels, it 
+will know the correct label
+number to use. If the 
+control command targets an
+instr created by a SASL
+instr command in the 
+configuration block, see
+this <A HREF="../data/index.html#labels">section</A> for details
+on how to specify the label
+names. 
+
+[2] The same SASL label can
+be applied to instances of
+multiple instr types. The
+CSYS_SASL_CONTROL needs to
+be invoked multiple times in
+this case, one for each 
+instr type. The *id field
+specifies the SAOL instr 
+a CSYS_SASL_CONTROL command
+targets, by using the 
+<A HREF="../data/index.html#instr">csys_instr</A>[].index number. 
+
+[3] The *pnum field is the
+<A HREF="../data/index.html#instr">csys_instr</A>[].csys_vars[].index
+number for the variable to
+be changed (see Note below).
+
+[4] This <A HREF="../data/index.html#target">data structure</A>
+simplifies the search for the
+correct *id and *pnum values
+for some types of control
+driver applications.
+
+[5] Set *fval to the new value of
+the variable.
+
+
+
+Note: Even though the MP4-SA
+specification only allows imports
+variables to be changed, the
+CSYS_SASL_CONTROL command will
+change all instr signal variables,
+to support control drivers which
+help in SAOL program debugging.
+Changing a non-imports variable
+is not guaranteed to change SAOL
+program behavior unless the -O0
+option is used, since sfront may
+have optimized away the variable
+that is being changed.
+
+</pre>
+</TT>
+
+<H2><A NAME="SASL_TABLE"><TT>CSYS_SASL_TABLE</TT></A></H2>
+
+<TT>
+<pre>
+Updates a SAOL global or future
+table.
+
+*cmd   = CSYS_SASL_TABLE
+*id    = [table to modify]
+*label = [wavetable generator]
+*pnum  = [number of parameters]
+*p     = [pointer to float array]
+
+
+[1] Set *id to the 
+<A HREF="../data/index.html#global">csys_global[].index</A>
+value of the table to be changed.
+Note that both global and future
+tables are in this array.
+
+[2] Set *label to one of these 
+constants to indicate the 
+wavetable generator:
+
+  symbolic                hex
+
+CSYS_SASL_TGEN_SAMPLE      6F 
+CSYS_SASL_TGEN_DATA        70
+CSYS_SASL_TGEN_RANDOM      71
+CSYS_SASL_TGEN_STEP        72
+CSYS_SASL_TGEN_LINESEG     73
+CSYS_SASL_TGEN_EXPSEG      74
+CSYS_SASL_TGEN_CUBICSEG    75
+CSYS_SASL_TGEN_POLYNOMIAL  76
+CSYS_SASL_TGEN_SPLINE      77
+CSYS_SASL_TGEN_WINDOW      78
+CSYS_SASL_TGEN_HARM        79
+CSYS_SASL_TGEN_HARM_PHASE  7A
+CSYS_SASL_TGEN_PERIODIC    7B
+CSYS_SASL_TGEN_BUZZ        7C
+CSYS_SASL_TGEN_CONCAT      7D
+CSYS_SASL_TGEN_EMPTY       7E
+CSYS_SASL_TGEN_DESTROY     7F
+
+Note that the numeric values match
+the MP4 symbol token values for 
+these wavetable generators. Also
+note that opcode and wavetable
+"buzz" are different token!
+
+[3] With the exception of the 
+SAMPLE generator, the *pnum
+field is the number of wavetable
+parameters, and the *p field points
+to an array of <B>floats</B> that
+are the parameters of the
+wavetable generator. Note the
+CONCAT generator has table 
+values for some of its parameters.
+For these parameters, use the 
+csys_global[].index value for
+the table, cast into a float.
+
+[4] The SAMPLE generator uses 
+the *pnum and *p arguments in
+a different way. The *pnum value
+is 4 + the number of actual
+samples in the wavetable. The
+control driver is responsible
+for executing the semantics of
+the <B>size</B> and <B>skip</B>
+field, to figure out this actual
+size. 
+
+The first four elements in the
+*p array have special meanings,
+that map into fields of the
+class sample of the MP4 binary
+file:
+
+(*p)[0]  sampling rate (Hz) (srate)
+(*p)[1]  loop start (index) (loopstart)
+(*p)[2]  loop end  (index)  (loopend)
+(*p)[3]  base frequency (Hz) (basecps)
+
+A value of -1 for these parameters
+codes "unknown". The actual sample
+elements are placed in elements 
+(*p)[4] to (*p)[(*pnum)-1]. Note 
+that the loop start and loop end
+values are not offset by 4 -- so
+a loop start at the top of the
+table would be set to 0 (not 4)
+and a loop end at the last element
+of the table would be set to 
+(*pnum) - 4 (not *pnum).
+
+</pre>
+</TT>
+
+
+<H2><A NAME="SASL_ENDTIME"><TT>CSYS_SASL_ENDTIME</TT></A></H2>
+<TT>
+<pre>
+Executes SASL endtime command.
+
+*cmd = CSYS_SASL_ENDTIME
+*fval = [endtime in scorebeats]
+
+Note: <A HREF="../data/index.html#system">Global variables</A>
+are available that tell the
+current endtime status. To
+halt execution after the 
+current execution cycle, set
+*fval to the value of the
+global variable scorebeats.
+
+</pre>
+</TT>
+
+<H2><A NAME="SASL_TEMPO"><TT>CSYS_SASL_TEMPO</TT></A></H2>
+<TT>
+<pre>
+The SASL tempo command
+
+*cmd = CSYS_SASL_TEMPO
+*fval = [new tempo, beats/min]
+
+Note: The current tempo is
+available in the global
+variable <A HREF="../data/index.html#system">tempo</A>.
+
+</pre>
+</TT>
+
+
+<H2><A NAME="SASL_NOOP"><TT>CSYS_SASL_NOOP</TT></A></H2>
+<TT>
+<pre>
+Do nothing.
+
+*cmd = CSYS_MIDI_NOOP
+
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+<H2><A NAME="register">Registration</A></H2>
+
+<P>
+The right panel shows how to register your
+control driver with the <TT>sfront</TT>
+sources. Registration is necessary in
+order for sfront to add your control
+driver flag to the permissible arguments
+to the <A HREF="../../../user/cmdline/index.html#cin">
+<TT>-cin</TT></A> command line switch.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2> Step 1: Create Libraries </H2>
+
+<TT>
+<pre>
+[1] cd sfront/src/lib
+
+[2] Edit Makefile, and add 
+name of your control driver
+to the CSYS list. 
+
+[3] Type "make". This will
+create:
+
+sfront/src/csyslib.c 
+sfront/src/csyslib.h
+
+which includes an embedded
+version of your driver. Search
+in the files for your driver
+name to verify.
+
+[4] Whenever you change your
+driver code in sfront/src/lib/csys
+you will need to remake the
+csyslib.c file.
+
+</pre>
+</TT>
+
+<H2> Step 2: Edit <TT>sfront/src/control.c</TT> </H2>
+
+<TT>
+<pre>
+In sfront/src/control.c, make
+these additions, to add driver
+"mydriver".
+
+[1] Add the constant definition
+
+#define CDRIVER_MYDRIVER 
+
+top the top of the file. Give it
+the current numerical value of
+CDRIVER_END, and then increase
+the value of CDRIVER_END by 1.
+
+[2] Add a printf line to the
+function
+
+void printcontrolhelp(void)
+
+that describes the -cin mydriver
+flag. This will be printed out
+when "sfront -help" is invoked.
+
+[3] Add an if statement to the
+funtion cinfilecheck that takes
+this form:
+
+if (!strcmp(fname,"mydriver"))
+ {
+   cin = CDRIVER_MYDRIVER;
+   csasl = 1;            
+   cmidi = 1;            
+   cmaxchan = 3;
+   clatency = ?_LATENCY_DRIVER;
+   return 0;
+  }
+
+  [a] Set csasl to 1 if your
+      driver supports SASL
+      commands, else set it
+      to 0. If you set it to
+      1, the sa.c file expects
+      your driver to define the 
+      csys_saslevent() function.
+
+  [b] Set cmidi to 1 if your
+      driver supports MIDI 
+      commands, else set it to 0.
+      If you set it to 1, the sa.c
+      file expects your driver to
+      define the csys_midievent()
+      function.
+
+  [c] If you set cmidi to 1, set
+      cmaxchan to 1 + the number
+      of extended MIDI channels
+      your driver supports. Don't
+      set this value unnecessarily
+      high, since it makes the 
+      executable larger.
+
+  [d] Set clatency to 
+
+      LOW_LATENCY_DRIVER 
+
+      if your driver is  
+      interactive, for example a
+      a MIDI In jack driver. 
+
+      Otherwise, set clatency
+      to
+
+      HIGH_LATENCY_DRIVER; 
+ 
+
+[4] Add this case entry to the
+switch statement in 
+
+void makecontroldriver(int num)
+
+  case CDRIVER_MYDRIVER:
+    makemydriver();
+    break;
+
+This call actually does the code
+insertion into the sa.c file: it
+calls the function created in 
+csyslib.c from your driver file.
+
+</pre>
+</TT>
+
+<H2> Step 3: Compile <TT>sfront</TT> </H2>
+
+<TT>
+<pre>
+Type "make" in sfront/src to 
+compile sfront with your driver.
+
+During driver development, you 
+should edit your original driver
+source in
+
+sfront/src/lib/csys/mydriver.c
+
+then to test first:
+
+cd sfront/src/lib/
+make
+
+and then:
+
+cd sfront/src
+make
+</pre>
+</TT>
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+<H2> <A NAME="bugs">Bug Reports</A></H2>
+
+<P>
+Please follow these <A HREF="../../../user/install/index.html#bugs">
+guidelines</A> when sending along bug reports and suggestions for
+the control driver interface. Thanks!
+
+<P>
+<B>Next section:</B>
+<A HREF="../../adriver/index.html">Part II/3: Audio Drivers.</A></H2>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<pre> </pre>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../../index.html">mp4-sa</A>-><A HREF="../../../index.html">
+sfront reference manual</A>->
+<STRONG>writing control drivers</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>

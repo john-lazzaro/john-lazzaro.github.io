@@ -1,0 +1,675 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>Sfront Reference Manual: Part I/2: Sfront File Rendering</TITLE>
+<META name="keywords" content="MP4-SA, SASL, SAOL, MP4, render, midi,
+stream, timesync, real time, real-time, interaction, control, encode,
+encoding, decode, decoding, omissions, extensions">
+<META name="description" content="A part of the Sfront reference
+manual, that describes how to use the program. Sfront is a 
+program that translates MP4-SA files into C programs.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+sfront reference manual</A>->
+<STRONG>file rendering</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The <TT>sfront</TT> Reference Manual</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part II/2: Sfront File Rendering</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="100%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#render">MP4 File Decoding</A>.</B> Rendering binary
+MP4-SA files to a file.
+<LI>
+<B><A HREF="#midi">SAOL, SASL and MIDI Decoding</A>.</B> 
+Rendering MP4 component files.
+<LI>
+<B><A HREF="#input">Audio Input</A>.</B> How to connect files 
+to the <B>input_bus</B>.
+<LI>
+<B><A HREF="#encode">MP4 File Encoding</A>.</B> Creating MP4-SA files.
+<LI>
+<B><A HREF="#deviant">Incompatibilities</A>.</B> Sfront deviations
+from the MP4-SA specification.
+</UL>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+This chapter describes how to use <TT>sfront</TT> for off-line
+applications, where audio input and output are sent to files.  These
+<I>rendering</I> applications work on all supported platforms.
+
+<P>
+We begin with decoding applications, including simple MP4 file
+rendering, and more complex jobs that use multiple file types (ASCII
+SAOL and SASL files, and binary MIDI Files).
+
+<P>
+We also describe how to use sfront to encode binary MP4
+files. Finally, we describe the ways that sfront is not
+MP4-SA compliant.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="render">MP4 File Decoding</A></H2>
+
+<P>
+In Chapter I/1, we describe the set of <A
+HREF="../install/index.html#test">example</A> files included with
+sfront for testing purposes. These examples use
+sfront to create an audio file in an off-line fashion.  We
+describe this sfront application as <I>file rendering</I>.
+
+<P>
+To render a binary MP4 file, simply run sfront and specify
+the binary file name using the <TT>-bit</TT> option (see the right
+panel for syntax). Running this command creates the file
+<TT>sa.c</TT>, that when compiled and executed, renders the audio
+performance in the WAV file &nbsp<TT>output.wav</TT>.
+
+<P>
+The <TT>-bit</TT> option reads both the configuration block and the
+streaming blocks from the MP4 file, which is the proper behavior for
+most applications. The alternative <TT>-bitc</TT> option reads
+only the configuration block data, and ignores the streaming blocks.
+
+<P>
+Note that sfront uses the MP4 extension for binary files, to
+match the naming convention of the MPEG reference decoder 
+saolc. Sfront MP4 files are compatible with saolc MP4 files.
+
+<P>
+However, these MP4 files do not use MPEG 4 Systems technology, and are
+incompatible with Structured Audio files that do use MPEG 4 Systems.
+  
+<H4>C filename option</H4>
+
+<P>
+The <TT>-o</TT> command-line option changes the C output filename
+from the default <TT>sa.c</TT>. See the right panel for examples.
+
+<H4>Audio output options</H4>
+
+<P>
+The <TT>-aout</TT> command-line option overrides the default option of
+writing a WAV file names <TT>output.wav</TT>. If the string following
+the <TT>-aout</TT> option contains a period, sfront assumes
+the string is a filename, and uses the extension after the period to
+determine the filetype. See the right panel for examples.
+
+<P>
+At this time, sfront recognizes four extensions: 
+
+<UL>
+<LI>
+.wav -- Microsoft WAV files
+<LI>
+.aif -- Electronic Arts AIF(F) files
+<LI>
+.raw -- a raw binary file
+<LI>
+.dat -- used by the <A HREF="http://john-lazzaro.github.io/chipmunk/describe/describe.html">
+Chipmunk</A> tool <I>view</I>.
+
+</UL>
+
+<P> 
+By default, WAV and AIFF files use 16-bit samples.  24-bit
+and 8-bit linear samples are also supported for WAV and AIFF
+files, via the syntax shown on the right panel.
+
+<P>
+If a raw file is selected, sfront writes a C file that generates a
+file containing channel-interleaved, 16-bit signed integers, in the
+native byte order of the machine. A companion ASCII file,
+fname.raw.info, is also written, which has three lines: line one is
+the sampling rate, line two is the number of channels, line three is
+the total number of samples in the file.
+
+<P>
+If a dat file is selected, sfront writes a C file that
+creates ASCII .dat files that are readable by the curve viewing and
+manipulation program <I>view</I>. View is a part of the
+<A HREF="http://john-lazzaro.github.io/chipmunk/describe/describe.html">
+Chipmunk</A> tools, which are licensed under the GNU Public
+License. These tools run on most UNIX systems, but do not run under
+Microsoft Windows.
+
+<P>
+In addition to audio files names, the <TT>-aout</TT> command-line
+option recognizes the string <TT>std</TT>. If this option is used,
+channel-interleaved, 16-bit signed integers, in the native byte order
+of the machine, are streamed to standard output
+(i.e. <TT>stdout</TT>).
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>File Rendering</H2>
+
+<TT>
+<pre>
+sfront -bit min.mp4
+
+creates sa.c file, that when 
+compiled, renders a WAV file
+into output.wav, based on the
+binary MP4-SA file min.mp4.
+compiles both configuration
+and streaming data into the
+sa.c file.
+
+
+sfront -bitc min.mp4
+
+creates sa.c file that only
+includes information from 
+the configuration block of
+the MP4-SA file min.mp4. Use
+for <A HREF="../rtime/index.html#fstr">decoding</A> mp4 files  
+when the streaming block of
+the mp4 file is very large. 
+</pre>
+</TT>
+
+<!--
+or 
+for <A HREF="../network/index.html#streaming">network streaming</A>
+-->
+
+<H2>C File Output</H2>
+
+<TT>
+<pre>
+sfront -bit min.mp4 -o min.c
+
+creates min.c file, that when 
+compiled, renders a WAV file
+into output.wav
+
+</pre>
+</TT>
+
+<H2>Audio File Output</H2>
+
+<TT>
+<pre>
+
+sfront -bit min.mp4 -aout new.wav
+
+Creates an sa.c file that creates
+the WAV file new.wav (16-bit samples).
+
+sfront -bit min.mp4 -aout new.wav-24
+sfront -bit min.mp4 -aout new.wav-8
+
+Syntax to specify 24-bit and 8-bit
+samples (created file is new.wav).
+
+
+
+sfront -bit min.mp4 -aout new.aif
+
+Creates an sa.c file that creates
+the AIF file new.aif (16-bit samples).
+
+sfront -bit min.mp4 -aout new.aif-24
+sfront -bit min.mp4 -aout new.aif-8
+
+Syntax to specify 24-bit and 8-bit
+samples (created file is new.aif).
+
+
+
+
+sfront -bit min.mp4 -aout new.dat
+
+Creates an sa.c file that creates
+the view file new.dat for SAOL 
+programs with outchannels = 1, 
+and the files new1.dat, new2.dat,
+new3.dat ... for SAOL programs
+with outchannels > 1.
+
+
+sfront -bit min.mp4 -aout new.raw
+
+Creates an sa.c file that creates
+the files new.raw and new.raw.info,
+in the format described on the
+left panel.
+
+
+sfront -bit min.mp4 -aout std
+
+Creates an sa.c file that sends 
+the audio stream to stdout, using
+the format described on the left
+panel.
+
+
+sfront -bit min.mp4 -aout null
+
+Creates an sa.c file that discards
+the audio stream. Use for testing. 
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="midi">SAOL, SASL and MIDI File Decoding</A></H2>
+
+<P>
+The last section described how to use sfront to decode MP4
+binary files. Sfront can also decode ASCII SAOL and SASL files
+and binary MIDI files directly. Note that if these component file
+options are used, the MP4 file <TT>-bit</TT> option may not be used.
+
+<P>
+The right panel shows how to use the <TT>-orc</TT> option to specify
+one or more SAOL files, the <TT>-sco</TT> option to specify a single
+SASL file, and the <TT>-midi</TT> option to specify a single binary
+MIDI file.  Note that, per the MP4-SA specification, only Format 0 and
+Format 1 MIDI files are processed by sfront.
+
+<P>
+Sfront also uses component options to specify score data for <A
+HREF="#encode">encoding</A> MP4 files.  Files specified using
+<TT>-sco</TT> and <TT>-midi</TT> options are encoded as configuration
+data at the start of the MP4 file. In addition, the options
+<TT>-sstr</TT> and <TT>-mstr</TT> can be used to encode SASL and MIDI
+files as <I>streaming events</I> at the end of the MP4 file.
+
+
+<H4>MIDI Verbose Mode</H4>
+
+<P>
+A common use for sfront is to normatively orchestrate 
+MIDI files. Since MIDI files are binary, it is difficult to 
+figure out the extended-channel numbers and preset numbers to
+use in SAOL instruments. 
+
+<P>
+The <TT>-mv</TT> option generates an ASCII listing of the MIDI file
+specified by the <TT>-midi</TT> option. This listing highlights the
+information the SAOL programmer requires to orchestrate a MIDI file.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>ASCII File Decoding</H2>
+
+
+<TT>
+<pre>
+sfront -orc min.saol -sco min.sasl
+
+Decodes the MP4-SA performance 
+represented by the ASCII SAOL
+file min.saol and the ASCII
+SASL file min.sasl.
+
+
+sfront -orc t1.saol t2.saol
+
+Decodes the MP4-SA performance
+represented by the ASCII SAOL
+files t1.saol and t2.saol. 
+
+</pre>
+</TT>
+
+<H2>MIDI File Decoding</H2>
+
+<TT>
+<pre>
+sfront -orc p.saol -midi p.mid
+sfront -mv -orc p.saol -midi p.mid
+
+The first line decodes the MP4-SA 
+performance represented by the ASCII
+SAOL file perc.saol and the binary
+MIDI file perc.mid. The second line
+also prints out information about
+the MIDI file, useful for SAOL coding.
+</pre>
+</TT>
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="input">Audio Input</A></H2>
+
+<P>
+SAOL programs can process external audio input placed on the
+<B>input_bus</B>. The sfront command-line option <TT>-ain</TT>
+sets the audio input source file for the C program created by
+sfront.
+
+<P>
+The right panel shows the file arguments for the
+<TT>-ain</TT> option. Like the <TT>-aout</TT> option,
+the file type is deduced from the file name 
+extension.
+
+<P>
+Sfront follows the rules set forth in the MPEG standard to
+determine the <B>input_bus</B> width and audio sampling rate of programs
+that use the <B>input_bus</B>.
+
+<P>
+Specifically, if the global parameters <B>inchannels</B> or <B>srate</B>
+are set, their values become the <B>input_bus</B> width and
+audio sampling rate of the program. 
+
+<P>
+If either of these parameters are not set, sfront
+queries the audio input device for a suitable parameter.
+For example, if audio input is a file, sfront opens the
+file and checks its sampling rate and width.
+
+<P>
+Note that these checks occur when sfront runs, not when the
+C program sfront creates runs.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Audio File Input</H2>
+
+<TT>
+<pre>
+ option       behavior     
+--------------------------
+-ain fn.wav   Reads from the
+              WAV file fn.wav
+              (the default option,
+              reading input.wav).
+
+-ain fn.aif   Reads from the
+              AIF file fn.aif
+
+-ain fn.dat   Reads from the
+              .dat file fn.dat.
+              Only reads the first
+              curve, data sent
+              to all inchannels.
+
+-ain fn.raw   Reads the raw binary
+              file fn.raw, as 
+              channel-interleaved,
+              16-bit signed integers.
+
+-ain std      Reads from standard 
+              input (stdin) as
+              channel-interleaved
+              16-bit signed integers.
+
+-ain null     Reads silence.
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="encode">MP4 File Encoding</A></H2>
+
+<P>
+The right panel shows how to use <TT>-bitout</TT> option of
+sfront to generate a binary MP4 file. The binary file encodes
+the SAOL, SASL, and MIDI files specified on the command line, using
+the syntax shown in a <A HREF="#midi">previous section</A>.
+
+<P>
+The MP4 file contains a binary encoding of the program files, as well
+as the sample data specified by any <B>sample</B> core wavetable
+generators used in the SAOL and SASL files.
+
+<P>
+The MP4 file format has two ways to store SASL and MIDI information:
+as configuration data at the start of the file, or as streaming events
+at the end of the file. The right panel shows an example of both types
+of encoding: the <TT>-sco</TT> and <TT>-midi</TT> options specify
+score data for the configuration section, and the <TT>-sstr</TT> and
+<TT>-mstr</TT> options specify score data for the streaming section.
+
+<!--
+<P>
+If score data is encoded as streaming events, the sfront networking
+system can <A HREF="../network/index.html#streaming">stream</A>
+it to remote clients. However, this encoding does result in larger
+mp4 files, compared to encoding score data in the configuration block.
+-->
+
+<H4>Regeneration</H4>
+
+<P>
+When decoding a binary MP4 file, sfront can recreate the SAOL, SASL,
+and MIDI files that make up the file. See the right panel for an
+example. Note that sfront always creates WAV files for any sound
+samples in an MP4 file, which the C program reads when executed.
+
+<P>
+By default, when encoding an MP4, the MP4 file does not include a
+symbol table. As a result, SAOL and SASL files regenerated from
+these MP4 files have randomly-generated variable and instrument names.
+
+<P>
+To encode MP4 files with the original variable names, use the
+<TT>-symtab</TT> option to include a symbol table.  Note that this
+produces significantly larger MP4 files.
+
+
+<P>
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>MP4 File Encoding</H2>
+
+<TT>
+<pre>
+This command creates the MP4 
+file x.mp4:
+
+sfront -bitout x.mp4 -orc s.saol 
+       -sco l.sasl
+
+Both SAOL and SASL information 
+is encoded in the configuration
+section at the start of x.mp4.
+ 
+To extract the SAOL and SASL 
+components from x.mp4, use:
+
+sfront -bit x.mp4 -orcout s2.saol 
+       -scoout l2.sasl
+
+The logic of s.saol and s2.saol 
+is identical, but the SAOL 
+variable names may be different.
+Add the -symtab option to the
+encoding line to preserve names.
+
+---
+
+This command creates the MP4 
+file y.mp4:
+
+sfront -bitout y.mp4 -orc s.saol 
+       -sstr l.sasl
+
+In y.mp4, the SAOL information 
+is encoded in the configuration 
+section at the start of the file, 
+and the SASL information is encoded
+as a list of streaming events at
+the end of the file. 
+
+---
+
+Note that streaming (-sstr, -mstr)
+and configuration (-sco, -midi) 
+options may be used together, to 
+distribute score data in both parts
+of the MP4 file.
+</pre>
+<!--
+Sfront networking can <A HREF="../network/index.html#streaming">stream</A>
+MIDI score data encoded as 
+streaming events, using the -mstr
+option. 
+-->
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="deviant">Incompatibilities</A></H2>
+
+<P>
+Sfront translates MPEG4 Structured Audio Object 3 bitstreams (plus
+MIDI functionality from Object 4). 
+
+<P>
+It does not handle Object 1 (equivalent to MIDI files), Object 2
+(<B>sasbf</B> synthesis driven by MIDI files), or Object 4 bitstreams
+(Objects 1-3, plus <B>sasbf</B> and MIDI file integration into SAOL).
+
+<P>
+In addition, sfront is currently non-compliant in the following major
+ways:
+
+<OL>
+<LI>
+If the SAOL global parameter <B>interp</B> set to 1, sfront implements
+band-limited interpolation for most core opcodes that use
+interpolation.  However, the grain() opcode uses linear
+interpolation for envelope and wave tables.
+<LI>
+AudioFX-related core opcodes are implemented,
+since sfront isn't integrated into an MPEG 4 system.
+However, AudioFX related standard names are available to the
+control driver interface for reading and writing, and SAOL
+programs can see these changes. 
+<LI>
+Array, oparray, and tablemap indexes are not checked for illegal
+array index values. <!--This omission has <A HREF="../network/index.html#security">
+security</A> ramifications for sfront networking users.-->
+</OL>
+
+
+<P>
+<B>Next section:</B>
+<A HREF="../rtime/index.html">Part I/3: Real-Time Operation</A></H2>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+</TT>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+sfront reference manual</A>->
+<STRONG>file rendering</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+</BODY>
+</HTML>

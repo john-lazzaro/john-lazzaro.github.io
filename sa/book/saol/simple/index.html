@@ -1,0 +1,1360 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part II/3: SAOL Simple Core Opcodes</TITLE>
+<META name="keywords" content="MP4-SA, core, opcodes, core opcodes, 
+rate, width, opcode rate semantics, int, frac, dbamp, ampdb, abs, sgn,
+exp, log, sqrt, sin, cos, atan, pow, log10, asin, acos, ceil, floor, 
+min, max, gettune, settune, octpch, pchoct, cpspch, pchcps, cpsoct, 
+octcps, midipch, pchmidi, midioct, octmidi, midicps, cpsmidi, irand,
+krand, arand, ilinrand, klinrand, alinrand, iexprand, kexprand, aexprand,
+kpoissonrand, apoissonrand, igaussrand, kgaussrand, agaussrand, gettempo,
+settempo">
+<META name="description" content="A subset of the core opcode library 
+of the SAOL language of MPEG 4 Structured Audio.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+SAOL</A>-><STRONG>simple core opcodes</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part II/3: SAOL Simple Core Opcodes</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="65%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#opcode">Core Opcode Semantics</A>.</B> Rules for
+using core opcodes.
+<LI>
+<B><A HREF="#trans">Transcendentals</A>.</B> Trigonometric,
+logarithmic, and power functions.
+<LI>
+<B><A HREF="#quant">Quantization</A>.</B> Rounding and related
+functions.
+<LI>
+<B><A HREF="#minmax">Min, Max, Abs</A>.</B> Comparisons.
+<LI>
+<B><A HREF="#random">Pseudorandom Generators</A>.</B> Random
+numbers and binary sequences.
+<LI>
+<B><A HREF="#loud">Loudness</A>.</B> dB conversions.
+<LI>
+<B><A HREF="#pitch">Pitch</A>.</B> Musical notation
+conversions.
+<LI>
+<B><A HREF="#tempo">Tempo</A>.</B> Changing tempo from SAOL
+<LI>
+<B><A HREF="#summary">Summary</A>.</B> Includes opcode rate and
+width rules.
+</UL>
+</TD>
+
+<TD WIDTH="35%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Core Opcodes:</H2>
+
+<P><B>
+<A HREF="#minmax">abs</A>
+<A HREF="#trans">acos</A>
+<A HREF="#random">aexprand</A>
+<A HREF="#random">agaussrand</A>
+<A HREF="#random">alinrand</A>
+<A HREF="#loud">ampdb</A>
+<A HREF="#random">apoissonrand</A>
+<A HREF="#random">arand</A>
+<A HREF="#trans">asin</A>
+<A HREF="#trans">atan</A>
+<A HREF="#quant">ceil</A>
+<A HREF="#trans">cos</A>
+<A HREF="#pitch">cpsmidi</A>
+<A HREF="#pitch">cpsoct</A>
+<A HREF="#pitch">cpspch</A>
+<A HREF="#loud">dbamp</A>
+<A HREF="#trans">exp</A>
+<A HREF="#quant">floor</A>
+<A HREF="#quant">frac</A>
+<A HREF="#tempo">gettempo</A>
+<A HREF="#pitch">gettune</A>
+<A HREF="#random">iexprand</A>
+<A HREF="#random">igaussrand</A>
+<A HREF="#random">ilinrand</A>
+<A HREF="#quant">int</A>
+<A HREF="#random">irand</A>
+<A HREF="#random">kexprand</A>
+<A HREF="#random">kgaussrand</A>
+<A HREF="#random">klinrand</A>
+<A HREF="#random">kpoissonrand</A>
+<A HREF="#random">krand</A>
+<A HREF="#trans">log</A>
+<A HREF="#trans">log10</A>
+<A HREF="#minmax">max</A>
+<A HREF="#pitch">midicps</A>
+<A HREF="#pitch">midioct</A>
+<A HREF="#pitch">midipch</A>
+<A HREF="#minmax">min</A>
+<A HREF="#pitch">octcps</A>
+<A HREF="#pitch">octmidi</A>
+<A HREF="#pitch">octpch</A>
+<A HREF="#pitch">pchcps</A>
+<A HREF="#pitch">pchmidi</A>
+<A HREF="#pitch">pchoct</A>
+<A HREF="#trans">pow</A>
+<A HREF="#tempo">settempo</A>
+<A HREF="#pitch">settune</A>
+<A HREF="#quant">sgn</A>
+<A HREF="#trans">sin</A>
+<A HREF="#trans">sqrt</A>
+
+</B>
+
+</TD>
+</TR>
+
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+Core opcodes provide access to commonly-used algorithms through a
+function call syntax. Core opcodes serve the same role in SAOL that
+library functions serve in C.
+
+<P>
+We introduced SAOL core opcodes in the <A
+HREF="../../tut/index.html#melody">second example</A> in the tutorial
+in Part I.  The right panel shows an assignment statement from this
+example that includes calls to the core opcodes <B>sin</B> and
+<B>cpsmidi</B>.
+
+<P>
+In this chapter, we take a second look at core opcodes. We describe
+how to use core opcodes in SAOL expressions and statements, and
+introduce five rate rules that apply to core opcodes.
+
+<P>
+Like our <A HREF="../exstat/index.html#summary">rate rules</A> in Part
+II/2, our core opcode rate rules are more conservative than the SAOL
+language standard, but easier to understand and remember.
+
+<P>
+We also describe 50 of the core opcodes that compute simple
+operations. These opcodes are a mix of general-purpose functions and
+utilities specialized for music and audio.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>From the <A HREF="../../tut/index.html#melody">tutorial</A>:</H2>
+<TT>
+<pre>
+
+a = 2*sin(3.1415927*
+          cpsmidi(num)/s_rate);
+
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="opcode">Core Opcode Semantics</A></H2>
+
+<P>
+Opcode calls act as atomic elements in expressions.  The value of the
+opcode call is computed as a function of its parameters. This
+computation occurs as the expression is being evaluated.
+
+<P>
+<I>Core</I> opcode semantics are defined in the MP4-SA standard. SAOL
+also has <I>user-defined</I> opcodes, whose semantics are specified by
+an opcode definition written in SAOL itself.
+
+<P>
+Since opcode calls act as atomic elements in expressions, they have a
+rate and a width. In the general case, determining the rate and width
+of a SAOL opcode may be quite subtle.
+
+<P>
+In <A HREF="../../opcodes/user/index.html#calls">Part IV/4</A> of the
+book we describe the rate and width semantics for user-defined
+opcodes. In this section, we introduce several simple rules that apply
+to the core opcodes we introduce in Parts II and III of the book.
+
+<P>
+Core opcode definitions include (1) a <I>header syntax</I> for the
+opcode that defines the structure of the opcode call and (2) the
+semantics for computing the return value. All core opcodes return a
+scalar value.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H4>Rate and Width Rules</H4>
+
+<P>
+The rate of fixed-rate opcodes is indicated in its header syntax.  The
+keywords <B>iopcode</B>, <B>kopcode</B>, or <B>aopcode</B> indicate
+that an opcode is i-rate, k-rate, or a-rate respectively. The
+header syntax also indicates the rate of each opcode parameters.
+
+<P>
+For example, the panel on the right shows the header syntax for the
+fixed-rate core opcode <B>krand</B>, which returns random numbers with
+a uniform distribution at the k-rate. 
+
+<P>
+The header for <B>krand</B> also defines the signal parameter
+<TT>p</TT>. This parameter sets the range of random numbers returned
+by <B>krand</B> to be from <TT>-p</TT> to <TT>p</TT>.
+
+<P>
+<A NAME="rate1">For</A> fixed-rate core opcodes, it is simple to apply
+our first rate rule:
+
+<B>
+<OL TYPE=1>
+<LI>
+To calculate the rate of an expression that includes an opcode call,
+treat the opcode call like a signal variable that has the rate of the
+opcode.
+</OL>
+</B>
+
+<P>
+The right panel shows examples that demonstrate rule 1, with
+expressions that include several calls to the opcode <B>krand</B>.
+These calls include a scalar expression within the parenthesis. To
+compute the value of <B>krand</B>, the expression is first evaluated,
+and then used to compute the return value.
+
+<P>
+<A NAME="rate2">Note</A> that <TT>p</TT> is declared as a <B>ksig</B>
+in the header syntax for <B>krand</B>. Our second rate rule concerns
+the meaning of this declaration:
+
+<B>
+<OL START=2>
+<LI>
+If a core opcode has a signal parameter declared at a certain rate,
+the expression for that parameter in an opcode call must not have a
+faster rate.
+</OL>
+</B>
+
+<P>
+The right panel shows a <B>krand</B> example that breaks rule 2. 
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>krand</TT></H2>
+
+<H4>Header Syntax</H4>
+
+<TT>
+<pre>
+kopcode krand(ksig p)
+
+</pre>
+</TT>
+
+<H4>Examples</H4>
+
+<TT>
+<pre>
+ivar i;
+ksig k;
+asig a;
+
+// rule 1 examples:
+
+
+// legal assignment to ksig k
+
+k = i*krand(5*i); // k-rate expr
+                  
+
+// illegal assignment to ivar i
+
+i = i*krand(5*i); // k-rate expr
+
+
+
+// statement breaks rule 2:
+
+k = krand(a + 0.5);
+
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+<A NAME="rate3">The</A> semantic specification of a fixed-rate core
+opcode may indicate the rate that a computation takes place. For
+example, the semantic description of <B>krand</B> states that the
+opcode generates a new random number when called at the k-rate.
+
+<P>
+However, it is possible for the core opcode to be called at a faster
+rate. For example, a <B>krand</B> call on the right-hand side of an
+assignment to an a-rate variable will occur at the a-rate (see right
+panel).
+
+<P>
+Our third rate rule defines how SAOL programs execute in this
+situation:
+
+<B>
+<OL START=3> 
+<LI>
+If a k-rate opcode is used in an a-rate statement, it executes the
+first time the statement runs in the execution cycle, and its return
+value is stored for future use. For all subsequent opcode calls in the
+same execution cycle, the stored return value is reused: the opcode
+does not execute a second time.
+</OL>
+</B>
+
+<P>
+We can apply rule 3 to the example on the right panel. The
+<B>krand</B> call in this example generates a new random number on the
+first a-pass of an execution cycle. On the second a-pass, SAOL reuses
+the random number <B>krand</B> returned on the first a-pass. SAOL
+continues reusing this number until the first a-pass of the next
+execution cycle, at which time <B>krand</B> executes again and a new
+random number is generated.
+
+<P>
+Note that if we wished to generate a new random number for each
+statement execution, we would choose the a-rate <B>arand</B>
+core opcode instead of the k-rate <B>kand</B> core opcode.
+
+<P>
+<A NAME="rate4">Our</A> fourth rate rule defines what happens when an
+i-rate opcode runs at a faster rate:
+
+<B>
+<OL START=4> 
+<LI>
+If a i-rate opcode is used in a k-rate or a-rate statement, it
+executes the first time the statement runs, and its return value is
+stored for future use. For all subsequent opcode calls during the
+instrument's lifetime, the stored return value is reused: the opcode
+does not execute a second time.
+</OL>
+</B>
+
+<P>
+Note that rule 4 takes the same general approach to faster-rate
+execution as rule 3: execute once, then reuse the returned value.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H4>Example</H4>
+
+<TT>
+<pre>
+
+ksig k;
+asig a;
+
+// krand called at a-rate
+
+a = krand(5); 
+</pre>
+</TT>
+
+<pre> </pre>
+
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+Not all opcodes are fixed-rate opcodes, and not all signal parameters
+in the header syntax for an opcode have a declared rate.
+
+<P>
+The right panel shows the header syntax for the core opcode
+<B>pow</B>, which raises a number to a power. The keyword
+<B>opcode</B> indicates that <B>pow</B> has no fixed rate, but rather
+is a <I>rate-polymorphic</I> opcode.  Its two signal parameters
+<TT>x</TT> and <TT>y</TT> are also rate-polymorphic, as indicated by
+their <B>xsig</B> declaration.
+
+<P>
+<A NAME="rate5">Our</A> final rate rule concerns rate-polymorphic opcodes.
+
+<B>
+<OL START=5>
+<LI>
+For rate-polymorphic core opcodes that only have rate-polymorphic
+signal parameters, the rate of an opcode call is the rate of the
+fastest expression in the opcode call. 
+</OL>
+</B>
+
+<P>
+Once the rate of the opcode call is determined, rule 1 is used to
+determine the rate of an expression that contains the call. The
+semantics of rate-polymorphic core opcodes are not affected by the
+rate of the call.
+
+<P>
+The examples on the right panel demonstrate rule 5.
+
+<P>
+Two width rules for core opcodes are mentioned in the description
+above and formalized below:
+
+<B>
+<OL START=1>
+<LI>
+Core opcodes have scalar width.
+<LI>
+All core opcode signal parameters are scalar width. 
+Opcode calls must have scalar width expressions for these
+parameters.
+</OL>
+</B>
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>pow</TT></H2>
+
+<H4>Header Syntax</H4>
+
+<TT>
+<pre>
+opcode pow(xsig x, xsig y) 
+
+</pre>
+</TT>
+
+<H4>Example Calls</H4>
+
+<TT>
+<pre>
+ivar i;
+ksig k;
+asig a;
+
+// pow calls are i-rate
+// statements are i-rate
+
+i = pow(2, 2);
+i = pow(i*2, 2);
+
+// pow calls are k-rate
+// statement is k-rate
+
+k = pow(i, pow(2, k+1));
+
+// pow calls are a-rate
+// statements are a-rate
+
+a = pow(a, k);
+a = pow(a, i);
+
+// pow call is a-rate
+// statement is k-rate
+//
+// illegal assignment statement
+
+k = pow(i, a+1);
+
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>Internal State</H4>
+
+<P>
+Opcodes may have internal state. On the right panel, we 
+introduce the core opcode <B>delay1</B> to explain the
+semantics of opcode state. 
+
+<P>
+The <B>delay1</B> opcode has an internal variable, that holds a signal
+value.  When the <B>delay1</B> opcode is called, it returns the
+current value of its internal variable, and then sets the internal
+variable to the value of the calling parameter <TT>x</TT>.
+
+<P>
+We can now express the single semantic rule for opcode
+state:
+
+<B>
+<OL START=1>
+<LI>
+If a core opcode has internal state variables, each syntactically distinct
+opcode call has its own set of internal state variables.
+</OL>
+</B>
+
+<P>
+The core fragment on the right panel has three syntactically
+distinct calls to <B>delay1</B>. This code fragment implements
+a three-stage delay line, because each call to <B>delay1</B>
+has its own internal state variable. 
+
+<P>
+In the following sections, we introduce sets of simple core opcodes
+that are useful in general-purpose programs.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>delay1</TT></H2>
+
+<H4>Header Syntax</H4>
+
+<TT>
+<pre>
+aopcode delay1(asig x) 
+
+</pre>
+</TT>
+
+<H4>Example</H4>
+
+<TT>
+<pre>
+
+asig a1, a2, a3, a4;
+
+a2 = delay1(a1);
+a3 = delay1(a2);
+a4 = delay1(a3);
+
+</pre>
+</TT>
+
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="trans">Transcendentals</A></H2>
+
+<P>
+The transcendental core opcodes are all rate-polymorphic. See
+the right panel for header syntax.
+
+<H4>Trigonometric Opcodes</H4>
+
+<P>
+The forward trigonometric opcodes take angle parameters in units of
+radians, and the inverse trigonometric opcodes return angle values in
+radians. 
+
+<P>
+The <B>asin</B> and <B>acos</B> opcodes may only be
+called with parameters in the range <TT>[-1, 1]</TT>.
+
+<P>
+The <B>asin</B> and <B>atan</B> return values in the range
+<TT>[-pi/2, pi/2)</TT>, and the <B>acos</B> returns values in the
+range <TT>[0, pi)</TT>.
+
+<P>
+Note that <B>tan</B> is missing from the core opcode library, as well
+as hyperbolic functions. The <A HREF="../../special/slib/index.html">
+Slib</A> library includes <A
+HREF="../../special/slib/index.html#trig">replacements</A> for these
+missing functions, and the related constants <A
+HREF="../../special/slib/index.html#mathc">pi and e</A>.
+
+<H4>Logs and Powers</H4>
+
+<P>
+The <B>log</B> and <B>log10</B> opcodes compute the natural
+and base-10 logarithms respectively, and may only be called with
+positive parameters. The <B>exp</B> opcode computes the 
+exponential function.
+
+<P>
+The <B>sqrt</B> opcode returns the square root of the parameter,
+and may not be called with negative parameters. The <B>pow</B>
+opcode returns the parameter <TT>x</TT> raised to the <TT>y</TT>
+power; if <TT>y</TT> is not an integer value, <TT>x</TT> may not be
+negative.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Trigonometric</H2>
+
+<TT>
+<pre>
+opcode sin(xsig x)
+opcode cos(xsig x)
+opcode acos(xsig x)
+opcode asin(xsig x)
+opcode atan(xsig x)
+
+
+See <A HREF="../../special/slib/index.html">Slib</A> for other
+useful <A HREF="../../special/slib/index.html#trig">trigonometric</A> 
+functions like tan() 
+and tanh(), and the 
+constants <A HREF="../../special/slib/index.html#mathc">pi and e</A>.
+
+</pre>
+</TT>
+
+<H2>Logs and Exp</H2>
+
+<TT>
+<pre>
+opcode log(xsig x)
+opcode log10(xsig x)
+opcode exp(xsig x)
+
+</pre>
+</TT>
+
+<H2>Powers</H2>
+
+<TT>
+<pre>
+opcode sqrt(xsig x)
+opcode pow(xsig x, xsig y)
+</pre>
+</TT>
+
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="quant">Quantization</A></H2>
+
+<P>
+Five rate-polymorphic core opcodes implement functions that relate to
+rounding and quantization. See the right panel for header syntax. 
+
+
+<P>
+The <B>int</B> opcode extracts the integer part of a parameter
+<TT>x</TT> and returns it as a floating-point value.  It implements
+the C expression <TT>(float)((int)(x))</TT>.
+
+<P>
+The <B>frac</B> opcode returns the signed fractional part of a
+parameter <TT>x</TT>. It implements the SAOL expression <TT>x -
+int(x)</TT>.
+
+<P>
+The <B>floor</B> opcode returns the greatest integral value
+<TT>y</TT> so that <TT>y<=x</TT>. The <B>ceil</B> opcode returns
+the smallest integral value <TT>y</TT> so that <TT>x<=y</TT>.
+
+<P>
+The <B>sgn</B> opcode returns <TT>1.0</TT> if the parameter
+<TT>x</TT> is positive, <TT>-1.0</TT> if <TT>x</TT> is negative, and
+<TT>0.0</TT> if <TT>x</TT> is zero.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Quantization</H2>
+
+<TT>
+<pre>
+opcode int(xsig x)
+opcode frac(xsig x)
+opcode floor(xsig x)
+opcode ceil(xsig x)
+opcode sgn(xsig x)
+</pre>
+</TT>
+
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="minmax">Min, Max, and Abs</A></H2>
+
+<P>
+The rate-polymorphic <B>min</B> and <B>max</B> core opcodes
+return the smallest and largest of their parameters respectively.
+See the right panel for header syntax.
+
+<P>
+These two opcodes must be called with at least one parameter, but
+may be called with an arbitrary number of parameters. The right
+panel introduces the header syntax notation for a variable number
+of opcode parameters.
+
+<P>
+The rate-polymorphic <B>abs</B> core opcode returns the 
+absolute value of the parameter <TT>x</TT>.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Min, Max, and Abs</H2>
+
+<TT>
+<pre>
+
+opcode min(xsig x1[, xsig ...])
+opcode max(xsig x1[, xsig ...])
+
+opcode abs(xsig x)
+
+</pre>
+</TT>
+
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="random">Pseudorandom Generators</A></H2>
+
+<H4>Random Numbers</H4>
+
+<P>
+A set of 12 fixed-rate core opcodes return pseudorandom
+numbers. Opcodes that return numbers at the i-rate, k-rate, and a-rate
+are provided for four different probability distributions.
+
+<P>
+The right panel shows the header syntax, grouped by distribution. Note
+that opcode parameters have the same rate as the opcodes
+themselves. The probability distributions are also shown.
+
+<P>
+The <B>irand</B>, <B>krand</B>, and <B>arand</B> opcodes generate
+pseudo-random numbers with a linear distribution in a range defined by
+the parameter <TT>p1</TT>.  Numbers are uniformly distributed in the
+interval <TT>[-p1, p1]</TT>.
+
+<P>
+The <B>igaussrand</B>, <B>kgaussrand</B>, and <B>agaussrand</B>
+opcodes generate pseudo-random numbers with a Gaussian distribution
+with mean <TT>mean</TT> and variance <TT>var</TT>, where <TT>mean</TT>
+and <TT>var</TT> are parameters.  The <TT>var</TT> parameter must have
+a value greater than zero.
+
+<P>
+The <B>iexprand</B>, <B>kexprand</B>, and <B>aexprand</B>
+opcodes generate pseudo-random numbers with an exponential 
+(Poisson) distribution.  The parameter <TT>p</TT> sets the single
+parameter of the distribution.  and must have a value greater than
+zero.
+
+<P>
+The <B>ilinrand</B>, <B>klinrand</B>, and <B>alinrand</B>
+opcodes generate pseudo-random numbers with a ramp distribution
+defined by the parameters <TT>p1</TT> and <TT>p2</TT>.  See the right
+panel for details.
+
+<P>
+All calls to these 12 core opcodes share a common source of
+pseudorandom numbers. The opcodes themselves have no internal
+state.
+
+<H4>Binary Random Sequences</H4>
+
+<P>
+The core opcodes <B>kpoissonrand</B> and <B>apoissonrand</B> generate
+random sequences of binary return values according to a Poisson
+distribution. These opcodes return <TT>1.0</TT> if an event occurs and
+<TT>0.0</TT> otherwise. Each opcode has a single parameter
+<TT>p1</TT>.
+
+<P>
+The opcode <B>kpoissonrand</B> generates sequences at the k-rate,
+using a Poisson distribution with a parameter dependent on the krate
+as well as <TT>p1</TT>. See the right panel for details.
+
+<P>
+The opcode <B>apoissonrand</B> generates sequences at the a-rate,
+using a Poisson distribution with a parameter dependent on the
+arate as well as <TT>p1</TT>.
+
+<P>
+Calls to <B>kpoissonrand</B> and <B>apoissonrand</B> share a common
+source of pseudorandom numbers with the opcodes described earlier in
+this section.
+
+<P>
+However, the <B>kpoissonrand</B> and <B>apoissonrand</B> opcodes also
+use an internal state variable in its sequence generation
+algorithm. As explained in an <A HREF="#opcode">earlier section</A>,
+each syntactically distinct call to these opcodes accesses its own
+copy of the internal state variable.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Random Numbers</H2>
+
+
+<H4> Uniform Distribution </H4>
+
+<TT>
+<pre>
+iopcode irand(ivar p1)
+kopcode krand(ksig p1)
+aopcode arand(asig p1)
+
+prob(x) = 1/(2*p1), if x in [-p1, p1]
+prob(x) = 0         otherwise
+</pre>
+</TT>
+
+<H4> Gaussian Distribution </H4>
+
+<TT>
+<pre>
+iopcode igaussrand(ivar mean, ivar var)
+kopcode kgaussrand(ksig mean, ksig var)
+aopcode agaussrand(asig mean, asig var)
+
+prob(x) = (1/sqrt(2*pi*var))*
+       exp(-(mean-x)*(mean-x)/(2*var))
+</pre>
+</TT>
+
+<H4> Poisson Distribution </H4>
+
+<TT>
+<pre>
+iopcode iexprand(ivar p1)
+kopcode kexprand(ksig p1)
+aopcode aexprand(asig p1)
+
+prob(x) = (1/p1)*exp(-x/p1), if x > 0 
+prob(x) = 0                  otherwise
+</pre>
+</TT>
+
+<H4> Linearly Ramped Distribution </H4>
+
+<TT>
+<pre>
+iopcode ilinrand(ivar p1, ivar p2)
+kopcode klinrand(ksig p1, ksig p2)
+aopcode alinrand(asig p1, asig p2)
+
+prob(x) = abs(d*
+	  (x-p1))    if x in [p1, p2]
+prob(x) = 0          otherwise
+
+where d = 2/((p2 - p1)*(p2 - p1))
+
+</pre>
+</TT>
+
+<H2> Binary Random Sequences </H2>
+
+<TT>
+<pre>
+kopcode kpoissonrand(ksig p1)
+
+generates binary (0/1) events
+using the distribution 
+
+prob(x) = (1/(k_rate*p1))
+          *exp(-x/(k_rate*p1))
+  
+
+aopcode apoissonrand(asig p1)
+
+generates binary (0/1) events
+using the distribution 
+
+prob(x) = (1/(s_rate*p1))
+          *exp(-x/(s_rate*p1))
+
+both pdfs for (x > 0) only.
+</pre>
+</TT>
+
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="loud">Loudness</A></H2>
+
+<P>
+Linear increases in the amplitude of a sound waveform result in only
+logarithmic increases in the perceived loudness of the
+waveform. Therefore, waveform amplitude is often converted to the
+decibel (dB) scale to express loudness.
+
+<P>
+SAOL has two rate-polymorphic core opcodes that handle conversion
+between amplitude units and decibel units. The right panel shows the
+header syntax for these opcodes and the equations the opcodes compute.
+
+<P>
+The <B>dbamp</B> opcode converts the amplitude parameter <TT>x</TT>
+into decibels. The amplitude value 1.0 maps to 90dB. Only <TT>x</TT>
+values greater than zero may be used.
+
+<P>
+The <B>ampdb</B> opcode converts the decibel parameter <TT>x</TT> into
+amplitude, using the same scaling as <B>dbamp</B>.
+
+<P>
+These core opcodes introduce the SAOL convention for conversion
+opcodes: the return unit (<TT>db</TT> for <B>dbamp</B>) is the first
+part of the opcode name, and the parameter unit (<TT>amp</TT> for
+<B>dbamp</B>) is the second part of the name.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Loudness</H2>
+
+<TT>
+<pre>
+
+opcode dbamp(xsig x)
+
+computes 90 + 20 log10(x) for x > 0
+
+
+
+opcode ampdb(xsig x)
+
+computes pow(10,(x - 90)/20)
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="pitch">Pitch</A></H2>
+
+<P>
+Sound generation algorithms usually require frequency variables in
+units of Hz (cycles per second). Western musicians usually label
+pitches with the names of notes on a piano keyboard (i.e. F# two
+octaves below middle C). Several numerical encodings of
+equally-tempered note names are used in computer music.
+
+<P>
+A set of 12 rate-polymorphic core opcodes handles conversions between
+three popular note name encodings and cycles per second. The right
+panel shows the header syntax for these opcodes.
+
+<P>
+These opcodes are named by the concatenation of the abbreviations for
+the four pitch types (<B>cps, midi, pch, oct</B>). The return type
+starts the opcode name.
+
+<P>
+The <B>cps</B> type is cycles per second. Opcode parameters that are
+in <B>cps</B> notation must be greater that zero. 
+
+<P>
+The <B>midi</B> type is MIDI note numbers, which are integer values
+between 0 and 127 representing notes on a piano keyboard. MIDI note
+number 57 is A below middle C.  MIDI note number return values always
+have integral values.
+
+<P>
+The <B>oct</B> type is octave-fraction notation, that uses floating
+point numbers. The integer part of the number is the octave number,
+where 8 is the octave starting with middle C. The fractional part
+is the note within the octave, where 1/12 represents a semitone.
+For example, 7.75 is the A below middle C.
+
+<P>
+The opcodes that return the <B>oct</B> type may return values between
+the 1/12 note steps, except for the <B>octpch</B> opcode.  Opcode
+parameters that are in <B>oct</B> notation must be greater that zero.
+
+<P>
+The <B>pch</B> type is pitch class notation, that uses floating point
+numbers. The integer part of the number is the octave number, where 8
+is the octave starting with middle C. The fractional part is the note
+within the octave, where a 0.01 increment is a semitone. For example
+7.09 is the A above middle C.
+
+<P>
+Opcodes that return <B>pch</B> type generate values quantized to the
+nearest semitone. Opcodes parameters in <B>pch</B> notation are rounded
+to the nearest semitone, and parameter values greater than 0.11 are
+set to zero.
+
+<P>
+By default, conversions between <B>cps</B> and the pitch
+representations assume that the A above middle C is 440.0 Hz.
+The k-rate core opcode <B>settune</B> changes this default to the
+value of the parameter <TT>x</TT>. 
+
+<P>
+The rate-polymorphic core opcode <B>gettune</B> returns the current
+global tuning value. The parameter <TT>dummy</TT> is simply used to
+set the rate of the opcode. If <TT>dummy</TT> is omitted the opcode is
+krate.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Pitch Conversion</H2>
+
+<TT>
+<pre>
+opcode cpsmidi(xsig x)
+opcode cpspch(xsig x)
+opcode cpsoct(xsig x)
+
+opcode midicps(xsig x)
+opcode midipch(xsig x)
+opcode midioct(xsig x)
+
+opcode pchcps(xsig x)
+opcode pchmidi(xsig x)
+opcode pchoct(xsig x)
+
+opcode octcps(xsig x)
+opcode octmidi(xsig x)
+opcode octpch(xsig x)
+
+
+See <A HREF="../../special/slib/index.html">Slib</A> for useful <A HREF="../../special/slib/index.html#pitch">constants</A>
+for pitch calculations.
+
+</pre>
+</TT>
+
+<H2>Tuning</H2>
+
+<TT>
+<pre>
+kopcode settune(ksig x)
+opcode gettune([xsig dummy])
+</pre>
+
+<H2>Conversion Table</H2>
+<TT>
+<pre>
+ MIDI  PCH   OCT       CPS (A440)
+
+C  36  6.00  6.000       65.40
+C# 37  6.01  6.083...    69.29
+D  38  6.02  6.166...    73.41
+D# 39  6.03  6.250       77.78
+E  40  6.04  6.333...    82.40
+F  41  6.05  6.416...    87.30
+F# 42  6.06  6.500       92.49
+G  43  6.07  6.583...    97.99
+G# 44  6.08  6.666...   103.82
+A  45  6.09  6.750      110.00
+A# 46  6.10  6.833...   116.54
+B  47  6.11  6.916...   123.47
+C  48  7.00  7.000      130.81
+C# 49  7.01  7.083...   138.59
+D  50  7.02  7.166...   146.83
+D# 51  7.03  7.250      155.56
+E  52  7.04  7.333...   164.81
+F  53  7.05  7.416...   174.61
+F# 54  7.06  7.500      184.99
+G  55  7.07  7.583...   195.99
+G# 56  7.08  7.666...   207.65
+A  57  7.09  7.750      220.00
+A# 58  7.10  7.833...   233.08
+B  59  7.11  7.916...   246.94   
+C  60  8.00  8.000      261.62 <--  
+C# 61  8.01  8.083...   277.18
+D  62  8.02  8.166...   293.66
+D# 63  8.03  8.250      311.12
+E  64  8.04  8.333...   329.62
+F  65  8.05  8.416...   349.22
+F# 66  8.06  8.500      369.99
+G  67  8.07  8.583...   391.99
+G# 68  8.08  8.666...   415.20
+A  69  8.09  8.750      440.00
+A# 70  8.10  8.833...   466.16
+B  71  8.11  8.916...   493.88
+C  72  9.00  9.000      523.25
+
+Arrow denotes middle C.
+... denotes repeating digit
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="tempo">Tempo</A></H2>
+
+<P>
+We introduced the SASL tempo command in the <A
+HREF="../../tut/index.html#melody">second example</A> in the tutorial
+in Part I. This score command changed the relationship between score
+time and simulated time from the default 60 score beats per minute.
+
+<P>
+The global tempo can also be changed in SAOL, through the k-rate
+core opcode <B>settempo</B>. The new tempo parameter <TT>x</TT>
+must be set to a value greater than zero.
+
+<P>
+A companion rate-polymorphic opcode, <B>gettempo</B>, returns the
+current tempo. The optional parameter <TT>dummy</TT> sets the rate of
+the opcode, which defaults to k-rate.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Tempo</H2>
+
+<TT>
+<pre>
+
+kopcode settempo(ksig x)
+opcode gettempo([xsig dummy])
+
+
+See <A HREF="../../special/slib/index.html">Slib</A> for useful <A HREF="../../special/slib/index.html#tempo">constants</A>
+for tempo calculations.
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="summary">Summary</A></H2>
+
+<P>
+We have now finished our description of the 50 core opcodes that are
+useful when writing algorithms at the lowest level of abstraction.
+
+<P>
+The remaining core opcodes work at higher level of abstractions, often
+implementing complete synthesis and effects methods in a single opcode
+call.
+
+<P>
+We introduce these opcodes, often in conjunction with descriptions of
+related SAOL language features, in the remainder of the book.
+
+<P>
+The right panel has a summary of the rate and width rules for core
+opcodes.
+
+<P>
+<B>Next section:</B>
+<A HREF="../wave/index.html">Part II/4: Wavetables</A></H2>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>Core Opcode Rate Rules:</H2>
+<OL TYPE=1>
+<LI>
+To calculate the rate of an expression that includes an opcode call,
+treat the opcode call like a signal variable that has the rate of the
+opcode.
+<LI>
+If a core opcode has a signal parameter declared at a certain rate,
+the expression for that parameter in an opcode call must not have a
+faster rate.
+<LI>
+If a k-rate opcode is used in an a-rate statement, it executes the
+first time the statement runs in the execution cycle, and its return
+value is stored for future use. For all subsequent opcode calls in the
+same execution cycle, the stored return value is reused: the opcode
+does not execute a second time.
+<LI>
+If a i-rate opcode is used in a k-rate or a-rate statement, it
+executes the first time the statement runs, and its return value is
+stored for future use. For all subsequent opcode calls during the
+instrument's lifetime, the stored return value is reused: the opcode
+does not execute a second time.
+<LI>
+For rate-polymorphic core opcodes that only have rate-polymorphic
+signal parameters, the rate of an opcode call is the rate of the
+fastest expression in the opcode call.
+</OL>
+
+<H2>Core Opcode Width Rules:</H2>
+<OL START=1>
+<LI>
+Core opcodes have scalar width.
+<LI>
+All core opcode signal parameters are scalar width.
+Opcode calls must have scalar width expressions for these
+parameters.
+</OL>
+
+<H2>Core Opcode State Rule:</H2>
+<OL START=1>
+<LI>
+If a core opcode has internal state variables, each syntactically distinct
+opcode call has its own set of internal state variables.
+</OL>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+SAOL</A>-><STRONG>simple core opcodes</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>
+
+
+

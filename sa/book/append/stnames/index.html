@@ -1,0 +1,229 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Appendix D: Standard Names</TITLE>
+<META name="description" content="An index to descriptions of the standard
+names, sorted alphabetically.">
+<META name="keywords" content="MP4-SA, standard, names, standard names,
+index, list, k_rate, s_rate, inchan, outchan, input, inGroup,
+preset, channel, MIDIctrl, MIDItouch, MIDIbend, dur, itime, released,
+time, cpuload, position, direction, listenerPosition, listenerDirection,
+minFront, maxFront, minBack, maxBack, params"></HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+appendices</A>
+-><STRONG>standard names</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Appendix D: Standard Names</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Alphabetically</H2>
+
+<TT>
+<pre>
+
+ivar <A HREF="../../control/midi/index.html#stnames">channel</A>;
+ksig <A HREF="../../control/saolc/index.html#stnames">cpuload</A>;
+</pre>
+</TT>
+
+<TT>
+<pre>
+ksig <A HREF="../notcov/index.html">direction</A>[3];
+ivar <A HREF="../../control/saolc/index.html#stnames">dur</A>;
+</pre>
+</TT>
+
+
+<TT>
+<pre>
+ivar <A HREF="../../saol/bus/index.html#standard">inchan</A>;
+asig <A HREF="../../saol/bus/index.html#standard">input</A>[inchannels];
+ivar <A HREF="../../saol/bus/index.html#standard">inGroup</A>[inchannels];
+ksig <A HREF="../../control/saolc/index.html#stnames">itime</A>;
+</pre>
+</TT>
+
+<TT>
+<pre>
+ivar <A HREF="../../saol/vars/index.html#stnames">k_rate</A>;
+</pre>
+</TT>
+
+<TT>
+<pre>
+ksig <A HREF="../notcov/index.html">listenerPosition</A>[3];
+ksig <A HREF="../notcov/index.html">listenerDirection</A>[3];
+</pre>
+</TT>
+
+<TT>
+<pre>
+ksig <A HREF="../notcov/index.html">minFront</A>;
+ksig <A HREF="../notcov/index.html">maxFront</A>;
+ksig <A HREF="../notcov/index.html">minBack</A>;
+ksig <A HREF="../notcov/index.html">maxBack</A>;
+ksig <A HREF="../../control/midi/index.html#stnames">MIDIctrl</A>[128];
+ksig <A HREF="../../control/midi/index.html#stnames">MIDItouch</A>;
+ksig <A HREF="../../control/midi/index.html#stnames">MIDIbend</A>;
+</pre>
+</TT>
+
+<TT>
+<pre>
+ivar <A HREF="../../saol/bus/index.html#standard">outchan</A>;
+</pre>
+</TT>
+
+<TT>
+<pre>
+imports exports ksig <A HREF="../notcov/index.html">params</A>[128];
+imports ksig <A HREF="../notcov/index.html">position</A>[3];
+ivar <A HREF="../../control/midi/index.html#stnames">preset</A>;
+</pre>
+</TT>
+
+<TT>
+<pre>
+ksig <A HREF="../../control/saolc/index.html#stnames">released</A>;
+</pre>
+</TT>
+
+<TT>
+<pre>
+ivar <A HREF="../../saol/vars/index.html#stnames">s_rate</A>;
+</pre>
+</TT>
+
+<TT>
+<pre>
+ivar <A HREF="../../control/saolc/index.html#stnames">time</A>;
+</pre>
+</TT>
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>By Function</H2>
+
+<H4>For sampling rates</H4>
+<TT>
+<PRE>
+ivar <A HREF="../../saol/vars/index.html#stnames">k_rate</A>;
+ivar <A HREF="../../saol/vars/index.html#stnames">s_rate</A>;
+</PRE>
+</TT>
+
+<H4>For buses</H4>
+<TT>
+<PRE>
+ivar <A HREF="../../saol/bus/index.html#standard">inchan</A>;
+ivar <A HREF="../../saol/bus/index.html#standard">outchan</A>;
+asig <A HREF="../../saol/bus/index.html#standard">input</A>[inchannels];
+ivar <A HREF="../../saol/bus/index.html#standard">inGroup</A>[inchannels];
+</PRE>
+</TT>
+
+<H4>For MIDI</H4>
+<TT>
+<PRE>
+ivar <A HREF="../../control/midi/index.html#stnames">preset</A>;
+ivar <A HREF="../../control/midi/index.html#stnames">channel</A>;
+ksig <A HREF="../../control/midi/index.html#stnames">MIDIctrl</A>[128];
+ksig <A HREF="../../control/midi/index.html#stnames">MIDItouch</A>;
+ksig <A HREF="../../control/midi/index.html#stnames">MIDIbend</A>;
+</PRE>
+</TT>
+
+<H4>For instr control</H4>
+<TT>
+<PRE>
+ivar <A HREF="../../control/saolc/index.html#stnames">dur</A>;
+ksig <A HREF="../../control/saolc/index.html#stnames">itime</A>;
+ksig <A HREF="../../control/saolc/index.html#stnames">released</A>;
+ivar <A HREF="../../control/saolc/index.html#stnames">time</A>;
+ksig <A HREF="../../control/saolc/index.html#stnames">cpuload</A>;
+</PRE>
+</TT>
+
+<H4>For AudioBIFS</H4>
+<TT>
+<PRE>
+imports ksig <A HREF="../notcov/index.html">position</A>[3];
+ksig <A HREF="../notcov/index.html">direction</A>[3];
+ksig <A HREF="../notcov/index.html">listenerPosition</A>[3];
+ksig <A HREF="../notcov/index.html">listenerDirection</A>[3];
+ksig <A HREF="../notcov/index.html">minFront</A>;
+ksig <A HREF="../notcov/index.html">maxFront</A>;
+ksig <A HREF="../notcov/index.html">minBack</A>;
+ksig <A HREF="../notcov/index.html">maxBack</A>;
+imports exports ksig <A HREF="../notcov/index.html">params</A>[128];
+</PRE>
+</TT>
+
+<pre>
+
+
+
+</pre>
+
+<B><P>
+Appendix E:</B>
+</B>
+<A HREF="../lang/index.html">Language Elements</A></H2>
+
+</TD>
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+appendices</A>-><STRONG>standard names</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>
+
+

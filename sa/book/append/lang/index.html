@@ -1,0 +1,212 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Appendix E: Language Elements</TITLE>
+<META name="description" content="An index to statements and other
+syntactic elements of MP4-SA.">
+<META name="keywords" content="MP4-SA">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+appendices</A>-><STRONG>language elements</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Appendix E: Language Elements</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+
+<H4>Bus Elements</H4>
+<TT>
+<pre>
+<A HREF="../../saol/bus/index.html#system">inchannels</A>
+<A HREF="../../saol/bus/index.html#system">input_bus</A>
+<A HREF="../../saol/bus/index.html#system">outchannels</A>
+<A HREF="../../saol/bus/index.html#system">output_bus</A>
+</pre>
+</TT>
+
+<H4>Core Opcodes</H4>
+<P>
+See other appendices for core opcode lists sorted 
+<A HREF="../corea/index.html">alphabetically</A> 
+and by <A HREF="../coref/index.html">function</A>.
+
+<H4>Core Wavetable Generators</H4>
+<P>
+See this appendix for the list of 
+<A HREF="../wave/index.html">wavetable generators</A>.
+
+<H4>Expression Elements</H4>
+<TT>
+<pre>
+<A HREF="../notcov/index.html">sasbf</A> 
+</pre>
+</TT>
+
+<H4>Expression Operators</H4>
+<TT>
+<P>
+<A HREF="../../saol/exstat/index.html#arith">+</A> 
+<A HREF="../../saol/exstat/index.html#arith">-</A>
+<A HREF="../../saol/exstat/index.html#arith">*</A> 
+<A HREF="../../saol/exstat/index.html#arith">/</A>
+<A HREF="../../saol/exstat/index.html#logic">==</A> 
+<A HREF="../../saol/exstat/index.html#logic">!=</A>
+<A HREF="../../saol/exstat/index.html#logic"><=</A> 
+<A HREF="../../saol/exstat/index.html#logic">>=</A>
+<A HREF="../../saol/exstat/index.html#logic">&&</A>
+<A HREF="../../saol/exstat/index.html#logic">||</A>
+<A HREF="../../saol/exstat/index.html#logic">!</A>
+<A HREF="../../saol/exstat/index.html#switch">? :</A>
+<A HREF="../../saol/exstat/index.html#assign">=</A>
+</TT>
+
+<H4>Global Parameters</H4>
+<TT>
+<pre>
+<A HREF="../../saol/wave/index.html#playback">interp</A>
+<A HREF="../../saol/bus/index.html#system">inchannels</A>
+<A HREF="../../saol/vars/index.html#glo_param">krate</A>
+<A HREF="../../saol/bus/index.html#system">outchannels</A>
+<A HREF="../../saol/vars/index.html#glo_param">srate</A>
+</pre>
+</TT>
+
+<H4>SASL Commands</H4>
+<TT>
+<pre>
+<A HREF="../../control/sasl/index.html#instr">instr</A> 
+<A HREF="../../control/sasl/index.html#control">control</A> 
+<A HREF="../../control/sasl/index.html#tempo">tempo</A> 
+<A HREF="../../control/sasl/index.html#tempo">end</A> 
+<A HREF="../../control/sasl/index.html#table">table</A> 
+</pre>
+</TT>
+
+<H4>Standard Names</H4>
+<P>
+See this appendix for the list of 
+<A HREF="../stnames/index.html">standard names</A>.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+
+
+<H4>Statements</H4>
+<TT>
+<pre>
+<A HREF="../../saol/exstat/index.html#assign">assignment</A>
+<A HREF="../../control/saolc/index.html#extend">extend</A>
+<A HREF="../../saol/exstat/index.html#if">if</A>
+<A HREF="../../saol/exstat/index.html#if">if-else</A>
+<A HREF="../../control/saolc/index.html#instr">instr</A>
+<A HREF="../../saol/bus/index.html#ancillary">outbus</A>
+<A HREF="../../saol/bus/index.html#output">output</A>
+<A HREF="../../opcodes/user/index.html#block">return</A>
+<A HREF="../../saol/bus/index.html#route">route</A>
+<A HREF="../../saol/bus/index.html#send">send</A>
+<A HREF="../../saol/bus/index.html#determine">sequence</A>
+<A HREF="../../saol/bus/index.html#ancillary">spatialize</A>
+<A HREF="../../control/saolc/index.html#turnoff">turnoff</A>
+<A HREF="../../saol/exstat/index.html#while">while</A>
+</pre>
+</TT>
+
+<H4>Top-Level Declarations</H4>
+<TT>
+<pre>
+<A HREF="../../opcodes/user/index.html#header">aopcode</A> 
+<A HREF="../../saol/vars/index.html#vars_global">global</A>
+<A HREF="../../saol/vars/index.html#preamble">instr</A>
+<A HREF="../../opcodes/user/index.html#header">iopcode</A> 
+<A HREF="../../opcodes/user/index.html#header">kopcode</A> 
+<A HREF="../../opcodes/user/index.html#header">opcode</A> 
+<A HREF="../../control/midi/index.html#saol">preset</A> 
+<A HREF="../../template/index.html">template</A> 
+<A HREF="../../template/index.html#maplist">map</A> 
+<A HREF="../../template/index.html#maplist">with</A> 
+</pre>
+</TT>
+
+<H4>Variable Declarations</H4>
+<TT>
+<pre>
+<A HREF="../../saol/vars/index.html#vars_instr">asig</A>
+<A HREF="../../saol/vars/index.html#vars_instr">exports</A>
+<A HREF="../../saol/vars/index.html#vars_instr">imports</A>
+<A HREF="../../saol/vars/index.html#vars_instr">ivar</A>
+<A HREF="../../saol/vars/index.html#vars_instr">ksig</A>
+<A HREF="../../opcodes/filter/index.html#oparray">oparray</A> 
+<A HREF="../../saol/wave/index.html#decl">table</A>
+<A HREF="../../saol/wave/index.html#decl">tablemap</A>
+<A HREF="../../opcodes/user/index.html#header">xsig</A> 
+</pre>
+</TT>
+
+
+<pre>
+
+</pre>
+
+<B><P>
+Appendix F:</B>
+</B>
+<A HREF="../rules/index.html">Language Rules</A>
+
+</TD>
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+appendices</A>-><STRONG>language elements</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+
+</BODY>
+</HTML>
+
+

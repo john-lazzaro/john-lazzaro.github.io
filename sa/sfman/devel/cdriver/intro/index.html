@@ -1,0 +1,283 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>Sfront Reference Manual: Part II/2A: Control Driver Overview</TITLE>
+<META name="keywords" content="MP4-SA, SASL, SAOL, MP4, sfront,
+command line options.">
+<META name="description" content="A part of the Sfront reference
+manual, that is a collection of reference materials. Sfront is a 
+program that translates MP4-SA files into C programs.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../../index.html">mp4-sa</A>-><A HREF="../../../index.html">
+sfront reference manual</A>->
+<STRONG>control driver overview</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../../index.html">The <TT>sfront</TT> Reference Manual</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part II/2A: Overview of Control Drivers</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="100%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#fstr">Example: <TT>fstr</TT> control driver</A>.</B> Uses
+the file streaming control driver to introduce the
+control driver concept.
+</UL>
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+Several sfront command-line options let the user specify control
+information in a static way.  The <A
+HREF="../../../user/cmdline/index.html#sco"><TT>-sco</TT></A> and <A
+HREF="../../../user/cmdline/index.html#sstr"><TT>-sstr</TT></A> command
+line options let user specify SASL commands in an ASCII file, and the
+<A HREF="../../../user/cmdline/index.html#midi"><TT>-midi</TT></A> and <A
+HREF="../../../user/cmdline/index.html#mstr"><TT>-mstr</TT></A> options
+let users specify MIDI commands via standard MIDI files. Both SASL and
+MIDI commands may be a part of <TT>mp4</TT> binary files, which are
+specified by the <A HREF="../../../user/cmdline/index.html#bit"><TT>-bit</TT></A> and <A HREF="../../../user/cmdline/index.html#bit"><TT>-bitc</TT></A> options.
+
+<P>
+When any of these options are specified, sfront transforms the control
+information into initialization parameters for C global variables in
+the <TT>sa.c</TT> file. A static compilation approach lets the C 
+compiler optimize the <TT>sa.c</TT> program in significant ways.
+
+<P>
+However, for some applications, a static approach to SASL and MIDI
+control data is not suitable. An important example is streaming
+Structured Audio files over the Internet. The <TT>mp4</TT> file format
+lets users place the SASL and MIDI control information in small
+packets (called <TT>SA_access_units</TT>) at the end of the file (see
+this <A HREF="../../../user/use/index.html#encode">section</A> of the
+manual to learn how to encode control information into
+SA_access_units). A Structured Audio decoder that can accept control
+data dynamically can start playing back an <TT>mp4</TT> file once a
+few <TT>SA_access_units</TT>s are received, rather than wait for the
+entire file to arrive.
+
+<P>
+The <I>control driver</I> interface is designed to support dynamic
+control applications such as audio streaming. The interface lets the
+user specify a C or C++ driver file to be included into the main
+<TT>sa.c</TT> file, that is capable of dynamically issuing SASL and
+MIDI commands at each k-cycle. In addition to providing functionality
+for normatively streaming Structured Audio, the control driver
+interface also has facilities for supporting interactive applications
+such as patch editors, sequencers, and hardware emulations.
+
+<P>
+Our description of control drivers is divided into three sections.
+In this section, we introduce the control driver architecture by
+describing the streaming file control driver <TT>fstr</TT> that is
+included in the sfront distribution. The second and third sections
+describe the control driver interface in detail.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="fstr">Example: <TT>fstr</TT> control driver</A></H2>
+
+<P>
+The right panel shows how to use sfront to stream a Structured Audio
+binary file that has control information encoded as
+<TT>SA_access_unit</TT>s. The example uses the file streaming control
+driver <TT>fstr</TT>. In this section, we will use <TT>fstr</TT> to
+introduce the control driver concept.
+
+<P>
+The control driver <TT>fstr</TT> is invoked on the sfront command line
+by using the option <TT>-cin fstr</TT>. This option copies the C or
+C++ code contained in the file <TT>sfront/src/lib/csys/fstr.c</TT>
+into the <TT>sa.c</TT> file created by sfront.
+
+<P>
+Like all control drivers, the <TT>fstr</TT> control driver defines
+a small number of C functions, listed on the right panel.  These
+functions are called at different points during the execution of the
+<TT>sa.c</TT> program:
+
+<UL>
+<LI>
+<B>csys_setup(void)</B> Called at the start
+of execution of the <TT>sa.c</TT> program, lets the
+control driver initialize its state. 
+<LI>
+<B>csys_newdata(void)</B> Called once per <A
+HREF="../../../../book/tut/index.html#execution">control cycle</A>
+(k-cycle). Its return value informs the main program that there are
+MIDI or SASL events that the driver wishes to execute this cycle.
+<LI>
+<B>csys_midievent(...)</B> Called if the
+csys_newdata() return value indicates that the driver 
+wishes to send MIDI events. The actual MIDI event is 
+returned using pointer variables in the function parameter
+list. The return value is used to request another call to
+csys_midievent(), to transfer another MIDI event in the
+same k-cycle.
+<LI>
+<B>csys_saslevent(...)</B> Called if the
+csys_newdata() return value indicates that the driver 
+wishes to send SASL events. The actual SASL event is 
+returned using pointer variables in the function parameter
+list. The return value is used to request another call to
+csys_saslevent(), to transfer another SASL event in the
+same k-cycle. The csys_saslevent() function may also
+be used to send <I>special events</I> that perform 
+functions not included in the SASL language.
+<LI>
+<B>csys_shutdown(void)</B> Called at the end of execution of the
+<TT>sa.c</TT> program, lets the control driver close files and
+devices. If the <TT>-except</TT> option is used during sfront
+invocation, csys_shutdown() will be called even if the <TT>sa.c</TT>
+program is ending its execution prematurely due to an error condition.
+</UL>
+
+<P>
+In order to request MIDI and SASL events, the control
+driver needs to know details about the SAOL file, such
+as the names of instruments and variables. The
+next section of the control driver chapter
+describes the data structures and service functions 
+that inform the SAOL program and the run-time environment.
+
+<P>
+The final section of the control driver chapter describes the calling
+syntax and semantics for the five functions listed above. It also
+describes the registration process, by which the sfront program learns
+the characteristics of a new control driver.
+
+<P>
+<B>Next section:</B>
+<A HREF="../data/index.html">Part II/2B: Control Drivers Data Structures</A></H2>
+</TD>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Example</H2>
+
+
+<TT>
+<pre>
+sfront -cin fstr -bitc t.mp4 
+       -aout linux -playback
+gcc -O3 sa.c -o sa
+./sa
+
+
+Notes:
+
+[1] The control driver is 
+specified by "-cin fstr"
+
+[2] We use -bitc instead of
+-bit to tell sfront to not
+compile in the SA_access_unit
+data into sa.c.
+
+[3] We use -aout linux -playback
+to tell sfront to send its audio
+directly to the soundcard, instead
+of its default behavior of writing
+an output.wav file.
+
+</pre>
+</TT>
+
+<H2>Functions in Control Drivers</H2>
+
+<TT>
+<pre>
+/* called at program start */
+
+int csys_setup(void);
+
+/* called each k-cycle */
+
+int csys_newdata(void);
+
+/* called each kcycle that */
+/* csys_newdata() requests */
+
+int csys_saslevent( ... );
+int csys_midievent( ... );
+
+/* called at program end */
+
+void csys_shutdown(void);
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../../index.html">mp4-sa</A>-><A HREF="../../../index.html">
+sfront reference manual</A>->
+<STRONG>control driver overview</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>

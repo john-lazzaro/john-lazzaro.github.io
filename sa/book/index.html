@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MPEG-4 Structured Audio Book</TITLE>
+<META name="keywords" content="John Lazzaro, John Lazaro, Jon Lazzaro,
+Jon Lazaro, John Lazarro, Jon Lazarro, John Lazzarro, Jon Lazzarro,
+John Lazzarow, John Wawrzynek, MPEG, MPEG 4, MPEG-4, MP4, MPEG-4
+Structured Audio, MP4, SA, MP4-SA, MP4/SA, computational audio,
+structured audio, MIDI files, audio compression, music synthesis,
+computer music, DSP, digital signal processing, audio scripting, audio
+signal processing, sound signal processing, digital audio workstation,
+digital audio, physical models, WAV, AIFF, audio signal processing,
+digital signal processing, reverb, chorus, flange, sampling, hip-hop,
+tracker, mod tracker, content creation">
+<META name="description" content="An online book about writing 
+applications using SAOL, the programming language of MPEG-4 Structured
+Audio. Includes information on the score language SASL,
+and on using legacy formats like MIDI Files, WAV, and AIFF with
+SAOL. Appendices detail SAOL language syntax, core opcodes and wavetables,
+standard names, and binary formats.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../index.html">mp4-sa</A>-><STRONG>the mp4-sa book</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H1>The MPEG-4 Structured Audio Book</H1>
+<H3>By <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek</A>, <A HREF="http://www.cs.berkeley.edu/">
+CS Division</A>, <A HREF="http://www.berkeley.edu/">UC Berkeley.</A></H3>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="45%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>Introduction</H2>
+
+<P>
+MPEG-4 Structured Audio (MP4-SA) is an ISO/IEC standard (edited by
+Eric Scheirer) that specifies sound not as audio data, but as a
+computer program that generates audio when run.
+
+<P>
+One implication of this design is that
+encoding content in MP4-SA is a creative act,
+not an automatic one. Or more specifically,
+two creative acts: 
+
+<UL> 
+<LI>
+<B>Sound modeling.</B> In MP4-SA, sound happens because a program
+written in the SAOL (pronounced "sail") computer language outputs
+audio samples. The algorithms coded in SAOL may model how musical
+instruments (like a piano or the human voice) create sound, or may
+process sounds (tasks like adding reverberation or mixing instrument
+sounds together).
+</LI>
+</UL> 
+
+<UL>
+<LI>
+<B>Sound sequencing.</B>
+Performance is sound moving in time: notes play in sequence to make a
+melody, faders sweep across a mixing console to blend a performance,
+etc. In MP4-SA, the score language SASL (pronounced "sassil"), the
+MIDI standard, and the SAOL language itself are all available to
+support sound sequencing.
+</LI> 
+</UL>
+
+<P>
+The goal of this book is to show how to use SAOL,
+SASL, and the other MP4-SA tools to create these
+two types of content. We assume some familiarity
+with computer programming and algorithms, audio
+signal processing, and music and sound. 
+
+<P>
+<B>Next:</B><A HREF="tut/index.html">A Tutorial Introduction.</A>
+
+</TD>
+<TD WIDTH="55%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Table of Contents</H2>
+
+<H4>Part I. <A HREF="tut/index.html">A Tutorial Introduction.</A></H4>
+
+<H4>Part II. <A HREF="saol/index.html">The SAOL Language</A></H4>
+
+<OL TYPE=1>
+<LI><A HREF="saol/vars/index.html">Numbers and Variables</A>
+</LI>
+<LI><A HREF="saol/exstat/index.html">Expressions and Statements</A></LI>
+<LI><A HREF="saol/simple/index.html">Simple Core Opcodes</A></LI>
+<LI><A HREF="saol/wave/index.html">Wavetables</A></LI>
+<LI><A HREF="saol/bus/index.html">Buses and Execution Order</A></LI>
+</OL>
+
+<H4>Part III. <A HREF="control/index.html">Instrument Control</A></H4>
+<OL TYPE=1>
+<LI><A HREF="control/sasl/index.html">The SASL Score Language</A></LI>
+<LI><A HREF="control/midi/index.html">MIDI Instrument Control</A></LI>
+<LI><A HREF="control/saolc/index.html">SAOL Instrument Control</A></LI>
+</OL>
+
+<H4>Part IV. <A HREF="opcodes/index.html">Advanced Opcodes</A></H4>
+<OL TYPE=1>
+<LI><A HREF="opcodes/sgen/index.html">Sound Synthesis Core Opcodes</A></LI>
+<LI><A HREF="opcodes/filter/index.html">Filter Core Opcodes</A></LI>
+<LI><A HREF="opcodes/sproc/index.html">Signal Processing Core Opcodes</A></LI>
+<LI><A HREF="opcodes/user/index.html">User-Defined Opcodes</A></LI>
+</OL>
+
+<H4>Part V. <A HREF="special/index.html">Special Topics</A></H4>
+<OL TYPE=1>
+<LI><A HREF="special/debug/index.html">Debugging SAOL Programs</A></LI>
+<LI><A HREF="template/index.html">Templates</A></LI>
+<LI><A HREF="special/slib/index.html">The Slib Library</A></LI>
+<LI><A HREF="special/au/index.html">AudioUnit Plug-Ins</A></LI>
+<!--
+<LI><A HREF="special/large/index.html">Developing Large SAOL Programs</A></LI>
+-->
+</OL>
+
+<H4>Appendices (<A HREF="append/index.html">click for full list</A>)</H4>
+<OL TYPE=A>
+<LI><A HREF="append/corea/index.html">Core Opcode Sorted Alphabetically</A>
+<LI><A HREF="append/coref/index.html">Core Opcode Sorted by Opcode Type</A>
+<LI><A HREF="append/wave/index.html">Core Wavetable Generators</A>
+<LI><A HREF="append/stnames/index.html">Standard Names</A>
+<LI><A HREF="append/lang/index.html">Language Elements</A>
+<LI><A HREF="append/rules/index.html">Language Rules</A>
+</A>
+</OL>
+<A HREF="ack/index.html">Acknowledgements</A> and 
+<A HREF="bib/index.html">Bibliography</A><BR>
+
+</TD>
+
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../index.html">mp4-sa</A>-><STRONG>the mp4-sa book</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>

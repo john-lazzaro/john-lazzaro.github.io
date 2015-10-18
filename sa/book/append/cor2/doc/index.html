@@ -1,0 +1,346 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Appendix L: MP4-SA Items for COR2 (March 2002)</TITLE>
+<META name="description" content="Listing of items from the March 2002
+MPEG 4 Corrigenda that relate to Structured Audio.">
+<META name="keywords" content="MP4-SA">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../../index.html">mp4-sa</A>-><A HREF="../../../index.html">
+the mp4-sa book</A>-><A HREF="../../index.html">
+appendices</A>-><STRONG>cor2 items</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Appendix L: MP4-SA Items for COR2 (March 2002)</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Item 1</H2>
+
+<P>
+In subclause 5.7.3.3.5.2 (Determination of instrument output width
+and bus width), replace the second sentence of the first paragraph
+with:
+
+<P>
+<I>the width of each bus is either provided by a <B>send</B> statement
+(subclause 5.8.5.5) or is determined by the sum of the output widths
+(subclause 5.8.6.6.8) of the instruments routed to that bus in a
+single <B>route</B> statement (subclause 5.8.5.4).</I>
+
+<H2>Item 2</H2>
+
+<P>
+In subclause 5.7.3.3.5.2 (Determination of instrument output width
+and bus width), remove the beginning of the third sentence:
+
+<P>
+<I>Only for the purpose of calculating bus widths</I>
+
+<H2>Item 3</H2>
+
+<P>
+In subclause 5.7.3.3.5.2 (Determination of instrument output width
+and bus width), add the following note at the end of the first
+paragraph, before EXAMPLE 1:
+
+<P>
+<I>NOTE: if the output width of an instrument depends on
+<B>outchannels</B>, and the bus width of the bus where that instrument
+is routed is not specified by means of other <B>send</B> and
+<B>route</B> statements, the orchestra may be indeterministic. 
+Programmers should pay special attention in checking the 
+deterministic behavior of the orchestra or make use of determined
+bus widths (subclause 5.8.5.5).</I>
+
+<H2>Item 4</H2>
+
+<P>
+In subclause 5.7.3.3.5.2 (Determination of instrument output width
+and bus width), in EXAMPLE 1 replace the second route with:
+
+<P>
+<I>route(bus2, i2, i1);</I>
+
+<H2>Item 5</H2>
+
+<P>
+In subclause 5.7.3.3.5.2 (Determination of instrument output width
+and bus width) remove instr i3 from the pseudo-code. Replace the
+paragraph following the pseudo-code with:
+
+<P>
+<I>In this orchestra, the global sequencing rules (subclause 5.8.5.6)
+specify that instrument <B>i1</B> precedes instrument <B>i2</B>, and
+instrument <B>i1</B> and <B>i2</B> precede instrument
+<B>i4</B>. Instrument <B>i1</B> has two channels, so bus <B>bus1</B>
+has two channels. Instrument <B>i2</B> has two channels, since it gets
+input from <B>bus1</B>. The bus <B>bus2</B> has four channels, two
+each from <B>i2</B> and <B>i1</B>. The instrument <B>i4</B> has four
+channels, since it gets input from <B>bus2</B>.</I>
+
+<H2>Item 6</H2>
+
+<P>
+In subclause 5.8.5.3.2 (Signal variables), replace the second part
+of the paragraph following &lt;array length&gt specification with:
+
+<P>
+<I>
+If the latter, the array length shall be the same as the number of
+input channels or output channels of the orchestra, respectively. It
+is illegal to use the token <B>inchannels</B> if the number of input
+channels to the orchestra is 0.</I>
+
+<H2>Item 7</H2>
+
+<P>
+In subclause 5.8.5.5 (Send statement), change the definition
+of <I>&lt;send statement&gt;</I> to be:
+
+<P>
+<I>send(&lt;ident&gt;;&lt;exprlist&gt;;&lt;namelist&gt)</I>
+
+<H2>Item 8</H2>
+
+<P>
+In subclause 5.8.5.5 (Send statement), in the paragraph beginning with
+"Any bus may be routed to more than one effect instrument" replace the
+first sentence with:
+
+<P>
+<I>
+Any bus, except for the special bus <B>output_bus</B>, may be sent to
+more than one effect instrument and/or instantiations; in this case,
+when the simple identifier is not used, it is illegal to refer to a
+bus with more than one length.</I>
+
+<H2>Item 9</H2>
+
+<P>
+In subclause 5.8.6.5.1 (Syntactic form), replace the line following
+the &lt;tablemap declaration&gt with:
+
+<P>
+<I>
+&lt;array length&gt and &lt;namelist&gt as defined in subclause
+5.8.5.3.2, except that in the instrument scope the tokens
+<B>inchannels</B> and <B>outchannels</B> refer to the input channels
+and output channels of the instrument, respectively.</I>
+
+<H2>Item 10</H2>
+
+<P>
+In subclause 5.8.6.8.5 (outchan), replace standard name description
+with:
+
+<P>
+<I>
+The standard name <B>outchan</B>, in each scope, shall contain the number
+of channels ofoutput provided by the instrument instantiation with
+which that scope is associated, in the sense described in subclause
+5.8.6.8.4.</I>
+
+
+<H2>Item 11</H2>
+
+<P>
+In subclause 5.8.7.4.1 (Syntactic form), replace the last sentence of
+the first paragraph to:
+
+<P>
+<I>
+If the array width is the special token <B>outchannels</B>, then the
+array width shall be the same as the number of output channels to the
+associated instrument instantiation (in the sense described in
+subclause 5.8.6.8.4).</I>
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Item 12</H2>
+
+<P>
+In subclause 5.8.7.5.1, (Syntactic form) after the &lt;opcode var
+declaration&gt lines, replace the first two lines as follows:
+
+<P>
+<I>
+&lt;namelist&gt and &lt;instr variable declaration&gt as defined in
+subclause 5.8.5.3.2 and subclause 5.8.6.5.1. In the opcode scope, the
+tokens <B>inchannels</B> and <B>outchannels</B> refer to the input channels and
+output channels of the associated instrument,respectively (in the
+sense described in subclause 5.8.6.8.4).</I>
+
+<H2>Item 13</H2>
+
+<P>
+In subclause 5.8.6.6.2 (Assignment), add at the end of the third
+paragraph (If the lvalue denotes an entire array...):
+
+<P>
+<I>
+In the case that lvalue depends on the ordering of computation of the
+right-hand-side expression (e.g. if an entire array is multiplied with
+one of its elements), lvalue is undefined.</I>
+
+<H2>Item 14</H2>
+
+<P>In subclause 5.8.6.6.11 (Extend), in the third paragraph replace 
+the following text:
+
+<P><I>or the rate of the guarding expression containing the statement, 
+or the rate of the opcode containing the statement, whichever is
+fastest.</I>
+
+<P>
+with the text
+
+<P><I>or the control rate if the rate of the guarding expression containing
+the statement, or the rate of the opcode containing the statement, is faster
+than the rate of the expression parameter.</I>
+
+<P>
+(MP4-SA Book Author Note: The purpose of this text is to make a-rate 
+<B>extend</B> statements illegal.)
+
+<H2>Item 15</H2>
+
+<P>
+In subclause 5.8.6.6.11 (Extend), before the NOTE add:
+
+<P>
+<I>
+The <B>extend</B> statement shall not be executed in an instrument instance
+that is created asthe result of a <B>send</B> statement referencing the
+special bus <B>output_bus</B>.</I>
+
+<H2>Item 16</H2>
+
+<P>
+In subclause 5.8.7.5.1 (Syntactic form), at the end of the second
+paragraph add the following paragraph:
+
+<P><I>A variable shall not have a rate faster than the rate of the
+opcode. Standard names faster than the rate of the opcode are not
+defined in the opcode. The imports tag shall not be used for local
+k-rate signals when there is no global variable of the same name.
+</I>
+
+
+<H2>Item 17</H2>
+
+<P> In subclause 5.8.7.7.3 (Shared variables and statements slower
+than the rate of the opcode),at the end of the third paragraph add:
+
+<P><I>
+Statements that contain expressions of type <B>specialop</B> (subclause
+5.9.2) are executed both at the k-rate and a-rate, and those
+expressions return values as specified in subclause 5.8.6.7.6 and
+5.9.2.
+</I>
+
+<H2>Item 18</H2>
+
+<P>In subclause 5.9.2 (Specialop type), add at the end of the third
+paragraph:
+
+<P>
+<I>Calls to <B>specialop</B> type opcodes are not allowed in
+<B>iopcodes</B>, <B>kopcodes</B> and <B>opcodes</B>. If a call to a
+<B>specialop</B> type opcode is present in an <B>aopcode</B>, the
+specialop opcode is executed both at k-rate and a-rate according to
+rules specified in subclause 5.8.7.7.3.</I>
+
+<H2>Item 19</H2>
+
+<P>In subclause 5.9.11.1 (rms), replace the sentence:
+
+<P><I>It is a run-time error if length is provided and is negative.</I>
+
+<P>
+with
+
+<P><I>It is a run-time error if length is provided and is not strictly
+positive.</I>
+
+<H2>Item 20</H2>
+
+<P>
+In subclause 5.9.12.3 (downsamp), in the fourth paragraph replace:
+
+<P><I>0&lt;i&lt;SR*KR</I>
+
+<P>
+with
+
+<P><I>0&lt;i&lt;SR/KR</I>
+
+<H2>Item 21</H2>
+
+<P>In subclause 5.C.3 (Syntactic grammar for SAOL in yacc), in senddef
+replace
+
+<P><I>identlist</I>
+
+<P>
+with
+
+<P><I>namelist</I>
+
+<pre>
+
+</pre>
+
+<B><P>
+Return to:</B>
+</B>
+<A HREF="../../index.html">Appendix Cover Page</A>
+
+</TD>
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../../index.html">mp4-sa</A>-><A HREF="../../../index.html">
+the mp4-sa book</A>-><A HREF="../../index.html">
+appendices</A>-><STRONG>cor2 items</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+</BODY>
+</HTML>
+
+

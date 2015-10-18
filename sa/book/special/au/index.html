@@ -1,0 +1,1792 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part V/4: AudioUnit Plug-Ins</TITLE>
+<META name="keywords" content="audiounit, audiounits, au, Apple, plug-ins,
+components, resource files, SAOL, MIDI, MP4-SA, MP4">
+<META name="description" content="Describes how to write
+Apple AudioUnit plug-ins in SAOL.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+special topics</A>-><STRONG>audiounits</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part V/4: Coding AudioUnits in SAOL</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="65%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+
+<UL>
+<LI>
+<B><A HREF=#intro>Introduction</A></B>
+<LI>
+<B><A HREF=#demystified>AudioUnits Demystified.</A></B>&nbsp
+How SAOL simplifies plug-in programming.
+<LI>
+<B><A HREF=#limits>SAOL Plug-ins.</A></B>&nbsp
+The types of AudioUnits can be developed in SAOL today.
+<LI>
+<B><A HREF=#aumu><TT>sin</TT>: A Softsynth Example.</A></B>&nbsp 
+SAOL code for a simple MusicDevice AudioUnit.
+<LI>
+<B><A HREF=#aufx><TT>hiss</TT>: An Effect Example.</A></B>&nbsp
+SAOL code for a simple Effects AudioUnit.
+<LI>
+<B><A HREF=#lpf><TT>lpf</TT>: A Custom View Example.</A></B>&nbsp
+A SAOL plug-in that uses a Cocoa user-interface view.
+<LI>
+<B><A HREF=#debug>Debugging.</A></B>&nbsp
+Notes on <TT>-aout audiounit_debug</TT> and other debugging features.
+</UL>
+</TD>
+<TD WIDTH="35%" VALIGN=top BGCOLOR="#CCFFCC">
+
+
+<H2>Naming Conventions</H2>
+
+<A HREF="#parameters"><B><TT>Parameter Sliders</TT></B></A>&nbsp 
+<A HREF="#aufx"><B><TT>Parameter Text Menus</TT></B></A>&nbsp 
+<A HREF="#factory"><B><TT>Factory Presets</TT></B></A>&nbsp 
+<A HREF="#cmdline_type"><B><TT>AU Type</TT></B></A>&nbsp 
+<A HREF="#cmdline_subtype"><B><TT>AU Subtype</TT></B></A>&nbsp<BR> 
+<A HREF="#cmdline_subtype"><B><TT>AU Manu</TT></B></A>&nbsp 
+<A HREF="#cmdline_subtype"><B><TT>AU Filename</TT></B></A>&nbsp 
+<A HREF="#cmdline_bundle"><B><TT>AU Bundle Manu</TT></B></A>&nbsp 
+<A HREF="#cmdline_vdisc"><B><TT>AU Custom Views</TT></B></A>&nbsp 
+
+<H2>Standard Names</H2>
+
+<A HREF="#cpuload"><B><TT>cpuload</TT></B></A>&nbsp
+
+
+</UL>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+<P>
+<I>Plug-ins</I> are small programs that can be run within larger
+<I>host</I> applications. In the audio world, host programs are
+often digital audio workstations, and plug-ins often
+act as in-line effects (doing tasks like equalization) or as virtual
+musical instruments (accepting MIDI input and generating audio
+output, in the way a hardware synthesizer does).  By supporting
+plug-ins, a host developer lets outside developers
+write programs that run inside the host.
+<P>
+In this chapter, we describe how to write audio plug-ins in SAOL.  At
+this time, <TT>sfront</TT> supports a single plug-in standard -- the
+AudioUnit standard on Mac OS X.  This format is supported by many OS X
+applications, including GarageBand, Logic, Ableton Live, Digital
+Performer, and Final Cut Pro.  SAOL plug-ins are known to work under
+Lion (10.7) and also under Tiger (10.4).  Compatibility reports
+for Leopard and Snow Leopard would be appreciated.
+<P>
+Plug-in support in <TT>sfront</TT> is a work in progress, and in this
+chapter we note the current limitations of writing plug-ins in SAOL.
+Most of these limits are not intrinsic to using SAOL for plug-ins, but
+rather reflect the current "gaps" in <TT>sfront</TT> support.  We
+anticipate that most of these gaps will be filled as <TT>sfront</TT>
+AudioUnit support matures.
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="demystified">AudioUnits Demystified</A></H2>
+
+<P>
+Newcomers to plug-ins are often surprised at how much extra
+programming effort a plug-in involves, compared to a stand-alone
+command-line program.  The difference has little to do with the the
+audio signal-processing code for the program.
+<P>
+Below, we list the major reasons why AudioUnit programming is
+complicated, and why writing a plug-in in SAOL reduces the
+complexity.
+
+</TD>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H4><A NAME="discovery">Discovery</A></H4>
+
+<P>
+A host program needs to <I>discover</I> the plug-ins that are
+installed on a computer, in order to support the user interfaces that
+let users select plug-ins to add to a project.  The AudioUnit
+discovery process requires that users install AudioUnits in special
+directories on the disk file system (listed on the right panel).  Host
+programs examine these directories to build the user-interface menus
+that display plug-ins to the user.
+<P>
+AudioUnit plug-ins appear in the Finder as individual files, but are
+actually a special type of directory tree called a <I>bundle</I>.  The
+right panel shows a typical directory structure for an AudioUnit.  A
+special file, called a <I>resource</I> file (<TT>.rsrc</TT>), codes
+discovery information about an AudioUnit, including the data the
+host uses to build its user-interface menus for plug-in selection.
+<P>
+When building an AudioUnit from a SAOL file, <TT>sfront</TT> creates
+the resource file automatically.  The example Makefiles shipped with
+the sfront distribution create the correct bundle directory structure,
+and place the resource file in the correct place in the bundle.  To
+build an example AudioUnit, type <TT>make install</TT>.  This command
+builds the AudioUnit, copies it into a discovery directory, and
+launches an AU host to begin testing.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H3>Discovery Directories</H3>
+<TT>
+<pre>
+      All users:  /Library/Audio/Plug-Ins/Components/
+A specific user: ~/Library/Audio/Plug-Ins/Components/
+
+
+</pre>
+</TT>
+<H3>AudioUnit Bundle Structure</H3>
+<TT>
+<pre>
+For AudioUnit hiss:
+
+% ls
+hiss.component/
+% cd hiss.component
+% ls
+Contents/
+% cd Contents
+% ls
+Info.Plist    MacOS/      PkgInfo     Resources/
+% cd MacOS
+% ls
+hiss*
+% cd ../Resources
+% ls
+hiss.rsrc
+</pre>
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H4><A NAME="dynload">Dynamic Loading</A></H4>
+
+<P>
+The C code of an AudioUnit does not include a &nbsp<TT>main()</TT>
+function.  As a consequence, an AudioUnit cannot execute as a
+stand-alone program.
+
+<P>
+Instead of a &nbsp<TT>main()</TT> function, an AudioUnit defines an
+<TT>entry</TT> function that implements a standardized interface
+between a host and the plug-in (called a <TT>Component</TT>
+interface).  The name of a plug-in's entry function is encoded
+in its resource file, along with the name of plug-in binary file.
+
+<P>
+When the user chooses to add a plug-in to a project in a host, the
+host dynamically maps the plug-in binary into the host's address
+space, and then calls the plug-in's entry function.  The host uses a
+standard interface to communicate with the plug-in through the entry
+function.  The information in the resource file enables this bootstrap
+process.
+
+<P>
+The <TT>sa.c</TT> file created by <TT>sfront</TT> defines an
+AudioUnit entry function. The entry function bridges the gap between
+the AudioUnit standard and the MPEG 4 Structured Audio standard.  The
+resource file that <TT>sfront</TT> creates embeds the names of the
+entry function and the AudioUnit binary file, and the Makefiles
+shipped in the sfront AudioUnit example projects place the binary file
+in the correct location in the bundle directory tree.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H4><A NAME="instances">Multiple Instantiation</A></H4>
+
+<P>
+A host may be running several copies (<I>instances</I>) of an
+AudioUnit plug-in at the same time.  Each instance acts as an
+independent entity.  However, only one binary image of the AudioUnit
+plug-in is mapped into the host's address space.  You may be
+wondering, how do the AudioUnit instances maintain independent state
+while sharing a common binary?
+
+<P>
+To solve this problem, AudioUnits use an "instance factory" model.  An
+AudioUnit entry function accepts host requests to create independent
+instances of the plug-in. The entry function also accepts requests to
+destroy a plug-in instance when it is no longer needed.  As part of
+the creation process, an entry function dynamically allocates memory
+to hold an instance's state.  The entry function reclaims the state
+memory when the instance is destroyed.
+
+<P>
+A SAOL program represents a single instance of the plug-in.  The
+<TT>sa.c</TT> file created by <TT>sfront</TT> uses this SAOL program
+as a template to create independent instance copies on demand.
+
+<P>
+Sfront detects SAOL global variables that are accessed in a read-only
+fashion, and shares those variables among all instances.  This
+optimization is particularly helpful for plug-ins that use large
+sample wavetables.
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H4><A NAME="parameters">User Interface</A></H4>
+
+<P>
+In addition to processing audio, an AudioUnit plug-in may present a
+control interface to the user inside the host. The host provides a
+configuration button for each plug-in instance; the user the button to
+bring up the control interface window.
+
+<P>
+For example, the interface of a high-pass plug-in may include an
+on-screen slider to vary the filter cut-off frequency.  A control
+screen for this plug-in is shown below.
+
+<P>
+<IMG SRC="hpf.png" ALIGN="TOP" WIDTH=501 HEIGHT=93>
+</P>
+
+<P>
+An AudioUnit defines its user interface by declaring floating-point
+<I>parameters</I> during initialization.
+
+<P>
+For each parameter (for example, the cut-off frequency parameter of a
+high-pass filter plug-in), the plug-in tells the host the parameter
+name ("Cut-Off"), its units ("Hz"), its preferred user interface ("a
+slider with a logarithmic taper"), and the parameter's minimum ("1
+Hz"), maximum ("300 Hz") and default values ("80 Hz").
+
+<P>
+A host creates a simple (a.k.a <I>generic</I>) user interface for a
+plug-in, by drawing a user-interface control on the screen for each
+parameter. The host sends an updated parameter value to the plug-in
+whenever the user moves a slider.  Parameters are also the mechanism
+AudioUnits user for persistent state -- when a host saves a user
+project, it saves the current parameter values for each plug-in.
+
+<P>
+SAOL programmers specify the parameters for a plug-in's user interface
+by declaring <B>ksig</B> variables in the <B>global</B> block that
+follow a special naming convention.  Ancillary variable declarations
+define the user-interface appearance of each parameter.  The naming
+conventions for these SAOL variables are defined on the right panel.
+
+<P>
+On each k-cycle, the values of SAOL global <B>ksig</B> variables
+associated with AudioUnit user-interface parameters are updated to
+reflect user activity in the host.  By importing these global
+variables, SAOL instrs can change their behavior based on real-time
+user input.  The variable updates follow the same semantics as SASL
+updates of global variables.
+
+<P>
+If SAOL program code updates a variable that is associated with a
+AudioUnit user-interface parameter, the new data appears in the
+AudioUnit user-interface screen.  The naming convention supports
+<I>display</I> user-interface elements, so that the user-interface
+can display parameter values (without offering a way for the
+user to change the parameter values).
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H3>Parameter Naming Conventions</H3>
+<P>
+AudioUnit parameters are SAOL <B>ksig</B> scalar variables defined in
+the <B>global</B> block.  Variable must begin with <TT>aup_</TT>,
+followed by the parameter name.  In the user interface, underscores in
+the name are presented as spaces, and case is preserved.  The name
+must not use the strings <TT>_factory</TT>, <TT>_idx</TT>,
+<TT>_unit</TT>, <TT>_slider</TT>, <TT>_menu</TT>, <TT>_checkbox</TT>,
+and <TT>_pinfo</TT>.  SAOL programs read the <TT>aup_name</TT>
+variable to learn the current value of a parameter.
+
+<P>
+The user-interface control for a parameter <TT>aup_name</TT> may be
+specified by declaring a <B>ksig</B> scalar variable with a particular
+naming convention.  This variable exists to code information in its
+name -- the run-time value of the variable has no special
+significance to the sfront engine.  The examples below define the
+naming convention:
+<TT>
+<pre>
+
+// sliders
+
+ksig aup_name_slider;           // linear taper
+
+ksig aup_name_slider_log;       // other tapers
+ksig aup_name_slider_cuberoot;
+ksig aup_name_slider_squareroot;       
+ksig aup_name_slider_linear;    
+ksig aup_name_slider_squarelaw;       
+ksig aup_name_slider_cubic;       
+ksig aup_name_slider_exp;        
+
+// checkbox -- parameter value should be 0 or 1
+
+ksig aup_name_checkbox;
+
+// n-choice menu -- parameter values 0, 1, .. n-1
+// To learn more about menus, see this <A HREF="#aufx">example</A>
+
+ksig aup_name_menu;
+
+// display a value in the user interface
+
+ksig aup_name_display_number;   // print numeral
+ksig aup_name_display_checkbox; // dim checkbox
+ksig aup_name_display_menu;     // print a menu label
+</pre>
+</TT>
+</P>
+
+<P>
+In a similar fashion, the unit label that appears next to a slider
+may be specified with variables of the form:
+<TT>
+<pre>
+// name1 unit shown as "Hz"
+ksig aup_name1_unit_Hz; 
+
+// name2 unit shown as "Cycles Per Second"
+ksig aup_name2_unit_Cycles_Per_Second;
+</pre>
+</TT>
+Units are ignored for menus and checkboxes.
+</P>
+
+<P>
+The range and default value for a parameter <TT>aup_name</TT> is
+defined by a SAOL table <TT>aup_name_pinfo</TT>.
+The three elements of this table specify the minimum, default,
+and maximum values of the parameter.
+</P>
+
+<P>
+The parameter variable in the example control window is defined as:
+<TT>
+<pre>
+global {
+
+  // A parameter to be shown in AudioUnit user interface
+
+  ksig aup_Cut_Off;  // underscores become spaces in UI
+
+  // Sets the user-interface widget for each parameter
+
+  ksig aup_Cut_Off_slider_log;
+
+  // Sets the unit to display next to the slider
+
+  ksig aup_Cut_Off_unit_Hz;
+
+  // Parameter info                min  default  max
+
+  table aup_Cut_Off_pinfo(data, 3,  1,    80,    300);
+}
+</pre>
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H4><A NAME="factory">Factory Presets</A></H4>
+
+<P>
+An AudioUnit plug-in developer may define <I>factory presets</I>.
+Factory presets are sets of parameter value that produce a useful
+behavior.  For example, a high-pass filter plug-in may define a
+factory preset "Vocal Rumble", whose cut-off value is useful for
+filtering out the rumble picked up by microphones stands.
+
+<P>
+SAOL programs may define a factory preset by declaring a table in the
+<B>global</B> block that follows a specialized naming convention. The
+naming convention is shown on the right panel.
+
+<P>
+By enabling a special debug mode, SAOL developers can instruct a
+plug-in instance running in a host to print out a factory preset
+table of the current plug-in state to a log file.  We describe
+this debug mode <A HREF="#debug">later</A> in this chapter.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H3>Factory Preset Naming Conventions</H3>
+<tt>
+<P>
+AudioUnit factory presets are defined as tables in the <B>global</B> block.
+Preset tables must begin with the prefix <TT>aup_factory_</TT>,
+followed by the preset name.  In the user interface, underscores are
+presented as spaces, and case is preserved.
+
+<P>
+A preset table has a length equal to the number of AudioUnit
+parameters.  Each table entry corresponds to a parameter, following
+the order of parameter declaration in the global block.  A
+parameter's value for a factory preset is the computed value of its
+table entry in the factory preset table.
+
+<pre>
+Example factory preset declarations:
+
+global {
+  // Parameters shown in AudioUnit user interface
+  ksig aup_Attack;
+  ksig aup_Release;
+
+  // Factory preset tables          Attack   Release          
+  table aup_factory_Quick(data,  2,  0.005,   0.025);
+  table aup_factory_Normal(data, 2,  0.05,    0.075);
+  table aup_factory_Slow(data,   2,  0.200,   0.200);
+}
+
+</pre>
+</tt>
+</TD>
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="limits">SAOL Plug-ins</A></H2>
+
+<P>
+The AudioUnit plug-in standard is deep and wide.  At present, plug-ins
+written in SAOL support a subset of the full AudioUnit specification.
+Below, we describe the current status of SAOL plug-ins.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H4><A NAME="types">Plug-In Types</A></H4>
+
+<P>
+The AudioUnit standard defines a family of AudioUnit types.
+The three most popular types are currently supported by SAOL:
+MusicDevice, Effect, and MusicEffect.  The right panel shows
+the <tt>sfront</tt> command-line options for each type.
+
+<P>
+MusicDevice plug-ins are software synthesizers: they accept MIDI input
+(including note events) and generate audio output.  Effect plug-ins
+are audio signal processors: they accept audio input and produce audio
+output.  MusicEffects are similar Effects, but also accept a MIDI
+input stream.  MusicEffects are useful for creating software
+synthesizers that require audio input, such as envelope followers and
+vocoders.
+
+<P>The resource (<TT>.rsrc</TT>) file encodes an AudioUnit's identity
+using three fields: the Type, Sub-Type, and Manufacturer fields.  Each
+field holds a 4-character constant.  Sfront automatically encodes the
+correct Type constant in the resource file (<TT>aumu</TT> for
+MusicDevice, <TT>aufx</TT> for Effect, <TT>aumf</TT> for MusicEffect).
+
+<P>
+The Manufacturer and Sub-Type fields form a unique identifier of a
+plug-in of a particular type.  The Manufacturer field identifies
+the author of the plug-in, and the Sub-Type field identifies the
+particular plug-in product created by the author.
+
+<P>
+The right panel shows <TT>sfront</TT> command-line options to set the
+Manufacturer and Sub-type fields, along with related options to set
+the plug-in bundle name (as seen in the Finder), and to code
+descriptive information about the plug-in that is shown in the user
+interface of an AudioUnit host.
+
+<H4><A NAME="types">AudioUnit Bundle ID</A></H4>
+
+<P>
+AudioUnits are a type of bundle. Bundles include a file
+<TT>Contents/Info.Plist</TT> that describes the bundle.  The
+<TT>CFBundleIdentifier</TT> property in this file acts as a bundle
+identification string.
+
+<P>
+Sfront automatically creates the CFBundleIdentifier string, and places
+it in the Info.Plist file.  This string begins with a sub-string
+defining the manufacturer of the AudioUnit, using an inverted version
+of a DNS name associated with the manufacturer. For example, we use
+<TT>edu.berkeley.eecs</TT> for the example plug-ins that ship with
+sfront.
+
+<P>
+The right panel shows the command-line options for setting the
+manufacturer sub-string for use with <TT>CFBundleIdentifier</TT>.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H3><A NAME="cmdline_type">Type Specification</A></H3>
+<tt>
+<pre>
+A MusicDevice AudioUnit (type aumu) is specified
+by the sfront command line options:
+
+-aout audiounit -cin aucontrolm
+
+An Effect AudioUnit (type aufx) is specified by
+the sfront command line options:
+
+-aout audiounit -ain audiounit -cin aucontrol
+
+A MusicEffect AudioUnit (type aumf) is specified by
+the sfront command line options:
+
+-aout audiounit -ain audiounit -cin aucontrolm
+
+In each case, -aout audiounit_debug may be 
+substituted for -aout audiounit to use a 
+debugging version of the audiounit drivers.
+
+All other combinations of (-ain, -aout, -cin)
+that include an AudioUnit driver will result
+in an sfront compile-time error.
+</pre>
+</tt>
+<H3><A NAME="cmdline_subtype">Sub-Type and Manufacturer Options</A></H3>
+
+<tt>
+<P>
+Sfront command-line options set the AudioUnit subtype and manufacturer
+fields.  Each option flag must be followed by a four-character literal
+to define the field.  Examples below:
+</P>
+<pre>
+-au_component_subtype Hiss
+-au_component_manu ucBe
+</pre>
+<P>
+The name for the AudioUnit bundle 
+(as it appears in the Finder) may
+also be specified by an sfront
+command-line option. Spaces
+should not appear in this name.
+An example below:
+</P>
+<pre>
+-au_filesystem_name hiss
+</pre>
+<P>
+Finally, command-line options may be
+used to set the AudioUnit name and
+manufacturer, as it is presented in
+the user interface.  Examples below:
+</P>
+<pre>
+-au_ui_name "Inline Noise Generator"
+-au_ui_manu "John Lazzaro, UCB EECS"
+</pre>
+</TT>
+<H3><A NAME="cmdline_bundle">Bundle Identifier Options</A></H3>
+
+<TT>
+<P>
+Sfront command-line options determine the bundle identifier
+string that appears in the Info.Plist file.  Example below:
+</P>
+<pre>
+-au_manu_url edu.berkeley.eecs
+-au_filesystem_name hiss
+
+creates the CFBundleIdentifier string:
+
+edu.berkeley.eecs.audiounit.hiss
+</pre>
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H4><A NAME="rates">Sample Rates</A></H4>
+
+<P>
+In most cases, users configure an audio application to run at a
+particular audio sample rate. Users expect plug-ins to run at this
+sample rate.
+
+<P>
+However, SAOL programs typically set a constant audio sample rate in
+the <B>global</B> block, using the <B>srate</B> parameter.
+
+<P>
+SAOL plug-ins handle this situation in the following way.  
+
+<P>
+SAOL programs are free to set the <B>srate</B> parameter. and the
+<TT>sa.c</TT> sends a request to the host to use this sample rate
+during initialization.  However, the host may override the request,
+and force the plug-in to use a different sample rate.
+
+<P>
+In all cases, the SAOL standard name <B>s_rate</B> codes the actual
+audio sample rate.  SAOL programs should use <B>s_rate</B> in all
+expressions, rather than the constant value for the
+parameter <B>srate</B> set in the <B>global</B> block.
+
+<P>
+The SAOL language standard requires that the <B>krate</B> of an
+orchestra evenly divide the <B>srate</B>.  If a plug-in host changes
+the audio sample rate of a SAOL program, the <B>krate</B> may also
+change slightly, so that it still evenly divides the <B>srate</B>.
+
+<P>
+In all cases, the SAOL standard name <B>k_rate</B> will code the
+actual control rate.  SAOL programs should use <B>k_rate</B> in all
+expressions, rather than hard-code the constant value for the
+parameter <B>krate</B> set in the <B>global</B> block.
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H3>K-rate Caveats</H3>
+<TT>
+<P>
+In the current sfront implementation, there are
+a few places where k-rates that change during
+run-time (due to an AudioUnit host changing
+the audio sampling rate) are not handled
+gracefully. These errata (and work-arounds) are listed 
+below.
+</P>
+<H4>(1) fft()/ifft()</H4>
+<P>
+If len is not specified in the core opcodes,
+len defaults to the smallest power of two
+that is greater than s_rate/k_rate. At
+present, this computation is done at sfront
+compile-time, and thus will not reflect 
+krate changes during run-time.
+</P>
+<P>
+As a work-around, specify len (or other
+parameters like size) explicitly, using
+the standard names s_rate and k_rate to
+compute the desired length.
+</P>
+<H4>(2) SASL and MIDI file playback</H4>
+<P>
+If your AudioUnit specifies events in a
+SASL or MIDI file for playback, the 
+temporal sequencing of these events will
+be hard-coded in the sa.c file, using
+the compile-time k_rate as a time base.
+If the k-rate changes during run-time,
+playback will occur at the wrong tempo.
+</P>
+<P>
+The easiest workaround is to set a
+krate that evenly divides the popular
+audio sampling rates (96000, 88200,
+48000, and 44100 Hz).  The greatest
+common divisor is 300 Hz.
+</P>
+</tt>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H4><A NAME="buses">Audio Buses</A></H4>
+
+<P>
+AudioUnits support a versatile audio bus model.  A plug-in may have an
+arbitrary number of input and output audio buses, and each bus may
+have an arbitrary number of channels.
+
+<P>
+
+The SAOL audio bus model, at present, is more restrictive, as we
+describe below.  However, we intend to support a more versatile bus
+model in future <TT>sfront</TT> releases.
+
+<P>
+During initialization, a SAOL plug-in informs the AU host that the
+plug-in can deliver mono or stereo audio output on a single bus.  An
+Effect or MusicEffect plug-in also informs the host that it can
+receive input on a single mono or stereo bus.
+
+<P>
+The host is free to choose a mono or a stereo bus for both input and
+output.  However, the plug-in's SAOL code is not informed of the bus
+sizes selected by the host.
+
+<P>
+Instead, the SAOL code is written to support a static
+<B>output_bus</B> width and (for Effect and MusicEffect plug-ins) a
+static <B>input_bus</B> width.  The <B>global</B> parameters
+<B>outchannels</B> and <B>inchannels</B> signal this choice (legal
+values are "1" and "2").
+
+<P>
+If an AU host selects a mono input bus for a SAOL plug-in that
+uses a stereo bus, the <TT>sa.c</TT> replicates the mono signal on the
+left and right channels of the SAOL <B>input_bus</B>.  Complementary
+conversions are performed for the stereo-to-mono input case, and for
+channel-width mismatches for audio output.
+
+<P>
+Note that the "single-bus" restriction means that at present, SAOL
+does not support plug-ins that require a side-chain input bus.
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H4><A NAME="views">User Interface Views</A></H4>
+
+<P>
+The AudioUnit specification lets a plug-in replace the generic
+user-interface controls (described <A href="#parameters">earlier</A>
+in the chapter) with a custom user-interface that the plug-in draws
+for itself.  Most commercial plug-ins ship with a custom interface.
+
+<P>
+SAOL plug-ins are capable of using a custom user-interface view, as we
+describe in the <A HREF="#lpf">lpf</A> example later in this chapter.
+
+<P>
+However, at present, sfront does not create a custom user-interface
+view from the SAOL program structure (we intend to do so in a later
+release).  At present, programmers write the user-interface view for a
+SAOL plug-in in Objective-C, using the Cocoa framework.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H4><A NAME="unfeatures">Unsupported Features</A></H4>
+
+<P>
+In addition to the limitations described above, many other
+AudioUnit specification features are not supported by SAOL
+plug-ins at present.
+
+<P>
+For example, at present there is no way for a SAOL plug-in
+to sense the current tempo of an AU host sequencer.  Thus,
+delay plug-ins that synchronize to tempo are not possible
+to write in SAOL.
+
+<P>
+As a second example, the AudioUnit specification provides
+several mechanisms to ensure that plug-ins with long
+"decay times" (such as reverbs) clear their internal
+state in response to sequencer transport controls.
+
+<P>
+At present, these decay-time features are not supported by SAOL
+plug-ins.
+
+<P>
+We anticipate that these two unsupported features, and many others of
+a similar nature, will be supported in SAOL plug-ins in the future.
+
+<P>
+In the sections that follow, we show examples of SAOL plug-ins.  The
+examples are included in the sfront distribution <TT>examples</TT>
+directory, and are intended to serve as starting points for your own
+projects.
+
+<P>
+The examples are known to work on several AudioUnit hosts: GarageBand,
+Ableton Live, AU Lab (a host distributed with Apple's Developer Tools)
+and the command-line validation host <TT>auval</TT>.
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="aumu"><TT>sin</TT>: A Softsynth Example</A></H2>
+
+<P>
+The right panel shows the SAOL code for <TT>sin</TT>, a simple
+sine-wave virtual instrument that ships with the sfront distribution,
+in the directory <TT>sfront/examples/rtime/au/sin</TT>.  Typing
+<TT>make install</TT> in this directory builds the AudioUnit MusicDevice
+component <TT>sin.component</TT>. 
+
+<P>
+The <TT>sin</TT> plug-in acts as as MIDI-controlled polyphonic music
+synthesizer.  It should appear in the AU-host menu that lets the
+user choose MIDI instruments.  The AudioUnit responds to MIDI note
+commands on any MIDI channel, and generates audio output in response.
+
+<H4>Global Block</H4>
+
+<P>
+The <B>global</B> block begins by setting the default <B>srate</B> and
+<B>krate</B> values.  However, all references to these values in
+<TT>sin</TT> are made via the <B>s_rate</B> and <B>k_rate</B> standard
+names.  This practice ensures that <TT>sin</TT> uses the actual k-rate
+and s-rate of the plug-in (<A HREF="#rates">recall</A> that an
+AudioUnit host may change the audio sampling rate of a plug-in
+instance, and this change in the s-rate may also force a change in the
+k-rate).
+
+<P>
+The <B>global</b> block also sets <B>outchannels</B> to configure the
+<B>output_bus</B> to be mono.  If an AudioUnit host inserts <TT>sin</TT>
+into a stereo bus, the <B>output_bus</B> value will be copied by the
+<TT>sa.c</TT> driver code to both AudioUnit stereo channels.
+
+<P>
+The rest of the <B>global</B> block defines three AudioUnit parameters
+(Attack and Release, to shape the envelope of the note waveforms, and
+Notes On, to display whether notes are currently sounding) and several
+factory presets with different envelope shapes (Quick, Normal, and
+Slow).  The declarations follow the naming conventions defined earlier
+in this chapter (click for <A HREF="#parameters">parameter</A> and <A
+HREF="#factory">factory preset</A> conventions).
+
+<P>
+To keep the example simple, no <B>send</B> statements appear in the
+<B>global</b> block, and thus SAOL instrs launched by MIDI Note
+commands sum audio output to the <B>output_bus</B>.  In practice, most
+MusicDevice AudioUnits written in SAOL would use <B>send</B> and
+<B>route</B> statements to post-process this output with effect SAOL
+instrs, as shown in this <A HREF="../../tut/index.html#reverb">example</A> 
+in the tutorial chapter of this book.
+
+</TD>
+
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+<TT>
+<pre>
+
+//
+// AudioUnit MusicDevice (aumu) example
+// Sine wave synth with variable attack and release
+//
+
+global {
+  srate 44100;  // AU host may change this value
+  krate 1050; 
+  outchannels 1;
+
+  // Parameters shown in AudioUnit User Interface
+
+  ksig aup_Attack;
+  ksig aup_Release;
+  ksig aup_Notes_On;
+
+  // Sets the user-interface widget for each parameter
+
+  ksig aup_Attack_slider_log;
+  ksig aup_Release_slider_log;
+  ksig aup_Notes_On_display_checkbox;
+
+  // Sets the unit to display next to the slider
+
+  ksig aup_Attack_unit_s;
+  ksig aup_Release_unit_s;
+  
+  // Parameter info                 min   default  max
+
+  table   aup_Attack_pinfo(data, 3, 0.001, 0.01, 0.25); 
+  table  aup_Release_pinfo(data, 3, 0.001, 0.05, 0.25); 
+  table aup_Notes_On_pinfo(data, 3,     0,    0, 1); 
+
+  // Factory Preset Tables         Attack Release NoteOn        
+
+  table  aup_factory_Quick(data, 3, 0.005,  0.025,  0);
+  table aup_factory_Normal(data, 3, 0.05,   0.075,  0);
+  table   aup_factory_Slow(data, 3, 0.200,  0.200,  0);
+
+  // Note: Attack appears first in the tables because
+  //       it is declared first in the global block.
+
+  ksig note_count;    // number of notes playing
+}
+</pre>
+</tt>
+</TD>
+</TR>
+</TABLE>
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>The <TT>tone</TT> instr</H4>
+
+<P>
+The rest of the <TT>sin</TT> example program defines the <tt>tone</tt>
+MIDI instr, shown on the right panel.  An instance of
+<tt>tone</tt> is created for each MIDI NoteOn received from the
+AudioUnit host.
+
+<P>
+In most respects, AudioUnit MIDI instrs follow the semantics defined
+in the <A HREF="../../control/midi/index.html">MIDI control</A>
+chapter of the book. However, the <TT>sin</TT> example uses aspects of
+<TT>sfront</TT> initialization behavior simplify AudioUnit power-up
+behavior, in the manner we now describe.
+
+<P>
+As shown on the right panel, the <TT>tone</TT> header specifies
+<B>preset</B> 0, indicating that a <TT>tone</TT> instance should be
+created for NoteOn commands on all MIDI channels whose most recent
+MIDI Program Change set the program number to 0.
+
+<P>
+The reader may wonder, how does the AudioUnit behave if the user
+never sends a MIDI Program Change command to the plug-in?
+
+<P>
+The answer is as follows.  During compilation, <TT>sfront</TT> sorts
+all MIDI instrs in order of ascending <B>preset</B> tag number.  Then,
+<TT>sfront</TT> initializes MIDI channel 0 to use the first instr in
+this sorted list, MIDI channel 1 to use the second, etc.  If there are
+more channels that list elements, the list is traversed several times.
+
+<P>
+Thus, for the <TT>sin</TT> program example, all MIDI channels execute
+a MIDI Program Change 0 command on power-up, and all Note
+commands will create a <TT>tone</TT> instance.
+
+<P>
+By default, <TT>tone</TT> will remain bound to all MIDI channels for
+the lifetime of the AudioUnit, as the <tt>sfront</TT> run-time engine
+ignores MIDI Program Change commands whose preset values do not
+correspond to a SAOL instr. The <TT>sfront</TT> option
+<TT>-null-program</TT> changes this behavior, so that MIDI Program
+Changes to preset numbers without corresponding SAOL instrs
+will silence a MIDI channel.
+
+<H4><TT>tone</TT> program code</H4>
+
+<P>
+The <tt>tone</TT> instr imports the SAOL global variables
+associated with AudioUnit user-interface sliders, and uses these
+variables to initialize the <B>ksig</B> variables that generate the
+attack envelope phase.  The initialization occurs at instance-relative
+time 0, inside the <B>if</B> (<B>itime</B> == 0) clause).
+
+<P>
+The rest of the k-rate code detects the MIDI NoteOff (by
+sensing the <B>released</B> standard name), <B>extend()</B>s the
+lifetime of the instance to execute the release envelope, and
+reconfigures the envelope generation variables to create the release
+envelope phase.
+
+<P>
+The a-rate code generates the sine waveform using a simple
+trigonometric algorithm, shapes the sine wave with the envelope
+waveform, and uses an <B>output</B> statement to sum the audio sample
+onto the <B>output_bus</B>.
+
+</TD>
+
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+<TT>
+<pre>
+// instr "tone" plays the MIDI notes
+
+instr tone (pitch, vel) preset 0 { 
+
+  imports exports ksig aup_Attack;     // matches globals
+  imports exports ksig aup_Release;
+  imports exports ksig aup_Notes_On;
+  imports exports ksig note_count;
+ 
+  ivar a;                              // osc constant
+  ksig attack, attack_incr, tot_incr;  // attack constants
+  ksig release, release_mult;          // rel constants
+
+  ksig incr, rel, tot;                 // envelope state
+  asig x, y, init;                     // osc state
+  asig env;                            // envelope state
+
+
+  // **********************
+  // computed during i-pass
+  // **********************
+
+  // compute oscillator constant
+
+  a = 2.0*sin(3.14159*cpsmidi(pitch)/s_rate);
+
+  // **********************
+  // computed during k-pass
+  // **********************
+
+  if (itime == 0)  // compute envelope constants
+    {
+      attack = int(aup_Attack*k_rate)/k_rate;
+      attack_incr = (vel/256)/(attack*s_rate);
+      tot_incr = (vel/256)/(attack*k_rate);
+      release = int(aup_Release*k_rate)/k_rate;
+      release_mult = 1/((release + 2/k_rate)*s_rate);
+      note_count = note_count + 1;
+      aup_Notes_On = 1;
+    }
+
+  // update envelope k-rate state
+
+  incr = 0;  // no increment during envelope sustain
+
+  if (released)  // detect user releasing a note
+    {
+      if (rel)
+	{
+	  note_count = note_count - 1;
+	  aup_Notes_On = (note_count > 0) ? 1 : 0;
+	}
+      else
+	{
+	  rel = 1;
+	  extend(release);
+	}
+    }
+
+  if (rel)  // update release envelope ?
+    {
+      incr = -tot*release_mult;
+    }
+  else
+    {
+      if (itime < attack)  // update attack envelope ?
+	{
+	  incr = attack_incr;
+	  tot = tot + tot_incr;
+	}
+    }
+
+  // **********************
+  // computed during a-pass
+  // **********************
+
+  if (init == 0)     // initialize osc state
+    {
+      x = 0.25;
+      init = 1;
+    }
+
+  x = x - a*y;        // update osc state
+  y = y + a*x;
+
+  env = env + incr;  // update envelope state
+  output(env*y);     // mono audio out
+}
+</pre>
+</tt>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="aufx"><TT>hiss</TT>: An Effect Example</A></H2>
+
+<P>
+The right panel shows the SAOL code of <TT>hiss</TT>, a
+simple Effect AudioUnit that adds random noise to an
+audio signal.  The <TT>hiss</TT> plug-in ships with
+the sfront distribution, in the directory 
+<TT>sfront/examples/rtime/au/sin</TT>.  
+
+<P>
+The Makefile in this directory builds the AudioUnit component
+<TT>hiss.component</TT> as an Effect plug-in (type <TT>make install</TT> to
+build <tt>hiss</tt>).  AudioUnit Effects are not sent MIDI data; thus,
+the SAOL instrs in this example do not use the MIDI <B>preset</B> tag,
+and no MIDI standard names appear in the code.
+
+<P>
+However, if the Makefile were changed to use <TT>-cin aucontrolm</TT>
+instead of <TT>cin aucontrolm</TT>, then <TT>hiss</TT> would be built
+as a MusicEffect plug-in, and the SAOL code could use MIDI language
+constructs.
+
+<H4>Global Block</H4>
+
+<P>
+Near the top of the <B>global</B> block, <B>inchannels</B> and
+<B>outchannels</B> are set to configure a stereo-in, stereo-out
+plug-in.  If an AU host inserts <TT>hiss</TT> into a mono mixer channel,
+code in the <TT>sa.c</TT> AudioUnit driver duplicates the mono input
+onto both channels of <B>input_bus</B>, and converts the stereo
+<B>output_bus</B> to a mono signal on the way back to the AU host.
+
+<P>
+The <B>send</B> statement in the <B>global</B> block sets the signal
+flow graph for the plug-in: the <B>input_bus</B> is routed to an
+instance of the SAOL instr <TT>addnoise</TT>, and (per default SAOL
+semantics) the output of <TT>addnoise</TT> is routed to the SAOL
+<B>output_bus</B>.
+
+<P>
+The rest of the <B>global</B> block defines three AudioUnit parameters
+(Input Volume, Hiss Volume, and Random Mode), and three factory
+presets (No Noise, No Signal, and Balanced), using the naming
+conventions defined earlier in this chapter (click for <A
+HREF="#parameters">parameter</A> and <A HREF="#factory">factory
+preset</A> conventions).  
+
+<P>
+The right panel shows the control window as it appears in an AU host.
+Note that the Random Mode parameter (which selects the algorithm used
+to generate the added noise) appears as a menu, as requested by the
+<TT>aup_Random_Mode_menu</TT> variable declaration.  Each menu item is
+associated with an integer variable; the minimum and maximum entries
+of the <TT>pinfo</TT> table set the number of menu items.
+
+<P>
+The labels displayed for each menu item are coded in the <B>global</B>
+block by the presence of <B>ivar</B> scalar variables that use a
+special naming convention: <TT>aup_</TT>, followed by the menu
+parameter name (in this case, <TT>Random_Mode</TT>), followed by an
+identifier for menu index N (coded as <TT>_idxN</TT>), followed by the
+text to be displayed for the menu selection.  The menu item variables
+for <TT>Random Mode</TT> on the right panel shows examples of this
+syntax.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<pre>
+
+//
+// AudioUnit Effect (aufx) example
+// Adds a noise signal to input audio
+//
+
+global {
+  srate 44100;    // AU host may change this value ...
+  krate 100;      // ... which will change this value
+
+  inchannels 2;   // stereo in
+  outchannels 2;  // stereo out
+
+  // send sets internal routing for the audiounit:
+  // input_bus -> addnoise instr -> output_bus
+
+  send (addnoise; ; input_bus); 
+
+  // Parameter shown in AudioUnit User Interface
+
+  ksig aup_Input_Volume;    // "_" becomes " " in the UI
+  ksig aup_Hiss_Volume;
+  ksig aup_Random_Mode;
+
+  // Sets the user-interface widget for each parameter
+
+  ksig aup_Input_Volume_slider_linear;
+  ksig aup_Hiss_Volume_slider_linear;
+  ksig aup_Random_Mode_menu;
+
+  // Sets the unit to display next to the slider
+  // Units are not used for checkbox and menu widgets
+
+  ksig aup_Input_Volume_unit_dB; 
+  ksig aup_Hiss_Volume_unit_dB;
+
+  // "Random Mode" displays a pop-up menu, 
+  // whose text labels are coded below
+
+  ivar aup_Random_Mode_idx0_Wide_Gaussian;
+  ivar aup_Random_Mode_idx2_Uniform;
+  ivar aup_Random_Mode_idx1_Narrow_Gaussian;
+
+  // Parameter info                     min  default  max
+
+  table aup_Input_Volume_pinfo(data, 3, -40,  -6,     0);
+  table aup_Hiss_Volume_pinfo(data,  3, -40,  -6,     0);
+  table aup_Random_Mode_pinfo(data,  3,   0,   0,     2);
+  
+  // Factory Preset Tables          Input dB  Hiss dB  Mode
+
+  table aup_factory_No_Noise(data, 3,   -6,    -40,     0);
+  table aup_factory_No_Signal(data, 3, -40,     -6,     0);
+  table aup_factory_Balanced(data, 3,   -6,     -6,     0);
+
+  // Note: Input dB appears first in factory preset tables
+  //       because it is declared first in the global block
+}
+</pre>
+</tt>
+<P>
+<IMG SRC="hiss.png" ALIGN="TOP" WIDTH=501 HEIGHT=181>
+</P>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H3>The <TT>addnoise</TT> instr</H3>
+
+<P>
+The right panel shows the code for <TT>addnoise</TT>, the SAOL instr that
+accepts <B>input_bus</B> samples and produces <B>output_bus</B>
+samples.
+
+<P>
+In the declaration block, <TT>addnoise</TT> imports the three
+AudioUnit parameters, and declares <B>ksig</B> state variables that
+track changes in the hiss and signal volume parameters.
+
+<P>
+Change tracking is done at the k-rate, in the <B>if</B> (<B>itime</B>)
+control block.  We track the state of the variables to avoid doing
+expensive logarithmic-to-linear conversion on every k-cycle.
+
+<P>
+The rest of the code runs at the a-rate.  An <B>if</B>-<B>else</B>
+tree selects the <B>output</B> statement that corresponds to the
+user-selected random noise generator.  
+
+<P>
+For each random generator option, the input waveform is accessed via
+the <B>input</B> standard name, weighted by the input-volume
+parameter, and then added to a weighted version of the random-number
+generator output.  The constants in each random-generator call are
+tuned to produce consistent loudness across the generators, at
+moderate absolute volume.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+<TT>
+<pre>
+// instr addnoise adds a noise signal to input[] audio
+
+instr addnoise () {
+
+  imports exports ksig aup_Input_Volume; // matches globals
+  imports exports ksig aup_Hiss_Volume;
+  imports exports ksig aup_Random_Mode;
+
+  ksig hiss_db_last, hiss_linear;        // noise state
+  ksig input_db_last, input_linear;
+
+  // **********************
+  // computed during k-pass
+  // **********************
+
+  // ampdb() is expensive -> only do when parameters change
+
+  if (itime)
+    {
+      if (hiss_db_last != aup_Hiss_Volume)
+	{
+	  hiss_db_last = aup_Hiss_Volume;
+	  hiss_linear = ampdb(90 + hiss_db_last);
+	}
+      if (input_db_last != aup_Input_Volume)
+	{
+	  input_db_last = aup_Input_Volume;
+	  input_linear = ampdb(90 + input_db_last);
+	}
+    }
+  else
+    {
+      hiss_db_last = aup_Hiss_Volume;
+      hiss_linear = ampdb(90 + hiss_db_last);
+      input_db_last = aup_Input_Volume;
+      input_linear = ampdb(90 + input_db_last);
+    }
+ 
+  // **********************
+  // computed during a-pass
+  // **********************
+
+  // Random Mode selects different noise functions
+
+  if (aup_Random_Mode == 2)
+    {
+      output(input_linear*input + 
+             hiss_linear*agaussrand(0, 0.1));
+    }
+  else
+    {
+      if (aup_Random_Mode == 1)
+	{
+	  output(input_linear*input + 
+                 hiss_linear*agaussrand(0, 0.05));
+	}
+      else
+	{
+	  output(input_linear*input + 
+                 hiss_linear*arand(0.1));
+	}
+    }
+}
+</pre>
+</tt>
+</TD>
+</TR>
+</TABLE>
+
+
+
+
+
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="lpf"><TT>lpf</TT>: A Custom View Example</A></H2>
+
+<P> 
+SAOL plug-ins are not limited to generic user-interface views. 
+
+<P>
+In this section, we describe <TT>lpf</TT>, an AudioUnit whose audio
+signal processing code is written in SAOL, and whose custom
+user-interface view code is written in Objective C.  This plug-in
+ships with the sfront distribution, in the directory
+<TT>sfront/examples/rtime/au/lpf</TT>.
+
+<P>
+This development approach works because user-interface views are
+not part of the executable code of an AudioUnit.  Instead, the
+user-interface view is a separate executable program, contained
+in a bundle that (usually) appears in a sub-directory
+of the AudioUnit bundle. 
+
+<P>
+The <TT>lpf</TT> example is based on the <TT>FilterDemo</TT>
+example that appears in the Apple AudioUnit SDK.  We
+re-coded the <TT>FilterDemo</TT> C++ implementation in SAOL. This program
+appears in the file <TT>lpf/lpf.saol</TT>.
+
+<P>
+We borrowed the <TT>FilterDemo</TT> Cocoa user-interface view to serve
+as the user-interface view for <TT>lpf</TT>.  This code lives in
+<TT>lpf/CocoaFilterView</TT>.  We changed the original view code to
+ensure unique names for the Cocoa classes, and to add some
+user-interface code that Apple's implementation placed in the C++
+AudioUnit.
+
+<P>
+To build the <TT>lpf</TT> example, type <TT>Make install</TT> in the
+<TT>lpf</TT> directory.  The Makefile first builds the
+user-interface view in the <TT>CocoaFilterView</TT> directory. Then
+the Makefile builds the AudioUnit from the SAOL code, using sfront
+command-line options that let an AudioUnit instance discover and
+launch the custom view.  These options are described on the right
+panel.  Finally, the AudioUnit is installed, and GarageBand is
+launched to test the AudioUnit.
+
+<P>
+The right panel also shows a screen image of the <TT>lpf</TT> custom
+view.  The user can change the filter parameters by dragging the
+cross-hairs on the response curve, or by typing numbers into the boxes
+at the bottom of the view.
+
+<P>
+As a practical matter, learning to write Cocoa user-interface views
+has a steep learning curve (see this Apple Programming <A
+HREF="http://developer.apple.com/mac/library/documentation/MusicAudio/Conceptual/AudioUnitProgrammingGuide/Introduction/Introduction.html">Guide</A>
+for details).  In a future release, we intend to add support for
+automatically generating user-interface views from the semantics of
+the SAOL program.
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<pre>
+
+</pre>
+
+<H2>View Screen for <tt>lpf</TT></H2>
+<P>
+<IMG SRC="lpf.png" ALIGN="TOP" WIDTH=417 HEIGHT=304>
+</P>
+<pre>
+
+</pre>
+<H2><A NAME="cmdline_vdisc">View Discovery Options</A></H2>
+<tt>
+<pre>
+AudioUnits with custom views usually
+discover those views upon instantiation.  
+The sfront command-line options below cause 
+sfront to create the sa.c code for view 
+discovery.
+
+-au_view_bundlename viewname
+-au_view_baseclass classname
+
+The viewname argument is the name of
+the bundle for the Cocoa View, without
+the .bundle suffix.  Sfront assumes the
+view bundle will reside in the AudioUnit 
+bundle sub-directory Contents/Resources.
+
+The classname argument is the class in
+the view that implements the AUCocoaUIBase 
+protocol.
+
+In the lpf example, these options are
+set to be:
+
+-au_view_bundlename CocoaFilterView 
+-au_view_baseclass UCBLopassFilter_ViewFactory 
+</pre>
+</tt>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="debug">Debugging</A></H2>
+
+<P>
+If the <TT>sfront</TT> command-line option <TT>-aout
+audiounit_debug</TT> appears in lieu of <TT>-aout audiounit</TT>, the
+<TT>sa.c</TT> file generates a debugging version of AudioUnit support.
+
+<P>
+In this section, we describe features of this debug mode.  Note that
+debug mode may cause clicks in the audio output stream, and thus
+should not be left on for production use.
+
+<P>
+In this section, we also describe AudioUnit-specific aspects of the
+SAOL <B>cpuload</B> standard name. Basic information about
+<B>cpuload</B> appears in 
+<A HREF="../../control/saolc/index.html#stnames">this section</A> of the
+book.  Note that <B>cpuload</B> works correctly in 
+both regular and debug modes.
+
+<H3>The <TT>wiretap.txt</TT> file</H3>
+
+<P>
+When an AudioUnit host maps the binary code for a debug-enabled SAOL
+plug-in into its address space, the plug-in creates an ASCII log file
+<TT>/tmp/wiretap.txt</TT>, and logs diagnostic messages to the file
+thereafter.  Restarting the AU host will delete
+the existing <TT>wiretap.txt</TT> and create a new one.
+
+<P>
+If debug mode is enabled, the <TT>sfront</TT> print statement writes
+its output to the <TT>wiretap.txt</TT> file.  We describe the syntax
+of the SAOL print statement in <A HREF="../debug/index.html#printf">this
+section</A> of the <A HREF="../debug/index.html">debugging
+chapter</A> of this book.  
+
+<P>
+Note that the <TT>wiretap.txt</TT> file may contain many messages
+written by the <TT>sfront</TT> audiounit driver about its own status.
+To simplify debugging, your SAOL-program writes to
+<TT>wiretap.txt</TT> should be easy to search for in a text editor.
+One approach is to start each <B>printf</B> output line with an
+identifying title.  </TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H3><pre> </pre></H3>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H3><TT>wiretap.txt</TT> and Factory Presets</H3>
+
+<P>
+Most of the data written to <TT>wiretap.txt</TT> by the
+<TT>sfront</TT> driver chronicle the messages sent between the plug-in
+and the host, and is generally more useful for debugging the
+<TT>sfront</TT> AudioUnit drivers than debugging the SAOL program.
+
+<P>
+However, one of the these log messages, <TT>kAudioUnitGetPropertySelect</TT>
+for <TT>kAudioUnitProperty_ClassInfo</TT>, is useful for SAOL programmers
+who are creating the factory preset library for their plug-in, as we now
+describe.
+
+<P>
+When an AU host saves a project file to disk (and also at other
+times), the host sends the <TT>kAudioUnitGetPropertySelect</TT>
+message for <TT>kAudioUnitProperty_ClassInfo</TT> to a plug-in
+instance, and the plug-in returns state to save to disk.  In debug
+mode, the plug-in also writes a human-readable form of its state to
+<TT>wiretap.txt</TT>, including a SAOL table line suitable for use as a
+factory preset line in the <B>global</B>.
+
+<P>
+Thus, a SAOL programmer can design factory presets using the
+user-interface control screen in an AU host.  Once the patch is
+complete, the programmer can save the host project to disk, then
+example the <TT>wiretap.txt</TT> for the correct SAOL <B>table</B>
+line for the factory presets.  An example of <TT>wiretap.txt</TT> output
+for this use case is shown on the right panel.
+
+</TD>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H3>Factory Preset example</H3>
+
+<TT>
+<P>
+The user-interface window below shows the parameter state
+of the hiss example plug-in, at the moment when the AU host
+requested state information from the plug-in.
+
+<P>
+<IMG SRC="factory.png" ALIGN="TOP" WIDTH=501 HEIGHT=181>
+</P>
+
+<P>
+Concurrently, the message below was written to wiretap.txt.
+
+<pre>
+kAudioUnitGetPropertySelect
+ For kAudioUnitProperty_ClassInfo
+ kAudioUnitScope_Global
+
+ A preset for aumf Hiss ucBe
+ 3 parameters for scope 0, element 0:
+ P[0] = -31.3514
+ P[1] = -22.7027
+ P[2] = 1
+ Preset Name: Untitled
+ Render Quality: Maximum (127)
+ CPU Load: 0
+ table aup_factory_Untitled(data, 3, -31.3514, -22.7027, 1);
+</pre>
+
+The <B>table</B> line is suitable for use as a factory
+preset table in the <B>global</B> block of the SAOL
+code for hiss.
+</tt>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H3><A NAME="cpuload">The <TT>cpuload</TT> standard name</A></H3>
+
+<P>
+As described in <A HREF="../../control/saolc/index.html#stnames">this
+section</A> of the book, the <B>cpuload</B> standard name returns a
+values between 0.0 and 1.0, that codes the amount of computer time the
+SAOL program has recently used.
+
+<P>
+For SAOL AudioUnit plug-ins, a <B>cpuload</B> of 1.0 codes for the
+case where the AudioUnit took 1 second of wall-clock time on a single
+processor to compute the samples for 1 second of audio samples.  
+
+<P>
+Therefore, on a single-processor system, a <B>cpuload</B> of 1.0 during
+glitch-free operation could never be achieved, as the AudioUnit host
+(and the operating system, concurrently-running programs, etc) would
+need to run for some fraction of the 1 second.  SAOL programmers
+should keep this fact in mind when measuring performance using <B>cputime</B>.
+
+<P>
+Finally, we note that user-interface control screen for an AudioUnit
+may contain a "Restrict CPU Load" percentage control, in the
+Properties section.  If this percentage is set to a non-zero value
+(say, 10%), the SAOL <B>cpuload</B> standard name returns a value of
+1.0 if the AudioUnit is using 10% of a single processor.
+
+</TD>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H3><pre> </pre></H3>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="summary">Summary</A></H2>
+
+<P>
+Part V/4 completes the main text of the MPEG 4 Structured Audio Book. We
+conclude the text with the Appendix, that includes a keyword index.
+<B>
+<P>
+Appendix A:
+</B>
+<A HREF="../../append/notcov/index.html">Aspects of MP4-SA Not Covered In this Book</A></H2>
+
+
+</TD>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+special topics</A>-><STRONG>audiounits</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 2000 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>

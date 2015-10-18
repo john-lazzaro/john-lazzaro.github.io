@@ -1,0 +1,29 @@
+
+
+//
+// instr tone
+// plays a 1kHz sine wave
+//
+
+instr tone ()    
+     
+{
+
+  // variable declaration
+
+  asig x, y, init;
+  
+  // computing starts here 
+
+  if (init == 0)
+    {
+      init = 1;
+      x = 0.5;
+    }
+  
+  x = x - 0.196307*y;
+  y = y + 0.196307*x;
+  
+  output(y);
+
+}

@@ -1,0 +1,113 @@
+
+In this errata, we briefly summarize several errata to RFC 4695,
+reported by Alfred Hoenes.  The listed errata either fix normative
+problem in RFC 4695, or describe editorial errata that may be
+particularly confusing to the implementor.
+
+The presentation below is brief.  See the main text of
+<draft-ietf-avt-rfc4695-bis-00.txt> for a bis version of RFC 4695 that
+integrates the fixes listed below in a more-complete way, and also
+includes many other editorial fixes.
+
+John Lazzaro, lazzaro@eecs.berkeley.edu
+
+---
+
+[1] In Appendix C.1 and Appendix C.2.3 of RFC 4695, an ABNF rule
+related to System Chapter X is incorrectly defined as:
+
+      <parameter> = "__" <h-list> ["_" <h-list>] "__"
+
+The correct version of this rule is:
+
+      <parameter> = "__" <h-list> *( "_" <h-list> ) "__"
+
+[2] In Appendix C.6.3 of RFC 4695, the URIs permitted to be assigned
+to the "url" parameter are not stated clearly.  URIs assigned to "url"
+MUST specify either HTTP or HTTP over TLS transport protocols.
+
+In Appendix C.7.1 and C.7.2 of RFC 4695, the transport
+interoperability requirements for the "url" parameter are not stated
+clearly.  For both C.7.1 and C.7.2, HTTP is REQUIRED and HTTP over TLS
+is OPTIONAL.
+
+[3] Both fmtp lines in both session description examples in Appendix
+C.7.2 of RFC 4695 contain instances of the same syntax error (a
+missing ";" at a line wrap after "cm_used=2M0.1.2").
+
+[4] In Appendix D of RFC 4695, all uses of "*ietf-extension" in rules
+are in error, and should be replaced with "ietf-extension".  Likewise,
+all uses of "*extension" are in error, and should be replaced with
+"extension".  This bug incorrectly lets the null token be assigned to
+the j_sec, j_update, render, smf_info, and subrender parameters.
+
+[5] In Appendix D of RFC 4695, the definitions of the <command-type>
+and <chapter-rules> incorrectly allow lowercase letters to appear in
+these strings. The correct definitions of these rules appear below:
+
+   command-type =   [A] [B] [C] [F] [G] [H] [J] [K] [M]
+                    [N] [P] [Q] [T] [V] [W] [X] [Y] [Z]
+
+   chapter-list =   [A] [B] [C] [D] [E] [F] [G] [H] [J] [K]
+                    [M] [N] [P] [Q] [T] [V] [W] [X] [Y] [Z]
+
+   A        = %x41
+   B        = %x42
+   C        = %x43
+   D        = %x44
+   E        = %x45
+   F        = %x46
+   G        = %x47
+   H        = %x48
+   J        = %x4A
+   K        = %x4B
+   M        = %x4D
+   N        = %x4E
+   P        = %x50
+   Q        = %x51
+   T        = %x54
+   V        = %x56
+   W        = %x57
+   X        = %x58
+   Y        = %x59
+   Z        = %x5A
+
+[5] In Appendix D of RFC 4695, the definitions of the <four-octet>,
+<nonzero-four-octet>, and <midi-chan> are incorrect.  The correct
+definitions of these rules appear below:
+
+   nonzero-four-octet =  (NZ-DIGIT 0*8(DIGIT))
+                       / (%x30-33 9(DIGIT))
+                       / ("4" %x30-31 8(DIGIT))
+                       / ("42" %x30-38 7(DIGIT))
+                       / ("429" %x30-33 6(DIGIT))
+                       / ("4294" %x30-38 5(DIGIT))
+                       / ("42949" %x30-35 4(DIGIT))
+                       / ("429496" %x30-36 3(DIGIT))
+                       / ("4294967" %x30-31 2(DIGIT))
+                       / ("42949672" %x30-38 (DIGIT))
+                       / ("429496729" %x30-34)
+
+   four-octet        = "0" / nonzero-four-octet
+   midi-chan         = DIGIT / ("1" %x30-35)
+   DIGIT             = %x30-39
+   NZ-DIGIT          = %x31-39
+
+[6] In Appendix D of RFC4695, the rule <hex-octet> is
+incorrect.  The correct definition of this rule appears below.
+
+   hex-octet   = %x30-37 U-HEXDIG
+   U-HEXDIG    = DIGIT / A / B / C / D / E / F
+
+   ; DIGIT as defined in [5] above
+   ; A, B, C, D, E, F as defined in [4] above
+
+[7] In Appendix D of RFC4695, the rules <base64-unit> and
+<base64-pad> are defined unclearly.  The rewritten rules
+appear below:
+
+   base64-unit = 4(base64-char)
+   base64-pad  = (2(base64-char) "==") / (3(base64-char) "=")
+
+---
+

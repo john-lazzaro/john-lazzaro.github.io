@@ -1,0 +1,89 @@
+
+global {
+  srate 48000;   // DAT-quality 
+  krate  2400;   // 417 us
+}
+
+//
+// instr vtone
+// shaped sinewave 
+//
+
+instr vtone (num) {
+
+  // declarations
+ 
+  // envelope settings
+  ivar atime;   // attack
+  ivar rtime;   // release
+
+  // internal env state 
+  ivar attack;  
+  ivar release;
+  ivar sustain;
+
+  ivar a;       // sets osc f
+  
+  ksig env;     // env output
+
+  asig x, y;    // osc state
+  asig init;
+
+
+  // **********************
+  // computed during i-pass
+  // **********************
+
+  // turns MIDI number into 
+  // oscillator constant 
+
+  a = 2*sin(3.1415927*
+	    cpsmidi(num)/s_rate);
+
+  // envelope computation
+
+  atime = 0.3; // attack time (s)
+  rtime = 0.2; // decay time (s)
+
+  // computes envelope state
+
+  if (dur > atime + rtime)
+    {
+      attack = atime;
+      release = rtime;
+      sustain = dur - atime
+	- rtime;
+    }
+  else
+    {
+      attack = dur/2;
+      release = dur/2;
+      sustain = 0;
+    }
+
+  // **********************
+  // computed during k-pass
+  // **********************
+
+  env = kline(0, attack, 1, sustain,
+	      1, release, 0); 
+
+  // **********************
+  // computed during a-pass
+  // **********************
+
+  if (init == 0)
+    {
+      x = 0.25;
+      init = 1;
+    }
+
+  x = x - a*y;
+  y = y + a*x;
+  
+  output(y*env);
+
+}
+
+
+

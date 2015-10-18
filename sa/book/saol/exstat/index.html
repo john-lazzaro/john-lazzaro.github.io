@@ -1,0 +1,1160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part II/2: SAOL Expressions and Statements</TITLE>
+<META name="keywords" content="MP4-SA, syntax, semantics, expressions,
+statements, looping, conditionals, assignment, if, else, while, SAOL,
+SASL, MP4">
+<META name="description" content="The syntax and semantics of expressions
+and statements in the SAOL language of MPEG 4 Structured Audio.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+SAOL</A>-><STRONG>expressions and statements</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part II/2: SAOL Expressions and Statements</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="70%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#arith">Arithmetic Expressions</A>.</B> Scalar computation
+using arithmetic operands.
+<LI>
+<B><A HREF="#array">Arrays and Expressions</A>.</B> Arrays, width, and
+expressions.
+<LI>
+<B><A HREF="#logic">Logical Expressions</A>.</B> Logical and 
+relational operators. Precedence table.
+<LI>
+<B><A HREF="#switch">Switch</A>.</B> The switch operator, and a
+comparison of the C and SAOL operators.
+<LI>
+<B><A HREF="#assign">Assignment Statement</A>.</B> Rate and width
+semantics.
+<LI>
+<B><A HREF="#if">If and If-Else Statements</A>.</B> Implementing
+conditional logic.
+<LI>
+<B><A HREF="#while">While Statement</A>.</B> Looping in SAOL.
+<LI>
+<B><A HREF="#summary">Summary</A>.</B> Includes a rate rule table.
+
+
+</UL>
+
+
+</TD>
+<TD WIDTH="70%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>In This Chapter</H2>
+
+<H4>Statements:</H4>
+<B>
+<TT>
+<P>
+<A HREF="#assign">assignment</A>
+<A HREF="#if">if</A>
+<A HREF="#if">if-else</A>
+<A HREF="#while">while</A>
+</TT>
+</B>
+<H4>Other Elements:</H4>
+<B>
+<TT>
+<P>
+<A HREF="#arith">+</A>
+<A HREF="#arith">-</A>
+<A HREF="#arith">*</A>
+<A HREF="#arith">/</A>
+<A HREF="#logic">==</A>
+<A HREF="#logic">!=</A>
+<A HREF="#logic"><=</A>
+<A HREF="#logic">>=</A>
+<A HREF="#logic">&&</A>
+<A HREF="#logic">||</A>
+<A HREF="#logic">!</A>
+<A HREF="#switch">? :</A>
+<A HREF="#assign">=</A>
+<A HREF="#array">array</A>
+
+</TT>
+</B>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+In this chapter, we show how to construct arithmetic and logical
+expressions in SAOL. We also explain the SAOL statements for
+assignment, conditional execution, and looping. 
+
+<P>
+We show how to determine the width and rate of SAOL expressions, and
+how width and rate rules govern the use of expressions in SAOL
+statements.
+
+<P>
+The rate rules we present in this book are sometimes more conservative
+than those in the SAOL language specification.  We reformulated these
+rules to make them easier to understand and remember.
+
+<P>
+We find that SAOL programs written using these rules are
+easier to maintain, and often run faster as well.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="arith">Arithmetic Expressions</A></H2>
+
+<P>
+The simplest SAOL expressions use the basic arithmetic operations
+(negation, addition, subtraction, multiplication, and division) on
+scalar signal variables and numbers. 
+
+<P>
+Negation is evaluated first in SAOL expressions, followed by
+addition and subtraction, and lastly multiplication and division. This
+ordering forms three <I>precedence</I> classes: unary <TT>-</TT>,
+binary (<TT>+</TT>, <TT>-</TT>), and binary (<TT>*</TT>, <TT>/</TT>).
+
+<P>
+For the binary classes, operators are performed in the order they
+appear in an expression, scanning from left to right. For the unary
+class, operators are performed in order scanning from right to left.
+Parenthesis act to change this ordering. 
+
+<P>
+These precedence and scanning order rules are identical to the C
+language. The right panel shows examples of correct evaluation.
+
+<P>
+Unlike C, all numbers and variables in SAOL expressions are 32-bit
+floating point values. As a result, the type conversion issues in
+evaluating C expressions aren't needed. An example on the right panel
+show a consequence of this distinction.
+
+<P>
+All unary and binary operations in SAOL follow a simple rate rule: the
+rate of an expression is the rate of its fastest subexpression (i-rate
+is the slowest rate, k-rate is a faster rate, and a-rate is the
+fastest rate). 
+
+<P>
+If a subexpression is an atomic element (a <A
+HREF="../vars/index.html#vars_instr">variable</A>, <A
+HREF="../vars/index.html#preamble"><B>instr</B> parameter</A>, <A
+HREF="../vars/index.html#stnames">standard name</A>, or <A
+HREF="../vars/index.html#numbers">number</A>) the rate of the
+subexpressions is the rate of the atomic element.
+
+<P>
+See the right panel for example expressions and their rates.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Expression Evaluation</H2>
+<TT>
+<pre>
+SAOL Expression      Evaluation
+
+-10.0*12 + 5/10        -119.5  
+   
+-(10.0*12 + 5/10)      -120.5
+
+-10.0*(12 + 5)/10      -17
+
+-10.0*(12 + 5/10)      -125
+
+
+
+SAOL Expression     Evaluation
+
+-10.0*12 + 5/10        -119.5
+
+C Expression        Evaluation
+
+-10.0*12 + 5/10        -120.0
+
+</pre>
+</TT>
+
+<H2>Rate Semantics</H2>
+<TT>
+<pre>
+ivar i1;
+ksig k1;
+asig a1;
+
+10*i1 + 1/i1    // i-rate
+
+i1*k1 - k1      // k-rate
+
+-a1 + i1*k2     // a-rate   
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="array">Arrays and Expressions</A></H2>
+
+<P>
+In Part II/1, we described how to <A HREF=
+"../vars/index.html#vars_instr">declare</A> array signal variables.
+In this section, we describe how to use arrays in arithmetic
+expressions.
+
+<P>
+Like C arrays, arrays in SAOL may be indexed to access a single value
+in an array, using square bracket syntax. See the right panel for
+examples.
+
+<P>
+SAOL array indexes are numbered starting with 0 and can take on values
+up to <TT>N - 1</TT>, where <TT>N</TT> is the declared width of an
+array. The index value is a scalar SAOL expression. 
+
+<P>
+The index expression is evaluated to a 32-bit floating point value,
+then rounded to the nearest integer to produce the index position.
+Rounding is performed by adding <TT>0.5</TT> to the index value and
+truncating the result.
+
+<P>
+Indexed arrays in SAOL are scalars. The rate of an indexed array is
+either the declared rate of the array itself, or the rate of the
+indexing expression, whichever is faster. The panel on the right
+shows examples of indexed arrays in SAOL expressions.
+
+<P>
+Arrays in SAOL are different from C arrays in one significant way: an
+unindexed array may be used in an expression. 
+
+<P>
+One simple way to use arrays in SAOL arithmetic expressions is for
+all atomic elements be array variables of the same width
+<TT>N</TT>. In this case, the expression is evaluated as in the scalar
+case, for each position in the array. The final result has width
+<TT>N</TT>. See the right panel for an example.
+
+<P>
+Expressions between a scalar and a width <TT>N</TT> array are also
+supported in SAOL. For a binary operator, the scalar is promoted to
+an array of width <TT>N</TT> that takes on the scalar value for all
+elements, and the operation proceeds as an array operation.
+
+<P>
+Operations between two arrays of different widths are prohibited (note
+we consider arrays of width 1 as scalars in this context). See the
+right panel for legal and illegal array expressions.
+
+<P>
+The rate semantics for array expressions are identical to scalar
+expressions.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Declarations</H2>
+
+<TT>
+<pre>
+// used in examples below
+
+ivar i[2]; 
+ksig k;    
+asig a[3]; 
+</pre>
+</TT>
+
+<H2>Legal Indexes</H2>
+<TT>
+<pre>
+i[0]       // 
+i[0.25*5]  // 1.25 rounds to 1
+</pre>
+</TT>
+
+<H2>Illegal Indexes</H2>
+<TT>
+<pre>
+i[2]       // out of range
+i[1.5]     // 1.5 rounds to 2
+k[0]       // <I>k</I> not an array
+</pre>
+</TT>
+
+<H2>Arrays and Rates</H2>
+
+<TT>
+<pre>
+i[0]       // i-rate 
+i[k]       // k-rate
+a[k]       // a-rate
+</pre>
+</TT>
+
+<H2>Arrays and Width</H2>
+
+<TT>
+<pre>
+i[0] = 1;   // setup
+i[1] = 2;
+k = 3;
+
+
+i*i      // expression width: 2
+         // 
+	 // expression value: (1,4)
+
+
+i*2      // expression width: 2
+         // 
+         // expression value: (2,4)
+
+
+i*k      // expression width: 2
+         // 
+         // expression value: (3,6)
+	 //
+	 // expression rate: k-rate
+
+
+i*a      // illegal (width mismatch) 
+         //
+         // a: width = 3
+	 //
+         // i: width = 2
+</pre>
+</TT>
+
+
+
+</TD>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="logic">Logical Expressions</A></H2>
+
+<P>
+SAOL provides <I>relational</I> operators for comparing signal
+variables and <I>logical</I> operators for doing Boolean algebra on a
+binary interpretation of signal variables. 
+
+<P>
+Like arithmetic expressions, the rate of relational and logical
+operators is the rate of the fastest subexpression. Apart from the
+<TT>&&</TT> and <TT>||</TT> operators (see below) the width semantics
+are also identical to arithmetic expressions.
+
+<P>
+SAOL has six relational operators (less than, greater than, less than
+or equal to, greater than or equal to, equal to, not equal to) that
+use the same symbols as C (<TT>< > <= >= == !=</TT>). If an operator
+is true, it takes the value 1.0. If it is false, it takes the value
+0.0.
+
+<P> 
+SAOL has three logical operators that implement the Boolean AND, OR,
+and NOT functions.  SAOL logical operators interpret the
+floating-point value 0.0 as false, and all other values as true.
+
+<P> 
+The unary NOT operator <TT>!</TT> performs logical negation on a
+signal variable, mapping 0.0 to 1.0 and all other values to 0.0.
+
+<P> 
+The binary logical operators <TT>&&</TT> and <TT>||</TT> perform the
+logical AND and OR operations. The semantics of these operators depend
+on the width of their operand subexpressions.  If at least one
+subexpression has a width greater than one, the left and right
+subexpressions are both evaluated, and the operator is applied as
+usual.
+
+<P>
+However, if both operands are scalar width, the <TT>&&</TT> and <TT>||</TT>
+operators take on the <I>short-circuit</I> semantics of their C
+language equivalents. For AND, if the left subexpression evaluates to
+false, the right subexpression is not evaluated, and the result of the
+AND operation is set to 0.0. Only if the left subexpression evaluates
+to true is the right subexpression evaluated.
+
+<P>
+Likewise, for the logical OR operator with scalar width operands, if the
+left subexpression evaluates to true, the right subexpression is not
+evaluated, and the result of the OR operation is set to 1.0.  Only if
+the left subexpression evaluates to false is the right subexpression
+evaluated.
+
+<P>
+Apart from the short-circuit behavior, width semantics of <TT>&&</TT>
+and <TT>||</TT> are identical to arithmetic operators.
+
+</TD>
+
+<TD WIDTH="25%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<TT>
+<pre>
+<H2>Precedence</H2>
+!  -
+
+
+*  /
+
+
++  -
+
+
+<   >   <=  >=
+
+
+== !=
+
+
+&&
+
+
+||
+
+
+?:
+(see next section)
+
+
+</pre>
+</TT>
+<P>
+<B>Notes.</B>
+Table indicates the order operators are performed during expression
+evaluation. Operators on the top line are performed first, operators
+on the bottom line are performed last. 
+
+</TD>
+<TD WIDTH="25%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<TT>
+<pre>
+<H2>Association</H2>
+right
+
+
+left
+
+
+left
+
+
+left
+
+
+left
+
+
+left
+
+
+left
+
+
+right
+
+
+
+</pre>
+</TT>
+<B>Notes.</B>
+All operators on a left-associative line are performed in
+the order they appear in an expression, scanning from left to
+right. For right-associative lines, operators are performed in the
+order they appear in an expression, scanning from right to left. 
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2></H2>
+<H2><A NAME="switch">Switch</A></H2>
+
+<P>
+The SAOL switch operator (see right panel for syntax) has both logical
+and arithmetic properties.  If the logical value of the first operand
+is non-zero (logical true) the switch operator takes the value of the
+second operand, else it takes the value of the third operand.
+
+<P>
+The rate of the switch operator is the rate of the fastest of its
+three operands. As shown in the table in the last section, the
+precedence of the switch operator is the lowest of all SAOL operators.
+
+<P>
+The exact semantics of the switch operator depend on the width of its
+subexpression operands. If its operands all have scalar width, the
+operator has short circuit semantics. The first subexpressions is
+always evaluated, and depending on its logical value, either the
+second or the third subexpression is evaluated (but never both).
+
+<P>
+However, if at least one subexpression has width greater than 1,
+all three subexpressions are evaluated, and then the operator
+logic happens on an element-by-element basis. 
+
+<P>
+Apart from the short-circuit behavior, width semantics are identical
+to arithmetic operators.
+
+<P>
+The switch operand concludes our tour of the SAOL operators.  The C
+operators that are missing from SAOL are those that target integer
+data types, such as bit shifts, bit-wise logic, and modulo. In
+addition, SAOL expressions may not have embedded assignments to
+variables within them, unlike C expressions.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>The Switch Operator</H2>
+<TT>
+<pre>
+op1 ? op2 : op3   
+</pre>
+</TT>
+<H2>|a| using Switch</H2>
+<TT>
+<pre>
+(a >= 0) ?  a  : -a  
+
+</pre>
+</TT>
+<H2>Illegal in SAOL Expressions</H2>
+<TT>
+<pre>
++   // unary plus 
+
+%   // not a floating point op
+^   // 
+&   // 
+<<  // 
+>>  // 
+~   // 
+
+=   // assignment not embeddable
+
+++  // illegal in assignment too!
+--  // 
++=  // 
+-=  // 
+*=  // 
+/=  // 
+%=  // 
+<<= // 
+>>= // 
+&=  // 
+^=  // 
+|=  // 
+</pre>
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="assign">Assignment Statement</A></H2>
+
+<P>
+In this chapter, we describe the three SAOL statements that are the core
+tools for expressing algorithms. We begin with the assignment
+statement that sets a signal variable to a new value.
+
+<P>
+The panel on the right shows the syntax of the assignment statement.
+The <I>lval</I> is the <B>instr</B> parameter or signal variable that
+receives the new value. The <I>expr</I> is the expression that is
+evaluated to generate the value to assign.
+
+<P>
+An <I>lval</I> may be a scalar or array variable, and so assignment
+statements also have rules regarding width semantics.
+
+<P>
+If the <I>lval</I> has scalar width (i.e. it is a scalar, an array of width
+1, or an indexed array), the expression must also have scalar width.
+Indexed array <I>lval</I>s follow the rate, width, and indexing <A
+HREF="#array">rules</A> for indexed arrays in expressions.
+
+<P>
+If the <I>lval</I> is an unindexed array of width <TT>N</TT>, the
+expression must either have width <TT>N</TT> or scalar width (in which
+case each element of the <I>lval</I> takes on the scalar value).
+
+<P>
+See the right panel for examples showing the width semantics of
+assignment statements.
+
+
+<P>
+If the <I>lval</I> and <I>expr</I> both have width greater than one,
+SAOL leaves the sequence order of expression evaluation and assignment
+undefined. One implementation may evaluate the expression for all
+array elements before doing the assignment; a second implementation
+may evaluate and assign array elements member by member, in an
+arbitrary order.
+
+<P>
+This implementation detail matters to the SAOL programmer, because it
+is possible to write assignment statements whose answer depends on the
+sequence of operations, by using indexed versions of the <I>lval</I>
+variable in the <I>expr</I>. Reliable SAOL programs break up this sort
+of assignment statement into several simpler statements.
+
+<P>
+Assignment statements have two rate rules:
+
+<OL>
+<LI>
+<B>
+The rate of the </B><I>lval</I><B> sets the rate for the 
+assignment statement.</B> For example, if the <I>lval</I> is a-rate,
+the expression is evaluated and the <I>lval</I> is set to a new value
+during every a-pass. This is true even if the expression is k-rate or
+i-rate.</LI>
+<LI>
+<P>
+<B>
+The rate of the expression may not be faster than the rate of the</B>
+<I>lval</I>.  For example, if the <I>lval</I> is k-rate, the
+expression may not be a-rate.</LI>
+</OL>
+
+<P>
+These rules underpin the SAOL multi-pass compute model described in
+the <A HREF = "../../tut/index.html#execution">tutorial</A> in Part
+I. The first rule establishes the convention for setting the rate of
+variable assignments. The second rule forces information to flow from
+slower-rate variables to faster-rate variables.
+
+<P>
+SAOL also has a null variant of the assignment statement, in which an
+expression is computed but not assigned to an <I>lval</I>. The null
+assignment statement runs at the rate of the expression.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Syntax</H2>
+<TT>
+<pre>
+<I>lval</I> = <I>expr</I> ; 
+
+</pre>
+</TT>
+
+<H2>Width Semantics</H2>
+<TT>
+<pre>
+ksig stereo[2], quad[4];
+
+		   // stereo set to:
+stereo = 2;        // (2,2)
+stereo = stereo*2; // (4,4)
+
+// illegal statement
+
+quad = stereo;  // width mismatch
+
+</pre>
+</TT>
+
+<H2>Rate Semantics</H2>
+<TT>
+<pre>
+ivar i[2]; 
+ksig k;
+asig a;
+	      // runs at:
+
+i = 10;       // i-rate
+i = i*i;      // i-rate
+
+k = i[0];     // k-rate
+k = k + i[0]; // k-rate
+
+a = i[0]*k;   // a-rate
+a = k*a;      // a-rate
+
+// illegal statements
+// violate rule 2
+
+i = k;        
+i = a;        
+
+// legal statement
+// satisfies rule 2
+
+i[0*a] = a;   // array index is
+	      // a-rate, and so
+	      // the statement 
+	      // is too!
+</pre>
+</TT>
+
+<H2>Null Syntax</H2>
+<TT>
+<pre>
+<I>expr</I> ; 
+
+</pre>
+</TT>
+
+<H2>Null Example</H2>
+<TT>
+<pre>
+ivar i; 
+ksig k;
+
+i*i;   // runs at i-rate
+i*k;   // runs at k-rate
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="if">If and If-Else Statements</A></H2>
+
+<P> 
+The <B>if</B> and <B>if-else</B> statements support conditional
+execution. The right panel shows the syntax for these statements.
+
+<P> 
+These conditional statements work as follows.  If the guard expression
+<I>expr</I> of an <B>if</B> statement is non-zero (logical true) the
+statement block is executed.
+
+<P> 
+The <B>if-else</B> statement adds a second statement block that is
+executed if <I>expr</I> is zero (logical false).
+
+<P>
+Unlike C, the curly braces surrounding the statement blocks in the
+SAOL <B>if</B> and <B>if-else</B> statements are required, 
+regardless of the number of statements in the block.
+
+<P> 
+The guard expression must have scalar width. The short-circuit
+semantics of the scalar-width <TT>&&</TT>, <TT>||</TT>, and switch
+operators are useful for constructing efficient guard expressions.
+
+<P> 
+The <B>if</B> and <B>if-else</B> statements have four rate rules.
+The first two rules are simple to state:
+
+<OL>
+<LI>
+The rate of the <B>if</B> or <B>if-else</B> statement is the rate of
+the fastest statement in the statement block(s) it controls.
+<LI>
+No statement in the statement block(s) may be slower than the 
+guard expression.
+</OL>
+
+<P> 
+Rule 1 sets a simple convention for setting the rate of the <B>if</B>
+or <B>if-else</B> statement. Rule 2 lets slower-rate variables
+conditionally control the execution of faster-rate statements.
+
+<P>
+The right panel shows an example of an <B>if-else</B> statement, whose
+behavior may be understood using these two rate rules.
+
+<H4>Multi-rate semantics</H4>
+
+<P>
+Note that rate Rules 1 and 2 permit multi-rate <B>if</B> and
+<B>if-else</B> statements. For example, a k-rate <B>if</B> statement
+with an i-rate guard may include i-rate statements in its
+statement block.
+
+
+<P>
+We recommend avoiding multi-rate statement blocks, since the resulting
+code is difficult to maintain. However, because this construction is
+legal, you may encounter it in SAOL code. Rate rules 3 and 4 cover
+this construction:
+
+<OL START=3>
+<LI>
+If i-rate statements appear in a statement block of a k-rate or a-rate
+<B>if</B> or <B>if-else</B> statement, the i-rate statements execute
+at most once, during the first time the statement block executes. The
+i-rate statements execute at this start of statement block execution,
+before any k-rate or a-rate statements run.
+<LI>
+If k-rate statements appear in a statement block of an a-rate
+<B>if</B> or <B>if-else</B> statement, the k-rate statements execute
+at most once per execution cycle, during the first a-pass the
+statement block executes.  The k-rate statements execute at this start
+of statement block execution, before any a-rate statements run.
+</OL>
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2> Syntax</H2>
+<TT>
+<pre>
+
+<B>if</B> ( <I>expr</I> )
+ {
+   <I>statement</I>
+   <I>statement</I>
+       .
+       .
+ }
+
+
+<B>if</B> ( <I>expr</I> )
+ {
+   <I>statement</I>
+   <I>statement</I>
+       .
+       .
+ }
+<B>else</B>
+ {
+   <I>statement</I>
+   <I>statement</I>
+       .
+       .	
+ }
+
+</pre>
+</TT>
+
+</pre>
+</TT>
+<H2>Example</H2>
+
+<TT>
+<pre>
+
+instr piano(note) {
+
+  ksig decay;
+
+
+// note:
+//
+// (1) if-else runs at k-rate
+// (2) { and } are required
+                
+
+  if (note > 5)   // expr i-rate 
+   {
+     decay = 0.8; // k-rate 
+   }
+  else
+   {
+     decay = 0.9; // k-rate
+   }
+}
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="while">While Statement</A></H2>
+
+<P> 
+The <B>while</B> statement is the only looping construct in SAOL.  See
+the right panel for the statement syntax.  
+
+<P>
+The curly braces surrounding the statement block are required,
+regardless of the number of statements in the block.
+
+<P> 
+At the start of <B>while</B> statement execution, the guard expression
+<I>expr</I> is evaluated. If it has a value of zero (logical false)
+the statement ends.
+
+<P>
+However if <I>expr</I> is non-zero (logical true) the program flow
+alternates between executing the statement block and re-evaluating
+<I>expr</I>. The <B>while</B> statement ends the first time
+<I>expr</I> evaluates to false.
+
+<P>
+The guard <I>expr</I> must have scalar width.
+
+<P> 
+The <B>while</B> statement obeys a single rate rule:
+
+<OL>
+<LI>
+The guard expression and all statements in the block must run
+at the same rate. This rate becomes the rate of the <B>while</B>
+statement.
+</OL>
+
+<P>
+The right panel shows an example of a <B>while</B> statement. The
+statement block executes 50 times per k-pass.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2> Syntax</H2>
+<TT>
+<pre>
+
+<B>while</B> ( <I>expr</I> )
+ {
+   <I>statement</I>
+   <I>statement</I>
+       .
+       .
+ }
+
+</pre>
+</TT>
+<H2>Example</H2>
+
+<TT>
+<pre>
+
+ksig a; 
+
+// while runs at k-rate
+// { and } are required
+
+while (a < 50)
+ {
+   a = a + 1;
+ }
+
+// reset for next k-pass
+
+a = 0; 
+
+</pre>
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="summary">Summary</A></H2>
+
+<P>
+In this chapter, we have presented the core language
+tools for expressing algorithms. Compared to a 
+language like C, the number of constructs may seem
+small.
+
+<P>
+The SAOL toolkit is limited because there is so much information to
+remember about each construct: program semantics, width semantics, and
+rate semantics. Three core statement types is a manageable number to
+remember how to use, while 6 or 7 might not be.
+
+<P>
+The right panel collects the rate semantic rules we have presented in
+this chapter.
+
+<P>
+<B>Next section:</B>
+<A HREF="../simple/index.html">Part II/3: Simple Core Opcodes</A></H2>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Rate Rules</H2>
+<H4>Expressions</H4>
+
+<OL>
+<LI>
+The rate of an expression (as described in this chapter) is the rate
+of its fastest atomic element.
+</OL>
+</B>
+
+<H4>Assignment Statement</H4>
+
+<OL>
+<LI>
+The rate of the <I>lval</I> sets the rate for the assignment
+statement.
+<LI>
+The rate of the expression may not be faster than the rate of the
+<I>lval</I>.  
+</OL>
+
+<H4>Null Assignment Statement</H4>
+<OL>
+<LI>
+The rate of the statement is the rate of the expression.
+</OL>
+
+<H4>If and If-Else Statements</H4>
+
+<OL>
+<LI>
+The rate of the <B>if</B> or <B>if-else</B> statement is the rate of
+the fastest statement in the statement block(s) it controls.
+<LI>
+No statement in the statement block(s) may be slower than the 
+guard expression.
+<LI>
+If i-rate statements appear in a statement block of a k-rate or a-rate
+<B>if</B> or <B>if-else</B> statement, the i-rate statements execute
+at most once, during the first time the statement block executes. The
+i-rate statements execute at this start of statement block execution,
+before any k-rate or a-rate statements run.
+<LI>
+If k-rate statements appear in a statement block of an a-rate
+<B>if</B> or <B>if-else</B> statement, the k-rate statements execute
+at most once per execution cycle, during the first a-pass the
+statement block executes.  The k-rate statements execute at this start
+of statement block execution, before any a-rate statements run.
+</OL>
+
+<H4>While Statement</H4>
+<OL>
+<LI>
+The guard expression and all statements in the block must run
+at the same rate. This rate becomes the rate of the <B>while</B>
+statement.
+</OL>
+
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+SAOL</A>-><STRONG>expressions and statements</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+
+</BODY>
+</HTML>
+
+
+
+
+

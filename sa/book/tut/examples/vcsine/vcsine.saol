@@ -1,0 +1,150 @@
+
+
+global {
+
+  srate 48000;   // DAT-quality 
+  krate  2400;   // 417 us
+
+  ksig bal;  // position
+
+
+// routes vctone to mixer
+//
+// ----------     ---------
+// |        |     |       |--> stereo
+// | vctone |-->--| mixer |    audio 
+// |        |     |       |--> out
+// ----------     ---------
+
+  route (tonebus, vctone);
+  send(mixer; 2, 0.25; tonebus);
+  outchannels 2; // stereo
+
+}
+
+//
+// instr vctone
+// shaped sinewave 
+//
+
+instr vctone (num) {
+
+  ivar atime;   // attack time
+  ivar rtime;   // release time
+  ivar attack;  
+  ivar release;
+  ivar sustain;
+
+  ksig env;     // envelope multiplier
+
+  imports ksig bend; // pitch bend
+  ksig numacc;  // pitch bend state
+  ksig a;       // oscil constant
+  ksig kinit;   // first k pass flag
+
+  asig ainit;   // first a pass flag
+  asig x, y;    // state vector
+  
+  // **********************
+  // computed during i-pass
+  // **********************
+
+  // envelope computation
+
+  atime = 0.3; // attack (sec)
+  rtime = 0.2; // decay (sec)
+
+  // envelope state
+
+  if (dur > atime + rtime)
+    {
+      attack = atime;
+      release = rtime;
+      sustain = dur - atime - rtime;
+    }
+  else
+    {
+      attack = dur/2;
+      release = dur/2;
+      sustain = 0;
+    }
+
+  // **********************
+  // computed during k-pass
+  // **********************
+
+  // computes envelope
+
+  env = kline(0, attack, 1, sustain,
+	      1, release, 0); 
+
+  // computes sine const
+  // does pitch bend
+
+  if ( !kinit || bend)
+    {
+      if (!kinit)
+	{
+	  numacc = num;
+	  kinit = 1;
+	}
+      if (bend)
+	{
+	  numacc = numacc + bend;
+	  bend = 0;
+	}
+      a = 2*sin(3.1415927*
+	cpsmidi(numacc)/s_rate);
+    }
+
+  // **********************
+  // computed during a-pass
+  // **********************
+
+  if (ainit == 0)
+    {
+      x = 0.5;
+      ainit = 1;
+    }
+
+  x = x - a*y;
+  y = y + a*x;
+  
+  output(env*y);
+
+}
+
+// instr mixer
+// adds reverb, panning
+
+instr mixer (rt60, wetdry) {
+
+  ivar wet,dry;
+  imports ksig bal;
+  ksig pos[2];
+  asig out[2];
+
+  // **********************
+  // computed during i-pass
+  // **********************
+
+  wet = wetdry;
+  dry = 1 - wetdry;
+
+  // **********************
+  // computed during k-pass
+  // **********************
+
+  pos[0] = dry*(1 - bal);
+  pos[1] = dry*(bal);
+
+  // **********************
+  // computed during a-pass
+  // **********************
+
+  out = pos*input +
+	 wet*reverb(input[0], rt60); 
+
+  output(out);
+
+}

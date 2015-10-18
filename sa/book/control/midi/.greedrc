@@ -1,0 +1,5 @@
+# Proxy server's IP (leave empty if none)
+SERVER=
+
+# Proxy server's PORT
+PORT=8080

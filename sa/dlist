@@ -1,0 +1,14 @@
+diff -c {sfman,sfnew}/devel/adriver/index.html
+diff -c {sfman,sfnew}/devel/cdriver/code/index.html
+diff -c {sfman,sfnew}/devel/cdriver/data/index.html
+diff -c {sfman,sfnew}/devel/cdriver/intro/index.html
+diff -c {sfman,sfnew}/devel/intro/index.html
+diff -c {sfman,sfnew}/devel/old/driver/index.html
+diff -c {sfman,sfnew}/devel/old/gcode/index.html
+diff -c {sfman,sfnew}/devel/old/scode/index.html
+diff -c {sfman,sfnew}/index.html
+diff -c {sfman,sfnew}/index.html
+diff -c {sfman,sfnew}/user/install/index.html
+diff -c {sfman,sfnew}/user/ref/alsaseq/index.html
+diff -c {sfman,sfnew}/user/ref/index.html
+diff -c {sfman,sfnew}/user/use/index.html

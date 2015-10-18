@@ -1,0 +1,18 @@
+
+0 tempo 110
+2 tempo 112.1
+4 tempo 114
+6 tempo 116
+8 tempo 118
+
+1 vtone   1.5 52 
+3 vtone   1.5 64 
+5 vtone   1   63 
+6 vtone   0.5 59 
+6.5 vtone 0.5 61 
+7 vtone   1   63 
+8 vtone   1   64 
+
+10 end
+
+

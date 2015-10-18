@@ -1,0 +1,22 @@
+
+       1   vctone    1.5 52 
+       3   vctone    1.5 64 
+       5   vctone    1   63   
+ver  : 6   vctone    1   59 
+rain : 7   vctone    2   63 
+
+6.5 ver control bend 2
+8   rain control bend 1
+
+0 tempo 120
+
+1   control bal 0
+3   control bal 0.2
+5   control bal 0.5
+6   control bal 0.8
+7   control bal 1
+
+
+10 end
+
+

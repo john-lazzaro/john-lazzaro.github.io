@@ -1,0 +1,91 @@
+
+global {
+
+  table cyc(harm, // fourier table 
+	    128,  // 128-bytes long
+	    1     // f0 weight
+	    );    // no partials
+
+  srate 44100;    
+
+}
+
+//
+// instr vtone
+// table-driven version
+// of tutorial example 2
+//
+
+instr vtone (num) {
+
+  // declarations
+
+  // sinewave global table
+
+  imports exports table cyc; 
+ 
+  // envelope table
+  //
+  // piecewise linear
+  // shape
+  //
+  // 0.3 second attack 
+  // 0.2 second release
+  
+  table shape(lineseg,
+
+  // fixed table length: 128 elements
+
+  128, 
+
+  // (x0, y0) is (0,0)
+
+  0, 0,      
+
+  // end of attack segment: (x1, y1)
+
+  127*(((dur < 0.5) ? dur/2 : 0.3)/dur), 1,
+
+  // end of sustain segment: (x2, y2)
+
+  127*(((dur < 0.5) ? dur/2 : (dur - 0.2))/dur), 1,
+
+  // end of release segment: (x3, y3)
+
+  127, 0);
+
+  ivar freq; // frequency of sine
+
+  asig y;    // voice output
+
+
+  // **********************
+  // computed during i-pass
+  // **********************
+
+  // turns MIDI number into 
+  // wavetable frequency
+
+  freq = cpsmidi(num);
+  
+  // **********************
+  // computed during k-pass
+  // **********************
+
+  if (itime == 0) // first k-pass only
+    {
+      ftsetsr(shape, 128/dur);
+    }
+
+  // **********************
+  // computed during a-pass
+  // **********************
+
+  y = doscil(shape)*oscil(cyc, freq);
+  
+  output(y);
+
+}
+
+
+

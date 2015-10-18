@@ -1,0 +1,1468 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part I. Tutorial Introduction</TITLE>
+<META name="keywords" content="MP4-SA, tutorial, introduction,
+SAOL, SASL, MP4">
+<META name="description" content="A tutorial introduction to
+SAOL, SASL, and MP4 Structured Audio.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../index.html">
+the mp4-sa book</A>-><STRONG>tutorial introduction</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part I.  A Tutorial Introduction </H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="70%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+
+<UL>
+<LI>
+<B><A HREF=#intro>Introduction</A>.</B>
+<LI>
+<B><A HREF=#execution>The Execution Model</A>.</B> Introduces i-pass, 
+k-pass, and a-pass. Shows how SAOL and SASL work together.
+<LI>
+<B><A HREF=#simple>A Simple Example</A>.</B> Fixed-frequency sine
+wave oscillator. Introduces <B>instr</B> structure.
+<LI>
+<B><A HREF=#running>Running the Example.</A></B> Shows how to use
+<TT>sfront</TT> to generate audio and MP4-SA files. Computes
+compression ratio for the first example.
+<LI>
+<B><A HREF=#melody>Playing a Melody.</A></B> Second example.
+Plays a melody with the sine-wave oscillator. Shows how to combine i-pass,
+k-pass, and a-pass computations.
+<LI>
+<B><A HREF=#reverb>In Reverberant Stereo.</A></B> Third example.
+Shows how to use <B>send</B> and <B>route</B> commands to make effects
+pipelines. Shows how to change SAOL variables from a SASL score line.
+</UL>
+</TD>
+<TD WIDTH="30%" VALIGN=top BGCOLOR="#CCFFCC">
+<pre> </pre>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+MPEG-4 Structured Audio (MP4-SA) is an ISO/IEC standard (edited by
+Eric Scheirer) that specifies sound not as audio data, but as a
+computer program that generates audio when run.
+
+<P> 
+This tutorial introduction shows how to write programs using the
+MP4-SA programming language SAOL (pronounced <I>sail</I>) and the
+MP4-SA score language SASL (pronounced <I>sassil</I>) to create audio
+content. We start with a simple programming example, and add more
+features to introduce different aspects of SAOL and SASL.
+
+<P>
+At the end of the tutorial, the reader should have a broad overview of
+the MP4-SA system. The rest of the book will revisit the issues
+introduced in this tutorial, and show in detail how MP4-SA works.
+
+<P>
+As you might have noticed, this tutorial is a bit lengthy; if
+you just want a quick look at MPEG-SA in action, you might want
+to look at this <A HREF="../simple/index.html">simple example</A>
+instead.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2><A NAME="execution">The</A> Execution Model</H2>
+
+<P> 
+When we hear a sound, we are sensing fluctuations of air pressure with
+time. The temporal structure of the pressure waveform has a significant
+effect on our perception of the sound.
+
+<P> 
+This structure happens on several different time scales. Notes in a
+musical composition change on a time scale of hundreds of
+milliseconds. The timbre of sounds changes on a time scale of tens of
+milliseconds. The actual sound waveform changes on a time scale of
+tens of microseconds.
+
+<P> 
+When programmers write software to create audio content in a
+conventional language like C or Java, much of the effort focuses on
+managing these three time scales of sound. Since the code is
+structured around timing issues, it is difficult to group all the code
+for modeling a specific musical instrument in one place. Instead, the
+code becomes separated into different sections for different time
+scales, and the methods of communicating between the time scales
+become hard to track and modify.
+
+<P> 
+In MP4-SA, time management is a part of the language itself. A SAOL
+program executes by moving a simulated clock forward in time,
+performing calculations along the way in a synchronous fashion. For
+interactive applications (for example, musicians playing MIDI controllers
+that send data to a SAOL program) this simulated clock is in sync
+with real time. For off-line applications, like converting a MP4-SA
+bitstream into an audio file for later playback, the simulated clock is
+unrelated to real time.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P> 
+The clock is set to 0 at the start of program execution, and moves
+forward at the audio sample rate (called the <I>a-rate</I>). In addition to
+the a-rate, there is a slower time scale for timbre changes and note
+sequencing, called the control rate or <I>k-rate</I>.  
+
+<P>
+The a-rate and k-rate values may not be varied during execution, and
+the a-rate must be evenly divisible by k-rate.  By default, the a-rate
+is 32 kHz and the k-rate is 100 Hz.  We use the terms <I>a-cycle</I>
+and <I>k-cycle</I> to describe the moments in time that repeat with
+a-rate and k-rate frequency, respectively.
+
+<P>
+Sound creation in MP4-SA can be compared to a musician playing notes on
+an instrument. A SAOL subprogram (called an <B>instr</B> -- SAOL and
+SASL keywords are in bold face in this text) serves as the
+instrument. SASL commands (called score lines) act to play notes on
+SAOL <B>instr</B>s. Just as a musician playing a polyphonic instrument
+can play several notes concurrently, many instances of a SAOL
+<B>instr</B> can be active at one time, making sounds corresponding to
+notes launched by different score lines in a SASL file.
+
+<P>
+A SAOL <B>instr</B> contains all the instructions for playing a note:
+code that runs at note launch, code that models timbre evolution at
+the k-rate, and the code to generate audio samples at the a-rate.
+Because time management is a part of the SAOL language, computation at
+these different rates can be written compactly in one place in the
+file, and communication across these time scales can be expressed
+easily.
+
+<P>
+The right panel shows the execution trace of a note played on a SAOL
+instrument, which is part of a SAOL program that has an audio rate of
+40 kHz and a control rate of 100 Hz.  This note is scheduled to start
+at a simulated clock time of 0.995 second. However, since notes are
+launched in SAOL at k-rate granularity, the note launch is delayed to
+1.0 seconds.
+
+<P>
+At 1.0 seconds, instance execution begins with the <I>i-pass</I>,
+where <B>instr</B> code for note launch executes. Following the i-pass
+is the first <I>k-pass</I>, where <B>instr</B> code for timbral
+evolution executes. Following the first k-pass is the first
+<I>a-pass</I>, where <B>instr</B> code to generate an audio sample
+runs.
+
+<P>
+After the first a-pass, simulated time advances by the audio sample
+period (the inverse of the audio sample rate) and another a-pass is
+executed. Execution continues in this fashion until
+&nbsp<TT>a-rate/k-rate</TT>&nbsp a-passes have run.
+
+<P>
+At this point, the first <I>execution cycle</I> of the instance is
+complete.  The subsequent execution cycles consist of a k-pass
+followed by a set of a-passes. The i-pass code only runs during the
+first execution cycle.
+
+<P>
+Note that the analogy of a musician (SAOL) playing notes (SASL) only
+loosely applies to MP4-SA.  In practice, not all SAOL <B>instr</B>s
+are used for instrument modeling, and instrument models don't always
+map one-to-one onto <B>instr</B>s in a SAOL program. In addition,
+there are other ways to trigger notes in MP4-SA besides SASL score
+lines, including MIDI files and commands run in other SAOL
+<B>instr</B>s. 
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><A NAME="trace">Instance Execution Trace</A></H2>
+
+<TT>
+<pre>
+Audio rate   : 40,000 Hz
+Control rate :    100 Hz
+Start time   :  0.995 s 
+
+
+Time (s)   Cycle     Pass     X-# 
+
+
+0.990000   k-cycle
+           a-cycle
+0.990025   a-cycle
+0.990050   a-cycle
+0.990075   a-cycle
+  ...
+
+0.999925   a-cycle
+0.999950   a-cycle
+0.999975   a-cycle
+                            
+1.000000   k-cycle   i-pass  -- 
+                     k-pass    |  
+           a-cycle   a-pass    |  
+1.000025   a-cycle   a-pass    | 1  
+1.000050   a-cycle   a-pass    |    
+1.000075   a-cycle   a-pass    |  
+   ...       ...       ...     |   
+1.009975   a-cycle   a-pass  -- 
+                            
+
+                            
+1.010000   k-cycle    k-pass --    
+           a-cycle    a-pass   |  
+1.010025   a-cycle    a-pass   |
+1.010050   a-cycle    a-pass   | 2
+1.010075   a-cycle    a-pass   |
+   ...       ...       ...     |   
+1.019975   a-cycle    a-pass --
+                         
+
+
+1.020000   k-cycle    k-pass --    
+           a-cycle    a-pass   |  
+1.020025   a-cycle    a-pass   |
+1.020050   a-cycle    a-pass   | 3
+1.020075   a-cycle    a-pass   |
+   ...       ...       ...     |   
+1.029975   a-cycle    a-pass --
+                         
+
+
+1.030000   k-cycle    k-pass --    
+           a-cycle    a-pass   |  
+1.030025   a-cycle    a-pass   |
+1.030050   a-cycle    a-pass   | 4
+1.030075   a-cycle    a-pass   |
+   ...       ...       ...     |   
+1.039975   a-cycle    a-pass --
+
+
+X-# column indicates the passes
+that make up each execution cycle
+of the instance.
+
+</pre>
+</TT>
+
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2><A NAME="simple">A Simple Example</A></H2>
+
+<P> Our first SAOL <B>instr</B> is a simple sine wave oscillator.  Our
+first SASL score triggers this oscillator.
+
+<P>
+The panel on the right shows this SASL score. It is a list of commands
+that trigger actions relative to the clock time. These times are
+expressed as 32-bit floating point numbers, and may use the full
+resolution of the representation.  However, SASL commands are
+processed at k-rate granularity. At each k-cycle all unexecuted
+commands whose times are less than or equal to the current clock time
+are executed.
+
+<P>
+SASL commands are one line long; the newline marks the end of the
+command. The first number on the line indicates the trigger
+time. However, this time is not in units of seconds of time; instead,
+it is measured in <I>beats</I> of <I>score time.</I> A global
+<I>tempo</I> value is used to convert beats to seconds.
+
+<P>
+By default, the global tempo is 60 beats per minute, or 1 beat per
+second. In the first example in this tutorial, we use this default
+global tempo, so that all SASL times can be thought of as beats or
+seconds interchangeably.
+
+<P>
+We now look at the SASL score on the right panel in detail. The first
+line of the file is an <B>instr</B> command that triggers the SAOL
+sine-wave oscillator instrument.  The first field (0.25) indicates the
+start time for the instrument. The second field (<TT>tone</TT>)
+indicates the name of the SAOL <B>instr</B> to trigger.  The final
+field (4.0) is the duration that tone should play, in units of beats
+(and in this example, seconds).
+
+<P>
+The final line in the SASL file is an <B>end</B> command. It signals
+the simulated clock time to end program execution via its trigger time
+(4.50 seconds).
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<H2><A HREF="examples/sine/sine.sasl">sine.sasl</A>
+[26 bytes]</H2>
+
+<pre>
+0.25 tone 4.0
+4.50 end
+</pre>
+
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P> 
+The right panel shows the SAOL file for the <B>instr</B> tone, a
+fixed-frequency sine-wave generator. The file begins with several
+comment lines.  SAOL comments begin with the characters // and end
+with a newline; characters inside comments are ignored by MP4-SA
+tools.
+
+<P> 
+The keyword <B>instr</B> starts the definition, followed by the name
+of the instrument (<TT>tone</TT>), and an empty pair of
+parenthesis. As in C function syntax, curly brackets enclose the body
+of the definition, which consists of a variable declaration block
+followed by a code block.
+
+<P>
+Three variables (<TT>x</TT>, <TT>y</TT> and <TT>init</TT>) are
+declared as type <B>asig</B>, one of the three signal variable types
+(<B>asig</B>, <B>ksig</B>, and <B>ivar</B>). Signal variables, the
+only type of variables that can be used in SAOL expressions, hold
+32-bit floating point numbers, and are initialized to 0 at the time a
+SASL command instantiates an instrument.  The <B>asig</B> type
+indicates that computation involving these variables runs during the
+a-cycle.
+
+<P>
+Next, we reach the code block. The syntax of this code seems quite
+familiar to C programmers: a simple assignment statement, followed by
+an <B>if</B> statement, followed by two more assignment
+statements, and finally what appears to be a call to an undefined
+function <B>output</B>().
+
+<P>
+What may be surprising, in light of the earlier discussion on SAOL's
+execution model, is that the statements in the code block aren't
+marked to indicate the rate of computation (a-rate, k-rate, or
+i-rate). In SAOL, the time scale of statements is inferred from the
+time scale of variables used in the statement. As we shall see as we
+analyze each statement, each statement in this code block runs at
+a-rate.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<H2><A HREF="examples/sine/sine.saol">sine.saol</A>
+[286 bytes]</H2>
+
+<pre>
+//
+// instr tone
+// plays a 1kHz sine wave
+//
+
+instr tone ()    
+     
+{
+
+  // variable declaration
+
+  asig a, x, y, init;
+  
+  // computing starts here 
+
+  a = 0.196307;
+
+  if (init == 0)
+    {
+      init = 1;
+      x = 0.5;
+    }
+  
+  x = x - a*y;
+  y = y + a*x;
+  
+  output(y);
+
+}
+</pre>
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+If we accept that each statement executes at a-rate, we can visualize
+the combined behavior of the SAOL and SASL code (see the SASL code
+reproduced in the panel to the right). Starting at the first k-cycle
+after 0.25s, the code block is executed on every a-pass. In this
+example, the a-pass happens 32,000 times per second (the default audio
+rate value).  The state of variables <TT>x</TT>, <TT>y</TT> and
+<TT>init</TT> is maintained between a-passes. Execution stops when the
+first k-cycle after 4.25s occurs (4.25s is the sum of the start time
+(0.25s) and the duration 4.0s), at which time this instance of the
+<B>instr</B> tone is destroyed.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+
+<H2><A HREF="examples/sine/sine.sasl">sine.sasl</A>
+[26 bytes]</H2>
+
+<pre>
+0.25 tone 4.0
+4.50 end
+</pre>
+
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+We now return to the SAOL file, and analyze each statement in the code
+block in the <B>instr</B> tone (reproduced in the panel on the right).
+Recall that this instrument generates a fixed-frequency sine wave.
+
+<P> 
+The first statement is a simple assignment statement, setting a
+constant value used in the algorithm.  Assignment statements execute
+at the rate of the variable on the left hand side of the statement; in
+this case, the variable <TT>a</TT> is an a-rate variable, and so the
+statement runs at a-rate. Note that operator <TT>=</TT> is the only
+assignment operator in SAOL; C assignment operators such as
+<TT>+=</TT> and <TT>++</TT> are not a part of the language.
+
+<P> 
+The assignment is followed by an <B>if</B> statement. Like its C
+equivalent, the code block (enclosed by curly brackets) executes if
+the value of the guard expression (enclosed by parenthesis) has a
+non-zero value. In this case, the code block is executed exactly once;
+the variable <TT>init</TT> is initialized to zero during instrument
+instantiation, and is set to a non-zero value in the code block of the
+<B>if</B> statement.  The purpose of this <B>if</B> statement is to
+initialize <TT>x</TT>.
+
+<P> 
+The statements in the code block of the <B>if</B> statement are
+a-rate, and as a result, the <B>if</B> statement also runs at a-rate.
+
+<P> 
+The next two assignment statements do the real work of the instrument;
+these statements implement a classic iterative algorithm for sine and
+cosine generation, that is guaranteed to be stable. The value of the
+variable <TT>a</TT> sets the frequency of the waveforms (in this
+example, the value of <TT>a</TT> maps to a frequency of 1000 Hz). The
+initial value of <TT>x</TT> sets the amplitude of the waveform. Since
+<TT>x</TT> and <TT>y</TT> are both a-rate, both statements execute at
+the a-rate.
+
+<P> 
+The final statement is an <B>output</B> statement, part of a class of
+SAOL statements that use the syntax of C functions. The <B>output</B>
+statement is defined as a-rate, and serves as the mechanism to
+communicate audio samples outside of an <B>instr</B>.  Audio in SAOL
+is read and written to special 32-bit floating-point variables called
+buses, which are initialized to zero at the start of each a-pass.
+
+<P> 
+SAOL has a special bus, <B>output_bus,</B> that represents the final
+audio output of an MP4-SA system.  In this example, the <B>output</B>
+statement adds data onto the <B>output_bus</B> (the default behavior
+in SAOL).  In this case, it adds a sample of the sine wave, which will
+vary in value from -0.5 to +0.5 (since <TT>x</TT> is set to 0.5 in the
+<B>if</B> statement during the first a-pass).
+
+<P> 
+After an a-pass is complete, the <B>output_bus</B> is clipped to the
+range -1.0 to +1.0, and sent to the audio output device (usually a
+file or a sound card). If no <B>instr</B>s are running during an
+a-pass, the initial zero value of the <B>output_bus</B> is sent
+to the audio output device, resulting in silence. In this example, a
+silent sections happen before the <B>instr</B> tone is triggered and
+after the <B>instr</B> tone is destroyed.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<H2><A HREF="examples/sine/sine.saol">sine.saol</A>
+[286 bytes]</H2>
+
+<pre>
+//
+// instr tone
+// plays a 1kHz sine wave
+//
+
+instr tone ()    
+     
+{
+
+  // variable declaration
+
+  asig a, x, y, init;
+  
+  // computing starts here 
+
+  a = 0.196307;
+
+  if (init == 0)
+    {
+      init = 1;
+      x = 0.5;
+    }
+  
+  x = x - a*y;
+  y = y + a*x;
+  
+  output(y);
+
+}
+</pre>
+</TT>
+
+</TD>
+</TR>
+
+</TABLE>
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="running">Running</A> the Example</H2>
+
+<P>
+In this section we show how to use the SAOL to C translation program
+<B>sfront</B> to run the example above. We assume a UNIX command-line shell
+environment.
+
+<P>
+The process begins by running sfront, using the syntax shown on the
+right panel. The -orc option is used to specify the SAOL file, and
+the -sco option is used to specify the SASL file. 
+
+<P>
+By default, sfront creates a file <TT>sa.c</TT>, a C program that, if
+compiled and executed, produces the audio output specified by the SAOL
+and SASL code. We direct the output to the audio file
+<TT>output.wav</TT> by using the -aout option.
+
+<P>
+Finally, since MP4-SA is a compression format, we would also like to
+create a compact version of the ASCII SAOL and SASL files, for
+efficient transmission and storage of the example. We create the
+MP4-SA binary file <TT>sine.mp4</TT> using the -bitout option.
+
+<P>
+We show the files created by sfront on the right panel. The
+<TT>sine.mp4</TT> doesn't have a link, since as a binary file it may
+crash certain Web browsers if displayed as an ASCII file. Note that
+<TT>sine.mp4</TT> is 143 bytes in length, but encodes both
+<TT>sine.saol</TT> (286 bytes) and <TT>sine.sasl</TT> (26 bytes)
+within it.
+
+<P>
+Next, we compile the generated <TT>sa.c</TT> file, and run the
+executable <TT>sa</TT>. This produces the audio file <TT><A
+HREF="http://john-lazzaro.github.io/sa/book/tut/examples/sine/output.wav">output.wav</A></TT>. If you are connected to the Internet, and if
+your Web browser is set up to handle audio files, you can click on the
+link to listen to it.
+
+<P>
+Finally, by dividing the size of the <TT>output.wav</TT> file (288044
+bytes) by the size of the <TT>sine.mp4</TT> file (143 bytes), we
+compute effectiveness of MP4-SA as a lossless compression format.
+This calculation yields a compression ratio of 2014 -- about 100 times
+better than a perceptual encoder like MPEG 2 Level 3 (MP3) would do on
+this example!
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Running sfront:</H2>
+<pre>
+<TT>
+sfront -orc sine.saol -sco sine.sasl\
+-bitout sine.mp4 -aout output.wav
+</TT>
+</pre>
+<H2>Creates the files:</H2>
+<pre>
+<TT>
+<A HREF="examples/sine/sa.c">sa.c</A> [30636 bytes]
+
+sine.mp4 [143 bytes]
+
+
+</TT>
+
+<H2>Compiling and executing sa.c:</H2>
+<pre>
+<TT>
+gcc -O2 sa.c -lm -o sa ; ./sa
+</TT>
+</pre>
+
+<H2>Creates the file:</H2>
+<pre>
+<TT>
+<A HREF="http://john-lazzaro.github.io/sa/book/tut/examples/sine/output.wav">output.wav</A> [288044 bytes, a Web link]
+</TT>
+</pre>
+
+</TD>
+</TR>
+
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="melody">Playing</A> a Melody</H2>
+
+<P>
+In this section, we rewrite the SAOL and SASL programs to play a
+melody with the sine-wave oscillator. We also upgrade the audio output
+to DAT quality, and eliminate the annoying click at the start of each
+note.  To implement these improvements, we take full advantage of
+SAOL's ability to express computation that runs at different time
+scales.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P> 
+The right panel shows the new SAOL program. The file begins with a
+<B>global</B> block, an optional part of a SAOL program that controls
+the execution environment of all SAOL instruments.
+
+<P>
+In this global block, we initialize two SAOL system parameters,
+<B>srate</B> (the audio sampling rate, or a-rate) and <B>krate</B>
+(the control rate, or k-rate).  Note that parameter initializations do
+not include an = operator.
+
+<P> 
+The remainder of the file holds the <B>instr</B> <TT>vtone</TT>, an
+enhanced version of the sine-wave oscillator <B>instr</B>
+<TT>tone</TT> from the previous example.
+
+<P> 
+The first change is evident in the <B>instr</B> preamble:
+<TT>vtone</TT> has the parameter <TT>num</TT>. An <B>instr</B>
+parameter is an i-rate variable. When an <B>instr</B> instance is
+created by a SASL <B>instr</B> command, its parameters are set to
+initial values provided on the SASL score line.
+
+<P>
+In this example, the parameter <TT>num</TT> sets the pitch of the
+note, using MIDI note numbering (integers from 0 to 127 that map to
+notes on the piano keyboard, with 57 mapping to A below middle C).
+
+<P> 
+The main body of <TT>vtone</TT> begins with declarations for 6
+<B>ivar</B> variables (for i-pass computations), 1 <B>ksig</B>
+variable (for k-pass computations), and 3 <B>asig</B> variables (for
+a-pass computations).
+
+<P> 
+In this example, comment banners partition the code block for
+<TT>vtone</TT> into separate sections for i-pass, k-pass, and a-pass
+code.  This convention greatly improves the maintainability of SAOL
+programs. We now look at each section in turn, to introduce the
+interaction between time scales in SAOL programs.
+
+<P>
+The i-pass section of an <B>instr</B> executes as soon as a new
+instrument instance is created.  During <TT>vtone</TT>'s i-pass,
+assignment statements set the values of the 6 <B>ivar</B> variables.
+In the rest of the code block (k-pass and a-pass sections) these
+<B>ivar</B>s will appear on the right-hand side of k-rate and a-rate
+assignment statements. In this way, an i-pass serves to pre-compute
+values once that may be used millions of times.
+
+<P>
+We now look at the i-rate assignment statements in detail. The first
+statement computes the value of the oscillator frequency control
+variable <TT>a</TT>. This statement introduces SAOL <I>opcodes</I> which
+are similar to C functions. The simple opcodes used here (the
+trigonometric function <B>sin</B> and the conversion routine
+<B>cpsmidi</B>) are part of the SAOL <I>core</I> opcode library. The opcode
+<B>cpsmidi</B> converts a MIDI note number into a frequency
+(in Hz).
+
+<P>
+This statement also introduces SAOL <I>standard names.</I> Standard names
+are read-only variables that convey status information.  The
+<B>s_rate</B> standard name used in this example holds the value of
+the a-rate (defined in the global block as 48 kHz).
+
+<P>
+The remaining assignment statements in the i-pass block specify
+characteristics of the amplitude envelope that shapes the sine wave.
+The first two statements set default attack and release times for the
+envelope. The remaining code handles the case where the duration of
+the note is too short for these defaults; it uses the <B>dur</B>
+standard name, that holds the duration of the note (in seconds, not
+beats).
+
+<P>
+The k-pass section of this example generates the envelope waveform.
+Since the envelope changes slowly in time relative to the audio
+sampling rate, we compute an envelope value during the k-pass, and
+apply it to samples generated in the following set of a-passes. To
+avoid the "zipper noise" that may happen if amplitude changes
+abruptly, we use a fast k-rate of 417 microseconds (set in the
+<B>global</B> block).
+
+<P>
+To compute the envelope samples, we use core opcode <B>kline</B>,
+which is specialized for piece-wise linear waveshapes. The parameters
+of the <B>kline</B> opcode alternate between the end-point values of
+the linear envelope (0 and 1 in this example) and the durations of the
+linear segments (computed during the i-pass).
+
+<P>
+Finally, the a-pass section computes the audio samples of the sine
+wave. Apart from scaling the final output by the envelope, this code
+is unchanged from the <TT>tone</TT> <B>instr</B> in the first example.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<H2><A HREF="examples/vsine/vsine.saol">vsine.saol</A></H2>
+<pre>
+global {
+  srate 48000;   // DAT-quality 
+  krate  2400;   // 417 us
+}
+
+//
+// instr vtone
+// shaped sinewave 
+//
+
+instr vtone (num) {
+
+  // declarations
+ 
+  // envelope settings
+  ivar atime;   // attack
+  ivar rtime;   // release
+
+  // internal env state 
+  ivar attack;  
+  ivar release;
+  ivar sustain;
+
+  ivar a;       // sets osc f
+  
+  ksig env;     // env output
+
+  asig x, y;    // osc state
+  asig init;
+
+
+  // **********************
+  // computed during i-pass
+  // **********************
+
+  // turns MIDI number into 
+  // oscillator constant 
+
+  a = 2*sin(3.1415927*
+	    cpsmidi(num)/s_rate);
+
+  // envelope computation
+
+  atime = 0.3; // attack time (s)
+  rtime = 0.2; // decay time (s)
+
+  // computes envelope state
+
+  if (dur > atime + rtime)
+    {
+      attack = atime;
+      release = rtime;
+      sustain = dur - atime
+	- rtime;
+    }
+  else
+    {
+      attack = dur/2;
+      release = dur/2;
+      sustain = 0;
+    }
+
+  // **********************
+  // computed during k-pass
+  // **********************
+
+  env = kline(0, attack, 1, sustain,
+	      1, release, 0); 
+
+  // **********************
+  // computed during a-pass
+  // **********************
+
+  if (init == 0)
+    {
+      x = 0.25;
+      init = 1;
+    }
+
+  x = x - a*y;
+  y = y + a*x;
+  
+  output(y*env);
+
+}
+</pre>
+</TT>
+</TD>
+</TR>
+</TABLE>
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P> 
+The right panel shows the SASL file that drives the SAOL file
+above. This example introduces the SASL <B>tempo</B> command, which
+changes the mapping between score beats and simulated clock time. A
+<B>tempo</B> score line starts with trigger time, followed by the
+keyword <B>tempo</B>, and the new tempo value (in units of beats per
+second).
+
+<P> 
+Next is a set of SASL <B>instr</B> commands that play a simple
+melody. On each score line, the start time, SAOL <B>instr</B> name,
+and duration fields are followed by the initial value for the
+<TT>vtone</TT> parameter <TT>num</TT>.
+
+<P>
+Note that the trigger time of the first <B>instr</B> command precedes
+the trigger time of the last <B>tempo</B> command. SASL score lines do
+not need to be ordered with respect to trigger times.
+
+<P>
+If you are connected to the Internet, you can listen to the audio
+output produced by this example by playing the file <A
+HREF="http://john-lazzaro.github.io/sa/book/tut/examples/vsine/output.wav">output.wav</A>.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<H2><A HREF="examples/vsine/vsine.sasl">vsine.sasl</A></H2>
+
+<pre>
+0 tempo 110
+2 tempo 112.1
+4 tempo 114
+6 tempo 116
+8 tempo 118
+
+1 vtone   1.5 52 
+3 vtone   1.5 64 
+5 vtone   1   63 
+6 vtone   0.5 59 
+6.5 vtone 0.5 61 
+7 vtone   1   63 
+8 vtone   1   64 
+
+10 end
+</pre>
+<H2><A HREF="http://john-lazzaro.github.io/sa/book/tut/examples/vsine/output.wav">output.wav</A></H2> 
+<P>
+[505,524 bytes, on the Web]
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="reverb">In</A> Reverberant Stereo</H2>
+<P> 
+In this section we enhance the previous example by adding
+reverberation and dynamic stereo panning to the melody line. We also
+add legato phrasing to the melody. In implementing these improvements,
+we show how to use two <B>instr</B>s together in a SAOL program. We
+introduce SAOL arrays, global variables, and user-defined buses, as
+well as SASL control statements.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+
+<pre> </pre>
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>The Global Block</H4>
+
+<P> 
+The right panel shows the SAOL program. In the <B>global</B> block, we
+declare the global signal variable <TT>bal</TT>, that is used for
+dynamic stereo panning. Global variables in SAOL can be read and
+written by <B>instr</B> instances, and updated by SASL <B>control</B>
+commands.  Global variables may be declared <B>ivar</B> or <B>ksig</B>
+but not <B>asig</B>.
+
+<P> 
+This example uses two <B>instr</B>s. A new version of the sine-wave
+generator instrument (<TT>vctone</TT>) produces notes, and an
+<I>effects</I> instrument (<TT>mixer</TT>) places them in the stereo field
+and adds room reverberation.
+
+<P> 
+In SAOL, effects <B>instr</B>s are not launched by SASL
+commands. Instead, instances of effects <B>instr</B>s are created at
+the start of program execution, along with the buses that route audio
+into and out of the instances.
+
+<P> 
+Two statements in the <B>global</B> block instantiate the effects
+<B>instr</B> <TT>mixer</TT> and set up its audio buses. A <B>route</B>
+statement specifies that audio from all <TT>vctone</TT> instances sum
+onto the audio bus <TT>tonebus</TT>. A <B>send</B> statement creates
+an instance of the <B>instr</B> <TT>mixer</TT>, and sets
+<TT>mixer</TT>'s two parameters to 2 and 0.25. The <B>send</B>
+statement also creates the bus <TT>tonebus</TT>, that serves as the
+audio input to the <B>instr</B> <TT>mixer</TT>.
+
+<P> 
+Since no <B>route</B> statement exists using <TT>mixer</TT>, the audio
+output for <TT>mixer</TT> adds to the default <B>output_bus</B>. This
+<B>output_bus</B> is a stereo bus, because we initialize the SAOL
+system parameter <B>outchannels</B> to 2 in the final statement of the
+<B>globals</B> block.
+
+<P> 
+The <B>route</B> and <B>send</B> statements introduce several
+concepts. The first concept is that buses may be arrays (in fact, in
+SAOL signal variables may also be declared as arrays). However, note
+that the <B>send</B> statement that defines the bus <TT>tonebus</TT>
+does not include an array width specifier. It is possible to declare
+the width of a bus in a <B>send</B> statement, but it is not
+required. If the bus width is unspecified, SAOL infers it from the
+code in <B>instr</B>s that write to the bus, as we see later in this
+example.
+
+<P>
+A second concept introduced by the <B>route</B> and <B>send</B>
+statements is that instruments instantiated by a <B>send</B> statement
+have audio input as well as audio output. The standard name
+<B>input</B>, a read-only array variable, is made available in effects
+instruments, and holds the current value of audio sent to the
+instrument.
+
+<P>
+A final concept concerns the execution order of the <B>instr</B>s
+<TT>vctone</TT> and <TT>mixer</TT>. Note that if <TT>mixer</TT>
+instances execute before the <TT>vctone</TT> instance during the
+a-pass, the bus <TT>tonebus</TT> is read before it is written. 
+
+<P>
+To prevent this problem, the SAOL language has a set of rules for
+execution ordering.  One ordering rule states that instruments adding
+signals to a bus execute before instruments reading the bus, ensuring
+the correct execution order for simple pipeline structures.  For more
+complex structures, the <B>global</B> statement <B>sequence</B> may be
+used to override this rule to achieve the desired results.
+
+<P>
+Note that since all buses are set to zero at the beginning of each
+a-pass, buses cannot hold audio state between a-passes.
+
+<H4>Instrument <TT>vctone</TT></H4>
+
+<P>
+The sound-generating <B>instr</B> in this example, <TT>vctone</TT>, is
+similar to the sine-wave oscillator <B>instr</B> <TT>vtone</TT> in the
+last example.  The major enhancement is the support of legato voicing,
+through the variable <TT>bend</TT>.
+
+<P>
+The variable <TT>bend</TT> is declared as an <B>imports</B> variable.
+A <B>imports</B> variable may be assigned a new value during a
+k-cycle in the following ways:
+
+<OL>
+<LI>
+If a global variable is declared with the same name as the 
+<B>imports</B> variable, the <B>imports</B> variable is
+assigned the value of the global variable at the start of
+each k-pass for the instrument instance.
+<LI>
+If no global variable has the same name as the <B>imports</B>
+variable, a SASL labelled <B>control</B> statement may modify the
+variable at the start of each k-cycle.
+</OL>
+
+<P>
+In this example, the second rule applies, as we use <TT>bend</TT> to
+signal legato voicing changes from the SASL score. 
+
+<P>
+The code that implements legato voicing is found in the k-pass section
+of the code block. The <B>if</B> statement in the k-pass section
+checks to see <TT>bend</TT> has been set to a non-zero value by a SASL
+line, and if so recalculates the oscillator frequency control variable
+<TT>a</TT> to reflect the modified pitch value. This <B>if</B>
+statement also initializes <TT>a</TT> to the proper value during the
+first k-pass.
+
+<P> 
+Finally, note that the <B>output</B> statement in the a-rate section
+has a single scalar parameter (the expression <TT>env*y</TT>). As a
+result, we infer that the width of the bus <TT>tonebus</TT> that this
+statement writes has a scalar width. If the statement had been
+<pre>
+<TT>output(env*y, env*y);</TT></pre>
+<P>
+the bus <TT>tonebus</TT> would be a stereo bus. 
+
+<H4>Instrument <TT>mixer</TT></H4>
+
+
+
+<P> 
+The <B>instr</B> <TT>mixer</TT> processes the monaural
+<TT>tonebus</TT> audio bus, panning the signal in the stereo field and
+adding reverberation. It accesses <TT>tonebus</TT> through the standard
+name <B>input</B>. It places <TT>tonebus</TT> in the stereo field
+under direction of the global variable <TT>bal</TT>, whose value is
+changed in the SASL file using <B>control</B> score lines.
+
+<P> 
+The <B>instr</B> <TT>mixer</TT> accesses the <B>global</B> variable
+<TT>bal</TT> through the <B>instr</B> signal variable <TT>bal</TT>,
+declared with type <B>imports ksig</B>. At the start of the k-pass for
+the <TT>mixer</TT> instance, the current value of the <B>global</B>
+variable <TT>bal</TT> is copied into the <B>instr</B> <TT>bal</TT>,
+and code in <TT>mixer</TT> accesses this local copy.
+
+<P> 
+The variable declaration block also defines the signal variable arrays
+<TT>pos</TT> and <TT>out</TT>, introducing SAOL array declaration
+syntax.
+
+<P> 
+The k-pass section of the code block shows how individual elements of
+SAOL arrays are addressed using C square-bracket notation.  This
+k-pass code updates the left- and right- channel values for the
+panning weight array <TT>pos</TT>.
+
+<P>
+The a-pass section shows how unindexed arrays may be used in SAOL
+arithmetic expressions. In this example, the expression on the
+right-hand side of the assignment statement combines an array of width
+2 (<TT>pos</TT>), an array of width 1 (the standard name
+<B>input</B>), a scalar (<TT>wet</TT>), and a core opcode with a
+scalar return value (<B>reverb</B>), to compute a stereo audio signal.
+
+
+<P>
+In this computation, all monaural signals are promoted to stereo
+arrays before the calculation begins. The stereo result is stored in
+the array <TT>out</TT>, and added to the stereo <B>output_bus</B> using
+an <B>output()</B> statement.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<H2><A HREF="examples/vcsine/vcsine.saol">vcsine.saol</A></H2>
+<pre>
+global {
+
+  srate 48000;   // DAT-quality 
+  krate  2400;   // 417 us
+
+  ksig bal;  // position
+
+
+// routes vctone to mixer
+//
+// ----------     ---------
+// |        |     |       |--> stereo
+// | vctone |-->--| mixer |    audio 
+// |        |     |       |--> out
+// ----------     ---------
+
+  route (tonebus, vctone);
+  send(mixer; 2, 0.25; tonebus);
+  outchannels 2; // stereo
+
+}
+
+//
+// instr vctone
+// shaped sinewave 
+//
+
+instr vctone (num) {
+
+  ivar atime;   // attack time
+  ivar rtime;   // release time
+  ivar attack;  
+  ivar release;
+  ivar sustain;
+
+  ksig env;     // envelope multiplier
+
+  imports ksig bend; // pitch bend
+  ksig numacc;  // pitch bend state
+  ksig a;       // oscil constant
+  ksig kinit;   // first k pass flag
+
+  asig ainit;   // first a pass flag
+  asig x, y;    // state vector
+  
+  // **********************
+  // computed during i-pass
+  // **********************
+
+  // envelope computation
+
+  atime = 0.3; // attack (sec)
+  rtime = 0.2; // decay (sec)
+
+  // envelope state
+
+  if (dur > atime + rtime)
+    {
+      attack = atime;
+      release = rtime;
+      sustain = dur - atime - rtime;
+    }
+  else
+    {
+      attack = dur/2;
+      release = dur/2;
+      sustain = 0;
+    }
+
+  // **********************
+  // computed during k-pass
+  // **********************
+
+  // computes envelope
+
+  env = kline(0, attack, 1, sustain,
+	      1, release, 0); 
+
+  // computes sine const
+  // does pitch bend
+
+  if ( !kinit || bend)
+    {
+      if (!kinit)
+	{
+	  numacc = num;
+	  kinit = 1;
+	}
+      if (bend)
+	{
+	  numacc = numacc + bend;
+	  bend = 0;
+	}
+      a = 2*sin(3.1415927*
+	cpsmidi(numacc)/s_rate);
+    }
+
+  // **********************
+  // computed during a-pass
+  // **********************
+
+  if (ainit == 0)
+    {
+      x = 0.5;
+      ainit = 1;
+    }
+
+  x = x - a*y;
+  y = y + a*x;
+  
+  output(env*y);
+
+}
+
+// instr mixer
+// adds reverb, panning
+
+instr mixer (rt60, wetdry) {
+
+  ivar wet,dry;
+  imports ksig bal;
+  ksig pos[2];
+  asig out[2];
+
+  // **********************
+  // computed during i-pass
+  // **********************
+
+  wet = wetdry;
+  dry = 1 - wetdry;
+
+  // **********************
+  // computed during k-pass
+  // **********************
+
+  pos[0] = dry*(1 - bal);
+  pos[1] = dry*(bal);
+
+  // **********************
+  // computed during a-pass
+  // **********************
+
+  out = pos*input +
+	 wet*reverb(input[0], rt60); 
+
+  output(out);
+
+}
+
+</pre>
+</TT>
+</TD>
+</TR>
+</TABLE>
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P> 
+The right panel shows the SASL file that drives the SAOL file
+above. The file begins with a set of SASL <B>instr</B> lines that play
+a melody on the <B>instr</B> <TT>vctone</TT>. Two lines are
+<I>labelled</I> for later reference. This example introduce the
+label syntax for SASL: a label name, followed by ":", at the
+start of the <B>instr</B> command.
+
+<P> 
+Next are two labelled <B>control</B> commands. Labelled control
+statements start with a trigger time, followed by a label defined
+earlier in the file and the keyword <B>control</B>. The label is used
+to direct the control change to a particular instrument instance.
+
+<P>
+The final two fields of the labelled <B>control</B> commands are the
+name of variable to change, and the new value of the variable. This
+variable must be defined, with type modifier <B>imports</B>, in the
+<B>instr</B> launched by the SASL score line associated with the
+label.
+
+<P> 
+In this example, the labelled <B>control</B> commands modify the
+<TT>bend</TT> variable of <TT>vctone</TT> instances.  K-rate code in
+<TT>vctone</TT> senses the change and shifts the frequency of the
+sine-wave oscillator, implementing a legato transition to a new note
+number.
+
+<P> 
+This example also introduces SASL unlabelled <B>control</B>
+statements.  A set of 5 control statements alter the k-rate global
+variable <TT>bal</TT>, changing the spatial position of the melody in
+the stereo field. In this encoding 0 is hard left, 0.5 is center, and
+1 is hard right. We use unlabelled control statements because the
+<B>instr</B> <TT>mixdown</TT> that performs the panning is 
+instantiated with a SAOL <B>send</B> statement, not a SASL
+<B>instr</B> command, and so there is no instantiation score line to
+label.
+
+
+<P>
+
+If you are connected to the Internet, you can listen to the output of
+this SAOL and SASL program pair by playing the file <A
+HREF="http://john-lazzaro.github.io/sa/book/tut/examples/vcsine/output.wav">output.wav</A>.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<H2><A HREF="examples/vcsine/vcsine.sasl">vcsine.sasl</A></H2>
+
+<pre>
+
+       1   vctone  1.5 52 
+       3   vctone  1.5 64 
+       5   vctone  1   63   
+ver  : 6   vctone  1   59 
+rain : 7   vctone  2   63 
+
+6.5 ver control bend 2
+8   rain control bend 1
+
+0 tempo 120
+
+1   control bal 0
+3   control bal 0.2
+5   control bal 0.5
+6   control bal 0.8
+7   control bal 1
+
+
+10 end
+</pre>
+<H2><A HREF="http://john-lazzaro.github.io/sa/book/tut/examples/vcsine/output.wav">output.wav</A></H2>
+<P>
+[960,124 bytes, on the Web]
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>Conclusions</H2>
+
+<P> 
+These three examples have introduced, in simple form, most of the
+basic techniques of SAOL and SASL programs.  Notably absent are
+commands relating to SAOL <B>tables</B>, which are variables
+specialized for audio samples, and information on user-defined
+opcodes. Also missing are the syntax and semantic rules for SAOL,
+especially in regard to variable rates and widths and bus widths.  The
+rest of the book revisits SAOL and SASL in systematic detail, showing
+all the options and usage rules.
+
+<P>
+<B>Next:</B> <A HREF="../saol/index.html">Part II: The SAOL Language</A></H2>
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<pre> </pre>
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../index.html">
+the mp4-sa book</A>-><STRONG>tutorial introduction</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>

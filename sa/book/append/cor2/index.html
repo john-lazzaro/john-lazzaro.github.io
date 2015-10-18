@@ -1,0 +1,181 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Appendix K: COR2 Changes to MP4-SA</TITLE>
+<META name="description" content="An index to MP4-SA changes
+introduced in the COR2 MPEG Audio Corrigenda (March 2002).">
+<META name="keywords" content="MP4-SA">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+appendices</A>-><STRONG>cor 2 changes</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Appendix K: <A HREF="http://john-lazzaro.github.io/sa/book/append/cor2/doc/index.html">COR2</A>
+Corrigenda Changes to MP4-SA</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>System Width Reference</H2>
+
+<P>
+The semantics of the standard names <B>inchan</B> and <B>outchan</B>
+and the width specifier tokens <B>inchannels</B> and
+<B>outchannels</B> have been <A
+HREF="../../saol/bus/index.html#system">changed</A>.
+
+<P>
+In instrument code, and in opcodes called from instruments,
+<B>inchan</B> and <B>inchannels</B> code the audio input port width,
+and <B>outchan</B> and <B>outchannels</B> code the audio output port width. 
+
+<P>
+In the <B>global</B> block, and in opcodes called from the
+<B>global</B> block, <B>inchan</B> and <B>inchannels</B> code the
+<B>input_bus</B> width, and <B>outchan</B> and
+<B>outchannels</B> code the <B>output_bus</B> width.
+
+<P>
+In the <B>startup</B> instrument, <B>inchan</B>,
+<B>inchannels</B>, <B>outchan</B> and <B>outchannels</B> take on
+instrument semantics, not <B>global</B> block semantics.
+
+<H2>Explicit Bus Width Syntax</H2>
+
+<P>
+The <B>send</B> statement <A
+HREF="../../saol/bus/index.html#send">syntax</A> has been enhanced.
+The new syntax option permits the explicit specification of bus
+width. This option may be used to fix problems caused by
+under-determined send/route meshes and <A
+HREF="../../saol/bus/index.html#resolve">unresolved</A> instrument
+output widths.
+
+<H2>Arbitrary Width Instruments</H2>
+
+<P>
+SAOL programmers may now write instruments that may take on an
+arbitrary output width, by using arrays of width <B>outchannels</B>
+in all <B>output</B> statements. Loops over these arrays should
+use the <B>outchan</B> standard name to control the loop.
+
+<P>
+The widths of these instruments are <A
+HREF="../../saol/bus/index.html#binding">resolved</A> in the
+<B>global</B> block, by routing the instruments to buses whose
+widths are declared using the new <B>send</B> statement syntax.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Specialops</H2>
+
+<P>
+The syntax and semantics of <B>specialop</B> core opcodes have been <A
+HREF="../../opcodes/sproc/index.html#special">clarified</A>.
+
+<P>
+Calls to <B>specialops</B> are legal in <B>instrs</B> and <B>aopcodes</B>,
+but are illegal in <B>kopcodes</B> and polymorphic <B>opcodes</B>.
+
+<P>
+Calls to <B>specialops</B> in a-rate statements are legal, and have
+the same <A HREF="../../saol/simple/index.html#rate3">return semantics</A> as
+k-rate opcode calls in a-rate statements.
+
+<H2>User-Defined Opcodes</H2>
+
+<P>
+The semantics of <A HREF="../../opcodes/user/index.html">user-defined
+opcodes</A> have been clarified in several ways.
+
+<P>
+Variables in user-defined opcodes may not have a rate faster than
+the rate of the opcode, and standard names faster than the opcode
+rate are not defined inside the opcode.
+
+<P>
+Opcode variables declared <B>imports ksig</B> may not serve as
+the target of SASL labelled control statements.
+
+<H2>Non-Effects Instr Width</H2>
+
+<P>
+The input width of non-effects instruments is defined to be
+one. References to <B>inchan</B> and <B>inchannels</B>
+yield this value.
+
+<H2>Miscellaneous</H2>
+
+<P>
+Error-checking clarifications for the <B><A
+HREF="../../opcodes/sproc/index.html#special">rms</A></B> and <B><A
+HREF="../../opcodes/sproc/index.html#samp">downsamp</A></B>
+core opcodes. 
+
+<P>
+Semantic clarifications for the <A
+HREF="../../control/saolc/index.html#extend"> extend</A> statement:
+the statement may not run at the a-rate, and the statement may not be
+used in an effects instrument instance created by a <B>send</B>
+statement that references the <B>output_bus</B>.
+
+<pre> </pre>
+
+<B><P>
+Return to:</B>
+</B>
+<A HREF="../../index.html">Appendix Cover Page</A>
+
+</TD>
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+appendices</A>-><STRONG>cor 2 changes</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>
+
+

@@ -1,0 +1,1050 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part V/1: Debugging</TITLE>
+<META name="keywords" content="template, templates, map, maplist,
+with, preset,SAOL, MIDI, MP4-SA, MP4">
+<META name="description" content="Techniques for debugging
+SAOL programs using facilities included in sfront">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+special topics</A>-><STRONG>debugging</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part V/1: Debugging SAOL Programs </H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="65%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+
+<UL>
+<LI>
+<B><A HREF=#intro>Introduction</A>.</B>
+<LI>
+<B><A HREF=#report>Reported Errors</A>.</B> Sfront and sa.c error
+printouts.
+<LI>
+<B><A HREF=#crash>Program Crashes</A>.</B> Using gdb to debug crashes.
+<LI>
+<B><A HREF=#runtime>Finding Runtime Errors</A>.</B> Simplify programs
+to simplify debugging.
+<LI>
+<B><A HREF=#printf><TT>printf</TT></A>.</B> Introduces 
+an sfront extension to SAOL, the printf statement.
+<LI>
+<B><A HREF=#irate>I-rate Methods</A>.</B> Using printf
+to debug note-instantiation issues.
+<LI>
+<B><A HREF=#krate>K-rate Methods</A></B> Techniques for
+tracking control-rate variables.
+<LI>
+<B><A HREF=#arate>A-rate Methods</A></B> Data reduction
+techniques for audio-rate debugging
+
+</UL>
+</TD>
+<TD WIDTH="35%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>Language Elements:</H2>
+
+<A HREF="#printf"><B>printf</B></A> &nbsp 
+
+
+</UL>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+A popular staple of afternoon television is
+the cooking show. At the start of the show,
+a complex meal is planned, and by the end
+of the show, a perfect dinner pops out of
+the kitchen. 
+
+<P>
+The examples shown in this book have a 
+similar flavor. Code is shown
+on the right-hand panel, which always 
+works to produce the desired audio 
+output.
+
+<P>
+Like TV cooking shows, the book examples
+don't show the real development process:
+syntax errors, compiler bugs, program
+crashes, and bad-sounding audio. 
+
+<P>
+In this chapter, we describe common ways
+that SAOL programs fail to work, and 
+techniques to use to find and fix the
+problems. 
+
+<P> The right panel shows a list of the
+major traps in the development cycle. In
+the sections of this chapter, we 
+describe how to approach these problems.
+
+<P>
+In this chapter, we use the sfront 
+SAOL-to-C translator, running under
+Linux, to demonstrate debugging. 
+However, even if you use another
+SAOL development systems, the concepts
+in this chapter should help you 
+debug your programs.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H4>Errors: Where, When, and What</H4>
+
+<P><BR>
+
+<H4> Before execution: </H4>
+
+<UL>
+<LI><TT>sfront</TT> reports SAOL Syntax Error.
+<LI><TT>sfront</TT> crashes or hangs up.</B>
+<LI><TT>gcc</TT> fails to compile <TT>sa.c</TT>.
+</UL>
+
+<H4> During execution: </H4>
+
+<UL>
+<LI> Program ends, prints "Runtime Error" banner.
+<LI> Program crashes, with Linux OS error.
+<LI> Program runs forever.
+</UL>
+
+<H4> After execution: </H4>
+
+<UL>
+<LI> Audio sounds totally wrong.
+<LI> Audio almost sounds correct.
+<LI> Audio ends too soon or too late.
+</UL>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="report">Reported Errors</A></H2>
+
+<P>
+
+Many SAOL programming errors are 
+detected automatically and reported
+to the user. Depending on the error,
+sfront may report a compile-time error,
+or the C program sfront creates may 
+terminate and report an error.
+
+<P>
+The right panel shows one kind of
+sfront compile-time error, a 
+<B>syntax</B> error (in this case,
+a missing semicolon). 
+
+<P>
+Since sfront can't understand
+the SAOL program without the semicolon,
+its error message doesn't describe the
+problem exactly. However, it does report
+a line number and filename, which 
+(usually) is sufficient to debug the
+problem.
+
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H4>Syntax Error Report</H4>
+
+<TT>
+<pre>
+
+SAOL fragment:
+
+instr tremelo ( ) {
+   asig count    // lacks ';'
+   ksig kinit;
+
+
+sfront reports:
+
+Syntax error during 
+-saolfile parsing.
+
+Error occurred near line
+28 in file min.saol:
+
+instr tremelo ( ) {
+   asig count
+   ksig kinit;
+   ksig halfperiod;
+
+Ending sfront.
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+A second type of compile-time error is a
+<B>type mismatch</B> error. The right
+panel shows an example of a type mismatch
+(a table used in a signal expression).
+
+<P>
+Because sfront successfully understood the
+syntax of the program, it was able to 
+print a meaningful error message.
+
+<P>
+Whenever you run sfront, your session should
+end in one of the following ways:
+
+<OL>
+<LI>
+Sfront runs and reports 
+error or warning messages about your program.
+The SAOL program must be fixed to
+eliminate these messages.
+<LI>
+Sfront runs without reporting
+an error. In this case, the C file
+it creates should compile and produce
+an runnable executable.
+</OL>
+
+<P>
+However, if your session ends in
+one of the following ways:
+
+<OL>
+<LI> Sfront never completes.
+<LI> Sfront crashes.
+<LI> Sfront printing an
+<B>Internal compiler error</B>
+message.
+<LI> The C file sfront produces
+won't compile.
+</OL>
+
+you've stumbled across a bug in
+sfront itself, which should be
+sent in as a <A HREF="../../../sfman/user/install/index.html#bugs">bug report</A>.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+
+<H4>Type Error Report</H4>
+
+<TT>
+<pre>
+
+SAOL fragment:
+
+instr square ( ) {
+   table delta(harm, 128, 1);
+
+   delta = delta + 1; // type error
+   
+
+sfront reports:
+
+Error: Table(map) delta 
+used inappropriately.
+
+Error occured near line
+56 in file min.saol:
+
+   table delta(harm, 128, 1);
+
+   delta = delta + 1;
+   
+
+Ending sfront.
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+When sfront creates a C program, it includes
+error checking code for certain types of
+errors. If this error checking code is 
+tripped, a <B>run-time</B> error
+report is printed and the program exits.
+
+<P>
+The right panel shows an example of run-time
+error checking. In this case, a table is
+defined, using the sample wavetable
+generator. However, the file specified doesn't
+actually exist. 
+
+<P>
+During execution, the program tries to open
+the file and fails; it then prints the run-time
+error shown and exits.
+
+<P>
+Reported errors are the simplest type of
+run-time error to catch and fix. To
+help the programmer write good code, the
+MP4-SA standard mandates that decoders
+catch report many kinds of 
+real-time errors checks.
+
+<P>
+Eventually, sfront will implement all of
+these error checks. At the
+present time, however, sfront implements
+many but not all required checks.
+
+<P>
+Specifically, sfront does not check to see if the index value of an <A
+HREF="../../saol/vars/index.html#vars_instr">array</A>, <A
+HREF="../../opcodes/filter/index.html#oparray">oparray</A>, or <A
+HREF="../../saol/wave/index.html#decl">tablemap</A> is out of
+range. In addition, CPU intensive checks on certain core opcodes,
+such as checking the range of the index parameter to <A
+HREF="../../saol/wave/index.html#lowcore">tableread</A> and <A
+HREF="../../saol/wave/index.html#lowcore">tablewrite</A>, are only
+performed if sfront is run with the <TT>-isocheck</TT> flag.
+
+<P>
+If your program does one of these illegal
+operations, it won't produce a run-time
+error message. Instead, the program might
+crash, or it may run forever, or (most
+likely) the sound created might not be
+what it should. 
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+
+<H4>Runtime Error Report</H4>
+
+<TT>
+<pre>
+
+SAOL fragment:
+
+// file doesn't actually exist
+
+global { 
+  table oneclap(sample, -1,
+               "samp_2.aif"); 
+
+
+
+Execution trace:
+
+gcc -O3 sa.c -lm  -o sa
+./sa 
+
+
+
+Runtime Error.
+Location: File claps.saol 
+          near line 10.
+
+While executing: table.
+Potential problem: Samplefile
+           not found (aif(f)).
+
+Exiting program.
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+<H2><A NAME="crash">Program Crashes</A></H2>
+
+In many ways, a program that crashes 
+is easier to debug than one that silently
+does the wrong thing. 
+
+<P>
+In the future, sfront will include modes
+for reporting exactly where and how a
+program crashes. For now, the easiest
+way to debug a program crash under
+Linux is to follow these steps:
+
+<OL>
+<LI> Recompile the <TT>sa.c</TT>
+program, using the <TT>-g</TT>
+option of <TT>gcc</TT>
+<LI> Run <TT>gdb</TT> on the 
+program, as shown on the right
+panel.
+<LI>
+The C code sfront generates embeds
+SAOL variable names into its C
+identifiers. Look at the debug
+printout <TT>gdb</TT> produces
+to pinpoint the error location.
+</OL>
+
+<P>
+It may be helpful to look at the
+sa.c file in this process, if you
+are comfortable with the C language.
+
+<P>
+The remainder of this chapter focuses
+on techniques for handling SAOL programs
+that don't crash, but which produce the
+wrong audio. 
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+
+<H4>Running Gdb</H4>
+
+<TT>
+<pre>
+
+[1] Run sfront without -except option
+
+[2] Compile sa.c with debug switch:
+
+gcc -g -O3 sa.c -lm  -o sa
+
+[3] Run gdb:
+
+gdb ./sa
+
+GNU gdb 4.17.0.11 
+
+(gdb) run
+
+Starting program: ./sa 
+
+Segmentation fault, in
+arpsound2__sym_butter_gainlp3
+(gdb) bt
+
+#0  in arpsound2__sym_butter_gainlp3 ()
+#1  in arpsound2_kpass ()
+#2  in main_kpass ()
+#3  in main ()
+
+[3] Example what gdb prints in 
+response to "bt" as shown above.
+In this case, bug was in the 
+kpass of instr arpsound2,
+during a call to opcode 
+butter_gainlp3.
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="runtime">Finding Runtime Errors</A></H2>
+
+<P>
+Finding the root cause of a run-time
+problem in a SAOL program may be
+a difficult task. Rate semantics may
+make even simple programs difficult
+to understand. Ancillary factors
+such as a complex SASL or MIDI
+track, real-time control, or audio
+input can make matters even worse.
+
+<P>
+The first step in debugging a complex
+SAOL program is to simplify the program
+itself. Store a safety copy of the 
+original program, and then try the
+following techniques to simplify the
+problem:
+
+<UL>
+<LI><B>Simplify the score.</B> Make
+a dummy SASL score with a few calls
+to each instr, that creates a few
+seconds of audio. Use this score
+instead of the real SASL, MIDI, or
+real-time control source for debug.
+<LI><B>Simplify the audio chain.</B>
+Eliminate all route and
+send statements from the
+global block, and just test each
+sound-generating instrument by itself.
+If these instrs work OK, test
+each effects instrument in isolation.
+<LI><B>Simplify the rate structure.</B>
+Once you've located the instrument
+with the problem, try replacing the
+i-rate and k-rate sections with
+constants, and just test the a-rate
+section. Then add the k-rate and i-rate
+back, to isolate the problem.
+<LI><B>Use audio channels independently.</B>
+Think of the two speaker channels as
+independent <I>audio oscilloscopes</I>, and
+send intermediate signals to each output
+independently. Use the balance control
+on your audio amplifier to listen to
+the channels in isolation.
+<LI><B>Visually inspect audio output.</B>
+Sometimes a picture is worth a thousand
+seconds of sound. Use your favorite visualization
+tool to look at the audio data in the
+output file. The <TT>-aout file.dat</TT>
+option produces an ASCII file format
+that can be inspected in a text editor,
+or graphed using the <A HREF="http://john-lazzaro.github.io/chipmunk/describe/describe.html">Chipmunk tool</A> view.
+</UL>
+
+<P>
+The techniques can be useful in tracking
+down a problem to a section of SAOL code.
+Once the problem area is localized, a
+careful examination of the source code
+may reveal the error. 
+
+<P>
+Other times, the only way to find the
+root cause of the problem is to print
+out variables over time and watch them
+evolve, as we describe in the next
+section.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="printf"><TT>printf</TT></A></H2>
+
+<P>
+SAOL programs compiled under sfront can
+use the <TT>printf</TT> statement, described
+on the right panel, to print out SAOL scalar
+program variables. Note that printf is an
+sfront extension of SAOL, and is not part
+of the standard language. 
+
+<P>
+The SAOL printf statement borrows its basic
+syntax from the ANSI C standard library function
+printf. The first argument is a <I>format
+string</I>, that contains the text to
+be printed out. When printed, the first
+instance of <TT>%f</TT> is replaced
+with the value of the second printf
+argument, the second instance of 
+<TT>%f</TT> is replaced with the value
+of the third argument, ect.
+
+<P>
+The SAOL printf statement differs from the
+C printf function in several ways:
+
+<UL>
+<LI>
+<B>SAOL's printf is a statement, not an 
+opcode.</B> It can not be used in 
+expressions, but must stand alone like
+an output() or extend() statement.
+<LI><B>SAOL's printf has rate semantics.</B>
+The rate of the printf statement is the
+rate of its fastest argument. The format
+string is considered to be i-rate.
+<LI><B>SAOL's printf arguments must be
+scalar signal expressions or strings.</B>
+Unindexed arrays with non-scalar width,
+tables, tablemaps, and opcodes that return 
+non-scalar widths may not be used as
+printf arguments.
+</UL>
+
+<P>
+For simplicity, the right-panel description
+of printf format strings only show plain 
+<TT>%f</TT> (for variables) and <TT>%s</TT> 
+(for strings) directives. Since SAOL printf
+statements are implemented in the <TT>sa.c</TT>
+file as C printf functions, experienced C
+programs are free to use more complex
+format directives for floating-point numbers.
+
+<P>
+Printf statements write to <TT>stdout</TT>, while
+all error diagnostics will write to <TT>stderr</TT>.
+Printf works this way so that <TT>stdout</TT> may
+be redirected to a file or program, while
+error messages are still printed to the screen.
+The first shell command below redirects printf
+output to the file <TT>log</TT>, the second
+redirects prints to the text viewer <TT>more</TT>:
+
+<TT>
+<pre>
+% ./sa > log
+% ./sa | more
+</pre>
+</TT>
+
+<P>
+Its a good idea to use the sfront option <TT>-except</TT>
+when redirecting to a log file, so that a 
+program crash does not delete the log file.
+
+<P>
+The most powerful part of the SAOL printf
+statement is its rate semantics. By careful
+choice of arguments, printing will occur
+at the i-rate, k-rate, or a-rate. In the
+following sections, we describe useful
+printf techniques at each rate.
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>Statement syntax</H2>
+
+<TT>
+<pre>
+
+printf("fmt" [, arg1, arg2, ..]);
+
+Where:
+
+"fmt":
+
+  is a (required) quoted string.
+  it may contain directives 
+  beginning with the % character.
+  Most users will only need the
+  %f character (for printing 
+  expressions) and the %s character
+  (for printing quoted strings).
+  Use the \n characters for carriage
+  return, the \t character for tab.
+  Replace %f with %e to print using
+  scientific notation, or %g to 
+  adaptively choose normal or 
+  scientific notation.
+
+argk:
+
+  are optional arguments. each 
+  must be a scalar signal 
+  expression or a quoted string.
+  arg1's value is printed in 
+  place of the first %f or %s,
+  arg2's value is printed in place
+  of the second %f or %s, ect. 
+  expressions must match with %f's,
+  and strings with %s. 
+
+Note that printf is a statement, 
+not an opcode. The rate of the
+expression is the rate of the
+fastest arguments, with strings
+considered i-rate. Expressions
+may be special-ops, in which
+case the printf is a special-op.
+
+Example:
+
+instr foo(i) {
+ksig k;
+asig a;
+
+i = 12;
+k = 5;
+a = 6;
+printf("hello world\n");
+printf("%s%f\n","start of instr",i);
+printf("krate %f %f\n",i, k);
+printf("arate %f\n",a); }
+
+Prints out (from instantiation):
+
+hello world
+start of instr 12.000000
+krate 12.000000 5.000000
+arate 6.000000
+arate 6.000000
+[...]
+arate 6.000000
+arate 6.000000
+krate 12.000000 5.000000
+arate 6.000000
+arate 6.000000
+[...]
+[...]
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="irate">I-rate Debugging</A></H2>
+
+<P>
+I-rate printf statements run when instrument
+instances are created. In many cases, the
+underlying source of an a-rate or k-rate
+bug can be understood by examining 
+values at the i-rate. Useful items to
+print include
+
+<UL>
+<LI><B>Instrument parameters</B> These
+values tie the instance to the SASL,
+MIDI, or SAOL instr statement that
+created it.
+<LI><B>Table contents.</B> Bugs in 
+wavetable generation can be found
+by printing out table values using
+the <A HREF="../../saol/wave/index.html#lowcore">tableread</A> opcode.
+<LI><B>Ivar standard names</B> These
+values can chart the time course of
+instances. See the right panel for
+details.
+</UL>
+
+<P>
+Sometimes, bugs happen in the initialization
+process of the SAOL program, at time zero.
+
+<P>
+To track these problems down, try adding
+i-rate printf statements in <A HREF="../../saol/bus/index.html#effects">effects
+instruments</A>, the <A HREF="../../saol/bus/index.html#send">startup</A> instrument, and
+in <A HREF="../../opcodes/user/index.html">user-defined opcodes</A> called in the
+global block.
+
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Useful <TT>ivar</TT> standard names</H2>
+
+<TT>
+<pre>
+
+<B>ivar time</B> 
+
+ The time that the instance
+ was created.
+
+<B>ivar dur</B>
+
+ The duration of the instance,
+ or -1 if no duration.
+
+<B>ivar inchan</B>
+
+ For effects instances: the 
+ number of input audio channels
+ provided.
+
+<B>ivar outchan</B>
+
+ The number of audio output
+ channels for the instrument.
+
+<B>ivar channel</B>
+
+ For MIDI instruments: the 
+ extended channel number for
+ the instance.
+
+<B>ivar preset</B>
+
+ For MIDI instruments: the 
+ preset number for this 
+ instance.
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="krate">K-rate Debugging</A></H2>
+
+<P>
+If i-rate printf statements do
+not find a bug, it may be 
+necessary to print out k-rate
+variable values. 
+
+<P>
+A key problem with k-rate printf
+statements is the large amount of
+data produced. Since an unguarded
+k-rate printf generates data once
+per k-cucle, it may produce hundreds
+of lines of text per second.
+
+<P>
+To solve this problem, only use k-rate printf statements inside of <A
+HREF="../../saol/exstat/index.html#if">if statements</A>, whose guard
+values are chosen to be rarely true.
+Common guard techniques include:
+
+<OL>
+<LI>
+<B>Change monitoring.</B> Look at 
+key k-rate variables every cycle,
+but only print if the value has
+significantly changed.
+<LI>
+<B>Subsampling.</B> 
+Print out status one
+every 10, 50, or 100 cycles. Use
+the <TT>itime</TT> standard name (see
+right panel) to keep track of when
+to print.
+<LI>
+<B>Release monitoring.</B>Use
+the <TT>released</TT> standard name
+(see right panel) to print the
+value of k-rate variables at the
+final k-cycle of an instance.
+</OL>
+
+<P>
+An alternative approach is to print
+information on every k-cycle, and
+to direct this information to a file
+for examination with a text editor.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>Useful <TT>ksig</TT> standard names</H2>
+
+<TT>
+<pre>
+
+<B>ksig itime</B> 
+
+ The elapsed time since the
+ instance was created. 
+
+<B>ksig released</B>
+
+ Normally 0, but 1 if the
+ instance is scheduled for
+ termination at the end of
+ the current execution cycle.
+
+<B>ksig MIDIctrl[128]</B>
+<B>ksig MIDIbend</B>
+<B>ksig MIDItouch</B>
+
+ For MIDI instances, monitors
+ MIDI data from the channel that
+ created it. For non-MIDI 
+ instances in a SAOL program
+ controlled by MIDI, monitors
+ the MIDI master channel 
+ (usually channel 0).
+
+<B>imports exports ksig params[128]</B>
+
+ Communicates with the control
+ driver in an application-
+ specific way; good for debug
+ of new control drivers.
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="arate">A-rate Debugging</A></H2>
+
+<P>
+The most difficult debugging sessions
+involve monitoring a-rate changes. In
+most cases, unguarded printf statements
+are not practical, since a short sound
+may produce one-hundred thousand lines
+of text!
+
+<P>
+As in k-rate debugging, enclosing all
+printf statements with if statements
+whose guards rarely execute is the key
+to successful debugging. Since a-rate
+problems often involve clicks or 
+run-away waveforms, guard expressions
+often are tuned to look for these
+waveform characteristics.
+
+<P>
+Another technique involves the use of specialops, 
+such as the <A
+HREF="../../opcodes/sproc/index.html#special">rms</A> opcode.
+This opcode examines its parameter at the a-rate, and
+returns the root-mean-square value of the waveform at
+the k-rate. A printf statement with a specialop expression
+prints out text at the k-rate.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<pre>  </pre>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+
+<B>Next: </B>
+<A HREF="../../template/index.html">Part V/2: Templates</A>
+
+</TD>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+special topics</A>-><STRONG>debugging</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 2000 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>

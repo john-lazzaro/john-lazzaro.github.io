@@ -1,0 +1,849 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part III/3: SAOL Instrument Control</TITLE>
+<META name="keywords" content="MP4-SA, SAOL, instr, dynamic instr,
+dynamic instruments, dynamic instances, dynamic, spawn, spawning,
+time, itime, dur, released, cpuload, extend, turnoff">
+<META name="description" content="The dynamic instantiation of new
+instruments in SAOL. Tracking the status of a SAOL instrument using
+standard names, and altering that status using the extend and turnoff
+statements.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+instrument control</A>-><STRONG>in SAOL</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part III/3: SAOL Instrument Control</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="70%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#instr">Dynamic Instruments.</A></B> The SAOL <B>instr</B> statement.
+<LI>
+<B><A HREF="#stnames">Instrument Status</A>.</B> Standard names. 
+<LI>
+<B><A HREF="#extend">The Extend Statement</A>.</B> Delaying instance termination.
+<LI>
+<B><A HREF="#turnoff">The Turnoff Statement</A>.</B> Forcing instance termination.
+<LI>
+<B><A HREF="#order">Decoder Execution Order</A>.</B> What happens when in SAOL.
+
+</UL>
+
+
+</TD>
+<TD WIDTH="70%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>In This Chapter</H2>
+
+<H4>Statements:</H4>
+<B>
+<TT>
+<P>
+<A HREF="#instr">instr</A>
+<A HREF="#extend">extend</A>
+<A HREF="#turnoff">turnoff</A>
+</TT>
+</B>
+<H4>Standard Names:</H4>
+<B>
+<TT>
+<P>
+<A HREF="#stnames">cpuload</A>
+<A HREF="#stnames">dur</A>
+<A HREF="#stnames">itime</A>
+<A HREF="#stnames">time</A>
+<A HREF="#stnames">released</A>
+
+</TT>
+</B>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+In the previous chapters in Part III, we describe the SASL and MIDI
+commands that create and control instrument instances.  In this
+chapter, we describe SAOL statements that support instrument control.
+
+<P>
+We describe the SAOL <B>instr</B> statement, that supports dynamic
+instance creation. An algorithmic score generator may be written
+directly in SAOL using this statement.
+
+<P>
+We describe several SAOL standard names for status monitoring that are
+useful for algorithmic score generation.  
+
+<P>
+These standard names hold information such as the elapsed time since
+instantiation, and whether an instrument is scheduled to be terminated
+before the next k-pass.
+
+<P>
+We describe several SAOL statements that let instances change their
+status. The <B>turnoff</B> statement lets an instance schedule its
+termination, while the <B>extend</B> statement lets an instance delay
+its termination.
+
+<P>
+Finally, we present a chart that shows the complete execution timeline
+of a SAOL program.  
+
+<P>
+The timeline shows the order of events during
+program startup, as well as the sequencing of events during an
+orchestra cycle of i-pass, k-pass, and a-pass.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="instr">Dynamic Instruments</A></H2>
+
+<P>
+The SAOL <B>instr</B> statement performs dynamic instrument
+instantiation, so that a parent instrument may spawn copies of a child
+instrument. This statement supports applications such as sequencers,
+arpeggiators, and algorithmic composition.
+
+<P>
+The <B>instr</B> statement runs at the i-rate or the k-rate, and may
+not be used in the <B>global</B> block. The right panel shows the
+syntax for the SAOL <B>instr</B> statement.
+
+<P>
+The statement syntax begins with the keyword <B>instr</B>, followed by
+the name of the child instrument to instantiate.
+
+<P>
+The parameters are i-rate or k-rate scalar expressions that control
+the instantiation process. All expressions evaluate to constant values
+before the child instrument spawns.
+
+<P>
+The <TT>dly</TT> and <TT>dur</TT> parameters control the starting time
+and duration for the new instance.  
+
+<P>
+The remaining parameters (<TT>p1, p2 ...</TT>) are the initial values
+for the instrument parameters of the new instance. The number of
+<TT>p</TT> parameters must match the number of instrument parameters
+in the new instance.
+
+<H4> <TT>dly</TT> and <TT>dur</TT> </H4>
+
+<P>
+The <TT>dur</TT> parameter specifies how long (in scorebeats) the
+instance should execute before terminating. If <TT>dur</TT> has a
+value of <TT>-1</TT>, the instance runs indefinitely.
+
+<P>
+The <TT>dly</TT> parameter specifies the length of time (in scorebeats)
+to delay the instantiation of the new instrument.
+
+<P>
+If the <TT>dly</TT> parameter has a value less than the k-period
+(<TT>1/k_rate</TT>) the instrument is created as soon as the
+<B>instr</B> statement executes. The i-pass of the new instance is run
+immediately, and the following rules hold for the first k-pass and
+a-pass of the new instance:
+
+<UL>
+<LI>
+If the instanced instrument occurs earlier in the <A
+HREF="../../saol/bus/index.html#determine">execution order</A> than
+the instrument containing the <B>instr</B> statement, the first k-pass
+and a-pass for the new instance are <I>delayed</I> until the
+<I>next</I> orchestra cycle.
+<LI>
+If the instanced instrument does not occur earlier, the k-pass and
+a-pass of the new instance run in the <I>current</I> cycle.
+</UL>
+
+<P> 
+If the <TT>dly</TT> parameter of the <B>instr</B> statement has a
+value greater than or equal to the k-period, the new instance is not
+created immediately. 
+
+<P> 
+Instead, a start time (in scorebeats) is computed for the new
+instance, by adding the <TT>dly</TT> parameter to the current score
+time. The instance is created when the score time exceeds this start
+time.
+
+<H4> Rate Semantics </H4>
+
+<P>
+The <B>instr</B> statement may be an i-rate or a k-rate statement.  It
+is an i-rate statement unless one of these conditions hold, in which
+case it runs at k-rate:
+
+<OL>
+<LI> Any of its parameters are k-rate.
+<LI> If the <B>instr</B> statement is enclosed in an <B>if</B>,
+<B>if-else</B>, or <B>while</B> statement and the rate of the guard
+expression of the enclosing statement is k-rate. It is an error if
+this guard expression is a-rate. 
+</OL>
+
+<P>
+The right panel shows examples of the rate semantics of the 
+<B>instr</B> statement.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Instr Statement</H2>
+
+<TT>
+<pre>
+
+instr name(dly, dur [, p1, p2 ...]); 
+
+
+name: name of the instrument 
+      to instantiate
+
+dly : delay time, in scorebeats, 
+      before instantiation.
+
+dur : duration (in scorebeats) of 
+      instance execution. a 
+      value of -1 codes indefinite
+      execution.
+
+p1, : values for instrument 
+p2, : parameters to use for
+... : instantiation.
+
+
+</pre>
+</TT>
+
+<H2>Rate Semantics</H2>
+
+<TT>
+<pre>
+
+instr spawn(num) {}
+
+
+instr mom() {
+
+ivar i1, i2;
+ksig k1, k2;
+asig a;
+
+
+// runs at i-rate
+
+instr spawn(0, i1, i2);
+
+
+// runs at k-rate
+
+instr spawn(0, i1, k2);
+
+
+// instr runs at k-rate
+
+if (k1 > k2) 
+ {
+   k1 = k1 - 1;
+   instr spawn(0, i1, i2);
+ }
+
+
+// guard is a-rate
+// breaks rule 2
+
+if (a > 0) 
+ {
+   a = a - 1;
+   instr spawn(0, i1, i2);
+ }
+
+
+// instr is i-rate
+// if is k-rate
+// breaks <A HREF="../../saol/exstat/index.html#if">if rule 1</A>
+
+if (i1 > i2) 
+ {
+   k1 = k1 - 1;
+   instr spawn(0, i1, i2);
+ }
+
+}
+
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="stnames">Instrument Status</A></H2>
+
+<P>
+Five SAOL standard names let an instance monitor its execution
+status. The right panel lists the full semantics for these standard
+names.
+
+<P>
+These standard names work in instances generated using any MP4-SA
+technique: SASL <B>instr</B> lines, SAOL <B>instr</B> and <B>send</B>
+statements, and MIDI note-on commands. 
+
+<P>
+
+
+<H4><TT>time and itime</TT></H4>
+
+<P>
+The <B>time</B> standard name holds the creation time for the
+instance, measured in seconds.  The <B>itime</B> standard name is the
+elapsed time since the instance was created. See the right panel for
+full semantics.
+
+<P>
+These two names support algorithmic scores, by letting an
+instance track simulation time and dynamically create 
+other instances at the appropriate times.
+
+
+<H4><TT>dur</TT></H4>
+
+<P>
+The expected duration of the instance, in seconds. An indefinite
+duration is indicated by -1. Although this standard name is an
+<B>ivar</B>. its value changes during the life of the instance, as
+explained on the right panel.
+
+<H4><TT>released</TT></H4>
+
+<P>
+This standard name normally has a value of zero. If the instance is
+slated to be terminated at the end of the next series of a-passes,
+<B>released</B> takes on the value <TT>1</TT>.
+
+<P>
+The <B>released</B> standard name is often used in conjunction with
+the <A HREF="#extend">extend</A> statement (covered later in this
+chapter) to add a release phase to an instance created with a definite
+duration.
+
+<H4><TT>cpuload</TT></H4>
+
+<P>
+This standard name is intended for applications where real-time
+decoding is needed, such as streaming audio to a D/A converter.
+
+<P>
+It tracks what percentage of system resources are currently being
+used, scaled to the amount of resources needed to maintain real-time
+operation. See the right panel for full semantics.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+
+<H2><TT>ivar time;</TT></H2>
+<TT>
+<PRE>
+The time of instantiation for the
+instance. In seconds, not scorebeats.
+Zero seconds is start of simulation.
+</PRE>
+</TT>
+
+
+<H2><TT>ksig itime;</TT></H2>
+<TT>
+<PRE>
+The elapsed time since the instance
+was created. In seconds, not 
+scorebeats. Zero seconds is the
+first k-pass. Note that (itime
++ time) is always the current 
+absolute time.
+</PRE>
+</TT>
+
+
+<H2><TT>ivar dur;</TT></H2>
+<TT>
+<PRE>
+The intended duration (in 
+seconds, not scorebeats) of
+the instrument, as set by
+the duration parameter in the 
+SAOL <B>instr</B> statement
+or SASL <B>instr</B> command.
+
+MIDI and <B>send</B> instances
+always set dur to -1. SAOL and
+SASL <B>instr</B> commands may also
+set dur to -1. A -1 indicates
+indefinite duration.
+
+Although it is an ivar, the 
+value changes to reflect tempo
+changes and the <A HREF="#extend">extend</A>
+statement.
+</PRE>
+</TT>
+
+<H2><TT>ksig released;</TT></H2>
+<TT>
+<PRE>
+Set to 1 if the instrument is 
+scheduled for termination after
+the last a-pass of the current
+cycle. Otherwise set to 0. 
+</PRE>
+</TT>
+
+
+<H2><TT>ksig cpuload;</TT></H2>
+<TT>
+<PRE>
+Measures the load on the CPU
+that this instance in running
+on most often. A value of
+0 indicates an idle CPU. A 
+value of 1 indicates that the
+edge of real-time performance
+has been reached. Temporal
+dynamics of cpuload are 
+decoder dependent.
+</PRE>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="extend">The Extend Statement</A></H2>
+
+<P>
+An instance may delay its termination by executing the <B>extend</B>
+statement.  This statement is often run in response to the setting of
+the <B><A HREF="#stnames">released</A></B> standard name.
+
+<P>
+The right panel shows the syntax for the <B>extend</B> statement.  The
+statement has a single parameter <TT>delay</TT>, an i-rate or k-rate
+signed expression for the amount of time to extend or reduce the
+instance (in seconds, not scorebeats).
+
+<P>
+If an instance has a scheduled termination time, executing the
+<B>extend</B> statement adds the value of <TT>delay</TT> to that
+termination time. If the new termination time is less than or equal to
+the current simulation time, the <B>extend</B> acts like the <A
+HREF="#turnoff"><B>turnoff</B></A> statement (described in the next
+section).
+
+<P>
+If an instance has an indefinite termination time (i.e. a duration of
+<TT>-1</TT>) executing the <B>extend</B> statement sets the new
+termination time to be the current simulation time plus the value of
+<TT>delay</TT>. If <TT>delay</TT> is less than or equal to zero, the
+<B>extend</B> acts like the <A HREF="#turnoff"><B>turnoff</B></A>
+statement.
+
+<P>
+The <B>dur</B> standard name is updated to reflect the execution
+of the <B>extend</B> statement.
+
+<P>
+The <B>extend</B> statement may be an i-rate or a k-rate statement.  It
+is an i-rate statement unless one of these conditions hold, in which
+case it runs at k-rate:
+
+<OL>
+<LI> The <TT>delay</TT> expression is k-rate.
+<LI> If the <B>extend</B> statement is enclosed in an <B>if</B>,
+<B>if-else</B>, or <B>while</B> statement and the rate of the guard
+expression of the enclosing statement is k-rate. It is an error if
+this guard expression is a-rate. 
+</OL>
+
+<P>
+The <B>extend</B> statement may not be used in an instance created by
+a <B>send</B> statement that uses the <B>output_bus</B>.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Statement Syntax</H2>
+<TT>
+<pre>
+extend(delay);
+
+</pre>
+</TT>
+
+<H2>Example</H2>
+
+<TT>
+<pre>
+
+instr lengthen() {
+
+ksig done;
+
+if (!done && released)
+ {
+   // runs at k-rate
+   extend(0.5); 
+   done = 1;
+ }
+
+}
+
+
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="turnoff">The Turnoff Statement</A></H2>
+
+<P>
+An instance may force its own termination by executing the
+<B>turnoff</B> statement.  The right panel shows the syntax of this
+k-rate statement.
+
+<P>
+The <B>turnoff</B> statement is particularly useful for instances that
+are not scheduled for termination automatically, such as instances
+created with the SASL <B>instr</B> command and the SAOL <B>instr</B>
+statement with a duration of -1.
+
+<P>
+If the <B>turnoff</B> statement executes during a k-pass,
+it schedules the instance to be terminated at the end of the
+<I>following</I> (not the current) orchestra cycle.
+
+<P>
+During the next (and "final") k-pass, the <B>released</B> standard
+name has a value of <TT>1</TT>.  An <B>extend</B> statement execution
+during this k-pass would delay instance termination.
+
+<P>
+The <B>turnoff</B> statement may not be used in an instance created by
+a <B>send</B> statement that uses the <B>output_bus</B>.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Statement Syntax</H2>
+<TT>
+<pre>
+turnoff;
+
+statement is k-rate
+
+</pre>
+</TT>
+
+<H2>Example</H2>
+
+<TT>
+<pre>
+
+instr random_duration() {
+
+// instance lasts at 
+// least 500 ms. and
+// at most 2.5 sec
+
+if (!released && 
+    (itime - 1.5 > krand(1)))
+ {
+   turnoff;
+ }
+
+}
+
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="order">Decoder Execution Order</A></H2>
+
+<P>
+We conclude this chapter with a table showing the
+order of execution of a SAOL program, shown on
+the right panel. 
+
+<P>
+The first part of the table covers the initialization
+of the simulation done at the start of execution.
+
+<P>
+The second part of the table covers a single orchestra
+cycle. Orchestra cycles are continued indefinitely until the end time
+of the simulation is reached (set by the SASL <TT>endtime</TT>
+command).
+
+<P>
+The third part of the table covers instance creation. The
+fourth part of the table covers the execution of an i-pass,
+k-pass, or a-pass of an instance.
+
+<P>
+Links in this table refers to section of the book
+that explains the operation in more detail.
+
+<P>
+This chapter completes Part III of the book. In Part IV,
+we take a comprehensive look at opcodes in SAOL. 
+
+<P>
+<B>Next:</B>
+<A HREF="../../opcodes/index.html">Part IV: Opcodes</A></H2>
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>I. Initial Execution Order</H2>
+<OL>
+<LI>
+Determine <A HREF="../../saol/bus/index.html#determine">instrument
+order</A>. Use this information to determine <A
+HREF="../../saol/bus/index.html#output">output width</A> of
+instruments and the <A HREF="../../saol/bus/index.html#apply">width of
+user-defined buses</A>.
+<LI>
+Instance and run the i-pass of the <B>startup</B> instrument to 
+<A HREF="../../saol/vars/index.html#vars_global">initialize 
+i-rate global variables</A>.
+<LI>
+<A HREF="../../saol/wave/index.html#decl">Initialize global wavetables</A>. 
+<LI>
+Create instances <A
+HREF="../../saol/bus/index.html#send">generated by <B>send</B></A> statements, and execute
+the i-pass of these instruments in the order dictated by the
+<A HREF="../../saol/bus/index.html#determine">sequence rules</A>.
+<LI>
+Set the absolute simulation time to zero. Set the score time to zero.
+</OL>
+
+<H2>II. Orchestra Cycle Execution Order</H2>
+<OL>
+<LI>
+Check if the score time is less than or equal to the end time for the
+simulation.  If it is, stop executing orchestra cycles.
+<LI>
+Any SASL instruments or <A HREF="#instr">dynamically generated
+instruments</A> that are ready to start execution are created. The
+i-pass for each instance is run, in the order dictated by the <A
+HREF="../../saol/bus/index.html#determine">sequence rules</A>.
+Instruments are ready when their start time is less than or equal to
+the current score time, or if they are streaming events that have no
+timestamps that have been received since the last orchestra cycle.
+<LI>
+If any instances are ready for termination at the end of this
+orchestra cycle, the <A HREF="#stnames"><B>released</B></A> flag is
+set for the instance. Instances are ready for termination when their
+end time is less than or equal to the current score time, or when they
+ran a <A HREF="#turnoff"><B>turnoff</B></A> statement in the last
+k-pass, or when they received a MIDI noteoff command.
+<LI>
+SASL control commands that are ready to execute are run. These are
+commands that have a trigger time less than or equal to the current
+score time, or streaming events that have no timestamps that have been
+received since the last orchestra cycle.
+<LI>
+SASL table commands that are ready to execute are run. These are
+commands that have a trigger time less than or equal to the current
+score time, or streaming events that have no timestamps that have been
+received since the last orchestra cycle.
+<LI>
+MIDI events that are ready to execute are run. These are commands that
+have a trigger time less than or equal to the current score time, or
+streaming events that have no timestamps that have been received since
+the last orchestra cycle.
+<LI>
+SASL or MIDI tempo commands that are ready to execute are run. These
+are commands that have a trigger time less than or equal to the
+current score time, or streaming events that have no timestamps that
+have been received since the last orchestra cycle.
+<LI>
+One k-pass and srate/krate a-passes are run for all the instruments in
+the program, obeying the <A HREF=../../saol/bus/index.html#apply>
+execution order rules</A>.  At the start of each a-pass, buses are
+initialized, and during each a-pass, audio output is generated,
+following the <A HREF=../../saol/bus/index.html#system>semantic rules
+of the system buses</A>.
+<LI>
+Instruments scheduled for termination are terminated, except if an
+<A HREF="#turnoff"><B>extend</B></A> statement was executed during its
+k-pass.
+<LI>
+The absolute time is advanced by the <TT>1/krate</TT>, and the
+score time updated appropriately given the current tempo.
+</OL>
+
+<H2>III. Instance Creation Execution Order</H2>
+<OL>
+<LI>
+Instrument parameters are initialized.
+<LI>
+All signal variables set to zero.
+<LI>
+All <A HREF="../../saol/vars/index.html#vars_instr"><B>imports
+ivar</B></A> signal variables are set to the value of their associated
+global variables.
+<LI>
+Wavetable generators are executed.
+<LI>
+All <A HREF="../../saol/wave/index.html#decl"><B>imports table</B></A>
+wavetables (but not <B>imports exports table</B> wavetables) are
+initialized to the value of their associated global table or future
+table.
+</OL>
+
+<H2>IV. [I/A/K]-Pass Execution Order</H2>
+<OL>
+<LI>
+Local signal variables declared at the rate of the pass with the <A
+HREF="../../saol/vars/index.html#vars_instr"><B>imports</B></A> tag are
+set to the value of their corresponding global variables, if any.
+<LI>
+All <A HREF="../../saol/wave/index.html#decl"><B>imports exports
+table</B></A> wavetables are linked to their associated global
+wavetables. Note that changes made to <B>imports exports</B>
+wavetables during an a-pass by an instance may or may not be seen by
+other instances accessing the table until the next k-pass.
+<LI>
+All statements at the rate of the pass are executed.
+<LI>
+Local signal variables declared at the rate of the pass with the <A
+HREF="../../saol/vars/index.html#vars_instr"><B>exports</B></A> tag
+write their value to their corresponding global variables, if any.
+</OL>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+instrument control</A>-><STRONG>in SAOL</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+
+</BODY>
+</HTML>
+
+
+
+
+

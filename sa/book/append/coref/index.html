@@ -1,0 +1,242 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Appendix B: Core Opcode Sorted By Function</TITLE>
+<META name="keywords" content="MP4-SA, core, opcodes, core opcodes, 
+rate, width, opcode rate semantics, int, frac, dbamp, ampdb, abs, sgn,
+exp, log, sqrt, sin, cos, atan, pow, log10, asin, acos, ceil, floor, 
+min, max, gettune, settune, octpch, pchoct, cpspch, pchcps, cpsoct, 
+octcps, midipch, pchmidi, midioct, octmidi, midicps, cpsmidi, irand,
+krand, arand, ilinrand, klinrand, alinrand, iexprand, kexprand, aexprand,
+kpoissonrand, apoissonrand, igaussrand, kgaussrand, agaussrand, gettempo,
+settempo">
+<META name="keywords" content="MP4-SA, core, opcodes, core opcodes, 
+hipass, lopass, bandpass, bandstop, biquad, allpass, comb, 
+fir, iir, firt, iirt, delay, delay1, fracdelay, reverb, chorus, 
+flange">
+<META name="keywords" content="MP4-SA, wavetables, table, tablemap,
+oscil, loscil, koscil, doscil, tableread, tablewrite, ftlen, ftloop,
+ftloopend, ftsr, ftbasecps, ftsetloop, ftsetend, ftsetbase, ftsetsr">
+<META name="keywords" content="MP4-SA, core, opcodes, core opcodes, 
+kline, aline, kexpon, aexpon, kphasor, aphasor, pluck, buzz, grain">
+<META name="keywords" content="MP4-SA, core, opcodes, core opcodes, 
+specialop, fft, ifft, rms, gain, balance, compressor, decimate, port,
+upsamp, downsamp, samphold, sblock, window">
+<META name="description" content="An index to the core opcodes 
+presented in the book, ordered by functions.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+appendices</A>-><STRONG>core opcodes by function</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Appendix B: Core Opcode Sorted By Function</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2><A NAME="">Delays</A></H2>
+<A HREF="../../opcodes/filter/index.html#delay">delay</A> 
+<A HREF="../../opcodes/filter/index.html#delay">delay1</A> 
+<A HREF="../../opcodes/filter/index.html#frac">fracdelay</A> 
+
+<H2><A NAME="">Downsampling</A></H2>
+<A HREF="../../opcodes/sproc/index.html#samp">decimate</A> 
+<A HREF="../../opcodes/sproc/index.html#samp">downsamp</A> 
+<A HREF="../../opcodes/sproc/index.html#samp">sblock</A> 
+
+<H2><A NAME="">Envelope Generation</A></H2>
+<A HREF="../../opcodes/sgen/index.html#env">aexpon</A>
+<A HREF="../../opcodes/sgen/index.html#env">aline</A>
+<A HREF="../../opcodes/sgen/index.html#env">kexpon</A>
+<A HREF="../../opcodes/sgen/index.html#env">kline</A>
+
+<H2><A NAME="">Effects</A></H2>
+<A HREF="../../opcodes/filter/index.html#noneff">chorus</A> 
+<A HREF="../../opcodes/filter/index.html#noneff">flange</A> 
+<A HREF="../../opcodes/filter/index.html#noneff">reverb</A> 
+
+<H2><A NAME="">FIR and IIR Filters</A></H2>
+<A HREF="../../opcodes/filter/index.html#iir">biquad</A> 
+<A HREF="../../opcodes/filter/index.html#fir">fir</A> 
+<A HREF="../../opcodes/filter/index.html#fir">firt</A> 
+<A HREF="../../opcodes/filter/index.html#iir">iir</A> 
+<A HREF="../../opcodes/filter/index.html#iir">iirt</A> 
+
+<H2><A NAME="">Fourier Processing</A></H2>
+<A HREF="../../opcodes/sproc/index.html#fft">fft</A> 
+<A HREF="../../opcodes/sproc/index.html#fft">ifft</A> 
+
+<H2><A NAME="">Loudness and Gain</A></H2>
+<A HREF="../../saol/simple/index.html#loud">ampdb</A>
+<A HREF="../../opcodes/sproc/index.html#gain">balance</A> 
+<A HREF="../../opcodes/sproc/index.html#comp">compressor</A> 
+<A HREF="../../saol/simple/index.html#loud">dbamp</A>
+<A HREF="../../opcodes/sproc/index.html#gain">gain</A> 
+<A HREF="../../opcodes/sproc/index.html#gain">rms</A> 
+
+<H2><A NAME="">Math Functions</A></H2>
+<A HREF="../../saol/simple/index.html#minmax">abs</A>
+<A HREF="../../saol/simple/index.html#trans">acos</A>
+<A HREF="../../saol/simple/index.html#trans">asin</A>
+<A HREF="../../saol/simple/index.html#trans">atan</A>
+<A HREF="../../saol/simple/index.html#quant">ceil</A>
+<A HREF="../../saol/simple/index.html#trans">cos</A>
+<A HREF="../../saol/simple/index.html#trans">exp</A>
+<A HREF="../../saol/simple/index.html#quant">floor</A>
+<A HREF="../../saol/simple/index.html#quant">frac</A>
+<A HREF="../../saol/simple/index.html#quant">int</A>
+<A HREF="../../saol/simple/index.html#trans">log</A>
+<A HREF="../../saol/simple/index.html#trans">log10</A>
+<A HREF="../../saol/simple/index.html#minmax">max</A>
+<A HREF="../../saol/simple/index.html#minmax">min</A>
+<A HREF="../../saol/simple/index.html#trans">pow</A>
+<A HREF="../../saol/simple/index.html#quant">sgn</A>
+<A HREF="../../saol/simple/index.html#trans">sin</A>
+<A HREF="../../saol/simple/index.html#trans">sqrt</A>
+
+<H2><A NAME="">Parametric Filters</A></H2>
+<A HREF="../../opcodes/filter/index.html#par">bandpass</A> 
+<A HREF="../../opcodes/filter/index.html#par">bandstop</A> 
+<A HREF="../../opcodes/filter/index.html#par">hipass</A> 
+<A HREF="../../opcodes/filter/index.html#par">lopass</A> 
+
+<H2><A NAME="">Random Numbers and Sequences</A></H2>
+<A HREF="../../saol/simple/index.html#random">aexprand</A>
+<A HREF="../../saol/simple/index.html#random">agaussrand</A>
+<A HREF="../../saol/simple/index.html#random">alinrand</A>
+<A HREF="../../saol/simple/index.html#random">apoissonrand</A>
+<A HREF="../../saol/simple/index.html#random">arand</A>
+<A HREF="../../saol/simple/index.html#random">iexprand</A>
+<A HREF="../../saol/simple/index.html#random">igaussrand</A>
+<A HREF="../../saol/simple/index.html#random">ilinrand</A>
+<A HREF="../../saol/simple/index.html#random">irand</A>
+<A HREF="../../saol/simple/index.html#random">kexprand</A>
+<A HREF="../../saol/simple/index.html#random">kgaussrand</A>
+<A HREF="../../saol/simple/index.html#random">klinrand</A>
+<A HREF="../../saol/simple/index.html#random">kpoissonrand</A>
+<A HREF="../../saol/simple/index.html#random">krand</A>
+
+</TD>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><A NAME="">Regenerative Filters</A></H2>
+<A HREF="../../opcodes/filter/index.html#dline">allpass</A> 
+<A HREF="../../opcodes/filter/index.html#dline">comb</A> 
+
+<H2><A NAME="">Subtractive Synthesis</A></H2>
+
+<A HREF="../../opcodes/sgen/index.html#buzz">buzz</A>
+
+<H2><A NAME="">Table Playback</A></H2>
+<A HREF="../../saol/wave/index.html#playback">doscil</A>
+<A HREF="../../opcodes/sgen/index.html#grain">grain</A>
+<A HREF="../../saol/wave/index.html#playback">koscil</A>
+<A HREF="../../saol/wave/index.html#playback">loscil</A>
+<A HREF="../../saol/wave/index.html#playback">oscil</A>
+<A HREF="../../opcodes/sgen/index.html#pluck">pluck</A>
+
+<H2><A NAME="">Table Manipulation and Access</A></H2>
+<A HREF="../../saol/wave/index.html#lowcore">ftbasecps</A>
+<A HREF="../../saol/wave/index.html#lowcore">ftlen</A>
+<A HREF="../../saol/wave/index.html#lowcore">ftloop</A>
+<A HREF="../../saol/wave/index.html#lowcore">ftloopend</A>
+<A HREF="../../saol/wave/index.html#lowcore">ftsetsr</A>
+<A HREF="../../saol/wave/index.html#lowcore">ftsetbase</A>
+<A HREF="../../saol/wave/index.html#lowcore">ftsetloop</A>
+<A HREF="../../saol/wave/index.html#lowcore">ftsetend</A>
+<A HREF="../../saol/wave/index.html#lowcore">ftsr</A>
+<A HREF="../../saol/wave/index.html#speedt">speedt</A>
+<A HREF="../../saol/wave/index.html#lowcore">tableread</A>
+<A HREF="../../saol/wave/index.html#lowcore">tablewrite</A>
+
+<H2><A NAME="">Tempo</A></H2>
+<A HREF="../../saol/simple/index.html#tempo">gettempo</A>
+<A HREF="../../saol/simple/index.html#tempo">settempo</A>
+
+<H2><A NAME="">Time Bases for Synthesis</A></H2>
+
+<A HREF="../../opcodes/sgen/index.html#phasor">aphasor</A>
+<A HREF="../../opcodes/sgen/index.html#phasor">kphasor</A>
+
+<H2><A NAME="">Tuning and Pitch</A></H2>
+<A HREF="../../saol/simple/index.html#pitch">cpsmidi</A>
+<A HREF="../../saol/simple/index.html#pitch">cpsoct</A>
+<A HREF="../../saol/simple/index.html#pitch">cpspch</A>
+<A HREF="../../saol/simple/index.html#pitch">gettune</A>
+<A HREF="../../saol/simple/index.html#pitch">midicps</A>
+<A HREF="../../saol/simple/index.html#pitch">midioct</A>
+<A HREF="../../saol/simple/index.html#pitch">midipch</A>
+<A HREF="../../saol/simple/index.html#pitch">octcps</A>
+<A HREF="../../saol/simple/index.html#pitch">octmidi</A>
+<A HREF="../../saol/simple/index.html#pitch">octpch</A>
+<A HREF="../../saol/simple/index.html#pitch">pchcps</A>
+<A HREF="../../saol/simple/index.html#pitch">pchmidi</A>
+<A HREF="../../saol/simple/index.html#pitch">pchoct</A>
+<A HREF="../../opcodes/sproc/index.html#port">port</A> 
+<A HREF="../../saol/simple/index.html#pitch">settune</A>
+
+<H2><A NAME="">Upsampling</A></H2>
+<A HREF="../../opcodes/sproc/index.html#samp">samphold</A> 
+<A HREF="../../opcodes/sproc/index.html#samp">upsamp</A> 
+
+<pre>   
+
+
+</pre>
+
+<B><P>
+Appendix C:</B>
+</B>
+<A HREF="../wave/index.html">Wavetable Generators</A></H2>
+
+</TD>
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+appendices</A>
+-><STRONG>core opcodes by function</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+</BODY>
+</HTML>
+
+

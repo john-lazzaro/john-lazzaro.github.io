@@ -1,0 +1,600 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part V/2: Templates</TITLE>
+<META name="keywords" content="template, templates, map, maplist,
+with, preset,SAOL, MIDI, MP4-SA, MP4">
+<META name="description" content="An explanation of the template
+language construct in SAOL.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../index.html">
+the mp4-sa book</A>-><A HREF="../special/index.html">
+special topics</A>-><STRONG>templates</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part V/2: Templates </H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="65%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+
+<UL>
+<LI>
+<B><A HREF=#intro>Introduction</A>.</B>
+<LI>
+<B><A HREF=#simple>A Simple Example</A>.</B> Shows how to
+uses templates to do simple instrument replication. 
+<LI>
+<B><A HREF=#maplist>Template Variables</A>.</B> Using templates
+to create a family of instruments with different properties.
+<LI>
+<B><A HREF=#preset>Preset Maplists</A></B> Shows how to specify
+the MIDI preset values of a family instruments.
+
+</UL>
+</TD>
+<TD WIDTH="35%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>Language Elements:</H2>
+
+<A HREF="#simple"><B>template</B></A> &nbsp 
+<A HREF="#maplist"><B>map</B></A> &nbsp 
+<A HREF="#maplist"><B>with</B></A> &nbsp 
+<A HREF="#preset"><B>preset</B></A> 
+
+
+</UL>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+Musical instruments that are capable of sounding a range of pitches
+often have a slightly different timbre quality for each pitch. 
+
+<P>
+The simplest way to model this type of instrument in SAOL is to write
+one <B>instr</B> that creates sound for the entire pitch range of the
+instrument. The parameters of this <B>instr</B> specify the pitch and
+timbre of the sound, and the algorithm for sound generation changes
+the pitch and timbre of the instrument based on these parameters.
+
+<P>
+Sometimes, this <I>parametric</I> approach to modeling an instrument
+is not a good fit to the problem. If an instrument generates sound in
+very different ways when played in different registers, it may be
+easier to write several <B>instr</B>s, one for each pitch register.
+
+<P>
+Often, the instrument modeling problem falls between these two
+extremes. The code for different registers is too different to use a
+parametric approach, but so similar that if separate <B>instr</B>s are
+written for each register, most of the code in each instrument would
+be identical. Widespread <I>code cloning</I> is a bad software
+practice, since any bug in the cloned section needs to be fixed
+multiple times.
+
+<P>
+The SAOL <B>template</B> language feature is designed to solve the
+code cloning problem. It provides a way to specify a <I>family</I> of
+<B>instr</B>s that change in systematic ways. Early in the processing
+of SAOL program, a template is transformed into a set of
+<B>instr</B>s, which are then treated identically to normal SAOL
+<B>instr</B>s.
+
+<P>
+
+We begin this chapter with a very simple example of templates, to
+introduce the concept. We then show more complicated examples, to show
+the features of the language construct. In each example, we show the
+family of instruments a template creates.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="simple">A Simple Example</A></H2>
+
+<P>
+The panel on the right shows a simple example that uses templates. The
+top part of the panel is the template definition, which the programmer
+writes instead of creating several nearly-identical instruments. The
+bottom part of the panel shows the instrument definitions that the
+template specified: this is the code the programmer would write if
+the templates feature did not exist in SAOL.
+
+<P>
+The template definition shown in a trivial one: it creates two
+<B>instr</B>s, <TT>lower</TT> and <TT>upper</TT>, that differ
+only in their names. We start with this example to explain the
+basic syntax of the template construction.
+
+<H4><TT>template</TT> syntax</H4>
+
+<P>
+A template begins with the keyword <B>template</B>. This keyword is
+followed by a list of one or more the names of instruments that the
+template creates (in this case, the instrument names <TT>lower</TT>
+and <TT>upper</TT>). This list starts with <TT>&lt</TT> and ends with
+<TT>&gt</TT>, and the list members are separated by commas.  Each name
+must be a valid instrument name, as described in <A
+HREF="../saol/vars/index.html#names">Part II/1</A>.
+
+<P>
+The name list is followed by the parameter definition for the family
+of instruments (in this case, <TT>(note)</TT>). Template parameters are
+defined in the same way as <B>instr</B> parameters (see <A
+HREF="../saol/vars/index.html#preamble"> Part II/1</A>). It is not
+possible to define a template so that different <B>instrs</B> have
+different parameter lists.
+
+<P>
+Following the parameter list is the <B>map</B> construct.  As
+described in this <A HREF="#maplist">next section</A>, the map
+construct lets the programmer specify how each <B>instr</B> in a
+template family is unique. 
+
+<P>
+This example shows the simplest form of the map construct, that
+specifies that all family members are identical (even in the simple
+cloning case, a map construct is required). The null map construct
+consist of the <B>map</B> keyword, followed by a matched set of curly
+brackets (<TT>{&nbsp}</TT>), followed by the <B>with</B> keyword,
+followed by a second set of curly brackets (<TT>{&nbsp}</TT>).
+
+<P>
+The rest of a template definition looks like an instrument
+definition: curly braces surround a variable block
+followed by a code block.
+
+<P>
+This template example creates two identical instruments, upper and
+lower, as shown on the bottom part of the panel, at the start of
+execution of the SAOL program.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>This <TT>template:</TT></H2>
+<tt>
+<pre>
+
+template &lt;lower, upper&gt (note) 
+
+map { } with { } 
+
+{
+  table t(harm,128,1);
+  ksig e;
+
+
+  // runs at k-rate
+
+  e = 0.5*kline(0,1,1,1,0);
+
+  // runs at a-rate
+
+  output(e*oscil(t,cpsmidi(note)));
+
+}
+
+</pre>
+</tt>
+<H2>Expands to:</H2>
+
+<tt>
+<pre>
+
+instr lower (note) {
+
+  table t(harm,128,1);
+  ksig e;
+
+
+  e = 0.5*kline(0,1,1,1,0);
+
+  output(e*oscil(t,cpsmidi(note)));
+
+}
+
+
+instr upper (note) {
+
+  table t(harm,128,1);
+  ksig e;
+
+
+  e = 0.5*kline(0,1,1,1,0);
+
+  output(e*oscil(t,cpsmidi(note)));
+
+}
+</pre>
+</tt>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="maplist">Template Variables</A></H2>
+
+<P>
+The example on the right panel shows how
+to use the <B>map</B> construction to 
+specialize each family member of a template.
+The top part of the example shows the 
+template definition, and the bottom part
+of the example shows the two instruments
+(<TT>lower</TT> and <TT>upper</TT>) the
+template creates.
+
+<P>
+The map construction works by defining
+a set of <I>template variables</I>,
+that may be used in the code block
+anywhere that an expression may be
+used. The map construction also defines,
+for each family member of the template,
+the actual SAOL <I>substitution expression</I>
+that should used in place of the template
+variable in that family member. By defining
+different substitution expressions for
+each family member, the programmer can
+specialize the functionality of each
+instrument created by the template.
+
+<P>
+The example on the right panel shows
+how to specify template variables and
+substitution expressions in a template.
+Template variables are listed inside
+the curly brackets following the
+<B>map</B> keyword. In this example,
+there are three template variables:
+<TT>env</TT>, <TT>tone</TT>, and <TT>vol</TT>. 
+
+<P>
+The second part of the map construction
+specifies the expression to substitute for
+each template variable, for each instr
+created by the template. Substitution
+expressions are defined inside the
+curly braces following the <B>with</B>
+keyword.
+
+<P>
+A substitution expression definition
+consists of a list of expression lists.
+Each expression list is enclosed in
+angle bracket (<TT>&lt;,&gt;</TT>), and
+contains one expression for each template
+variable. There is one expression list
+for each instrument in the family, 
+separated by commas.
+
+<P>
+In this example, the first expression
+list defines the substitutions for
+instrument <TT>lower</TT>. In other
+words, it specifies that the expression
+<TT>kline(0,1,1,1,0)</TT> be used in
+place of the template variable <TT>env</TT>,
+that the expression <TT>oscil(t,cpsmidi(note))</TT>
+be used in place of the template variable
+<TT>tone</TT>, and the number <TT>0.9</TT>
+be used in place of the template variable
+<TT>vol</TT>. Likewise, the second expression
+list defines substitutions for family member
+<TT>upper</TT>.
+
+<P>
+The second part of the example shows the
+two instruments the template creates. Note
+that all template variables are gone, 
+replaced by the appropriate expressions.
+
+<P>
+Compared to other SAOL language elements,
+templates are rather complicated. Keep
+these points in mind to avoid common 
+template mistakes:
+<UL>
+<LI> The <B>with</B> part of the map
+construction must have one expression
+list for each family member.
+<LI> Each expression list in the <B>with</B>
+part of the map construction must have
+one expression for each template variable.
+<LI> Template variables may be used in the
+code block anywhere an expression is legal.
+Note that in SAOL, variables are sometimes
+used in places where expressions are illegal:
+for example, the <TT>lval</TT> of an <A HREF = 
+"../saol/exstat/index.html#assign">assignment
+statement.</A>
+<LI> Template variables are not declared in
+the variable declarations.
+</UL>
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>This <TT>template:</TT></H2>
+<tt>
+<pre>
+
+template &lt;lower, upper&gt (note) 
+
+map { env, tone, vol } with 
+
+{ 
+  &lt kline(0,1,1,1,0), 
+    oscil(t,cpsmidi(note)),
+    0.9 &gt,
+
+  &lt kexpon(0.01,1,1,1,0.01), 
+    buzz(cpsmidi(note), 0,0, 0.5),
+    0.5 &gt 
+} 
+
+
+{
+
+table t(harm,128,1);
+ksig e;
+
+// runs at k-rate
+
+e = vol*env;
+
+// runs at a-rate
+
+output(e*tone);
+
+}
+
+</pre>
+</tt>
+<H2>Expands to:</H2>
+
+<tt>
+<pre>
+
+instr lower (note) {
+
+tone t(harm,128,1);
+ksig e;
+
+// runs at k-rate
+
+e = 0.9*kline(0,1,1,1,0);
+
+// runs at a-rate
+
+output(e*oscil(t,cpsmidi(note)));
+
+}
+
+
+instr upper (note) {
+
+tone t(harm,128,1);
+ksig e;
+
+// runs at k-rate
+
+e = 0.5*kexpon(0.01,1,1,1,0.01);
+
+// runs at a-rate
+
+output(e*buzz(
+       cpsmidi(note), 0,0, 0.5));
+
+}
+</pre>
+</tt>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="preset">Preset Maplists</A></H2>
+
+<P>
+As described in <A HREF="../control/midi/index.html#instr"> Part
+III/2</A>, the <B>preset</B> tag is used in <B>instr</B> definitions
+to define the MIDI preset numbers associated with the instrument. In
+this section, we show how to specify MIDI preset numbers for each
+instrument created by a template.
+
+<P>
+The right panel shows a template definition that uses the optional
+<I>preset maplist</I> construction to specify MIDI preset numbers.
+This construction begins with the keyword <B>preset</B>, and occurs
+after the template name definition list (in this example,
+<TT>&lt;upper,lower&gt;</TT>). 
+
+<P>
+Following the <B>preset</B> keyword is a list of expression lists, one
+for each instrument in the template family. The first list declares
+the MIDI preset numbers for the first instrument, the second list the
+MIDI preset numbers for the second instrument, etc. Each expression
+list is enclosed in angle brackets (<TT>&lt;,&gt;</TT>) and
+separated by commas.
+
+<P>
+Remember these points when using the preset maplist
+construction
+
+<UL>
+<LI>
+Unlike <B>instr</B> definitions, the <B>preset</B> token comes
+<I>before</I> the parameter list, and the preset expressions are
+separated by commas, not spaces.
+<LI>
+Because each instrument in a template may have a different quantity of
+MIDI preset numbers, the length of each expression list may be
+different.
+<LI>
+Only constant expressions are allowed in the preset maplist
+construction; global variables may not be used.
+<LI>
+Two instruments may not use the same MIDI preset numbers.
+</UL>
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>This <TT>template:</TT></H2>
+<tt>
+<pre>
+
+template &lt;lower, upper&gt 
+
+preset &lt;0,1&gt;, &lt;5+1&gt (note) 
+
+map { env } with 
+
+{ 
+  &lt kline(0,1,1,1,0) &gt,
+
+  &lt kexpon(0.01,1,1,1,0.01) &gt 
+} 
+
+
+{
+  table t(harm,128,1);
+  ksig e;
+
+
+  // runs at k-rate
+
+  e = 0.5*env;
+
+  // runs at a-rate
+
+  output(e*oscil(t,cpsmidi(note)));
+
+}
+
+</pre>
+</tt>
+<H2>Expands to:</H2>
+
+<tt>
+<pre>
+
+instr lower preset 0 1 (note) {
+
+  table t(harm,128,1);
+  ksig e;
+
+
+  e = 0.5*kline(0,1,1,1,0);
+
+  output(e*oscil(t,cpsmidi(note)));
+
+}
+
+
+instr upper preset 6 (note) {
+
+  table t(harm,128,1);
+  ksig e;
+
+
+  e = 0.5*kexpon(0.01,1,1,1,0.01);
+
+  output(e*oscil(t,cpsmidi(note)));
+
+}
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<B>Next: </B>
+<A HREF="../special/slib/index.html">Part V/3: The Slib Library</A>
+
+
+</TD>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../index.html">
+the mp4-sa book</A>-><A HREF="../special/index.html">
+special topics</A>-><STRONG>templates</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../copyright/index.html">Copyright 2000 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>

@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Appendix G: COR1 Changes to MP4-SA</TITLE>
+<META name="description" content="An index to MP4-SA changes
+introduced in the COR1 MPEG Audio Corrigenda (Feb 2001).">
+<META name="keywords" content="MP4-SA">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+appendices</A>-><STRONG>cor 1 changes</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Appendix G: <A HREF="http://john-lazzaro.github.io/sa/book/append/fdis/SA_DCOR1.pdf">COR1</A>
+Corrigenda Changes to MP4-SA</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+
+<H2>User-Defined Opcodes</H2>
+
+<P>
+New <A HREF="../../opcodes/user/index.html#block">normative rate
+semantics</A> describe the execution of i-rate statements in
+<B>kopcodes</B> and k-rate and i-rate statements in <B>aopcodes</B>.
+New <A HREF="../../opcodes/user/index.html#header">restrictions</A>
+limit the use of k-rate and a-rate variables and statements in
+user-defined polymorphic opcodes.
+
+
+<H2>Opcode Call Rate Semantics</H2>
+
+<P>
+New normative rate semantics describe the execution of <B>kopcode</B>
+calls in a-rate statements and <B>iopcode</B> calls in k-rate or
+a-rate statements. Explained in both <A
+HREF="../../saol/simple/index.html#rate3">core opcode</A> and <A
+HREF="../../opcodes/user/index.html#rate3">user-defined opcode</A>
+chapters.
+
+
+<H2>If and If-Else Rate Semantics</H2>
+
+<P>
+New <A HREF="../../saol/exstat/index.html#if">normative rate
+semantics</A> describe the execution of i-rate statements in k-rate
+<B>if</B> and <B>if-else</B> statement blocks, and i-rate and k-rate
+statements in a-rate <B>if</B> and <B>if-else</B> statement blocks.
+
+<H2>Standard Names</H2>
+
+<P>
+SAOL programs may alter the value of writable standard names (<A
+HREF="../../control/midi/index.html#stnames">MIDIctrl</A> and params)
+by using the <A HREF="../../opcodes/user/index.html#calls">call by
+reference</A> semantics of user-defined opcodes.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Core Opcodes</H2>
+
+<P>
+The syntax and semantics of the <A
+HREF="../../opcodes/sproc/index.html#comp">compressor</A> core opcode
+has changed: all programs using this opcode will need to be altered.
+Significant semantic changes have also been made to the <A
+HREF="../../opcodes/sproc/index.html#fft">spectral</A> opcodes.  Minor
+clarifications have been made to several other core opcodes; consult
+<A HREF="http://john-lazzaro.github.io/sa/book/append/fdis/SA_DCOR1.pdf"
+>COR 1</A> for details.
+
+<H2>Wavetable Generators</H2>
+
+<P>
+The semantics of the <A
+HREF="../../saol/wave/index.html#lowgen">concat</A> and the <A
+HREF="../../opcodes/sproc/index.html#window">window</A> wavetable
+generator have been clarified.
+
+<H2>MIDI</H2>
+
+<P>
+MP4-SA encodings that use the <B>midi_file</B> chunk now use the
+default tempo of the MIDI File standard (120 beats/minute). New <A
+HREF="../../control/midi/index.html#stnames">normative semantics</A>
+for monitoring MIDI standard names in dynamic, effects, and SASL
+instruments. Correct semantics for the All Sounds Off and All Notes
+Off MIDI commands.
+
+<H2>Miscellaneous</H2>
+
+<P>
+New <A HREF="../../opcodes/user/index.html#block">semantics</A> for
+user-defined opcodes without return statements, and for empty return
+statements. New semantics of event triggering in the <A
+HREF="../../control/saolc/index.html#order">decoder execution</A>
+cycle: an event occurs if its timestamp is less than or equal to the
+current score time. Corrections to the SAOL <A
+HREF="../../saol/exstat/index.html#logic">operator precedence</A>
+table.
+
+<pre>
+
+</pre>
+
+<B><P>
+Appendix H:</B>
+</B>
+<A HREF="../notcov/index.html">Aspects of MP4-SA Not Covered in This Book</A>
+
+</TD>
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+appendices</A>-><STRONG>cor 1 changes</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>
+
+

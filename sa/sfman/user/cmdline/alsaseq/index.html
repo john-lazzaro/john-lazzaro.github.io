@@ -1,0 +1,87 @@
+<pre>
+
+            ALSA Sequencer control driver for Sfront
+
+Some questions regarding the alsaseq.c driver:
+
+1 I have tested it using the 0.5.10 version of the ALSA driver running
+  on a 2.4.0 Linux kernel. The asound library API is supposed to keep
+  more or less unchanged, so the alsaseq driver should compile/work
+  with older versions of ALSA.
+
+2 It parses a driver specific command line argument, which is NOT
+  shown when typing sfront -help. The options can be used to tell the
+  sa.c program to connect to an ALSA port and read events from it. The
+  syntax is:
+
+     -csys_alsaseq_subscribe client:port [client:port ...] 
+
+  This option is not mandatory. By default, the sa.c program will just
+  open its own ALSA port, and wait for connections. You can tell your
+  ALSA application to connect to it, or use the "aconnect" command to
+  connect an ALSA midi device to the program.
+
+3 It can handle multiple input devices, which means that it can
+  generate extended channel numbers bigger than 16. The maximum number
+  of extended channels is set to 512 (32 devices each with 16 possible
+  midi channels). And yes, I have tried with 32 different devices!
+  (reading from my MIDI keyboard and from 31 instances of pmidi
+  playing a simple song). Of course, it was too much for my CPU... :)
+
+4 The driver needs to know how many channels/devices should it
+  handle. The sfman does not say how to get this value from the
+  application. (I guess I could have used the CSYS_MAXEXTCHAN constant,
+  but I restrained from using an "undocumented feature"). So, just for
+  now, changing the maximum number of extended channels/devices must
+  be done like this:
+
+  The number of extended channels must be changed in the control.c
+  file, as usual, setting the cmaxchan variable as described in the
+  sfront development manual (control drivers coding section), in the
+  "alsaseq" part of the cinfilecheck() function. The default is 512.
+
+  The associated number of possible devices (cmaxchan/16, 32 by
+  default) must be set in the line with the definition
+
+      #define CSYSI_MAX_DEVS 32
+
+  in the alsaseq.c file.
+
+  When these changes are done, sfront should be recompiled. Some
+  optimisation changes can be done before, though. The following lines
+  in the alsaseq.c source
+
+      #define CSYSI_MAP2_BITS 6
+      #define CSYSI_MASK1  0xFFC0
+
+  set the size of some internal tables. Those values are optimised for
+  CSYSI_MAX_DEVS with a value of 32. They will work for other values
+  of CSYSI_MAX_DEVS, but should be changed to optimise the tables
+  sizes. Some reasonable values:
+
+     #define CSYSI_MAX_DEVS 32
+     #define CSYSI_MAP2_BITS 6
+     #define CSYSI_MASK1  0xFFC0
+     
+     #define CSYSI_MAX_DEVS 64
+     #define CSYSI_MAP2_BITS 5
+     #define CSYSI_MASK1  0xFFE0
+     
+     #define CSYSI_MAX_DEVS 128
+     #define CSYSI_MAP2_BITS 5
+     #define CSYSI_MASK1  0xFFE0
+     
+     #define CSYSI_MAX_DEVS 255
+     #define CSYSI_MAP2_BITS 4
+     #define CSYSI_MASK1  0xFFF0
+     
+  Yes, I know this is a kludge. I hope it will be handled
+  automatically in future versions.
+
+Enjoy.
+
+  Enrique Robledo Arnuncio <era@debian.org>
+
+</pre>
+
+

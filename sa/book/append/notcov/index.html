@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Appendix H: Aspects of MP4-SA Not Covered in This Book</TITLE>
+<META name="keywords" content="MP4-SA, SAOL, language,
+sasbf, audiofx,  fx_speedc, sample">
+<META name="description" content="Aspects of MP4-SA Not Covered in This Book.
+Describes what was left out of the book, and where to find out about it in
+the standards document">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+appendices</A>-><STRONG>not covered</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Appendix H: Aspects of MP4-SA Not Covered in This Book</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="45%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>Introduction</H2>
+
+<P>
+Several part of MPEG 4 Structured Audio are not discussed in the
+book. In this Appendix, we briefly describe these topics, and provide
+a pointer to the part(s) of the <A
+HREF="http://john-lazzaro.github.io/sa/book/append/fdis/SA-FDIS.pdf">standards document</A> (FDIS ISO/IEC
+14496-3:1999(E), edited by Eric Scheirer) that
+explains the topic.
+
+<P>
+The uncovered topics are listed on the right panel. Several
+of these topics concern language features not included in
+<TT>sfront</TT>, such as AudioFX support and SASBF synthesis.
+
+<P>
+The other topics on the right panel are standards-oriented issues,
+such as the binary layout of an MP4 file, that is not usually
+necessary knowledge for SAOL programmers.
+
+</TD>
+<TD WIDTH="55%" VALIGN=top BGCOLOR="#FFCCCC">
+
+
+<H2>Uncovered Topics and 
+<A HREF="http://john-lazzaro.github.io/sa/book/append/fdis/SA-FDIS.pdf">FDIS</A> Page Numbers</H2>
+
+<H4>Language Features</H4>
+<UL>
+<LI>
+<B><TT>sasbf</TT> (p. 52, 107)</B> An atomic element in expressions, 
+that implements a sample-bank based synthesizer algorithm. Its
+primary purpose in life is to support Object 2 MP4-SA decoders,
+which don't use SAOL and SASL. Not in <TT>sfront</TT>.
+<LI>
+<B>AudioFX elements (p. 56, 114)</B>. SAOL can be used in other
+parts of MP4 as a support language for effects processing. The
+standard names <B>position</B>, <B>direction</B>,
+<B>listenerPosition</B>, <B>listenerDirection</B>, <B>minFront</B>,
+<B>maxFront</B>, <B>minBack</B>, <B>maxBack</B>, and <B>params</B>
+support this application. Control drivers in <TT>sfront</TT> are
+able to support these variables, but none do at present.
+<LI>
+<B><TT>fx_speedc</TT> core opcode (p. 95)</B> A core opcode for 
+changing the sampling rate of an <B>input_bus</B>. Not supported
+in <TT>sfront</TT>.
+</UL>
+
+<H4>Standards Issues</H4>
+<UL>
+<LI>
+<B>Binary MP4-SA Files (p. 16, 106, 116)</B>. How to read and write the
+MP4 binary encoding.
+<LI>
+<B>Decoding Process (p. 21)</B>. Exact normative description of
+how a SAOL program starts up, and how an orchestra cycle 
+executes. 
+<LI>
+<B>Random Access (p. 131)</B>. How to write SAOL and SASL so that the
+audio can be "fast-forwarded and reversed" easily.
+</UL>
+
+
+<B><P>
+Return to:</B>
+</B>
+<A HREF="../index.html">Appendix Cover Page</A>
+</TD>
+
+
+
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+appendices</A>-><STRONG>not covered</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>

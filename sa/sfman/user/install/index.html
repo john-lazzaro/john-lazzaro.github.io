@@ -1,0 +1,928 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>Sfront Reference Manual: Part I/1: Installing Sfront</TITLE>
+<META name="keywords" content="MP4-SA, SASL, SAOL, MP4, sfront,
+install, platforms, supported platforms, download, downloading, compile
+compiling, test, testing, bug, bugs, bug report, submit bug report">
+<META name="description" content="A part of the Sfront reference
+manual, that describes how to install the program. Sfront is a 
+program that translates MP4-SA files into C programs.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+sfront reference manual</A>->
+<STRONG>installing sfront</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The <TT>sfront</TT> Reference Manual</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part II/1:  Installing Sfront</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="100%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#platform">Supported platforms</A>.</B> Where sfront runs.
+<LI>
+<B><A HREF="#download">Downloading sfront</A>.</B> How to pick up sfront.
+<LI>
+<B><A HREF="#compile">Compiling sfront</A>.</B> Creating a binary.
+<LI>
+<B><A HREF="#test">Testing sfront</A>.</B> Making music with sfront.
+<LI>
+<B><A HREF="#bugs">Bugs</A>.</B> Let us know if things don't work.
+</UL>
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+In this chapter, we describe how set up 
+sfront to work on your machine, and how
+to test sfront to make sure it works
+properly. 
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="platform">Supported Platforms</A></H2>
+
+<P>
+Sfront is written in ANSI C and uses only ANSI C libraries.  When
+executed, sfront creates ANSI C files that only use ANSI C
+libraries.  
+
+<P>
+These attributes make sfront portable over a wide number of platforms,
+with ancillary files (makefiles, project files, etc.) and real-time
+support being the primary portability issues.
+
+<P>
+The right panel shows the platforms sfront is currently known to work.
+A checkbox in the <I>R</I> column indicates basic file rendering
+functionality. 
+
+<P>
+The <I>S</I>, <I>M</I>, and <I>P</I> columns indicate support for
+audio output and input to soundcards, MIDI control input from an
+external controller, and plug-in support.
+
+<P>
+We currently provide a generic source distribution, suitable for use
+on most UNIX variants (including Linux and Mac OS X) as well as
+Microsoft Windows.  <!--The Debian project <A
+HREF="http://packages.debian.org/testing/sound/sfront.html">offers</A>
+a binary distribution of sfront, which is maintained by Enrique
+Robledo Arnuncio.-->
+
+<P>
+We develop sfront under Mac OS X; the sfront user community is
+instrumental in porting and testing to other platforms.
+
+<P>
+Thanks to Ross Bencina, Richard Dobson, Michael Gogins, Peter Maas,
+Kees van Prooijen, and Tim Thompson for Microsoft support. Thanks to
+Bertrand Petit for FreeBSD support. Thanks to the coreaudio-api and
+darwin list members, and Manfred Brockhaus, BUYO-BUYO-IGOR, Phil Burk,
+Richard Dobson, Dominic Mazzoni, and Juno for Mac OS support. Thanks
+to Michael Pruett for IRIX support.  Thanks to Jeremy Voorhis and
+Christian Haines for testing AudioUnit plug-in support.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Platform Status</H2>
+<TT>
+<pre>
+
+OS Type          | R | S | M | P |
+----------------------------------
+OS X 10.7 -m32   | x | x | x | x |
+Linux 2.4 -m32   | x | x | x |   |
+Linux 2.6 -m64   | x | ? | ? |   |
+MS Windows       | x | x | ? |   |
+IRIX 6.5         | x | x |   |   |
+Solaris 2.6      | x |   |   |   |
+FreeBSD 3.4      | x | x | ? |   |
+BeOS 4.5         | x |   |   |   |
+HPUX 9.x         | x | x |   |   |
+----------------------------------
+
+Key: 
+    
+  R: sfront can create a C file, 
+that when compiled and executed,
+generates a WAV file containing
+the performance.
+
+  S: C files that can handle 
+real-time audio output and input
+from attached soundcards.
+
+  M: Real-time MIDI control input
+from an attached MIDI controller.
+
+  P: Plug-in support.
+
+x --> known to work
+? --> untested drivers, please 
+      report test results.
+</pre>
+</TT>
+
+<!--
+OS Type          | N |   
+--------------------------------------
+Linux 2.4        | x |
+Mac OS X 10.4    | x |
+MS Windows       |   |
+IRIX 6.5         | ? |
+Solaris 2.6      | x |
+FreeBSD 3.4      | ? |
+BeOS 4.5         |   |
+HPUX 9.x         | x |
+--------------------------------------
+
+  N: Sfront networking support.
+-->
+
+<H2>Compiler Support</H2>
+<TT>
+<pre>
+Sfront, and the C code sfront
+generates, compiles under gcc
+on all platforms.
+
+Under Windows, compiles using 
+Microsoft Visual C++ compiler 
+and Borland C++.
+
+Under Mac OS X, compiles with 
+cc/gcc. 
+
+Under Mac OS 9, sfront compiles,
+but the C code sfront creates is
+not completely stable (the sample
+wavetable generator and MIDI 
+file input are the major issues).
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="download">Downloading Sfront</A></H2>
+
+<P>
+Sfront is free software, distributed under the terms of the BSD
+license (without advertising clause).  See the right panel to learn
+how to download the source distribution.
+<!--An official Debian package for sfront also <A
+HREF="http://packages.debian.org/testing/sound/sfront.html">exists</A>.-->
+
+<H4>Unpacking <TT>wxyz.tar.gz</TT> files</H4>
+
+<P>
+The source distributions intended for Mac OS X, Linux, and generic UNIX
+systems are in the form of a UNIX tar file, compressed with the gzip
+utility (i.e. <TT>wxyz.tar.gz</TT>, or perhaps <TT>wxyz.tar</TT> if
+your browser automatically uncompresses files). The commands:
+
+<TT>
+<pre>
+gunzip sfront.tar.gz
+tar -xf sfront.tar
+</pre>
+</TT>
+
+<P>
+should unpack this file and create
+the directory sfront. If the 
+download generates the file
+sfront.tar, only execute the
+second command.
+
+<H4>Unpacking <TT>wxyz.zip</TT> files</H4>
+
+<P>
+The distributions intended for Windows systems are in the form of a
+ZIP archive. Use a tool such as Pkunzip or WINzip to unpack this file
+and create the directory sfront.
+
+<H4>The <TT>sfront</TT> directory tree</H4>
+
+<P>
+If you downloaded a <TT>tar.gz</TT> or <TT>zip</TT> file, unpacking
+the file will create a set of subdirectories under the <TT>sfront</TT>
+directory:
+
+<TT>
+<pre>
+% cd sfront
+% ls
+examples/  sfman/   src/   bin/   lib/
+</pre>
+</TT>
+
+<P>
+The <TT>examples</TT> directories holds set of MP4-SA files to
+test sfront. 
+
+<P>
+The <TT>src</TT> directory holds the source code to sfront.
+
+<P>
+After compilation, the <TT>bin</TT> directory holds sfront binaries.
+
+<P>
+The <TT>lib</TT> directory holds SAOL programming libraries, including the
+<A HREF="../../../book/special/slib/index.html">Slib</A>
+library of low-level utilities.
+
+<P>
+The <TT>sfman</TT> directory holds a copy of the HTML manual you're
+reading right now, which starts at
+
+<TT>
+<pre>
+sfman/index.html
+</pre>
+</TT>
+
+<P>
+Other files and directories may also be present.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Download <TT>sfront 0.99, 8/31/11</TT></H2>
+
+<TT>
+<pre>
+
+A source distribution is
+available, which works well 
+on Mac OS X, Linux, MS Windows,
+and generic UNIX platforms.
+
+To read about changes since the
+last distribution, read this
+<A HREF="../ref/index.html#change">change log</A>.
+
+Click on
+
+<A
+HREF="http://john-lazzaro.github.io/sa/sfront.tar.gz">[sfront.tar.gz : 4.73 MB]</A>
+
+or 
+
+<A
+HREF="http://john-lazzaro.github.io/sa/sfront.zip">[sfront.zip : 4.92 MB]</A>
+
+to download the full source 
+distribution for sfront, which
+includes a large set of examples. 
+
+
+Click on
+
+<A
+HREF="http://john-lazzaro.github.io/sa/sfrontlite.tar.gz">[sfrontlite.tar.gz : 1.03 MB]</A>
+
+or 
+
+<A
+HREF="http://john-lazzaro.github.io/sa/sfrontlite.zip">[sfrontlite.zip : 1.23 MB]</A>
+
+
+to download a minimal source 
+distribution for sfront, which
+includes a smaller set of examples.
+
+<!--Sfront also has an official 
+Debian <A HREF="http://packages.debian.org/testing/sound/sfront.html">package</A> maintained
+by Enrique Robledo Arnuncio.
+Enrique's package may contain
+a slightly older sfront version
+than the source distribution above.-->
+</pre>
+</TT>
+
+<TT>
+<pre>
+An ANSI C compiler is needed to
+create the sfront binary and to
+compile sfront's output, and a
+version of make is needed to 
+try the examples. If you are a
+DOS/Windows user and don't
+have these tools, click on
+
+<A
+HREF="http://john-lazzaro.github.io/sa/win_gnu.zip">[win_gnu.zip : 1.8 MB]</A>
+
+to download a Windows port of 
+the GNU gcc and make. Thanks to
+Ross Bencina for this package.
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="compile">Compiling sfront</A></H2>
+
+<P>
+To compile sfront under UNIX, begin by
+<TT>cd</TT>'ing to the <TT>sfront/src</TT>
+directory. Edit the <TT>Makefile</TT> in
+this directory, making the changes suggested
+on the right panel.
+
+<P>
+Once these changes are made, simply type
+
+<TT>
+<pre>
+make install
+</pre>
+</TT>
+
+<P>
+If all goes well, this command will trigger the compilation of all the
+C source files that make up <TT>sfront</TT>, then link the object
+files to create the <TT>sfront</TT> binary, and finally copy the
+binary to the bin directory specified by the <TT>Makefile</TT>.
+
+<P>
+If all doesn't go well, please let us know so we can do our best to
+fix the problem. See these <A HREF="#bugs">instructions</A> for sending
+a bug report.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Makefile options</H2>
+
+<TT>
+<pre>
+Before starting compilation, 
+edit the Makefile and read 
+the comments for suggestions
+on how to customize sfront for
+your environment. In particular:
+
+
+BINDIR = ../bin/
+
+BINDIR is where the binary of
+sfront is copied. BINDIR defaults
+to the sfront/bin directory, but
+you may wish to put the binary
+somewhere else. The complete path
+for BINDIR must be in your shell 
+path in order to use sfront on
+the command line.
+
+
+CC = gcc 
+
+CC specifies the the C compiler.
+On early versions of Mac OS X, the 
+Developer Tools installs gcc as cc, 
+and so  "gcc" must be changed to "cc".
+
+
+LINKLIB = -lm
+
+In some systems, LINKLIB will need
+extra options -- if you find that
+compilation works but linking fails,
+change this line.
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H4><A NAME="windows">If you use Windows ...</A></H4>
+
+<P>
+If you own the Microsoft Visual C++ or Borland C++ compiler, you can
+use it to compile <TT>sfront</TT> and the C files it creates, by
+following the directions above.  Microsoft users will need to use the
+project files locating in the <TT>win/</TT> directory to make
+sfront. These files were supplied by Richard Dobson.
+
+<P>
+If you don't own a C compiler, you can download the Windows port of
+the GNU development tools, using the link on the right panel. Thanks
+to Ross Bencina for putting this download together.
+
+<P>
+To fully use real-time audio support under Windows, you should
+download and install the latest version of <A
+HREF="http://www.microsoft.com/downloads/Browse.aspx?displaylang=en&categoryid=2">Developer
+Microsoft DirectSound</A>.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H4>GNU Tools for Windows</H4>
+
+<TT>
+<pre>
+Click <A HREF="http://john-lazzaro.github.io/sa/win_gnu.zip">here</A> to download a
+ZIP file (1.8 MB) that contains
+the Windows version of the GNU
+C compiler and GNU make. 
+
+</pre>
+<TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H4><A NAME="windows">If you own a Mac ...</A></H4>
+
+<P>
+We recommend Mac OS X for Macintosh users; sfront compiles and has
+been well tested on 10.7 (Lion) and 10.4 (Tiger).  We do not have
+access to 10.5/10.6 machines, and so compatability reports would be
+appreciated.  For stand-alone programs, sfront supports low-latency
+audio I/O under OS X using the CoreAudio framework.  Sfront also
+supports the AudioUnit plug-in format.
+
+<P>
+Sfront also compiles on Mac OS 9, using the the free <A
+HREF="http://developer.apple.com/tools/mpw-tools/">MPW</A> system to
+compile sfront and the C files it creates. Build sfront as an MPW tool
+and add it to your path, so that it can be used as a command-line tool
+in the MPW shell. Also build sa.c files as MPW-tools.
+
+<P>
+MIDI file and sample file reading is unstable under MPW, and so
+several of the examples shipped with sfront will not work under OS 9.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H4>Developer Tools for Mac OS X</H4>
+
+<TT>
+<pre>
+For 10.7/10.6 users, the Xcode developer 
+tools are available as a free download 
+via the Mac App Store application.  
+
+Otherwise, the boxed Mac OS X set 
+includes a developer CD, that 
+contains the Apple cc compiler and 
+many other development tools. Some 
+Macs have these developer tools 
+installed at the factory. Pre 10.6
+userscan also obtain these tools
+for free, by becoming an <A HREF="http://developer.apple.com/membership/online.html">ADC Online</A> 
+member, and downloading the tools
+from the ADC website.
+</pre>
+<TT>
+
+<H4>MPW for the Mac (Mac OS 9 only)</H4>
+
+<TT>
+<pre>
+Click <A HREF="http://developer.apple.com/tools/mpw-tools/">here</A> to download a 
+free compiler and development
+environment for the Macintosh. 
+
+</pre>
+<TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="test">Testing sfront</A></H2>
+
+<P>
+The sfront distribution includes a set of example files, to test
+different aspects of the program. The example files are located in
+subdirectories that are in <TT>sfront/examples</TT>. If you installed
+a packaged version of sfront, copy <TT>/usr/doc/sfront/examples</TT>
+to your home directory). Not all sfront distributions contain the same
+examples, due to file size and legal issues.
+
+<P>
+Each of the example directories share a common structure.  The
+directories include a <TT>Makefile</TT>, a SAOL file, and any other
+files needed in the example. See the right panel for a description of
+the examples.
+
+<P>
+Entering any of these directories and typing <TT>make</TT> results in
+the generation of an <TT>output.wav</TT> audio performance (an
+exception is the example <TT>in</TT>, which cannot be made until
+example <TT>beat</TT> is made). Mac OS X users may need to change the
+CC in each Makefile, from "gcc" to "cc".
+
+<P>
+The simplest example is <TT>examples/min</TT>, which should exist in
+all sfront distributions. Enter this
+directory, type <TT>make</TT>, and the command should finish a few
+seconds later, after running
+
+<UL>
+<LI>
+<TT>sfront</TT>, which produces the file <TT>sa.c</TT>.
+<LI>
+The C compiler, which compiles <TT>sa.c</TT> to produce <TT>sa</TT>.
+<LI>
+The object file <TT>sa</TT>, which creates the file <TT>output.wav</TT>.
+</UL>
+
+<P>
+If these commands execute, and if the <TT>output.wav</TT> file sounds
+like a short synthetic melody, then <TT>sfront</TT> works on your
+system.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Sfront Examples</H2>
+
+<TT>
+<pre>
+The number of examples in
+your sfront distribution 
+depends on the type of 
+distribution you have.
+
+Listed below are examples 
+which may included in your
+version of sfront. ES 
+indicates the example was
+written by Eric Scheirer.
+
+
+name       test coverage
+------------------------
+bach       MIDI files
+beat       SASL table lines (ES).
+claps      AIF soundfile (ES).
+elpelele   MIDI files (ES)
+gliss      sfront control port.
+in         input_bus
+min        general-purpose
+pc         general-purpose (ES)
+perc       spatialize, reverb.
+scr1       MIDI files (ES)
+speedt     WAV soundfile,
+           speedt core opcodes.
+torvalds   input_bus, soundfiles
+vowels     parametric filters (ES)
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+For your convenience, the top-level <TT>examples</TT> directory
+contains a Makefile that generates the <TT>output.wav</TT> file for all
+of the examples at once. Typing <TT>make</TT> at this level runs all of
+the examples in order. Depending on your machine, this may take a good
+fraction of an hour to run.
+
+<P>
+SAOL development using <TT>sfront</TT> is easiest to do using
+<TT>make</TT>. You may wish to copy the Makefile from one of the
+examples for your own development work.  The right panel shows the
+list of commands recognized by each <TT>Makefile</TT>.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Makefile Usage</H2>
+
+<TT>
+<pre>
+invocation      function
+------------------------
+make          create output.wav 
+make clean    delete all created
+              files, including ~'s.
+make mp4test  tests binary encoding
+make safe     cp output.wav safe
+make compare  cmp safe and output.wav
+make timing   times ./sa execution
+
+
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+The <TT>rtime</TT> directory contains several examples of audio <A
+HREF="../rtime/index.html#stream">playback</A>, real-time <A
+HREF="../rtime/index.html#rt">interactive</A>, and <A
+HREF="../rtime/index.html#plug-in">AudioUnit plug-in</A> uses of sfront. These
+examples generate real-time low-latency audio output, in response to
+MIDI and audio input.<!--; several examples use the Internet to connect
+several sfront clients interactively.-->
+
+<P>
+The right panel describes these examples.  All of the examples run
+under Mac OS X, and all non-plug-in examples will run under
+Linux. Some of the examples should run in other environments with
+real-time sfront support, including SGI Irix and Microsoft Windows.
+
+<P>
+We have tested these examples on an x86 Linux (32-bit, <TT>gcc
+-m32</TT>) machine using the standard Linux OSS drivers and a PCI 128
+soundcard, and on an Apple Powerbook G4 550 Mhz with an Edirol UM-1S
+USB MIDI interface.
+
+<P>
+To run an example under Linux, <TT>cd</TT> into its directory and type
+<TT>make</TT>. To run a (non-plugin) example under Mac OS X, copy
+<TT>Makefile.osx</TT> to <TT>Makefile</TT> and type <TT>make</TT>.
+Examine the README file in each directory to learn how to modify the
+example for other environments.
+
+<P>
+To build an AudioUnit example under Mac OS X, <TT>cd</TT> into its
+directory and type <TT>make install</TT> (for the plug-in examples, the
+default <TT>Makefile</TT> in the directory is the OS X Makefile).
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Interactivity and Plug-Ins</H2>
+
+<TT>
+<pre>
+Examples in the <TT>examples/rtime/</TT>
+directory are real-time applications,
+that generate audio output in response
+to audio and MIDI input signals.
+
+
+name       test coverage
+------------------------
+aatest     the simplest audio
+           test -- streams a 
+           MIDI file to audio out.
+ascii      monophonic sine-wave
+           instrument, played via
+           the ASCII keyboard.
+linain     simple reverb unit, that
+           processes audio input
+           and generates audio out.
+linmidi    polyphonic sine-wave 
+           instrument, triggered by
+           signals on the MIDI In
+           port on the soundcard.
+linbuzz    a real-time instrument
+           like linmidi, that uses
+           Slib to add pitch wheel,
+           mod wheel, and channel
+           volume controls.
+linvoc     envelope follower patch,
+           that uses MIDI In and 
+           audio in signals together
+           and generates audio out.
+au/hiss    an AudioUnit Effect plug-in
+           that adds random noise to
+           the audio input.
+au/sin     an AudioUnit MusicDevice 
+           plug-in that is a simple
+           sine-wave virtual instrument.
+au/lpf     an AudioUnit Effect plug-in
+           that is a low-pass filter.
+           Lpf includes a Cocoa UI 
+           view, and is based on the 
+           FilterDemo example in Apple's
+           AudioUnit Programming <A HREF="http://developer.apple.com/mac/library/documentation/MusicAudio/Conceptual/AudioUnitProgrammingGuide/Introduction/Introduction.html">Guide</A>.
+</pre>
+</TT>
+
+<!--
+mirror     tests sfront networking,
+           using a Berkeley-based
+           testing service.
+nmp_audio  a client for network 
+           musical performance.
+nmp_null   a network testing utility
+           for use with nmp_audio
+nmp_stream a client for streaming 
+           MIDI files with low 
+           latency over a network.
+-->
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="bugs">Bugs</A></H2>
+
+<P>
+If you use <TT>sfront</TT> extensively, or if
+you try to use <TT>sfront</TT> on a new platform,
+you will probably uncover bugs in the program.
+
+<P>
+By sending a bug report along to us, you can
+help make <TT>sfront</TT> a better program.
+
+<P>
+The right panel explains what makes a good
+bug report, and where to send the bug report.
+
+
+<P>
+<B>Next section:</B>
+<A HREF="../use/index.html">Part I/2: File Rendering</A></H2>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Bug Reports</H2>
+
+<TT>
+<pre>
+Send bug reports to: 
+
+lazzaro@cs.berkeley.edu
+
+Ideally, include:
+
+-- ASCII versions of the SAOL
+   and SASL files.
+
+-- The C file sfront produced,
+   or the error message sfront
+   produced.
+
+-- If the C file sfront produced
+   didn't compile, the compiler
+   error messages.
+
+-- If the file produced by sfront
+   crashed while running, any ASCII
+   messages printed by sfront or the
+   OS.
+
+-- Information on the platform 
+   you're running on, including
+   type of OS (including version
+   number) and type of compiler 
+   (including version number).
+
+-- The version number of sfront.
+
+-- A short note explaining the problem,
+   including what you heard.
+
+-- DON'T send any binary files (.mp4,
+   output.wav, ect) at first -- I'll
+   let you know if I need them later.
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+sfront reference manual</A>->
+<STRONG>installing sfront</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+</BODY>
+</HTML>

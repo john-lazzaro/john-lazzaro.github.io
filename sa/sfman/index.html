@@ -1,0 +1,212 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The sfront Reference Manual</TITLE>
+<META name="keywords" content="John Lazzaro, John Lazaro, Jon Lazzaro,
+Jon Lazaro, John Lazarro, Jon Lazarro, John Lazzarro, Jon Lazzarro,
+John Lazzarow, John Wawrzynek, MPEG, MPEG 4, MPEG-4, MP4, MPEG-4
+Structured Audio, MP4, SA, MP4-SA, MP4/SA, sfront, SAOL to C, 
+SAOL to C converter, MP4 to C, MP4-SA to C, MPEG 4 Structured Audio
+to C, s2c">
+<META name="description" content="The reference manual for sfront, a 
+program that translates SAOL programs and MP4-SA binary file encodings
+to a program in the C language. When executed, this program creates
+the audio.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../index.html">mp4-sa</A>-><STRONG>sfront reference manual</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H1>The <TT>sfront</TT> Reference Manual</H1>
+<H3>By <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek</A>, <A HREF="http://www.cs.berkeley.edu/">
+CS Division</A>, <A HREF="http://www.berkeley.edu/">UC Berkeley.</A></H3>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="45%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>Introduction</H2>
+
+<P>
+Welcome to the reference manual for sfront, a translator that converts
+MP4-SA files into efficient C programs that generate audio.  
+
+<P>
+Sfront supports sound generation for interactive applications.
+<!--both locally and over the Internet.--> It can support on-line
+streaming and off-line rendering applications.  Sfront also works well
+as a scripting tool for audio signal processing, in both batch and
+interactive applications.
+
+<P>
+This reference manual explains how to install and use sfront, and how
+to add drivers and make modifications to the programs.  To learn about
+how to write SAOL and SASL programs, see the <A
+HREF="../book/index.html">MP4-SA book</A>.
+
+<H2>Organization</H2>
+
+<P>
+The first part of the manual is a guide to using sfront
+to compile MP4-SA. 
+
+<P>
+Part I/1 describes how to install sfront, and includes instructions on
+downloading, compiling, and testing the system.
+
+<P>
+Part I/2 describes how to use sfront for decoding and encoding MP4-SA
+files. Part I/3 describes real-time sfront operation (including
+plug-ins).<!--, and Part I/4 describes networking.-->
+
+<P>
+Parts I/4 and I/5 document reference materials.<!-- renumbered-->
+
+<P>
+The second part of the manual is a programmers guide to sfront.
+
+<P>
+Part II/1 shows how to use sfront as a sound engine in other
+applications, and introduces the driver interface as the way to add
+new code to sfront itself.
+
+<P>
+Part II/2 explains the <I>control</I> driver interface, used to to add
+code to sfront to control the sound generation process.
+
+<P>
+Part II/3 explains the <I>audio</I> driver interface, used to add code
+to sfront to send audio streams into and out of the sound engine.
+
+<P>
+<B>Next:</B><A HREF="user/install/index.html">Installing Sfront.</A>
+
+</TD>
+<TD WIDTH="55%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>Table of Contents</H2>
+
+<H4>Part I. Users Guide</H4>
+
+<H4>1. <A HREF="user/install/index.html">Installing Sfront</A></H4> 
+<UL>
+<LI>
+<A HREF="user/install/index.html#platform">Supported platforms</A>. Where
+sfront runs.
+<LI>
+<A HREF="user/install/index.html#download">Downloading sfront</A>. How
+to pick up sfront.
+<LI>
+<A HREF="user/install/index.html#compile">Installation</A>. Compiling and
+testing sfront.
+<LI>
+<A HREF="user/install/index.html#bugs">Bugs</A>. Let us know if things don't work.
+</UL>
+
+<H4>2. <A HREF="user/use/index.html">File Rendering</A></H4>
+<UL>
+<LI>
+<A HREF="user/use/index.html#render">File decoding</A>. Rendering MP4-SA files.
+<LI>
+<A HREF="user/use/index.html#input">Audio input</A>. Connecting files 
+to <B>input_bus</B>.
+<LI>
+<A HREF="user/use/index.html#encode">MP4 file encoding</A>. Creating MP4-SA files.
+<LI>
+<A HREF="user/use/index.html#deviant">Incompatibilities</A>. Deviations
+from the spec.
+</UL>
+
+<H4>3. <A HREF="user/rtime/index.html">Real-Time Operation</A></H4>
+<UL>
+<LI>
+<A HREF="user/rtime/index.html#stream">Real-time playback</A>. Sending audio
+to sound hardware.
+<LI>
+<A HREF="user/rtime/index.html#rt">Real-time interaction</A>.
+Real time audio and control input.
+<LI>
+<A HREF="user/rtime/index.html#plug-in">Plug-in development</A>.
+Writing AudioUnits in SAOL.
+</UL>
+
+<!--
+<H4>4. <A HREF="user/network/index.html">Networking</A></H4>
+<UL>
+<LI>
+<A HREF="user/network/index.html#intro">Introduction</A>. SIP and RTP. 
+<LI>
+<A HREF="user/network/index.html#testing">Network Testing</A>. The mirror
+session.
+<LI>
+<A HREF="user/network/index.html#performance">Network Musical Performance</A>.
+Low-latency apps.
+<LI>
+<A HREF="user/network/index.html#streaming">Network Streaming</A>. MIDI filestreams. 
+</UL>
+-->
+<!-- 4. and 5. below were renumbered -->
+<B>4. <A HREF="user/cmdline/index.html">Command-line Options</A></B>
+<BR>
+<B>5. <A HREF="user/ref/index.html">Change Log and License</A></B>
+
+<H4>Part II. Programmer's Guide</H4>
+
+<H4>1. <A HREF="devel/intro/index.html">Developing with Sfront</A></H4>
+<UL>
+<LI>
+<A HREF="devel/intro/index.html#use">Using sfront in an application</A>.
+<LI>
+<A HREF="devel/intro/index.html#code">Adding features to sfront</A>.
+<LI>
+<A HREF="devel/intro/index.html#driver">The driver interface</A>.
+</UL>
+
+<H4>2. <A HREF="devel/cdriver/intro/index.html">Control Drivers</A></H4>
+<UL>
+<LI>
+<A HREF="devel/cdriver/intro/index.html">Overview</A>.
+<LI>
+<A HREF="devel/cdriver/data/index.html">Data Structures</A>.
+<LI>
+<A HREF="devel/cdriver/code/index.html">Writing the Driver</A>.
+</UL>
+
+<H4>3. <A HREF="devel/adriver/index.html">Audio Drivers</A></H4>
+
+</TD>
+
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../index.html">mp4-sa</A>-><STRONG>sfront reference manual</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>

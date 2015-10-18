@@ -1,0 +1,1148 @@
+
+
+                    sfront Control Driver Documentation             
+                             Version 0.3
+			    John Lazzaro
+		       lazzaro@cs.berkeley.edu
+
+
+	By default, sfront can incorporate control information (in the
+form of SASL files and MIDI files) at compile time, using the command
+line flags -sco, sstr, -midi, -mstr, and -bit. The control driver
+interface lets sfront handle dynamic control information -- sequences
+of MIDI events and SASL lines that are dynamically generated. Typical
+control drivers would perform tasks such as driving sfront from a MIDI
+keyboard played in real time, executing MP4 streaming events, and
+interfacing to an external sequencer program.
+
+I. Introduction
+---------------
+
+	A control driver is a set of macro defines and C functions,
+defined in a single file.  The control driver file should be placed in
+the sfront/src/lib/csys directory. Then, type "make" in
+sfront/src/lib/ to build *lib.{c,h} files for sfront that include the
+new driver.
+
+	Users select a control driver through the -cin flag on the
+sfront command line. Edit the sfront source file sfront/src/control.c
+to add hooks for your new driver; this source file includes
+documentation for making these changes. 
+
+	In this document, we describe how to write a new control
+driver. SAOL defines two ways to control instruments: MIDI events and
+SASL events. Control drivers support both types of events, by defining
+different event-handling functions for MIDI and SASL control.  The
+control driver indicates if MIDI and/or SASL events will be supported
+as part of its description in sfront/src/control.c.
+
+	The control drivers functions that communicate MIDI and SASL
+events do not have a timestamp parameter. Instead, the global
+variables scorebeats and absolutetime are available to the control
+driver, which denote the current score time and absolute time,
+respectively. The control driver is responsible for queuing
+timestamped events until the timestamp is less than or equal to the
+current time.
+
+	A control driver can define its own internal functions and
+variables, which must begin with csysi_, and define its own symbols,
+which must begin with CSYSI_.
+
+
+II. Interaction with other score sources
+----------------------------------------
+
+	A Structured Audio binary file (i.e. .mp4 or .sa file) has two
+ways the represent score data: SASL and MIDI. A Structured Audio
+binary file also has two places to hold score data:
+StructuredAudioSpecificConfig, a data structure at the beginning of
+the binary file, and SA_access_units, which follow the
+StructuredAudioSpecificConfig.
+
+	The control driver interface is designed for normative
+implementations of SA_access_unit unit decoding. In this section, we
+describe how control drivers events interact with other sources of
+score lines in sfront (i.e. MIDI and SASL data communicated via the
+-sco, -sstr, -midi, -mstr, and -bit options).
+
+MIDI
+----
+
+	For MIDI data, the StructuredAudioSpecificConfig and
+SA_access_unit data streams do not interact. More specifically, the
+StructuredAudioSpecificConfig holds a single MIDI file, that may
+address hundreds of MIDI channels, using the "extended channel number"
+semantics. 
+
+	SA_access_units hold single MIDI events (such as a Note On
+event or a Pitch Wheel Event), and can only communicate on the 16
+channels encoded by standard (on-a-wire) MIDI commands. These 16
+channels are independent from the extended MIDI channel numbers of
+StructuredAudioSpecificConfig, and so SA_access_unit MIDI events
+cannot affect StructuredAudioSpecificConfig MIDI commands.
+
+	The control driver MIDI interface has a channel number space
+independent from the StructuredAudioSpecificConfig. However, it can
+handle a extended channel number space of arbitrary size, not just the
+16 channels supported by SA_access_unit MIDI events.
+
+	SAOL instrs are bound to MIDI channels by using the MIDI
+program change command, which takes a preset number as an argument.
+In a SAOL program, a preset number is bound to at most one SAOL
+instr. These data structures:
+
+
+
+typedef struct csys_presetstruct {
+  int index;
+  int preset;
+} csys_presetstruct;
+
+#define CSYS_PRESETNUM    # of presets
+
+csys_presetstruct csys_presets[max(1,CSYS_PRESETNUM)] = { };
+
+
+
+	list the presets available for use in program change
+commands. The CSYS_PRESETNUM define is the number of presets defined
+in the SAOL program. The csys_presets[] array of csys_presetstructs
+describes each preset as follows:
+
+int index:   The instr associated with the preset number. This 
+             number can be used to index the csys_instr[] structure,
+             to get more information about the instr.
+
+int preset:  The preset number itself, which should be used in the
+             MIDI program change command.
+
+
+SASL
+----
+	For SASL data, StructuredAudioSpecificConfig and
+SA_access_unit data streams interact, by sharing a uniform label
+space. SASL instr commands can be labelled, and SASL control commands
+can target instr instances by using labels. A uniform label space
+means that SA_access_unit control commands can access
+StructuredAudioSpecificConfig instr instances, and vice versa.
+
+	The control driver SASL interface supports the uniform label
+space model. Specifically, it creates the following elements, to
+inform the control driver of the labels used by all other sources
+of SASL score lines in sfront (-sco, -sstr, and -bit options):
+
+
+typedef struct csys_labelstruct {
+  int index;
+  char * name;
+  int token;
+  int iflag[CSYS_INSTRNUM];
+} csys_labelstruct;
+
+
+#define CSYS_LABELNUM  #number of labels
+
+csys_labelstruct csys_label[max(1,CSYS_LABELNUM)];
+
+	The csys_label[] array holds information about each
+label used by the other SASL sources:
+
+int index:  The value that gets passed to control driver 
+            functions to identify the label. This value
+            is also the 1 + index position into csys_label[].
+
+char * name: The ASCII name of the SASL label, if one exists. If
+             the label is part of a binary file without a symbol
+             table entry for the label, the name is a##, where ##
+             is the token number in the binary file.
+
+int token:   The token number for the label in the binary file,
+             or -1 if not applicable.
+
+int iflag[CSYS_INSTRNUM]: 
+
+             For each instr k, iflag[k] is 1 if a SASL instr 
+             statement exists (in the -sco, -sstr, or -bit files)
+             for the instr that uses this label; otherwise,
+             iflag[k] is zero. The index position of iflag[]
+             matches the index position of the csys_instr[]
+             array that describes each instr in the SAOL program.
+
+	The symbol CSYS_LABELNUM is the number of labels defined;
+note that this can be zero, in which case csys_label is of size
+1 and holds no information. 
+
+	The SASL control driver can access labelled SASL instrs by
+passing the csys_label[]->index value to control driver routines.  It
+can also use these label numbers to label its own instruments, in
+which case any SASL control commands in other sources of SASL commands
+that use this label will target these instrs. To denote the null
+label, use the label CSYS_NOLABEL.
+
+	Label numbers greater than CSYS_LABELNUM should be used
+to label control driver instrs, if the goal is to use labels which are
+not used by sources of SASL commands.
+
+
+III. Identifying elements of SAOL programs
+------------------------------------------
+
+	Calls to control driver routines need to cite information
+about the SAOL program it is accessing. The control driver includes
+several different data structures that supply this information:
+	
+Global Variables
+----------------
+
+	Control driver routines for simulating SASL control and table 
+statements specify global variables by passing an integer associated
+with the variable. Two different methods are supported by the control driver.
+For control drivers that are designed to support a single SAOL program,
+it may be easiest to use these definitions:
+
+#define CSYS_SASL_GBL_varName  <index number>
+
+	Which exist for each global signal and table variable varName
+declared in the global block. varName will be the ASCII name of the
+variable if it is known (i.e. the SAOL is presented in ASCII form, or
+in binary form with a symbol table) or else varName will take the
+form a##, where ## is the binary token number.
+
+	If the control driver is meant to support an arbitrary SAOL
+program, this data structure is more appropriate:
+
+typedef struct csys_varstruct {
+  int index;
+  char * name;
+  int token;
+  int type;
+  int tag;
+  int width;
+} csys_varstruct;
+
+#define CSYS_GLOBALNUM ##
+
+csys_varstruct csys_global[max(1,CSYS_GLOBALNUM)];
+
+	The symbol CSYS_GLOBALNUM holds the number of global variables
+(signal and table) in the array. The array csys_global[] holds the
+struct csys_varstruct elements that describes the variable. Later on
+in this document, we use csys_varstruct to define other data structures
+for instr local variables. We describe csys_varstruct completely below,
+even though some aspects of it pertain to instr local variables:
+
+int index:  The is the value that gets passed to control driver
+            functions, that identifies the variable. 
+
+char * name: The ASCII name of the variable, if one exists. If
+             the SAOL program is part of a binary file without a symbol
+             table entry for the variable, the name is a##, where ##
+             is the token number in the binary file.
+
+int token:   The symbol number for the variable in the binary file, 
+             or -1 if not applicable.
+
+int type:    The type of the variable, one of:
+
+#define CSYS_IRATE 0
+#define CSYS_KRATE 1
+#define CSYS_ARATE 2
+#define CSYS_TABLE 3
+
+ 	     Global variables may be CSYS_IRATE, CSYS_KRATE, or 
+             CSYS_TABLE but not CSYS_ARATE. Local variable may take
+             on all values.
+
+int tag:     Special attributes a variable may have, one of:
+
+#define CSYS_NORMAL 0
+#define CSYS_IMPORT 1
+#define CSYS_EXPORT 2
+#define CSYS_IMPORTEXPORT 3
+#define CSYS_PFIELD 4
+
+	     Global signal and table variables may only be CSYS_NORMAL.
+	     The other tag values are for instr local variables only.
+             Note that table entries in csys_global[] include both
+             global tables and future tables.
+
+int width:   The width of the variable, for array signal variables.
+             Scalars and tables have width 1.
+
+
+Global Samples
+--------------
+
+	If a binary MP4-SA file contains global tables that use the
+sample wavetable generator, the sample blocks for these tables are
+tagged with a separate token, so that other elements in the bitstream
+can access them. Note that these sample blocks exist as addressable
+elements only for SAOL files presented to sfront in binary form
+(specified using the -bit option) and not ASCII form (using the -orc
+option).
+
+	This data structure allows access to these sample
+blocks:	
+
+
+typedef struct csys_samplestruct {
+  int index;
+  int token;
+  char * name;
+  char * fname;
+} csys_samplestruct;
+
+
+#define CSYS_SAMPLENUM ##
+
+csys_samplestruct csys_samples[max(1,CSYS_SAMPLENUM)];
+
+	Where the fields of the datastructures are as follows:
+
+int index: 
+	
+	Position of this element in csys_samples;
+
+int token
+
+       The token number for the label in the binary file.
+	
+char * name: 
+
+	The ASCII name of the SASL label, if one exists. If
+        the label is part of a binary file without a symbol
+        table entry for the label, the name is a##, where ##
+        is the token number in the binary file.
+
+char *fname;
+
+	The name of the Microsoft WAV file that holds the sample
+	block. This file is placed in the same directory as the 
+        MP4-SA file when sfront decodes the file.
+
+
+Instruments
+-----------
+
+	Control driver routines for simulating SASL instr, table,
+and labelled control statements take arguments for specifying
+SAOL instrs, as well as pfields and variables associated with
+the instrs. These arguments are all integer indexes. 
+
+	If a control driver is written for a specific SAOL program,
+a set of definitions provides easy access to these index values. Each
+instr will have a definition:
+
+#define CSYS_SASL_INSTR_instrName  <index number>
+
+	instrName will be the ASCII name of the instr if it is known
+(i.e. the SAOL is presented in ASCII form, or in binary form with a
+symbol table) or else instrName will take the form a##, where ## is
+the binary token number. To specify the null instrument, use 
+CSYS_SASL_NOINSTR.
+
+	If an instr has variables that are fair targets for a SASL
+labeled control statement or a SASL table statement, there will be a
+definition:
+
+#define CSYS_SASL_IMPORT_instrName_varName <index number>
+
+	in the file, where instrName and varName are the name of
+the instr and imports variable. 
+
+	If the control driver is meant to support an arbitrary SAOL
+program, this data structure is more appropriate:
+
+typedef struct csys_instrstruct {
+  int index;
+  char * name;
+  int token;
+  int numvars;
+  csys_varstruct * vars;
+  int outwidth;
+  int status;
+} csys_instrstruct;
+
+#define CSYS_INSTRNUM
+ 
+csys_inststruct csys_instr[CSYS_INSTRNUM] = { };
+
+	The symbol CSYS_INSTRNUM is the number of instrs in
+the SAOL program. The order of instruments in csys_instr[]
+indicates the execution sequence of the instruments, as 
+determined by global route, send, and sequence statements.
+
+	 Each element in the array csys_instr describes an
+instr, as follows:
+
+
+int index:  The is the value that gets passed to control driver
+            functions, that identifies the variable. It also is
+            the index into csys_instr[] for this instr.
+
+char * name: The ASCII name of the instr, if one exists. If
+             the SAOL program is part of a binary file without a symbol
+             table entry for the variable, the name is a##, where ##
+             is the token number in the binary file.
+
+int token:   The token number for the instr in the binary file, 
+             or -1 if not applicable. Note that since the startup
+             instrument does not have a token associated with it,
+             it has a -1 value -- use the status byte to locate the
+             startup instrument (see below).
+
+int numvars: The total number of pfields, local signal variables,
+             and local table variables in the instr. This value is
+             also held in the symbol CSYS_instrName_VARNUM, with
+             instrName defined as described above. 
+
+csys_varstruct * vars: 
+
+             An array, of size numvars, of csys_varstructs to describe
+             each pfield and local signal or table variable. See the
+             description of the csys_globals[] array for a description
+             of csys_varstruct.
+
+int outwidth: 
+
+             The width of the output() statements in the instr. 
+
+int status:  A status word that describes how the instr is used.
+             Note that an instr may be used in several ways.
+             A bit-wise "and" of status with the following symbols
+             indicate each possible use:
+
+             CSYS_STATUS_EFFECTS
+
+             Indicates that the instr is used as an effects instrument,
+             i.e. it is the target of a send() statement in the global
+             block.
+
+             CSYS_STATUS_SCORE
+
+             Indicates the instr is used by a SASL score line (for
+             binary files, in either the configuration or streaming
+             part of the file).
+
+	     CSYS_STATUS_MIDI
+
+             Indicates the instr is used by a MIDI event (for
+             binary files, in either the configuration or streaming
+             part of the file).
+
+	     CSYS_STATUS_DYNAMIC
+
+             Indicates the instr is the targed of a SAOL instr statement.
+
+             CSYS_STATUS_STARTUP
+
+             Indictaes the instr is the startup instr.
+
+Target Variables for Labelled Control Statements
+------------------------------------------------
+
+Instr ksig signal variables that use the "imports" tag, but do
+not have a corresponding variable in the global block, are 
+target variables for labelled SASL control statements. By using
+the csys_global[] and csys_instr->vars[] data structure, its
+possible to find all the potential target variables in a SAOL
+program. However, the following data structure lists all the
+target variables, to simplify the design of streaming decoders:
+
+
+typedef struct csys_targetstruct {
+  char * name;
+  int token;
+  int numinstr;
+  int * instrindex;
+  int * varindex;
+} csys_targetstruct;
+
+#define CSYS_TARGETNUM ##
+
+csys_targetstruct csys_target[max(1,CSYS_TARGETNUM] = { };
+
+Where the fields of csys_targetstruct are as follows:
+
+char * name:  
+
+              The name of the target variable
+int token:    
+
+              The MP4 file token number for the variable, or -1 
+              if not applicable.
+int numinstr: 
+
+              The number of instruments that have this target variable.
+
+int * instrindex:
+
+              An array, of size numinstr, of the csys_instr[].index 
+              values associated with each instr that has the target 
+              variable. This value also indexes into csys_instr[], and
+              is used as the *id value for the CSYS_SASL_CONTROL command
+              for executing labelled control commands.
+
+int * varindex;
+
+              An array, of size numinstr, of the csys_instr[].vars->index
+              value for each instr that has this target variable. This
+              is used as the *pnum value for the CSYS_SASL_CONTROL command
+              for executing labelled control commands. 
+
+
+Note that all target variables are scalar (width 1) ksig values.
+
+
+
+Audio Data Paths
+----------------
+
+	Two types of global SAOL statements -- send and route statements
+-- act to define the interconnection of SAOL instruments, and to define
+bus structures that act as the audio data path. This data structure
+describes the set of buses in a SAOL program:
+
+
+typedef struct csys_busstruct {
+  int index;
+  char * name;
+  int width;
+  int oflag; 
+} csys_busstruct;
+
+#define CSYS_BUSNUM ##
+ 
+csys_busstruct csys_bus[max(1,CSYS_BUSNUM)] = { };
+
+	The fields of csys_bus describe the bus in the following way:
+
+int index;
+
+	The index value into csys_bus[].
+
+char * name;
+
+	The name of the bus. The special buses "input_bus" and 
+	"output_bus" will always appear as those strings. User-defined buses
+	may be given names from the ASCII SAOL file, or tokenized
+	names from the MP4-SA token numbers (i.e. a##).
+
+int width;
+
+	The width of the bus.
+
+int oflag; 
+
+	The number of outbus() statements, in all instruments, that 
+	write onto this bus.
+
+
+	User-defined buses are created using the SAOL global "send" statements.
+The following data structure catalogs all send statements in a SAOL
+program:
+
+
+typedef struct csys_sendstruct {
+  int instr;
+  int nbus;
+  int * bus;
+} csys_sendstruct;
+
+#define CSYS_SENDNUM ##
+ 
+csys_sendstruct csys_send[max(1,CSYS_SENDNUM)] = { };
+
+
+	Where:
+
+
+int instr;   Is the instr the send statement creates, coded as the 
+             csys_instr[].index value. This number is also the index
+             into csys_instr[].
+
+int nbus;    The number of buses that make up the input[] value sent
+             to the instr.
+
+int *bus;    An array, or size nbus, that lists the buses that make up
+             the input[] value sent to the instr, in order. Each element
+             is the csys_bus[].index value for the bus, which is also the
+             array index into csys_bus.
+
+
+	The information encoded in the SAOL global "route" statements
+completes the description of the audio data path of the SAOL program
+(note that the order of instrs in csys_instr is the execution order of
+the instrs, and thus encapsulates the information in any "sequence"
+statements in the global block). This following data structure 
+catalogs all send statements in a SAOL program:
+
+typedef struct csys_routestruct {
+  int bus;
+  int ninstr;
+  int * instr;
+} csys_routestruct;
+
+
+#define CSYS_ROUTENUM ##
+ 
+csys_routestruct csys_route[max(1,CSYS_ROUTENUM)] = { };
+
+	Where:
+
+int bus;     Is the bus the route statement writes, coded as the 
+             csys_bus[].index value. This number is also the index
+             into csys_bus[].
+
+int ninstr;  The number of instrs whose outputs are written to the bus.
+
+int *instr;  An array, or size ninstr, that lists the instrs whose outputs
+             form the value added to the bus, in order. Each element
+             is the csys_instr[].index value for the instr, which is also the
+             array index into csys_instr.
+
+
+
+III. Initialization
+-------------------
+
+	Each driver must define the following initialization routine,
+which we be called at the start of processing:
+
+int csys_setup(void)
+
+	This function should return CSYS_DONE if initialization has
+been successful, or CSYS_ERROR if its not possible to deliver control
+input via the driver.
+
+	The global variables:
+
+int csys_argc;
+char ** csys_argv
+
+	may be useful during initialization. These two variables make
+available the argc and argv parameters of the main() function of the
+program that contains the driver. This allows the driver to parse
+command line arguments as part of its initialization. The driver may
+not alter the contents of csys_argc and csys_argv.
+
+	A control driver must use the following convention for its
+command line arguments
+
+  -csys_xxx[_yyy] [p1 p2]   
+
+where
+
+   xxx   is the name of the driver
+   yyy   is the name of the option for the driver. this can
+         be deleted if the driver only has one option.
+   p#    is a parameter for the option. options can have zero,
+         one, or more than one parameters. a parameter can not
+         start with a - (except when used as the sign of a number)
+         and may not contain spaces.
+   
+As an example, the linmidi driver could define:
+
+  -csys_linmidi_transpose p1
+
+as an option for setting a constant transposition of MIDI note
+number. The same program could be invoked with transpositions an
+octave above or below normal by using the options:
+
+  -csys_linmidi_transpose 12 
+  -csys_linmidi_transpose -12 
+
+Drivers should communicate the command-line argument syntax to the
+user by adding printf's to the cinfilecheck() function defined in
+sfront/src/control.c.
+
+	These variables may also be useful during initialization:
+
+int csys_sfront_argc;
+char ** csys_sfront_argv
+
+	these variables hold the command-line arguments for the
+sfront invocation that produced the sa.c file in which the control
+driver resides.
+
+IV. New Events
+---------------
+
+	In SAOL, new events get processed at the beginning of each
+ipass (initialization pass). Each driver must define the function:
+
+int csys_newdata(void)
+
+	which is called at the start of each ipass. The function
+should return:
+
+CSYS_NONE                 if no new events are available
+CSYS_MIDIEVENTS           if only MIDI events are available
+CSYS_SASLEVENTS           if only SASL events are available
+CSYS_EVENTS               if both MIDI and SASL events are available
+
+The global variable scorebeats indicates the current time, in score
+time; control drivers which handle timestamped events can use
+scorebeats to determine if events in the queue are ready for
+execution.
+
+IV. MIDI Events
+----------------
+
+	If a control driver supports MIDI events, and a call to
+csys_newdata() yields the return value CSYS_MIDIEVENTS or CSYS_EVENTS,
+the function
+
+int csys_midievent(unsigned char * cmd, unsigned char * ndata, 
+	           unsigned char * vdata, unsigned short * extchan,
+		   float * fval)
+
+	is called to transmit MIDI events. csys_midievent() should
+return CSYS_EVENTS, which indicates more MIDI events are ready for
+transmission, or CSYS_NONE which indicates no other MIDI events are
+pending. Note that csys_midievent() will be called repeatedly until
+CSYS_NONE is returned.
+
+	All csys_midievent() parameters are pointers, which are used
+to return information about the event; these parameters are designed
+so that information from an actual MIDI stream (i.e. on a wire) can be
+efficiently transferred, while also supporting "system" events that
+are not in the MIDI spec. We first describe the parameters when used
+to transmit events in the MIDI spec:
+
+*cmd:   The first byte of a MIDI command. The upper nibble of a MIDI
+        command is the command type, the lower nibble is the channel
+        number; however, the channel number is ignored by the calling
+        program. The following symbols are defined to use for this
+        argument:
+
+	#define CSYS_MIDI_NOTEOFF  0x80   /* Note off command */
+	#define CSYS_MIDI_NOTEON   0X90   /* Note on command */	
+	#define CSYS_MIDI_PTOUCH   0xA0   /* Polyphonic aftertouch */	
+	#define CSYS_MIDI_CC       0xB0   /* Controller change */	
+	#define CSYS_MIDI_PROGRAM  0xC0   /* Program change */	
+	#define CSYS_MIDI_CTOUCH   0xD0   /* Channel aftertouch */	
+	#define CSYS_MIDI_WHEEL    0xE0   /* Pitch wheel */	
+
+	Note that "running status" coding (in which byte one of a MIDI
+	command is not sent, and the previous command is used instead)
+	is not handled by the calling procedure; the control driver must
+	specify *cmd for each call. 
+
+*ndata: The second byte of a MIDI command. For CSYS_MIDI_NOTEOFF, 
+	CSYS_MIDI_NOTEON, and CSYS_MIDI_PTOUCH it codes MIDI note number
+	in the range 0-127. For CSYS_MIDI_CC, it codes which MIDI controller
+	is to be altered, in the range 0-127; symbols for popular MIDI
+	controllers are defined for use in this argument (see Appendix).
+	For CSYS_MIDI_PROGRAM, this number defines the program change
+	number, from 0-127; this number is combined with the bank select
+	to produce a "preset" number:
+
+        preset number = program change + bankselect*128
+
+        where bankselect defaults to 0, and can be changed via a 
+	CSYS_MIDI_CC command. The preset number matches the preset
+        preset number in SAOL instr definitions, which are listed in the 
+        csys_presets[] array. For CSYS_MIDI_CTOUCH, this number is the
+	channel aftertouch value, from 0-127. for CSYS_MIDI_WHEEL, it is the
+	LSB of the pitch wheel value.
+
+*vdata: The third byte of the MIDI command.  For CSYS_MIDI_NOTEOFF and
+	CSYS_MIDI_NOTEON, it codes the velocity, from 0-127. Note that a
+	CSYS_MIDI_NOTEON with velocity 0 is interpreted identically a
+	CSYS_MIDI_NOTEOFF. For CSYS_MIDI_PTOUCH this is the aftertouch amount,
+	from 0-127. For CSYS_MIDI_CC, this is the new value for the MIDI
+	controller, from 0-127. It is ignored for CSYS_MIDI_PROGRAM and
+	CSYS_MIDI_CTOUCH. For CSYS_MIDI_WHEEL it is the MSB of the pitch
+	wheel value.
+
+*extchan The extended channel number of the command. This is defined as:
+
+	  nibble + 16*port
+
+	Where nibble is the lower nibble of the first byte of the MIDI
+	command, which codes the MIDI channel, and port, for MIDI systems
+	with multiple MIDI-in ports, is which port the command is associated
+	with (ports are numbered starting with 0). The legal range of
+	extended channel numbers for a control driver is specified as part
+	of the sfront/src/control.c code.
+
+* fval  Only used for system events.
+
+System events use values for *cmd outside the range specified in the
+*cmd listing above. The following symbols will be defined for these
+system events:
+
+#define CSYS_MIDI_NOOP     0x70
+#define CSYS_MIDI_NEWTEMPO 0x71
+#define CSYS_MIDI_ENDTIME  0x72
+
+And the system events are described below:
+
+CSYS_MIDI_NOOP:     Do nothing. Useful if the MIDI event being processed
+		    does not map to a MIDI event used by MP4-SA.
+ 
+CSYS_MIDI_NEWTEMPO: Changes the current tempo to the score-time value stored 
+		    in *fval. This is the equivalent of the settempo() core
+		    opcode command. The current tempo is available in the
+		    global variable tempo.
+ 
+CSYS_MIDI_ENDTIME:  Changes the current endtime to the score time value stored
+		    in *fval. 
+
+		    The current endtime is available in the global
+		    variable endtime. The symbol CSYS_GIVENENDTIME is 1
+                    if the value of endtime reflects a SASL end command
+                    provided by the user. The symbol CSYS_GIVENENDTIME is 0
+                    if the value of endtime is computed by sfront, in lieu
+                    of a user-supplied SASL end command.
+
+		    The scorebeats variable holds the current score time;
+                    to make execution end after the current k-pass, set
+                    *fval to scorebeats.
+
+
+V. SASL Events
+--------------
+
+	If a control driver supports SASL events, and a call to
+csys_newdata() yields the return value CSYS_SASLEVENTS or CSYS_EVENTS,
+the function:
+
+int csys_saslevent(unsigned char * cmd, unsigned char * priority,
+		   unsigned short * id, unsigned short *label, 
+		   float * fval, unsigned int * pnum, float ** p)	
+
+	is called to transmit SASL events. csys_saslevent() should
+return CSYS_EVENTS, which indicates more SASL events are ready for
+transmission, or CSYS_NONE which indicates no other SASL events are
+pending. Note that csys_saslevent() will be called repeatedly until
+CSYS_NONE is returned.  All csys_saslevent() parameters are pointers,
+which are used to return information about the event; both SASL events
+and special "system" events are supported through this interface.
+
+	The first two parameters to csys_saslevent() are valid for all
+events: *cmd, which sets the type of event, and *priority, which is 1
+if the event is "high priority" (and should be executed even if CPU
+cycles are scarce) and 0 if the event is "normal priority." 
+
+	The argument *cmd should be one of the symbols below, which
+denote which type of SASL or system event is being sent:
+
+SASL Symbols (values match class score_line):
+
+#define CSYS_SASL_INSTR    0x00 
+#define CSYS_SASL_CONTROL  0x01 
+#define CSYS_SASL_TABLE    0x02 
+#define CSYS_SASL_ENDTIME  0x04 
+#define CSYS_SASL_TEMPO    0x05 
+
+System Symbols:  
+
+#define CSYS_SASL_NOOP     0x06
+
+	We describe the behavior of each event below, including the
+relevant parameters for the event; parameters not described for a 
+given event are ignored.
+
+CSYS_SASL_INSTR: Plays a new instrument event. The parameter *id is an
+                 integer that identifies the SAOL instr to play. As
+                 described in Section III, this integer can be specified
+                 by using symbols of the form:
+
+		 CSYS_SASL_INSTR_instrName
+
+		 or by using the index value in the csys_instr[] array.
+
+		 If the event will be referenced with a future 
+		 CSYS_SASL_CONTROL event, the parameter *label
+		 should be set to a label number. As described in
+		 section II, this number can either be a label
+                 used by SASL commands from other SASL sources
+                 than the control driver, or can be a label number
+		 unique to the control driver. Labels from other
+                 sources are specified by using the index values
+                 in the csys_labels[] data structure, whereas unique
+                 labels have values greater or equal to CSYS_LABELNUM.
+		 If the event has not label, set *label to CSYS_NOLABEL.
+
+		 The parameter *fval should be set to the duration of the
+		 event, or -1 if the event has no duration.
+
+		 The parameter *pnum should be set to the number of 
+		 parameters that are being supplied to the instr instance.
+		 The parameter *p should be set to a pointer to an array
+		 of floats holding these parameter values. The csys_instr[]
+		 has information about the parameters each instr has.
+
+CSYS_SASL_CONTROL: A new control event. This command modifies a global
+		 variable, or an import variable of instance(s) of a
+		 single type of instr. SASL control commands targeted
+		 to several types of instrs should be broken up into
+		 several CSYS_SASL_CONTROL calls.
+
+		 The parameter *id should be set to the instr type that
+		 contains the import variable modified by the control
+		 statement, using the same methods as the CSYS_SASL_INSTR
+                 command, or CSYS_SASL_NOINSTR if the control command is
+		 targeted to a global variable. 
+
+		 The parameter *label should be set to the label number
+		 of the instrument (see section II), or to the symbol
+		 CSYS_NOLABEL. 
+
+		 The parameter *pnum should indicate which variable is to
+		 be modified. To specify a particular global variable,
+                 use CSYS_SASL_GBL_varName definition or the csys_global[]
+                 index field as described in Section IIIa. 
+
+                 To specify a particular local variable, use the 
+                 CSYS_SASL_IMPORT_instrName_varName defintion, or the
+                 csys_instr[].vars[].index value described in Section
+                 IIIb. Note that even though normative MP4-SA behavior
+                 is that only imports signal variables can be changed
+                 by labelled SASL control statements, the control driver
+                 works to change any instr signal variable, to aid in
+                 applications such as symbolic debuggers.
+
+		 The parameters *fval should be set to the new value of
+		 the variable.
+
+CSYS_SASL_TABLE: A new table event. This command modifies a global table
+                 or a future table. 
+
+		 The parameter *id should indicate which variable is to
+		 be modified. To specify a particular global variable,
+                 use CSYS_SASL_GBL_varName definition or the csys_global[]
+                 index field as described in Section IIIa. Note that
+                 future tables are listed in this datastructure along
+                 with actual global tables. Be sure to use the index
+                 field from the csys_global[] array for future tables,
+		 not the index field from the csys_varstruct struct in
+		 an csys_instr[] entry that imports the future table.
+
+		 The *label parameter indicates which table generator is
+                 to be used, and should be one of the following symbols:
+
+                 #define CSYS_SASL_TGEN_SAMPLE       0x6F 
+                 #define CSYS_SASL_TGEN_DATA         0x70
+                 #define CSYS_SASL_TGEN_RANDOM       0x71
+                 #define CSYS_SASL_TGEN_STEP         0x72
+                 #define CSYS_SASL_TGEN_LINESEG      0x73
+                 #define CSYS_SASL_TGEN_EXPSEG       0x74
+                 #define CSYS_SASL_TGEN_CUBICSEG     0x75
+                 #define CSYS_SASL_TGEN_POLYNOMIAL   0x76
+                 #define CSYS_SASL_TGEN_SPLINE       0x77
+                 #define CSYS_SASL_TGEN_WINDOW       0x78
+                 #define CSYS_SASL_TGEN_HARM         0x79
+                 #define CSYS_SASL_TGEN_HARM_PHASE   0x7A
+                 #define CSYS_SASL_TGEN_PERIODIC     0x7B
+                 #define CSYS_SASL_TGEN_BUZZ         0x7C
+                 #define CSYS_SASL_TGEN_CONCAT       0x7D
+                 #define CSYS_SASL_TGEN_EMPTY        0x7E
+                 #define CSYS_SASL_TGEN_DESTROY      0x7F
+
+                 For most wavetable generators, the parameter *pnum
+                 should be set to the number of parameters that are
+                 being supplied to the wavetable generator, and the
+		 parameter *p should be set to a pointer to an array
+		 of floats holding these parameter values. However,
+                 the following wavetable generators use a different
+                 semantics:
+
+                 CSYS_SASL_TGEN_CONCAT
+
+                 The first parameter to concat, stored in (*p)[0], is
+                 the size of the wavetable, with the semantics detailed
+                 in the specification. The remaining parameters specify
+                 the global tables to concatenate to produce the table.
+                 Each parameter (*p)[] holds the value pf 
+                 csys_global[].index associated with the global or future
+                 table to concatenate. Note that only elements of 
+                 csys_global[] that have csys_global[].type set to 
+                 CSYS_TABLE are valid to use. The *pnum parameter sets
+                 the number of parameters in *p (1 + number of tables to
+                 concatenate).
+
+                 CSYS_SASL_TGEN_SAMPLE
+
+		 The first four elements in *p[] have special meanings.
+                 Symbol in parenthesis is corresponding values in the
+                 class sample detailed in section 5.5 of the FDIS.
+
+                 (*p)[0]  sampling rate (Hz) (srate)
+                 (*p)[1]  loop start (index) (loopstart)
+                 (*p)[2]  loop end  (index)  (loopend)
+                 (*p)[3]  base frequency (Hz) (basecps)
+
+		 A value of -1 for these parameters codes "unknown".
+		 
+		 The actual sample values begin with element (*p)[4] 
+                 and end with element (*p)[(*pnum)-1] -- thus, the 
+                 *pnum parameter should have a value of 4 + the number
+                 of table elements. Note that the "skip" and "size" 
+                 parameters of the sample wavetable generator are not
+                 explicitly coded in *p; instead, the caller should
+                 perform these operations in the processing of assembling
+                 the (*p)[] array. However, loop start and loop end are
+                 not offset by 4. 
+
+
+CSYS_SASL_ENDTIME: Changes the current endtime to the score time value stored
+		 in *fval. 
+
+		 The current endtime is available in the global
+		 variable endtime. The symbol CSYS_GIVENENDTIME is 1
+                 if the value of endtime reflects a SASL end command
+                 provided by the user. The symbol CSYS_GIVENENDTIME is 0
+                 if the value of endtime is computed by sfront, in lieu
+                 of a user-supplied SASL end command.
+
+		 The scorebeats variable holds the 
+		 current score time; to make execution end after the
+		 current k-pass, set *fval to scorebeats.
+
+CSYS_SASL_TEMPO: Changes the current tempo to the score-time value stored
+		 in *fval. The current tempo is available in the global
+		 variable tempo. 
+
+
+CSYS_SASL_NOOP:  Do nothing.
+
+
+VI. Shutdown
+-----------
+
+	At the end of sound processing, the function
+
+void csys_shutdown(void)
+
+	will be called, which should close down the control driver. 
+
+
+VII. Utility functions
+----------------------
+
+	In previous sections, we described functions beginning with
+csys_ that a control driver needs to define:
+
+int csys_setup(void)
+int csys_newdata(void)
+void csys_shutdown(void)
+
+
+	and depending on the type of control driver:
+
+
+int csys_midievent(unsigned char * cmd, unsigned char * ndata, 
+	           unsigned char * vdata, unsigned short * extchan,
+		   float * fval)
+
+int csys_saslevent(unsigned char * cmd, unsigned char * priority,
+		   unsigned short * id, unsigned short *label, 
+		   float * fval, unsigned int * pnum, float ** p)	
+
+
+	All other functions beginning with csys_ are utility functions,
+which are pre-defined in the sa.c file. A control driver may wish to
+use these functions to simply programming. We describe the utility
+functions below:
+
+---
+
+void csys_terminate(char * message)
+
+Call this function when a fatal error condition happens, and the
+driver wants to terminate the program. Driver XXX, calling 
+csys_terminate with the message "File dadorunrun.mp4 not found",
+will result in the following message printed to stderr, followed
+by an exit(-1). Note csys_terminate() never returns.
+	
+---
+
+
+VIII. Examples
+-----------
+
+	We describe two of the control drivers that located in
+sfront/src/lib/csys/. The first example, gliss.c, is a control driver
+that generates glissandos continuously, using both SASL and MIDI
+control events. This driver is used in the examples/gliss example; see
+this directory for the gliss.saol file that gliss.c is written to work
+with.
+
+	The second example, ascii.c, generates simple MIDI note
+commands in response to ASCII keyboard presses, using the UNIX curses
+package. This control driver, in conjunction with a real-time
+low-latency audio driver, can be used to generate a simple real-time
+sound system using sfront, by using the -timesync option. This simple
+driver may be a good starting point for writing a real-time control
+driver for a MIDI input port.
+
+Appendix A. MIDI Controller Definitions
+---------------------------------------
+
+#define CSYS_MIDI_CC_BANKSELECT_MSB  0x00   
+#define CSYS_MIDI_CC_MODWHEEL_MSB    0x01   
+#define CSYS_MIDI_CC_BREATHCNTRL_MSB 0x02   
+#define CSYS_MIDI_CC_FOOTCNTRL_MSB   0x04
+#define CSYS_MIDI_CC_PORTAMENTO_MSB  0x05   
+#define CSYS_MIDI_CC_DATAENTRY_MSB   0x06
+#define CSYS_MIDI_CC_CHANVOLUME_MSB  0x07   
+#define CSYS_MIDI_CC_BALANCE_MSB     0x08   
+#define CSYS_MIDI_CC_PAN_MSB         0x0A   
+#define CSYS_MIDI_CC_EXPRESSION_MSB  0x0B   
+#define CSYS_MIDI_CC_EFFECT1_MSB     0x0C   
+#define CSYS_MIDI_CC_EFFECT2_MSB     0x0D   
+#define CSYS_MIDI_CC_GEN1_MSB        0x10   
+#define CSYS_MIDI_CC_GEN2_MSB        0x11   
+#define CSYS_MIDI_CC_GEN3_MSB        0x12  
+#define CSYS_MIDI_CC_GEN4_MSB        0x13
+#define CSYS_MIDI_CC_BANKSELECT_LSB  0x20   
+#define CSYS_MIDI_CC_MODWHEEL_LSB    0x21   
+#define CSYS_MIDI_CC_BREATHCNTRL_LSB 0x22   
+#define CSYS_MIDI_CC_FOOTCNTRL_LSB   0x24
+#define CSYS_MIDI_CC_PORTAMENTO_LSB  0x25   
+#define CSYS_MIDI_CC_DATAENTRY_LSB   0x26
+#define CSYS_MIDI_CC_CHANVOLUME_LSB  0x27   
+#define CSYS_MIDI_CC_BALANCE_LSB     0x28   
+#define CSYS_MIDI_CC_PAN_LSB         0x2A   
+#define CSYS_MIDI_CC_EXPRESSION_LSB  0x2B   
+#define CSYS_MIDI_CC_EFFECT1_LSB     0x2C   
+#define CSYS_MIDI_CC_EFFECT2_LSB     0x2D   
+#define CSYS_MIDI_CC_GEN1_LSB        0x30   
+#define CSYS_MIDI_CC_GEN2_LSB        0x31   
+#define CSYS_MIDI_CC_GEN3_LSB        0x32  
+#define CSYS_MIDI_CC_GEN4_LSB        0x33
+#define CSYS_MIDI_CC_SUSTAIN         0x40        
+#define CSYS_MIDI_CC_PORTAMENTO      0x41   
+#define CSYS_MIDI_CC_SUSTENUTO       0x42 
+#define CSYS_MIDI_CC_SOFTPEDAL       0x43 
+#define CSYS_MIDI_CC_LEGATO          0x44
+#define CSYS_MIDI_CC_HOLD2           0x45
+#define CSYS_MIDI_CC_SOUNDCONTROL1   0x46
+#define CSYS_MIDI_CC_SOUNDCONTROL2   0x47
+#define CSYS_MIDI_CC_SOUNDCONTROL3   0x48
+#define CSYS_MIDI_CC_SOUNDCONTROL4   0x49
+#define CSYS_MIDI_CC_SOUNDCONTROL5   0x4A
+#define CSYS_MIDI_CC_SOUNDCONTROL6   0x4B
+#define CSYS_MIDI_CC_SOUNDCONTROL7   0x4C
+#define CSYS_MIDI_CC_SOUNDCONTROL8   0x4D
+#define CSYS_MIDI_CC_SOUNDCONTROL9   0x4E
+#define CSYS_MIDI_CC_SOUNDCONTROL10  0x4F
+#define CSYS_MIDI_CC_GEN5            0x50   
+#define CSYS_MIDI_CC_GEN6            0x51   
+#define CSYS_MIDI_CC_GEN7            0x52  
+#define CSYS_MIDI_CC_GEN8            0x53
+#define CSYS_MIDI_CC_PORTAMENTOSRC   0x54
+#define CSYS_MIDI_CC_EFFECT1DEPTH    0x5B
+#define CSYS_MIDI_CC_EFFECT2DEPTH    0x5C
+#define CSYS_MIDI_CC_EFFECT3DEPTH    0x5D
+#define CSYS_MIDI_CC_EFFECT4DEPTH    0x5E
+#define CSYS_MIDI_CC_EFFECT5DEPTH    0x5F
+#define CSYS_MIDI_CC_DATAENTRYPLUS   0x60
+#define CSYS_MIDI_CC_DATAENTRYMINUS  0x61
+#define CSYS_MIDI_CC_ALLSOUNDOFF     0x78
+#define CSYS_MIDI_CC_RESETALLCONTROL 0x79
+#define CSYS_MIDI_CC_LOCALCONTROL    0x7A
+#define CSYS_MIDI_CC_ALLNOTESOFF     0x7B

@@ -1,0 +1,1261 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>Sfront Reference Manual: Part I/4: Command-Line Options</TITLE>
+<META name="keywords" content="MP4-SA, SASL, SAOL, MP4, sfront,
+command line options.">
+<META name="description" content="A part of the Sfront reference
+manual, that is a collection of reference materials. Sfront is a 
+program that translates MP4-SA files into C programs.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+sfront reference manual</A>->
+<STRONG>command-line options</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The <TT>sfront</TT> Reference Manual</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part I/4: Command-Line Options</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="100%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#options">Command-line Options</A>.</B> Listed by function and
+alphabetically.
+</UL>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="options">Command-Line Options</A></H2>
+
+<TT>
+<pre>
+
+Usage: sfront [options]
+
+</pre>
+</TT>
+ 
+<H4><A NAME="inputfile">Input Options</A></H4>
+
+<P>
+Only one of the following two options may be used:
+
+<UL>
+<LI> <B><TT><A NAME="bit">-bit mp4file.</A></TT></B> Specifies an MP4
+Structured Audio bitstream as input. Only one bitstream may be
+specified. Both configuration and streaming blocks of the MP4 are
+read. Any samples in the bitstream are written out as WAV files
+using the names a#.wav, where # is an MP4 file symbol number.
+Any pre-existing files using these names will be deleted.
+<LI> <B><TT><A NAME="bitc">-bitc mp4file.</A></TT></B> Like the
+<A HREF="#bit">-bit</A> option, but reads the configuration
+block data while ignoring the streaming block data. Use the
+<B>-bitc</B> option, in conjunction with the 
+<A HREF="../rtime/index.html#fstr">file streaming</A> control driver,
+for bitstreams with large streaming sections (like those 
+created by sdif2mp4).
+<LI> <B><TT><A NAME="orc">-orc f1 [f2 f3 ...].</A></TT></B>Specifies
+one or more SAOL ASCII files. File order on the command line
+determines the position of each file's global block statements in the
+merged global block.
+
+
+</UL>
+
+<P>
+If the <TT>-orc</TT> option is used, the following options may also be used.
+
+<UL>
+<LI> <B><TT><A NAME="sco">-sco scorefile.</A></TT></B>
+Specifies a SASL file. Only one SASL file may be specified. 
+To process multiple SASL files, concatenate them into one file
+first. Note that the timestamps need not be in temporal order.
+When creating an MP4 file, sfront places the SASL lines 
+in the configuration section.
+<LI> <B><TT><A NAME="sstr">-sstr scorefile.</A></TT></B> Specifies
+a SASL file. Behaves like the -sco option, except that when 
+creating an MP4 file, sfront places the SASL lines in 
+the streaming section.
+<LI> <B><TT><A NAME="midi">-midi midifile.</A></TT></B>
+Specifies a Format 0 or Format 1 MIDI file. Only one MIDI file
+may be specified. When creating an MP4 file, sfront places the
+MIDI events in the configuration section.
+<LI> <B><TT><A NAME="mstr">-mstr scorefile.</A></TT></B> Specifies
+a MIDI file. Behaves like the -midi option, except that when 
+creating an MP4 file, sfront places the MIDI events 
+in the streaming section.
+<LI> <B><TT><A NAME="mv">-mv.</A></TT></B>
+Generates a verbose output when reading MIDI files, directly or via an
+MP4 file. Useful for orchestrating MIDI files created by someone else,
+to read the text comments for each channel, and to see which bank and
+patch change goes with each channel.
+</UL>
+
+<P>
+<A NAME="cin">In</A> addition to the static control input options
+above, dynamic input can drive the C file sfront generates, via the
+control driver interface. Only one control driver may be specified on
+the sfront command line, using the <TT>-cin</TT> option. 
+
+<P>
+The following control drivers are available:
+
+<UL>
+<LI> <B><TT>-cin ascii.</TT></B> Simple real-time MIDI input from an
+ASCII keyboard. Each row of letter keys maps to a 2-octave pentatonic
+scale, notes have fixed duration.  <TT>0-9</TT> select MIDI preset
+number, <TT>+/-</TT> change MIDI channel volume. See
+<TT>examples/rtime/ascii</TT>.
+<LI> <B><TT>-cin linmidi.</TT></B> Real-time input from the MIDI In
+jack of a soundcard under Linux, using the OSS API. 
+<LI> <B><TT>-cin alsamidi.</TT></B> Real-time input from the MIDI In
+jack of a soundcard under Linux, using the ALSA API (ALSA's OSS-compatible
+mode may not work with the linmidi driver). Thanks to Steven Pickles.
+<LI> <B><TT>-cin alsaseq.</TT></B> Real-time MIDI input from the ALSA
+sequencer under Linux, a more sophisticated alternative to alsamidi.
+See this <A HREF="alsaseq/index.html">documentation</A> for more details.
+Contributed by Enrique Robledo Arnuncio.
+<LI> <B><TT><A NAME="coremidi">-cin coremidi.</A></TT></B> Real-time
+input from external MIDI sources under Mac OS X. Be sure to connect
+the MIDI interface or device before starting the <TT>sa.c</TT>
+program. Up to 4 external MIDI inputs are supported. Virtual sources
+are currently ignored (with a warning message), but may be supported
+in a future release.
+<LI> <B><TT><A NAME="aucontrol">-cin aucontrol.</A></TT></B> An
+AudioUnit control driver, that must be used for the Effect AU
+type.  AudioUnits are the standard plugin format for Mac OS X.
+<LI> <B><TT><A NAME="aucontrolm">-cin aucontrolm.</A></TT></B> An
+AudioUnit control driver, that must be used for the MusicDevice and
+MusicEffect AU types. AudioUnits are the standard plugin
+format for Mac OS X.
+<LI> <B><TT>-cin freebsdmidi.</TT></B> Read-time input from the MIDI In
+jack of a soundcard under FreeBSD, using the pcm API. This code has
+not been tested. 
+<LI> <B><TT>-cin win32.</TT></B> Real-time input from the MIDI In
+jack of a soundcard under Windows. Should work with both pa_win_wmme
+and pa_win_ds audio drivers, but has not yet been tested.
+<LI> <B><TT>-cin gliss.</TT></B> Used by the examples/gliss example:
+produces piano glissando control input, with forward sweeps generating
+MIDI control, and reverse sweeps generation SASL control.
+<LI> <B><TT>-cin fstr.</TT></B> Reads streaming data from an MP4 file
+during the execution of the <TT>sa.c</TT> file. See this 
+<A HREF="../rtime/index.html#fstr">example</A> for proper usage, or
+run the examples/claps example invoked with "make stream".
+</UL>
+
+<P>
+Streaming audio control drivers should be used with the -<A
+HREF="#playback"><TT>playback</TT></A> time management option.
+Interactive control drivers may be used with the -<A
+HREF="#playback"><TT>playback</TT></A> or -<A
+HREF="#timesync"><TT>timesync</TT></A> time management options,
+depending on the audio driver in use.
+
+<P>
+See Part II/2 for information on adding your own 
+<A HREF="../../devel/cdriver/intro/index.html">control</A> drivers
+to sfront.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<P>
+<H2>Options By Category</H2></CAPTION>
+<P>
+<A HREF="#audioio">Audio I/O Options</A>
+<BR><A HREF="#codeoutput">Code Output Options</A>
+<BR><A HREF="#isoflags">Conformance Options</A>
+<BR><A HREF="#optoptions">Debugging Options</A>
+<BR><A HREF="#legal">Legal Options</A>
+<BR><A HREF="#network">Network Options</A>
+<BR><A HREF="#audiounit_id">AudioUnit Options</A>
+<BR><A HREF="#preprocess">Pre-processor Options</A>
+<BR><A HREF="#timemanage">Real-Time Options</A>
+<BR><A HREF="#inputfile">Source Input Options</A>
+<BR><BR><BR>
+
+
+<P>
+<H2>Alphabetical List</H2></CAPTION>
+<TT>
+<TABLE WIDTH="100%" BORDER=1>
+<TR>
+<TD WIDTH="50%"><A HREF="#ain">-ain [name or fname.ext]</A></TD>
+<TD WIDTH="50%">Audio input file/device</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#aout">-aout [name or fname.ext]</A></TD>
+<TD WIDTH="50%">Audio output file/device</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#au_csubtype">-au_component_subtype xxxx</A></TD>
+<TD WIDTH="50%">AudioUnit Subtype</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#au_cmanu">-au_component_manu xxxx</A></TD>
+<TD WIDTH="50%">AudioUnit Manufacturer</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#au_fname">-au_filesystem_name name</A></TD>
+<TD WIDTH="50%">AudioUnit Finder Name</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#au_uname">-au_ui_name "Name String"</A></TD>
+<TD WIDTH="50%">AudioUnit UI Name</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#au_umanu">-au_ui_manu "Manu String"</A></TD>
+<TD WIDTH="50%">AudioUnit UI Manufacturer</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#au_murl">-au_manu_url xxx.yyy.zzz</A></TD>
+<TD WIDTH="50%">AudioUnit Manufacturer URL</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#au_view_bundle">-au_view_bundlename name</A></TD>
+<TD WIDTH="50%">Audiounit Cocoa View Name</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#au_view_class">-au_view_baseclass name</A></TD>
+<TD WIDTH="50%">Audiounit Cocoa View Class</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#bandsize">-bandsize num</A></TD>
+<TD WIDTH="50%">Player count</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#bit">-bit fname</A></TD>
+<TD WIDTH="50%">MP4 input file</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#bitc">-bitc fname</A></TD>
+<TD WIDTH="50%">MP4 input file</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#bitout">-bitout fname</A></TD>
+<TD WIDTH="50%">MP4 output file</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#cin">-cin name</A> </TD>
+<TD WIDTH="50%">Control driver</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#cpp">-cpp</A> </TD>
+<TD WIDTH="50%">Use pre-processor</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#except">-except</A> </TD>
+<TD WIDTH="50%">Exception handling</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#fec">-fec mode</A> </TD>
+<TD WIDTH="50%">Network algorithm</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#fixedseed">-fixedseed</A> </TD>
+<TD WIDTH="50%">Random number seeds</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#gcc">-gcc</A> </TD>
+<TD WIDTH="50%">System compiler</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#hexdata">-hexdata</A> </TD>
+<TD WIDTH="50%">Encode data in hex strings</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#interp">-interp [linear|sinc]</A> </TD>
+<TD WIDTH="50%">Sets SAOL global interp parameter</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#Is">-Is</A> </TD>
+<TD WIDTH="50%">Preprocessor library</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#isocheck">-isocheck</A> </TD>
+<TD WIDTH="50%">Debug option</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#isosyntax">-isosyntax</A> </TD>
+<TD WIDTH="50%">Strict SAOL syntax</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#latency">-latency time</A></TD>
+<TD WIDTH="50%">Playback latency</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#lateplay">-lateplay</A></TD>
+<TD WIDTH="50%">Network tolerance</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#latetime">-latetime t</A></TD>
+<TD WIDTH="50%">Network tolerance</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#lopt">-license</A></TD>
+<TD WIDTH="50%">Print license flag</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#midi">-midi fname</A></TD> 
+<TD WIDTH="50%">MIDI input file</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#midout">-midout fname</A></TD>
+<TD WIDTH="50%">MIDI output file</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#m_semitones">-m_semitones num</A></TD> 
+<TD WIDTH="50%">Mirror transpose</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#mstr">-mstr fname</A></TD> 
+<TD WIDTH="50%">MIDI input file</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#mv">-mv</A> </TD>
+<TD WIDTH="50%">MIDI verbose flag</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#no_const">-no-constopt</A></TD>
+<TD WIDTH="50%">Optimizer flag</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#no_inline">-no-inline</A></TD>
+<TD WIDTH="50%">Optimizer flag</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#no_rate">-no-rateopt</A></TD>
+<TD WIDTH="50%">Optimizer flag</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#null_program">-null-program</A></TD>
+<TD WIDTH="50%">MIDI Program Change behavior</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#o">-o fname</A></TD>
+<TD WIDTH="50%">C output file</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#orc">-orc f1[,f2,...]</A></TD>
+<TD WIDTH="50%">SAOL input file</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#orcout">-orcout fname</A></TD>
+<TD WIDTH="50%">SAOL output file</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#no_opt">-O0</A></TD>
+<TD WIDTH="50%">Optimizer flag</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#passphrase">-passphrase</A></TD>
+<TD WIDTH="50%">Network secret</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#playback">-playback</A></TD>
+<TD WIDTH="50%">Mode flag</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#pporc">-pporc</A></TD>
+<TD WIDTH="50%">SAOL writing flag</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#render">-render</A></TD>
+<TD WIDTH="50%">Mode flag</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#sco">-sco fname</A> </TD>
+<TD WIDTH="50%">SASL input file</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#scoout">-scoout fname</A></TD>
+<TD WIDTH="50%">SASL output file</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#session">-session name</A> </TD>
+<TD WIDTH="50%">Activate network</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#sinc_pilen">-sinc_pilen n</A> </TD>
+<TD WIDTH="50%">Adjust band-limited interpolation quality</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#sinc_zcross">-sinc_zcross n</A> </TD>
+<TD WIDTH="50%">Adjust band-limited interpolation quality</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#sip_ip">-sip_ip dotquad</A> </TD>
+<TD WIDTH="50%">SIP server</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#sip_port">-sip_port num</A> </TD>
+<TD WIDTH="50%">SIP port</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#sstr">-sstr fname</A> </TD>
+<TD WIDTH="50%">SASL input file</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#symtab">-symtab</A></TD>
+<TD WIDTH="50%">Symbol table flag</TD>
+</TR><TR>
+<TD WIDTH="50%"><A HREF="#timesync">-timesync</A></TD>
+<TD WIDTH="50%">Mode flag</TD>
+
+
+</TR>
+
+
+</TABLE>
+
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4><A NAME="codeoutput">Code output options</A></H4>
+
+<P>
+These options specify output files written by <TT>sfront</TT>, or are
+flags that influence output file creation.
+
+<UL>
+<LI> <B><TT><A NAME="o">-o cfile.</A></TT></B> Specifies the C file sfront writes
+out. If not specified, the file sa.c is used.
+
+<LI> <B><A NAME="bitout"><TT>-bitout.</TT></A></B> Creates a MP4 file
+output in addition to a C file. The files specified by the -orc, -sco,
+and and -midi commands are packed into the configuration part of the
+MP4 file, along with any samples specified in the -sco files. The files
+specified by the -mstr and -sstr commands are packed into the
+streaming section of the MP4 file, along with any samples used by SASL
+table lines in the -sstr file. Sfront cannot regenerate a -bit file
+into a -bitout file.
+
+<LI> <B><TT><A NAME="symtab">-symtab.</A></TT></B> Includes a symbol
+table in the MP4 file created with -bitout. This makes the file longer,
+but allows decoders to create ASCII SAOL and SASL files with
+user-friendly variable names.
+
+<LI> <B><TT><A NAME="orcout">-orcout.</A></TT></B> Generate an ASCII SAOL file. Useful when
+reverse engineering an MP4 bitstream.
+
+<LI> <B><TT><A NAME="scoout">-scoout.</A></TT></B> Generate an ASCII SASL file. Useful when
+reverse engineering an MP4 bitstream.
+
+<LI> <B><TT><A NAME="midout">-midout.</A></TT></B> Generates a binary MIDI file. Useful
+when reverse engineering an MP4 bitstream.
+
+<LI> <B><TT><A NAME="except">-except.</A></TT></B>
+When this option is enabled, the C file includes extra code that runs
+when the program ends prematurely (for example, due to a division by
+zero in the SAOL program), and gracefully shuts down audio input and
+output. Code produced by this option may not work correctly on
+non-POSIX systems. Thanks to Bertrand Petit.
+
+<LI> <B><TT><A NAME="fixedseed">-fixedseed.</A></TT></B>
+When this option is enabled, the C file seeds the random number
+generator with the same value each time, ensuring the opcode
+calls that generate random numbers produce a deterministic
+number stream on each run of a <TT>sa.c</TT> program. If this
+flag is not specified, the random number generator seed is based
+on the current time of day, and so each program run produces a
+different result. This flag is primarily useful for testing.
+Thanks to Martin Marier and Michael McGonagle.
+
+<LI> <B><TT><A NAME="hexdata">-hexdata.</A></TT></B>
+When this option is enabled, the C file may encode arrays of numbers
+as hexadecimal strings to speed up the C compilation process, a 
+platform-dependent technique that is not strict ANSI C. This
+technique is known to produce functional code that provides a 
+significant speedup under gcc on Linux/x86; it is also known to
+produce buggy code under Solaris using the cc compiler.
+
+<LI> <B><TT><A NAME="pporc">-pporc.</A></TT></B>
+When this option is enabled, -orcout produces parse tree for SAOL
+code that has been optimized by sfront in preparation for code 
+generation. 
+
+<LI> <B><TT><A NAME="interp">-interp [linear | sinc].</A></TT></B>
+Instructs sfront to ignore the SAOL global interp parameter, and to
+instead perform linear interpolation (-interp linear) or band-limited
+sinc-function interpolation (-interp sinc).  See this <A
+HREF="http://ccrma-www.stanford.edu/~jos/resample/">article</A> for a
+description of the band-limited interpolation algorithm sfront
+implements. The <B>tableread</B> core opcode has special interpolation
+issues, as described in this <A
+HREF="../../../book/saol/wave/index.html#sinc_read">part</A> of the
+MP4-SA book).
+
+<LI> <B><TT><A NAME="sinc_zcross">-sinc_zcross n.</A></TT></B>
+If band-limited interpolation is in use, set the windowed 
+sinc interpolation function to have n zero-crossing for each
+lobe.  The default value is 3.  Higher values decrease aliasing
+but require more computation per sample.
+
+<LI> <B><TT><A NAME="sinc_pilen">-sinc_pilen n.</A></TT></B> If
+band-limited interpolation is in use, set the table lookup
+approximation for the windowed sinc function to have n entries (n=128
+by default).  Note the sinc-function implementation does not linearly
+interpolate between loop-up entries.  To avoid rounding artifacts, the
+table size should be increased if -sinc_zcross increases the
+number of zero crossings in the sinc function.
+
+<LI> <B><TT><A NAME="null_program">-null-program.</A></TT></B>
+When enabled, if the program number of a MIDI Program Change command
+on a channel does not map to the <B>preset</B> tag of any SAOL instr
+in the program, subsequent MIDI NoteOn commands on the MIDI channel
+are ignored.  Note that by default (no <TT>-null-program</TT> flag), a
+Program Change command selecting a non-existent SAOL instr would be
+ignored, and subsequent MIDI NoteOn commands on the MIDI channel would
+create new instances of the SAOL instr that was previously bound to
+the MIDI channel.
+
+</UL>
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+
+<H4> <A NAME="audioio">Audio I/O Options</A></H4>
+
+<P>
+Only one of the following <A NAME="aout">output</A> options may be used:
+
+<UL>
+<LI><B><TT>-aout fname.wav.</TT></B>
+Writes fname.wav, a Microsoft WAV file. Note the .wav extension 
+triggers this option -- fname can be any name.  By default, 
+fname.wav uses 16-bit samples.  The names fname.wav-24 and
+fname.wav-8 specify the creation of a file fname.wav that
+uses 24-bit or 8-bit samples, respectively.
+<LI><B><TT> -aout fname.aif.</TT></B>
+Writes fname.aif, an AIFF file (EA, Apple, SGI). Note the .aif
+extension triggers this option -- fname can be any name.  By default,
+fname.aif uses 16-bit samples.  The names fname.aif-24 and
+fname.aif-8 specify the creation of a file fname.aif that uses
+24-bit or 8-bit samples, respectively.
+<LI><B><TT> -aout fname.dat.</TT></B>
+Writes the ASCII file format of the <I>view</I> curve viewing tool, (a
+part of the <A HREF="http://john-lazzaro.github.io/chipmunk/describe/describe.html"> Chipmunk</A> tools). For single-channel output, 
+writes the file <TT>fname.dat</TT>. For multi-channel output, writes
+the files <TT>fname1.dat, fname2.dat, ...</TT>
+<LI><B><TT>-aout fname.raw.</TT></B>
+Writes fname.raw, a raw binary file. This file will contain 
+channel-interleaved, 16-bit signed integers, in the native
+byte order of the machine. Note the .raw extension triggers
+this behavior -- fname can be any name. A companion ASCII,
+fname.raw.info, is also written, which has three lines: line
+one is the sampling rate, line two is the number of channels,
+line three is the total number of samples in the file.
+
+<LI><B><TT>-aout linux.</TT></B> Send audio output to the audio
+hardware under Linux. Uses the OSS sound drivers (which also work
+under ALSA using OSS compatibility mode). Use a mixer application to
+set audio output source. When run as root, driver uses POSIX real-time
+features to improve audio quality. While we have carefully tested
+these root features, bugs in programs run as root can cause
+file-system damage: use at your own risk.  
+<LI><B><TT><A NAME="coreaudio_out">-aout coreaudio.</A></TT></B> Send
+audio output to the audio hardware under Macintosh OS X, using the
+CoreAudio framework. To compile the sa.c file, add the <TT>-framework
+CoreAudio</TT> option on the <TT>cc</TT> command line. If your system
+does not have <TT>cc</TT> installed, use the Mac App Store to download
+Xcode (for Lion and Snow Leopard, a free app), or
+join <A HREF="http://developer.apple.com/membership/online.html">ADC
+Online</A> and download the Apple Development Tools (also for free).  Thanks
+to members of Apple's <TT>coreaudio-api</TT> and <TT>darwin</TT>
+mailing lists for help with the CoreAudio driver. Thanks to Phil Burk,
+Richard Dobson, and Dominic Mazzoni for help with an earlier
+Carbon-based version of this driver.
+<LI><B><TT><A NAME="audiounit_out">-aout audiounit, -aout
+audiounit_debug.</A></TT></B>  
+The <TT>audiounit</TT> driver is used to create an AudioUnit, the
+plug-in standard for Mac OS X.  The driver must be used to create an
+Effect, MusicEffect, or MusicDevice plug-in.  The
+<TT>audiounit_debug</TT> driver may be used in lieu of the
+<TT>audiounit</TT> driver, to create a debugging version of the
+plug-in.  See this <A HREF="../../../book/special/au/index.html">book
+chapter</A> for more information about writing AudioUnit plugins in
+SAOL. If your system
+does not have <TT>cc</TT> installed, join <A
+HREF="http://developer.apple.com/membership/online.html">ADC
+Online</A> and download the Apple Development Tools for free. Thanks
+to Jeremy Voorhis for helping to test this driver.
+<LI><B><TT><A NAME="pa_win_wmme">-aout pa_win_wmme.</A></TT></B> Send
+audio output to the audio hardware under Microsoft windows, using the
+Windows MultiMedia Extension library.  See right panel for linking
+instructions for <TT>sa.c</TT> files created with this audio driver,
+and for hardware selection details. Thanks to <A
+HREF="http://www.portaudio.com">PortAudio</A>, Phil Burk, Ross
+Bencina, Richard Dobson, Peter Maas, Kees van Prooijen, and Tim
+Thompson for help with this driver.
+<LI><B><TT><A NAME="pa_win_ds">-aout pa_win_ds</A>.</TT></B> Send
+audio output to the audio hardware under Microsoft windows, using the
+Windows Directsound library. Users should install a recent copy of <A
+HREF="http://www.microsoft.com/directx/download.asp"> Developers
+DirectSound</A> for best results.  See right panel for linking
+instructions for <TT>sa.c</TT> files created with this audio driver,
+and for hardware selection details. Thanks to <A
+HREF="http://www.portaudio.com">PortAudio</A>, Phil Burk, Ross
+Bencina, Richard Dobson, Peter Maas, Kees van Prooijen, and Tim
+Thompson for help with this driver.  Also thanks to Vincent Siliakus
+and Thomas Jongepier for work on an earlier DirectSound driver.
+<LI><B><TT> -aout <A NAME="freebsdaout">freebsd.</A></TT></B>
+Send audio output to the audio hardware under FreeBSD (pcm).
+Thanks to Bertrand Petit.
+<LI><B><TT> -aout <A NAME="irix">irix</A>.</TT></B>
+Send audio output to the audio hardware of an SGI workstation
+running IRIX 6.2 or later. Output C file needs to be linked with -laudio.
+Thanks to Michael Pruett.
+<LI><B><TT>-aout std.</TT></B>
+Send channel-interleaved, 16-bit signed integers, in the native
+byte order of the machine, to stdout. 
+<LI><B><TT>-aout null.</TT></B>
+Do not send audio output anywhere.
+<LI><B><TT> -aout hpux.</TT></B>
+Send audio output to the audio hardware of a HP700 workstation
+running HPUX. Output C file needs to be linked with -lAlib.
+By default, sound is sent to the internal speaker; set the
+shell environment variable SPEAKER to EXTERNAL to drive the 
+line out jack in the back of the machine.
+</UL>
+
+<P>
+Only one of the following <A NAME="ain">input</A> options may be used:
+
+<UL>
+
+<LI><B><TT>-ain fname.wav.</TT></B>
+Reads fname.wav, a Microsoft WAV file. Note the .wav extension
+triggers this option -- fname can be any name.
+<LI><B><TT>-ain fname.aif.</TT></B>
+Reads fname.aif, an AIFF file (Apple, SGI).
+<LI><B><TT> -ain fname.dat.</TT></B>
+Reads the ASCII file format of the <I>view</I> curve viewing tool, (a
+part of the <A HREF="http://john-lazzaro.github.io/chipmunk/describe/describe.html"> Chipmunk</A> tools). Reads the first curve in 
+file <TT>fname.dat</TT> and sends its data to all input channels.
+Ignores the <TT>x</TT> parameter of the curve.
+<LI><B><TT>-ain fname.raw.</TT></B>
+Reads the raw binary file fname.raw. This file should contain 
+channel-interleaved, 16-bit signed integers, in the native
+byte order of the machine. Note the .raw extension triggers
+this behavior -- fname can be any name. An ASCII fname.raw.info,
+is also written, that contains information on how the file was
+read. This file has three lines: line one is the sampling rate,
+line two is the number of channels, line three is the total number
+of samples in the file.
+<LI><B><TT> -ain linux.</TT></B>
+Read audio input from the audio hardware under Linux. Uses
+the OSS sound drivers. Use a mixer application to set audio
+input source.
+<LI><B><TT><A NAME="coreaudio_in">-ain coreaudio.</A></TT></B> Read
+audio input from the audio hardware under Mac OS X, using the
+CoreAudio framework.  To compile the sa.c file, add the <TT>-framework
+CoreAudio</TT> option on the cc command line. If your system does not
+have cc installed, join ADC Online and download the Apple Development
+Tools for free. Thanks to members of Apple's <TT>coreaudio-api</TT>
+and <TT>darwin</TT> mailing lists for help with the CoreAudio
+driver. Thanks to Phil Burk, Richard Dobson, and Dominic Mazzoni for
+help with an earlier Carbon-based version of this driver.
+<LI><B><TT><A NAME="audiounit_in">-ain audiounit.</A></TT></B> The
+<TT>audiounit</TT> driver is used to create an AudioUnit, the plug-in
+standard for Mac OS X.  This input driver must be used to create an
+Effect or MusicEffect.  See this <A
+HREF="../../../book/special/au/index.html">book chapter</A> for more
+information about writing AudioUnit plugins in SAOL. If your system
+does not have <TT>cc</TT> installed, join <A
+HREF="http://developer.apple.com/membership/online.html">ADC
+Online</A> and download the Apple Development Tools for free. Thanks
+to Jeremy Voorhis for helping to test this driver.
+<LI><B><TT> -ain pa_win_wmme.</TT></B> 
+Read audio input from the audio hardware under Microsoft windows, using
+the Windows MultiMedia Extension library. See right panel for linking
+instructions for <TT>sa.c</TT> files created with this audio driver,
+and for hardware selection details. Thanks to <A
+HREF="http://www.portaudio.com">PortAudio</A>, Phil Burk, Ross
+Bencina, Richard Dobson, Peter Maas, Kees van Prooijen, and Tim
+Thompson for help with this driver.
+<LI><B><TT> -ain pa_win_ds.</TT></B> Read audio input from the audio
+hardware under Microsoft windows, using the Windows Directsound
+library. Users should install a recent copy of <A
+HREF="http://www.microsoft.com/directx/download.asp"> Developers
+DirectSound</A> for best results. See right panel for linking
+instructions for <TT>sa.c</TT> files created with this audio driver,
+and for hardware selection details.. Thanks to <A
+HREF="http://www.portaudio.com">PortAudio</A>, Phil Burk, Ross
+Bencina, Richard Dobson, Peter Maas, Kees van Prooijen, and Tim
+Thompson for help with this driver.  Also thanks to Vincent Siliakus
+and Thomas Jongepier for work on an earlier DirectSound driver.
+<LI><B><TT> -ain freebsd.</TT></B>
+Read audio input from the audio hardware under FreeBSD (pcm).
+Thanks to Bertrand Petit.
+<LI><B><TT> -ain irix.</TT></B>
+Read audio output from the audio hardware of an SGI workstation
+running IRIX 6.2 or later. Output C file needs to be linked with -laudio.
+Thanks to Michael Pruett.
+<LI><B><TT>-ain std.</TT></B>
+Read channel-interleaved, 16-bit signed integers, in the native
+byte order of the machine, from stdin. This is the default option.
+<LI><B><TT>-ain null.</TT></B>
+Read silence (all channels set to zero).
+<LI><B><TT>-ain hpux.</TT></B>
+Reads audio output to the audio hardware of a HP700 workstation
+running HPUX. Output C file needs to be linked with -lAlib.
+By default, sound is read from front-panel microphone input, and
+audio output is forced to be internal speaker by hardware constraints.
+</UL>
+
+<P>
+If an audio input or output is needed and -ain or -aout is not on the
+command line, the WAV files input.wav and output.wav are used as
+defaults.
+
+<P>
+If the <B>srate</B> or <B>inchannels</B> global parameters are
+not set in the SAOL global block, sfront queries the audio input
+source for the correct sampling rate and input width. Since sfront,
+and not the <TT>sa.c</TT> program, does the query, the file 
+specified by the file-input <TT>-ain</TT> options must be available
+when sfront runs.
+
+<P>
+See Part II/3 for information on adding your own 
+<A HREF="../../devel/adriver/index.html">audio</A> drivers to sfront.
+
+<H4><A NAME="timemanage">Time-management options</A></H4>
+
+<P>
+Sfront programs run under one of three temporal modes: render,
+playback, or timesync. Each mode defines a set of real-time
+behaviors.
+
+<P>
+Sfront sets a default temporal mode to suit the requirements of the
+chosen audio drivers. The time-management command-line options
+described below override the default temporal mode. These options are
+mutually exclusive; if multiple options are given, the last one is
+used.
+
+<UL>
+<LI><B><TT><A NAME="render">-render.</A></TT></B>        
+Execute the SAOL program as accurately as possible. Update the SAOL
+standard name <TT>cpuload</TT> if a real-time driver is in use; set
+<TT>cpuload</TT> to 0 if no real-time drivers are in use.
+<LI><B><TT><A NAME="playback">-playback.</A></TT></B>
+Compute audio output with the goal of meeting real-time constraints.
+Compromise audio quality if necessary to prevent buffer overruns.
+Always update <TT>cpuload</TT>.
+<LI><B><TT><A NAME="timesync">-timesync.</A></TT></B> 
+Follow the behavior described for playback mode, and also force the
+program to use at least 1 ms of real time to compute 1 ms of audio, by
+temporarily halting program execution if audio is computing too fast.
+This mode is rarely needed: real-time drivers usually default to
+playback mode, and use implicit techniques to handle compute-ahead
+issues.
+</UL>
+
+<P>
+<A NAME="latency">The</A> algorithm for real-time playback includes
+several parameters, which default to sensible values for typical
+hardware configurations.  These parameters may be set explicitly using
+the following option:
+
+<UL>
+<LI><B><TT>-latency time.</TT></B> Sets the playback latency, in units
+of seconds. Try increasing the latency if playback clicks or stutters.
+Sfront chooses a default latency, based on the type of SAOL program
+(interactive or streaming) and the audio hardware type. The default
+interactive latency is usually a few milliseconds; the default
+streaming latency may be a few tens or a few hundreds of milliseconds.
+</UL>
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H4><TT>Windows DLL Issues</TT></H4>
+
+<TT>
+<pre>
+To link sa.c files created with
+-aout pa_win_wmme ...
+
+Under gcc:
+
+ gcc -O3 sa.c -lm -lwinmm -o sa.exe
+
+Under MS VC++:
+
+ cl sa.c winmm.lib -o sa.exe
+
+
+
+To link sa.c files created with
+-aout pa_win_ds ...
+
+Under MS VC++:
+
+  cl sa.c dsound.lib dxguid.lib 
+     winmm.lib -o sa.exe
+
+If compilation fails, see this
+<A HREF="http://msdn.microsoft.com/library/default.asp?URL=/library/techart/DirectX8faq.htm">FAQ</A> for help
+with include path issues.
+
+Directsound programs may not link
+correctly with gcc, to try:
+
+  gcc -O3 sa.c -ldsound -ldxguid 
+               -lwinmm -o sa.exe
+
+</pre>
+</TT>
+
+<H4><TT>Windows Device Selection</TT></H4>
+
+<TT>
+<pre>
+Multiple audio input or output 
+sources may be available on 
+your Windows machine. The 
+pa_win_wmme and pa_win_ds 
+drivers are set up with 
+default sources. Environment
+variables select alternative 
+sources. For example:
+
+set PA_RECOMMENDED_OUTPUT_DEVICE=1
+set PA_RECOMMENDED_INPUT_DEVICE=1
+
+uses an alternative source for both
+input and output (0 codes the 
+default). Cycle through small 
+integer values to find the 
+source you want.
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4><A NAME="network">Networking options</A></H4>
+
+<I>
+<P>
+Previous releases of sfront supported <A
+HREF="http://www.eecs.berkeley.edu/~lazzaro/nmp/index.html">network
+musical performance</A> over the Internet. This feature relied on
+server infrastructure at Berkeley which no longer exists.
+
+<P>
+Therefore, this release of sfront does not support networking.
+The command-line networking options described in this section
+produce sfront compile-time errors.
+
+<P> 
+Sfront networking served as the reference standard for
+<A HREF="http://www.eecs.berkeley.edu/~lazzaro/rtpmidi/index.html">
+RFC 4695</A>, an IETF networking standard. To support RFC 4695
+implementers, it is possible to compile this distribution with
+RTP MIDI support (although without server support, it will not
+be possible to successfully start a networking session).  See
+the file <TT>sfront/src/NETWORK.HTML</TT> in the distribution
+for details.
+
+<P>
+Below is the original documentation describing the sfront
+command-line options for networking.
+</I>
+
+<P>
+The C program sfront creates can communicate with other clients in a
+network session. Note that using network features could result in a
+malicious attack on your machine. <B>USE AT YOUR OWN RISK.</B>
+
+<P>
+Currently, network sessions only carry MIDI commands
+that originate from the the <TT>-cin</TT> control driver. MIDI
+commands are sent to all other session participants.
+
+<P>
+The options below activate networking.
+
+<UL>
+<LI><B><TT><A NAME="session">-session name.</A></TT></B> 
+The name of session, chosen by the session participants and treated
+as a secret. If the name contains space characters, it should be
+enclosed in double-quotes. The session name mirror has special
+semantics, described below.
+<LI><B><TT><A NAME="passphrase">-passphrase key.</A></TT></B> A secret
+phrase, at least 20 characters long, shared among the session
+participants. If the passphrase contains space characters, it should
+be enclosed in double-quotes. May be omitted for the special mirror
+session; sfront generates a random passphrase in this case.
+</UL>
+
+<P>
+Session participants should keep the session name and passphrase
+secret, because these items are used to cryptographically authenticate
+data arriving over the network. Without authentication, an attacker
+could play loud notes into your speakers and cause damage, or perhaps
+even take over your machine.
+
+<P>
+The session name mirror has special semantics, and should not be used
+for regular session. The <TT>-session mirror</TT> option connects the
+client to a packet reflector client currently located in Berkeley
+California USA, that bounces back each RTP packet that contains MIDI
+data as soon as it arrives.
+
+<P>
+The sonic effect is an echo note for each note played, whose echo time
+reflects the network delay.  By default, this echo is also transposed
+up by 5 semitones. The following option changes this default.
+
+<UL>
+<LI><B><TT><A NAME="m_semitones">-m_semitones num.</A></TT></B>
+Number of semitones to transpose echo note, a positive number
+between 0 and 24.
+</UL>
+
+<P> 
+In theory, any number of clients may be in a session. In practice,
+more CPU and bandwidth is needed to sustain a session as the number of
+participants rise. By default, the client can only handle sessions
+with 2 other players. The following option changes this default.
+
+<UL>
+<LI><B><TT><A NAME="bandsize">-bandsize num.</A></TT></B>
+Number of other clients in the session. Note that the SIP
+server can only currently handle 6-member sessions, and so
+num should never be more than 5.
+</UL>
+
+<P>
+The Internet is an unreliable network; packets may be lost, delayed,
+or reordered in flight. Sfront uses algorithms to lessen the impact of
+lost and last packets on a performance. These algorithms may be tuned
+using the options below.
+
+<UL>
+<LI><B><TT><A NAME="latetime">-latetime t.</A></TT></B>
+If a MIDI NoteOn command arrives too late, the note is
+not played. The -latetime option sets how late is too
+late, and has units of seconds. If this value is set too
+small, practically all notes will be dropped; if it is set
+too large, very late notes will play. The default value of
+0.04 works well on Internet 2.
+<LI><B><TT><A NAME="lateplay">-lateplay.</A></TT></B> Sets
+the latetime to infinity.
+<LI><B><TT><A NAME="fec">-fec mode.</A></TT></B> This flag 
+sets the behavior of the forward-error correction
+system sfront uses to recover from lost packets. We
+describe each mode individually.
+<LI><B><TT>-fec standard.</TT></B> The
+standard FEC algorithm. For vigorous MIDI keyboarding,
+this algorithm uses about 6 kilobits per second of
+network bandwidth.  
+<LI><B><TT>-fec extra.</TT></B> Adds
+extra protection for note initiation events,
+when compared with standard fec. Fewer notes will
+be dropped due to lost packets, at the expense of
+higher bandwidth. Note this does not help late packets.
+<LI><B><TT>-fec minimal.</TT></B> Reduced
+protection relative to standard mode, but bandwidth
+uses decreases. Sonic effect is that sustained notes
+may play slightly past the time of release if packets
+are lost.
+<LI><B><TT>-fec noguard.</TT></B> Reduces
+protection relative to minimal mode, but bandwidth
+decreases. Sonic effect is that a sustained note may
+play long past the time of release, until the 
+musician generates a new MIDI event. Mostly used for
+testing.
+<LI><B><TT>-fec none.</TT></B> No packet loss
+protection at all. Use for reliable networks, or for
+SAOL programs where all voices are percussive and 
+execute SAOL <TT>turnoff</TT> commands after a fixed
+period of time.
+</UL>
+
+<P>
+By default, the C program sfront creates tries to contact a SIP
+(session initiation protocol) server located in Berkeley California
+USA. This SIP server acts to coordinate the session. Someday, 
+alternative SIP servers may exist. When that day arrives, the
+following options will become useful.
+
+<UL>
+<LI><B><TT><A NAME="sip_ip">-sip_ip dotquad.</A></TT></B> The IP
+number of the SIP server, expressed in dotted-quad format. For
+example, the dotted-quad 169.229.59.210 is the default SIP server at
+Berkeley (at the time of this writing).
+<LI><B><TT><A NAME="sip_port">-sip_port port.</A></TT></B> The port
+number for the SIP server, expressed as an unsigned integer. For 
+example, port number 5060 is the default SIP port.
+</UL>
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4><A NAME="audiounit_id">AudioUnit identification options</A></H4>
+
+<P>
+Sfront may be used to write AudioUnits, the plug-in standard
+for Mac OS X. 
+
+<P>
+Several command-line options server to define the identity of the
+AudioUnit.  The <I>type</I> of the AudioUnit (Effect, MusicEffect,
+MusicDevice) is set via the selection of <TT><A
+HREF="#audiounit_in">-ain</A></TT>, <TT><A
+HREF="#audiounit_out">-aout</A></TT>, and <TT><A
+HREF="#aucontrol">-cin</A></TT> drivers.  Other aspects of AudioUnit
+identity may be specified by the command-line options listed below:
+
+<UL>
+<LI><B><TT><A NAME="au_csubtype">-au_component_subtype xxxx.</A></TT></B>
+Specifies a four-character sequence (<TT>xxxx</TT>) that codes the subtype of
+the AudioUnit (subtypes are unique identifiers for a product from a
+particular manufacturer). 
+<LI><B><TT><A NAME="au_cmanu">-au_component_manu xxxx.</A></TT></B>
+Specifies a four-character sequence (<TT>xxxx</TT>) that codes the manufacturer of
+the AudioUnit.
+<LI><B><TT><A NAME="au_fname">-au_filesystem_name name.</A></TT></B>
+Specifies the filename (<TT>"name".component</TT>) of the bundle for the
+AudioUnit, as it appears in the Finder.  For maximum compatibility,
+"name" should not include white-space characters.
+<LI><B><TT><A NAME="au_uname">-au_ui_name "Name String".</A></TT></B>
+Specifies the name of an AudioUnit ("<TT>Name String</TT>") as it will appear
+in the user interface screens of Audio Unit hosts.
+<LI><B><TT><A NAME="au_umanu">-au_ui_manu "Manufacturer
+String".</A></TT></B> Specifies the manufacturer of an AudioUnit
+("<TT>Manufacturer String</TT>") as it will appear in the user interface
+screens of AudioUnit hosts.
+<LI><B><TT><A NAME="au_murl">-au_manu_url xxx.yyy.zzz</A></TT></B>
+&nbsp Specifies the manufacturer of an AudioUnit using inverse-URL
+syntax (i.e. <TT>edu.berkeley.eecs</TT>).  Sfront uses this
+string to write a bundle ID in the AudioUnit's Info.plist file.
+<LI><B><TT><A NAME="au_view_bundle">-au_view_bundlename name.</A></TT></B> 
+Specifies the name of a Cocoa view bundle for the AudioUnit 
+(without the <TT>.bundle</TT> suffix).
+<LI><B><TT><A NAME="au_view_class">-au_view_baseclass.</A></TT></B> Specifies the 
+name of the class in the Cocoa view that implements the <TT>AUCocoaUIBase</TT>
+protocol.
+</UL>
+
+<P>
+See this <A
+HREF="../../../book/special/au/index.html">book chapter</A> for more
+information about writing AudioUnit plugins in SAOL.
+
+<H4><A NAME="preprocess">Pre-processor options</A></H4>
+
+<P>
+SAOL and SASL files may be directed to a C pre-processor, by using
+the flags described below.
+
+<UL>
+<LI><B><TT><A NAME="cpp">-cpp.</A></TT></B>
+Process all files specified by <A HREF="#orc"><TT>-orc</TT></A>,
+<A HREF="#orc"><TT>-sco</TT></A>, and <A HREF="#orc"><TT>-sstr</TT></A>
+options using the C pre-processor available on the system. One
+of the system compiler options (described below) must be set to
+tell sfront how to run the pre-processor.
+<LI><B><TT><A NAME="gcc">-gcc.</A></TT></B> Use gcc as the system
+compiler. This option uses the ANSI C <TT>system</TT>
+function to invoke the pre-processor, and so should work on gcc-enabled 
+UNIX and Windows systems.
+<LI><B><TT><A NAME="Is">-Is dirname.</A></TT></B> 
+Search directory dirname to locate files
+specified in <TT>#include</TT> lines. 
+</UL>
+
+<P>
+The environment variable <TT>SFRONT_INCLUDE_PATH</TT> is also checked
+for include search directories. Sfront expects this variable to hold
+one or more directory names, separated by colons.  In addition, Sfront
+searches the /usr/share/sfront directory.
+
+
+<P>
+After pre-processing, extraneous semicolons (introduced by popular
+macro idioms) are stripped from the code to produce legal SAOL code.
+All semicolons which follow open or closed braces are deleted, and
+repeated semicolons are reduced to a single semicolon (except inside
+the <A
+HREF="../../../book/saol/bus/index.html#send">send</A>
+statement). 
+
+<P>
+This post-processing is needed because null statements are
+not legal in SAOL.
+
+
+<!--
+<P>
+See this <A HREF="../../../book/special/debug/index.html">book chapter</A> for complete details on using the pre-preprocessor.
+-->
+
+<H4><A NAME="optoptions">Debugging options</A></H4>
+
+<P>
+By default, sfront optimizes for speed, by 
+implementing several code-generation techniques,
+and by not doing many run-time checks
+mandated by the MP4-SA standard. These
+flags change these defaults, and are useful during
+debugging.
+
+<UL>
+<LI><B><TT><A NAME="isocheck">-isocheck.</A></TT></B>
+Turns on core opcode run-time checks mandated by MP4-SA standard.
+Once sfront implements run-time checks for arrays,
+oparrays, and tablemaps, this flag will also enable those checks.
+<LI><B><TT><A NAME="no_const">-no-constopt.</A></TT></B>
+Turns off the pre-computation of constant subexpressions.
+<LI><B><TT><A NAME="no_inline">-no-inline.</A></TT></B>
+Turns off inlining of opcode calls into instrument body.
+<LI><B><TT><A NAME="no_rate">-no-rateopt.</A></TT></B>
+Turns off rate optimizations. These optimizations find 
+k-rate or i-rate subexpressions in a-rate expressions,
+and move the computation of these subexpressions to a
+slower rate.
+<LI><B><TT><A NAME="no_opt">-O0.</A></TT></B>
+Equivalent to <TT>-isocheck -no-constopt -no-rateopt -no-inline</TT>.
+</UL>
+
+
+<H4><A NAME="isoflags">Conformance options</A></H4>
+
+<P>
+By default, sfront deviates from the strict syntax and
+semantics of the MP4-SA standard. These flags make 
+sfront more closely match the standard. 
+
+<UL>
+<LI><B><TT><A NAME="isocheck">-isocheck.</A></TT></B>
+Turns on core opcode run-time checks mandated by MP4-SA standard.
+Once sfront implements run-time checks for arrays,
+oparrays, and tablemaps, this flag will also enable those checks.
+<LI><B><TT><A NAME="isosyntax">-isosyntax.</A></TT></B>
+Disallow sfront SAOL syntax extensions. These currently
+include the <A HREF="../../../book/special/debug/index.html#printf"><TT>printf</TT></A> statement, the ability to have
+more than one <TT>global</TT> statement in a program, and 
+tolerance of stray semicolons as described in the <A HREF="#preprocess">
+pre-processor</A> section</TT>. 
+</UL>
+
+Note that the <TT>-bitout</TT> option always produces 
+encoded SAOL and SASL in strict conformance with the MP4-SA
+standard. The extensions listed under the <TT>-isosyntax</TT>
+are converted into compliant SAOL during encoding.
+
+<H4><A NAME="legal">Legal options</A></H4>
+
+<P>
+The <B><TT><A NAME="lopt">-license.</A></TT></B>option prints out
+license info for Sfront.  The message it prints is reproduced
+below:</P>
+
+<TT>
+Copyright (c) 1999-2006, Regents of the University of California
+All rights reserved.
+<P>
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+<P>
+ Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+<P>
+ Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+<P>
+ Neither the name of the University of California, Berkeley nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
+<P>
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+</TT>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+
+<P>
+<B>Next section:</B>
+<A HREF="../../user/ref/index.html">Part I/5: Change Log and License</A></H2>
+</TD>
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+sfront reference manual</A>->
+<STRONG>command-line options</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+</BODY>
+</HTML>

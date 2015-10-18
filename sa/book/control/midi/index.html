@@ -1,0 +1,744 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part III/2: MIDI Instrument Control</TITLE>
+<META name="keywords" content="MP4-SA, MIDI, MIDI file, note on, note off,
+noteon, noteoff, aftertouch, velocity, channel, extended channel, controller,
+controller change, preset change, bank select, pitch wheel, tempo, tracks,
+MIDIbend, MIDIctrl, MIDItouch, preset">
+<META name="description" content="MIDI Control of SAOL Instruments. 
+Describes how to use a MIDI file or real-time MIDI stream to 
+instantiate SAOL instruments. Describes standard names for MIDI.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+instrument control</A>-><STRONG>with MIDI</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part III/2: MIDI Instrument Control</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="70%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#basic">MIDI Basics</A>.</B> Overview of MIDI commands.
+<LI>
+<B><A HREF="#saol">MIDI Files and SAOL</A>.</B> Trigger times and channels.
+<LI>
+<B><A HREF="#instr">SAOL Instruments for MIDI</A>.</B> Specializations.
+<LI>
+<B><A HREF="#stnames">Standard Names</A>.</B> Access the MIDI data stream.
+<LI>
+<B><A HREF="#stream">Streaming and MIDI</A>.</B> MIDI commands without trigger times.
+
+</UL>
+
+
+</TD>
+<TD WIDTH="70%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>Standard Names:</H2>
+
+<B>
+<P>
+<A HREF="#stnames">MIDIctrl</A> 
+<A HREF="#stnames">MIDItouch</A> 
+<A HREF="#stnames">MIDIbend</A> 
+<A HREF="#stnames">channel</A> 
+<A HREF="#stnames">preset</A> 
+</B>
+
+<H2>Language Elements:</H2>
+
+<B>
+<P>
+<A HREF="#instr">preset</A> 
+</B>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+MIDI (Musical Instrument Digital Interface) is the dominant score
+language in electronic music.  Most electronic musical instruments
+have network ports that communicate MIDI commands, or have USB
+ports that may be used for MIDI transport.  
+
+<P>
+MIDI ports may be added to most personal computers, using an
+inexpensive adaptor (for MIDI sent over a USB cable, an adaptor is not
+needed).  Most musical software applications use the MIDI File Format,
+a score language based on MIDI.
+
+<P>
+MP4-SA supports the MIDI File Format as an alternative score language
+to SASL. MP4-SA also supports the inclusion of streaming MIDI commands
+in an MP4 bitstream.
+
+<P>
+In this chapter, we give a basic introduction to MIDI, and show how
+SAOL programs interact with MIDI commands.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="basic">MIDI Basics</A></H2>
+
+<P>
+In this section, we describe MIDI commands and MIDI Files, focusing on
+features relevant to MP4-SA. 
+
+<P>
+MIDI was originally designed to let musicians use a single electronic
+piano keyboard to play notes on several different electronic musical
+instruments.
+
+<P>
+In a typical architecture, the piano keyboard sends out control
+information, in the form of MIDI commands, on a "MIDI Out" network
+port (a 5-pin DIN connector). This port is wired to the "MIDI In" port
+of one of the instruments. This instrument regenerates the data on a
+"MIDI Through" jack, that is connected to another instrument.
+
+<P>
+In this way, several instruments are daisy-chained together, each
+listening to the same stream of MIDI commands. Most MIDI commands
+include a <I>channel number</I> field (an integer between 0 and
+15). In a typical installation, each instrument is programmed to only
+respond to commands that have a specific MIDI channel number.
+
+<H4>MIDI Commands</H4>
+
+<P>
+See the right panel for the syntax of the MIDI commands discussed in
+this section. Although these commands are defined as binary objects,
+in this chapter we discuss MIDI using a symbolic notation.
+
+<P>
+The MIDI commands for starting (<B>NoteOn</B>) and ending
+(<B>NoteOff</B>) sounds are defined using the vocabulary of the piano
+keyboard. These commands specify a key number (an integer between 0
+and 127, with 60 being Middle C), the velocity that the note was
+pressed or released, and a channel number. 
+
+<P>
+Electronic keyboards often have pressure sensors underneath the
+keyboard that generate an additional control signal while a note is
+depressed. Some keyboards have a single sensor for the entire
+keyboard, while others have a dedicated sensor for each note. 
+
+<P>
+The MIDI commands <B>Touch</B> and <B>CTouch</B> send information
+about the current pressure under a single key or the entire keyboard,
+respectively.
+
+<P>
+Many electronic keyboards also have a wheel on the left side of
+the keyboard, with a center detent. Moving the wheel off the
+center detent acts to smoothly bend the pitch of all depressed
+notes. The <B>PWheel</B> command sends the current value
+of the pitch wheel.
+
+<P>
+Electronic musical instruments typically have the ability to 
+play many different types of sounds. MIDI refers to these 
+sound types as presets, numbered between 0 and 127. The
+MIDI <B>PChange</B> command instructs an instrument on 
+a particular channel to switch to a particular preset.
+
+<P>
+In addition to pitch wheels, electronic piano keyboards often have
+other attached controllers, such as pedals, secondary wheels, etc.
+The <B>CChange</B> command lets a keyboard send the value of a
+controller on a specific MIDI channel.
+
+<P>
+The controller in the CChange command is specified as a number
+between 0-127, with many numbers linked to specific devices (for
+example, the piano sustain pedal is controller 64). Other controller 
+numbers are used to extend other MIDI commands. For example, controller
+32 extends the PChange command, by specifying the bank of 
+128 presets that the PChange command accesses.
+
+<H4>MIDI Files</H4>
+
+<P>
+As MIDI ports became available for personal computers, sequencer
+software became available for recording MIDI data from
+electronic piano keyboards and assembling the data fragments
+into a complete performance.
+
+<P>
+The MIDI File Format became the standard way to transfer performances
+between different sequencer packages. The MIDI File Format adds
+trigger times to the MIDI commands described in the last section.
+MIDI Files support trigger times with units of beats, with tempo
+commands to map between beats and seconds.
+
+<P>
+The simplest MIDI File type, Format 0, stores all note data in a
+single track, which consists of a list of MIDI commands with time
+triggers. This format limits the performance to use 16 MIDI channels.
+
+<P>
+Format 1 MIDI files store note data on multiple tracks, with each
+track having a distinct 16 MIDI channels available. This format
+supports an arbitrary number of channels.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>MIDI Command Syntax</H2>
+
+<TT>
+<pre>
+
+<B>NoteOn</B> Ch Note Velocity
+
+
+Ch: 0-15. The channel that should
+play the note.
+
+Note: 0-127. The piano keyboard
+note to play. 60 is middle C.
+
+Velocity: 0-127. How hard the 
+the piano keyboard note was struct.
+
+
+
+<B>NoteOff</B> Ch Note Velocity
+
+
+Ch: 0-15. The channel that should
+terminate the note.
+
+Note: 0-127. The piano keyboard
+note to terminate.
+
+Velocity: 0-127. How quickly the
+piano keyboard note was lifted.
+
+
+
+<B>Touch</B> Ch Note Value
+
+
+Ch: 0-15. The channel sent
+the pressure information. 
+
+Note: 0-127. The piano keyboard
+note that receives the pressure.
+
+Value: 0-127. The pressure value.
+
+
+
+<B>CTouch</B> Ch Value
+
+
+Ch: 0-15. The channel sent
+the pressure information.
+
+Value: 0-127. The pressure value.
+
+
+
+<B>PWheel</B> Ch Value
+
+
+Ch: 0-15. The channel sent
+the pitch wheel information. 
+
+Value: 0-16383. Pitch wheel
+value. Center detent is 8192.
+
+
+
+<B>PChange</B> Ch Preset
+
+
+Ch: 0-15. The channel sent
+the preset change.
+
+Preset: 0-127. The new preset
+number to use.
+
+
+
+<B>CChange</B> Ch Ctrl Value
+
+
+Ch: 0-15. The channel sent
+the controller change.
+
+Ctrl: 0-127. The controller
+to change.
+
+Value: 0-127. The new value
+for the controller.
+
+</pre>
+</TT>
+
+<H2>MIDI File Commands</H2>
+
+<TT>
+<pre>
+
+<B>tempo</B> value
+
+Translate trigger time values
+(in units of beats) to absolute
+time (in units of seconds).
+
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="saol">MIDI Files and SAOL</A></H2>
+
+<P>
+In this section, we describe the MP4-SA semantics of MIDI File scores.
+MP4-SA supports MIDI File Format 0 and 1.
+
+<H4>Triggering Commands</H4>
+
+<P>
+MP4-SA supports MIDI File scores with trigger times in units of
+beats. Absolute trigger times (units of seconds) are not supported.
+
+<P>
+A MIDI File command executes when the trigger time is less than or
+equal to the current clock time of the SAOL simulation.  The trigger
+time is converted from beats to seconds, using the current value of
+SAOL global tempo.
+
+<P>
+As described in the last section, a MIDI File may include <B>tempo</B>
+commands.  When a MIDI <B>tempo</B> commands executes, it changes the
+value of the SAOL global tempo. If a MIDI File does not include a
+tempo command at time zero, the SAOL global tempo takes on an initial
+value of 120 beats per minute (the MIDI File default).
+
+<P>
+In Part III/3, we present a <A
+HREF="../saolc/index.html#order">table</A> that shows the place that
+MIDI commands trigger in the execution cycle.
+
+<H4>Channel Numbers</H4>
+
+<P>
+As shown in the last section, most MIDI commands include a channel
+number. For Format 1 MIDI files, these commands may appear on 
+different tracks, each of which has a separate "channel space".
+
+<P>
+SAOL considers a MIDI command with channel number <TT>N</TT> that
+appears on track <TT>M</TT> of a MIDI Format 1 File to have
+the <I>extended channel number</I>  <TT>16*M + N</TT>. Tracks
+in a MIDI File are numbered in order of appearance in the file,
+starting with 0.
+
+<P>
+For a Format 0 MIDI file, the channel number of a MIDI command is
+also the extended channel number of the command.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<pre> </pre>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="instr">SAOL Instruments for MIDI</A></H2>
+
+<P>
+A MIDI <B>NoteOn</B> command creates a new instance of SAOL
+instrument.  SAOL instruments that are accessible by MIDI commands use
+a special declaration header, as shown on the right panel.
+
+<P>
+MIDI-capable SAOL instruments have two instrument parameters. The
+first parameter is initialized with the note number specified by the
+instantiating NoteOn command. The second parameter is
+initialized with the velocity value of the NoteOn command.
+
+<P>
+MIDI-capable SAOL instruments have the keyword <B>preset</B> following
+the parameter list, followed by a list of one or more MIDI preset
+numbers (separated by spaces). MIDI preset numbers are integers
+starting from zero. A particular present number may only be used by
+one instrument.
+
+<P>
+A NoteOn command creates an instance of the instrument that has
+the same preset number as the extended channel of the command.  
+
+<P>
+Before the first NoteOn command executes on a MIDI channel, a
+<B>PChange</B> command should execute to set the preset number for the
+channel.
+
+<P>
+If the MIDI channel requires a preset number greater than 127, the
+PChange command should be preceded by a <B>CChange</B> command
+for controller 32, to select a preset bank number.
+
+<P>
+An instance created on a specific channel to play a specific note
+executes until a <B>NoteOff</B> executes with that that channel/note
+combination. At that time, the instrument is scheduled for termination
+at the end of the current execution cycle. Termination may be delayed
+in the following ways:
+
+<OL>
+<LI>
+<B>Sustain Pedal.</B> If the sustain pedal on the extended channel is
+depressed (i.e. MIDI controller 64 has a non-zero value) the
+termination for the instance is delayed until the sustain pedal is
+released (i.e. MIDI controller 64 is zero).  Note that MIDI controller
+64 is initialized to zero at the start of the simulation, and is
+changed by a CChange command.
+<LI><B>SAOL Intervention.</B> As described in Part III/3, the SAOL
+<A HREF="../saolc/index.html#extend">extend</A> statement
+may be used to delay the termination of an instrument instance. 
+Instruments may use this technique to implement
+the release phase of the amplitude envelope of a note.
+</OL>
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Example MIDI Headers</H2>
+
+<TT>
+<pre>
+
+instr piano(note, vel) preset 13 2 {}
+instr sax(num, v) preset 300 {}
+
+</pre>
+</TT>
+
+<H2>Example MIDI Instrument</H2>
+
+<TT>
+<pre>
+
+// tutorial sine wave
+// for MIDI 
+
+instr mtone (num, vel) preset 0 { 
+
+  ivar a;     // freq const
+  ivar scale; //  amp const
+  asig x, y;  //  osc state
+  asig init;  //  init flag
+
+  // **********************
+  // computed during i-pass
+  // **********************
+
+  // turns MIDI number into 
+  // oscillator constant 
+
+  a = 2*sin(3.1415927*
+	    cpsmidi(num)/s_rate);
+
+  // volume for tone
+
+  scale = min(vel/127, 1);
+
+  // **********************
+  // computed during a-pass
+  // **********************
+
+  if (init == 0)
+    {
+      x = 0.25;
+      init = 1;
+    }
+
+  x = x - a*y;
+  y = y + a*x;
+  
+  output(y*scale);
+
+}
+</pre>
+</TT>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="stnames">Standard Names</A></H2>
+
+<P>
+Five standard names contain information about MIDI: 
+<B>channel</B>, <B>preset</B>, <B>MIDIbend</B>, 
+<B>MIDItouch</B>, and <B>MIDIctrl</B>.
+
+<P>
+The i-rate <B>channel</B> holds the extended channel number of the
+NoteOn command that created the instance, while the i-rate
+<B>preset</B> standard name holds the preset value of this extended
+channel.
+
+<P>
+The k-rate <B>MIDIbend</B> standard name holds the value of the last
+PWheel command targeted to the extended channel of the
+instrument. If no PWheel commands have targeted this channel,
+<B>MIDIbend</B> has the value 8192 (associated with the center detent
+of the pitch wheel).
+
+<P>
+The value of the k-rate <B>MIDItouch</B> standard name is updated
+whenever a CTouch command executes that targets the extended
+channel associated with the instance, or a Touch command
+executes that targets the note number <I>and</I> the extended channel
+number of the instance. 
+
+<P>
+The <B>MIDIctrl</B> array standard name holds the latest values of the
+128 MIDI controllers. The array index chooses the controller number.  A
+CChange command targeting the extended channel associated with
+the instance updates these controller values. 
+
+<P>
+Most MIDIctrl values are initialized to zero at the start of
+program execution; see the right panel for exceptions. Also,
+the <B>MIDIctrl</B> standard name may be used as an <I>lval</I> in
+a SAOL <A HREF="../../saol/exstat/index.html#assign">assignment</A>
+statement. 
+
+<H4>Non-MIDI Instances</H4>
+
+<P>
+A SAOL program under MIDI control may have instrument instances that
+are not created by MIDI commands. These instances may be be created by
+SASL <A HREF="../sasl/index.html#instr">instr</A> lines, or may be <A
+HREF="../../saol/bus/index.html#effects">effects</A>
+instruments created by global <B>send</B> statements.
+
+<P>
+If a SASL or effects instance uses a MIDI standard name, the returned
+values reflect the status of the <I>MIDI master channel</I>. The right
+panel describes how MP4-SA determines the MIDI master channel.
+
+<P>
+In addition, as we learn in the following chapter, instruments may be
+dynamically created in a SAOL program, using the <A
+HREF="../saolc/index.html#instr">instr</A> statement.  Accesses to 
+MIDI standard names in a dynamic instrument reflect the MIDI channel of
+its parent instrument.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>MIDI Standard Names</H2>
+
+<TT>
+<PRE>
+ivar channel;
+ivar preset;
+ksig MIDIbend;
+ksig MIDItouch;
+ksig MIDIctrl[128];
+
+
+The <A HREF="../../special/slib/index.html">Slib</A> library provides <A HREF="../../special/slib/index.html#ssm">access</A>
+to normalized and smoothed 
+versions of the MIDI standard
+names.
+
+Slib also includes constants for 
+scaling <A HREF="../../special/slib/index.html#midic">MIDI data</A>, and preset maps
+for <A HREF="../../special/slib/index.html#gmidi">General MIDI</A>. 
+
+</PRE>
+</TT>
+
+<H2>MIDIctrl Default Values</H2>
+
+<TT>
+<PRE>
+(only non-zero values shown)
+
+Number      Function      Value
+7           Volume         100
+10          Pan             64
+11          Expression     127
+
+</PRE>
+</TT>
+
+<H2>The MIDI Master Channel</H2>
+
+<TT>
+<PRE>
+[1] If a real-time control
+source is present, extended
+channel 0 is the MIDI master
+channel. Else,
+
+[2] If streaming MIDI is
+encoded in the MP4-SA file,
+the first channel is the MIDI
+master channel. Else,
+
+[3] If a MIDI File is present
+in the MP4-SA file, the first
+track with MIDI commands is the
+MIDI Master Channel.
+
+</PRE>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="stream">Streaming and MIDI</A></H2>
+
+<P>
+In the previous sections, we describe how a MIDI File may control a
+SAOL program. An MP4-SA binary encoding of this system would include
+the binary MIDI File data at the start of the MP4-SA file.
+
+<P>
+The MP4-SA file format also supports distributing individual MIDI
+commands throughout the file, that do not have individual trigger
+times.  These commands execute at the next opportunity for executing
+MIDI commands in the <A HREF="../saolc/index.html#order">execution
+order</A>, using the MIDI command semantics described in the
+previous sections of this chapter.
+
+<P>
+Note that this distributed MIDI encoding is identical to to the data
+encoding on a MIDI port of an electronic keyboard. As a result, SAOL
+decoders may support real-time interactions with a MIDI keyboard using
+the framework described in this chapter. The <TT>sfront</TT> decoder
+includes an interface of this nature.
+
+<P>
+<B>Next:</B>
+<A HREF="../saolc/index.html">Part III/3: SAOL Instrument Control</A></H2>
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+instrument control</A>-><STRONG>with MIDI</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+
+</BODY>
+</HTML>
+
+
+
+
+

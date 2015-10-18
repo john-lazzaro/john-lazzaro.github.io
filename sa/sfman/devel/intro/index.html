@@ -1,0 +1,433 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>Sfront Reference Manual: Part II/1: Developing With Sfront</TITLE>
+<META name="keywords" content="MP4-SA, SASL, SAOL, MP4, sfront,
+command line options.">
+<META name="description" content="A part of the Sfront reference
+manual, that is a collection of reference materials. Sfront is a 
+program that translates MP4-SA files into C programs.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+sfront reference manual</A>->
+<STRONG>developers intro</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The <TT>sfront</TT> Reference Manual</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part II/1: Developing With Sfront</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="100%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#use">Sfront in Applications</A>.</B> How to use sfront inside
+of C programs. 
+<LI>
+<B><A HREF="#code">Adding Features to Sfront</A>.</B> How to add
+new functions to sfront.
+<LI>
+<B><A HREF="#driver">The Driver Interface</A>.</B> Overview of audio
+and control drivers.
+</UL>
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+Part II of the <TT>sfront</TT> reference manual is written for two
+audiences:
+
+<UL>
+<LI>
+People who are writing end-user audio applications, such as
+sequencers, sound design tools, and streaming audio clients, and who want
+to use sfront instead of writing a Structured Audio decoder
+themselves.
+<LI>
+People who are using sfront directly as a command-line tool,
+and want to add new functions to the program, such as audio
+output support for an unsupported operating system.
+</UL>
+
+<P>
+In this chapter, we introduce both audiences to developing code for
+sfront. We begin with a description of how to use the off-the-shelf
+sfront in simple end-user applications, and show the limits
+of this approach. 
+
+<P>
+We then introduce the <I>driver interface,</I> a mechanism for adding
+application-specific code to sfront. The driver interface offers a
+more flexible way for application developers to use sfront in their
+programs. In addition, people wishing to add a new general-purpose
+feature to sfront can often use the driver interface, instead of
+directly modifying the sfront sources.
+
+<P>
+The chapter ends with a roadmap for the following two chapters,
+which describe the driver interface in detail. These chapters
+describe <I>control drivers</I>, which lets user C code directly
+control the sound generation process, and <I>audio drivers</I>,
+which handle moving audio-rate streams into and out of the sound
+engine.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="use">Sfront in Applications</A></H2>
+
+<P>
+Some end-user applications have simple requirements for a
+sound-generation engine. For example, consider a program
+that is a graphical score editor, that lets users 
+manually enter traditional music notation onto staves.
+
+<P>
+A common feature of score editors is an audio preview
+function, that lets users listen to rendered versions
+of the audio.  The right panel shows a C language code
+fragment that implements the feature, for Linux systems.
+
+<P>
+The code on the right panel assumes that the application
+program has created a SASL file <TT>ss</TT>, that contains
+the notes values and durations from the graphical score in
+SASL notation. 
+
+<P>
+The code also assumes that the program has created
+a SAOL file, <TT>sl</TT>, to orchestrate the score. 
+Typically, the application will have a library of SAOL 
+programs available, and includes a user-interface for 
+mapping different musical lines to SAOL instruments.
+
+<P>
+The code on the right panel uses the ANSI C library call
+<TT>system()</TT> to execute other programs. As an 
+ANSI library function, this method should work with any
+ANSI-compliant C compiler. However, the commands to be
+executed must exist on the platform.
+
+<P>
+Three programs are executed in sequence:
+
+<OL>
+<LI>
+<TT>sfront</TT>. The generated SAOL and SASL files 
+are converted into a C file (<TT>sa.c</TT>, the default
+name). Note that the OS-specific audio driver <TT>linux</TT>
+is used to specify streaming audio output. A multi-platform
+application would substitute different drivers for each OS.
+<LI>
+<TT>gcc</TT>. Compiles the <TT>sa.c</TT> to create an 
+executable. A multi-platform application would need to know
+the standard compiler for each OS.
+<LI>
+<TT>sa</TT>. The executable that generates the audio.
+</OL>
+
+<P>
+In practice, a production application would include additional code
+for error checking and file management, as described on the right
+panel.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Sample Code</H2>
+
+<TT>
+<pre>
+#include &lt;stdlib.h&gt;
+
+/* application first generates */
+/* file "sl" holding the SAOL  */
+/* program, and file "ss"      */
+/* holding the SASL notes.     */
+
+
+/* run sfront on sl and ss */
+
+system(
+"sfront -aout linux -orc sl -sco ss"
+);
+
+/* compile sfront's output */
+
+system("gcc -O3 sa.c -o sa");
+
+/* run executable */
+
+system("./sa");
+
+
+</pre>
+</TT>
+
+<H2>In Production Code:</H2>
+
+<TT>
+<pre>
+[1] Write all files to /tmp, use
+    tempnam() to create unique names,
+    and delete files after use.
+
+[2] Examine return value of system()
+    call for errors. 
+
+[3] Use POSIX and Windows replacements
+    for system() for enhanced features.
+
+[4] Redirect stdout and stderr for
+    each command to a log file:
+
+    system("sa &gt;&amp /tmp/log");
+
+[5] Make sure the complexity of the
+    SAOL code in sl and the note 
+    density of the score in ss 
+    matches the speed of the CPU.
+</pre>
+</TT>
+
+
+</TT>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="code">Adding Features to Sfront</A></H2>
+
+<P>
+The score transcription application described in the last section
+specifies the notes to be played in a static manner. It writes a SASL
+file, and then invokes sfront to create a sound engine that plays the
+file.  The application also statically specifies the audio routing, by
+invoking sfront with the <TT>-aout linux</TT> option.
+
+<P>
+However, some end-user applications are a bad match for a static
+audio and control approach. Examples of such applications include:
+
+<OL>
+<LI>
+An Internet audio streaming application, that streams SASL or MIDI
+control events over an IP network and feed them into a running SAOL
+program.
+<LI>
+Interactive music production systems, where knobs and sliders need
+to be interactively linked to SAOL program variables, external 
+input from a MIDI keyboard needs to be dynamically routed to different
+SAOL elements, and audio input and output streams need to be patched
+into the SAOL <TT>input_bus</TT> and <TT>output_bus</TT>.
+</OL>
+
+<P>
+For sfront to support these programs,
+application-specific code must be added to the <TT>sa.c</TT> file
+that sfront produces. A host program would still use <TT>system</TT>
+commands to prepare and launch the <TT>sa.c</TT> program, but the
+application-specific code in the <TT>sa.c</TT> program could handle
+the dynamic functions, perhaps by communicating to the host program
+using inter-process communication.
+
+<P> 
+The sfront driver interface lets application developers add C or C++
+code into the <TT>sa.c</TT> file in a standardized way. In addition to
+supporting application-specific uses for sfront, the driver interface
+is the mechanism for adding general-purpose sfront features that
+involve control and audio communication.
+
+<P>
+In the final section of this chapter, we introduce the concept of
+audio and control drivers.  The next two chapters describe the process
+of writing control and audio drivers in depth.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="driver">The Driver Interface</A></H2>
+
+<P>
+The driver interface lets users specify, on the the sfront
+command line, the inclusion of C or C++ code into the generated C
+file. Two types of drivers are currently supported: 
+
+<OL>
+<LI>
+<B>Control drivers</B>. Control drivers can insert SASL and MIDI
+commands into a running Structured Audio engine during each k cycle.
+The semantics of the control driver interface supports the simple
+creation of MPEG-4 compliant streaming decoders. The control driver
+API also includes data structures to inform the control driver about
+the SAOL program structure, as well as functions for reading variables
+and altering time. These supplementary calls support applications
+beyond streaming decoders, such as symbolic debugging, patch editors,
+and interactive sequencer programs.
+<LI>
+<B>Audio drivers</B>. Audio drivers can insert audio streams into
+running SAOL engines, via the SAOL <TT>input_bus</TT>, and can pipe
+audio streams out of the SAOL engine, via the SAOL <TT>output_bus</TT>.
+The audio driver API supports real-time, low-latency audio I/O, and
+can also be used for file I/O purposes.
+</OL>
+
+<P>
+To create a new driver, two tasks are involved. The larger task is to
+create the C or C++ code that is included into the <TT>sa.c</TT>
+file. This code includes a set of functions, described in the API,
+that are called by sfront at regular intervals. The control
+driver calls allow the driver to insert control data into the running
+program, while the audio driver calls let the driver pick up or
+deliver audio streaming data. During each function call, the driver
+can communicate with other processes running on the system, as well as
+read and write external hardware devices such as MIDI In ports.
+
+<P>
+In addition to creating the included C or C++ code, a new driver needs
+to be registered with sfront, so that <TT>-cin</TT>,
+<TT>-ain</TT>, and <TT>-aout</TT> flags recognize the driver. This
+registration task involves appending information to parsing functions
+in the sfront source files.
+
+
+<H4>Current Limitations</H4>
+
+<P>
+At the current time, the audio and control driver APIs do not
+support adding new plug-in formats to <TT>sfront</TT>.  The
+AudioUnit drivers work using private additions to the driver APIs.
+We intend to generalize these additions so that they will support
+other plug-in formats, and add them to the official control and
+audio driver APIs.
+
+<P>
+At the current time, only one control driver (specified by the 
+<TT>-cin</TT> flag on the sfront command line) and two audio
+control drivers (an audio input driver, specified by the 
+<TT>-ain</TT> flag, and an audio output driver, specified by the
+<TT>-aout</TT> flag) may be specified. However, the APIs have
+been designed to support future expansion to support multiple
+audio and control drivers, and we believe that adding this feature 
+would not break backward compatibility for properly written drivers.
+
+<P>
+At the current time, the registration process requires recompilation
+of the sfront sources. Future enhancements will support adding new
+drivers to sfront without recompilation.
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+<B>Next section:</B>
+<A HREF="../cdriver/intro/index.html">Part II/2A: Control Driver Overview</A></H2>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+sfront reference manual</A>->
+<STRONG>developers intro</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>

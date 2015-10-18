@@ -1,0 +1,1445 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>Sfront Reference Manual: Part I/4: Sfront Networking</TITLE>
+<META name="keywords" content="MP4-SA, SASL, SAOL, MP4, render, midi,
+stream, timesync, real time, real-time, interaction, control, encode,
+encoding, decode, decoding, omissions, extensions">
+<META name="description" content="A part of the Sfront reference
+manual, that describes how to use the program in real-time applications.
+Sfront is a program that translates MP4-SA files into C programs.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+sfront reference manual</A>->
+<STRONG>networking</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The <TT>sfront</TT> Reference Manual</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part II/4: Sfront Networking</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="100%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#concepts">Network Concepts</A>.</B> The sfront networking model.
+<LI>
+<B><A HREF="#testing">Network Testing</A>.</B> Echo packets from our mirror
+server.
+<LI>
+<B><A HREF="#performance">Network Musical Performance</A>.</B> 
+Interactive networking with sfront.
+<LI>
+<B><A HREF="#streaming">Network Streaming</A>.</B> Stream MIDI files
+to a session.
+<LI>
+<B><A HREF="#security">Network Security</A>.</B> Playing safe in cyberspace.
+<LI>
+<B><A HREF="#details">Technology Details</A>.</B> Inside sfront networking.
+</UL>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+In this chapter, we describe how to network together
+sfront clients running on machines connected to the
+public Internet. The right panel lists the 
+platforms that support sfront networking.
+
+<P> 
+To begin the chapter, we explain the sfront networking
+model, and show how to test the network operation of a
+single client. 
+
+<P>
+We show how sfront networking enables musicians 
+located in different physical locations
+to interact in a network musical performances.
+We describe how an sfront client can stream  
+MIDI file data to a group of sfront clients.
+
+<P>
+We conclude with a description of network
+security issues, and a section that describes
+the sfront networking model in more detail.
+
+<P>
+
+
+<P>
+Sfront networking has been designed with safe
+operation in mind; however, there is no such
+thing as perfect security on the public Internet.
+<B>USE SFRONT NETWORKING AT YOUR OWN RISK.</B> 
+Using the network features described in this 
+chapter could result in a malicious
+attack on your machine. 
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Supported Platforms</H2>
+
+<TT>
+<pre>
+The real-time audio experiments
+in this chapter were tested 
+under Linux (using OSS) and
+Mac OS X. 
+
+The sfront network library
+uses standard Berkeley UNIX
+sockets, and the ascii control
+driver uses termios and other
+UNIX libraries. Network examples
+without audio output:
+
+-aout null -timesync -cin ascii
+
+have been tested under Linux, 
+Solaris, HPUX, and Mac OS X.
+
+The network library and ascii
+control driver probably won't
+compile under Windows, but
+a port of this code should not
+be that difficult to do. Send
+me email if you are interested
+in doing a Windows port.
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="concepts">Network Concepts</A></H2>
+
+<P>
+As we describe in Part II/3, sfront can create
+C programs that accept control input from 
+external sources during execution, by using
+the <A HREF="../rtime/index.html#rt"><TT>-cin</TT>
+</A> option to specify a control driver.
+
+<P>
+Control drivers may be interactive in nature,
+such as the <TT>linmidi</TT> driver that
+supports an external MIDI keyboard under
+Linux, or the <TT>ascii</TT> driver that supports
+the ASCII keyboard as a simple MIDI device.
+The control driver port also support 
+file streaming, using the <TT>fstr</TT> driver.
+
+<P>
+Sfront networking extends the control driver 
+concept to the network. If an sfront client is
+participating in a networked session, it sends a
+copy of all MIDI commands on the control driver
+port to all other members of the session. Likewise,
+it receives MIDI commands from all other members of the
+session, and treats these commands as if they
+came from additional control driver ports.
+
+<P>
+For example, imagine a session with three
+members. Each sfront client in the session
+runs the same SAOL program, which defines three
+SAOL instrument, each with its own MIDI
+preset number. Each session member chooses
+one MIDI preset number as its own.
+
+<P>
+This configuration results in a simple network
+musical performance. Each sfront client generates
+sounds for the local member and the two remote
+members, as MIDI data arrives locally and remotely.
+Players adapt to the network delays on the Internet,
+just as players in the same room adjust to delays
+due to the speed of sound. The mean and variance of
+the latency limit the temporal complexity of the music.
+
+<P>
+As described above, the sfront network model
+has several key attributes:
+
+<UL>
+<LI><B>The session.</B> An sfront network
+client belongs exactly one session. At 
+any point in time, other clients may also
+belong to the session.
+<LI><B>All-to-all.</B> An sfront network
+client sends identical control driver data
+to all other session members.
+<LI><B>MIDI only.</B> An sfront network
+client can only send MIDI data. See
+this <A HREF="../../../book/control/midi/index.html">
+chapter</A> in the MP4-SA book to 
+learn how to write SAOL programs that
+process MIDI data.
+</UL>
+ 
+This model, though limited, is
+able to support a variety of network applications.
+Future versions of sfront networking may 
+lift some restrictions in the model.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>Session Management</H4>
+
+<P>
+The sfront networking model uses a remote
+server to set up and tear down sessions.
+This server uses the 
+<A HREF="http://www.ietf.org/">IETF</A> 
+Session Initiation Protocol 
+(<A HREF="http://www.ietf.org/html.charters/sip-charter.html">SIP</A>)
+for session management.
+
+<P>
+By default, sfront is hardwired to contact
+a server on the public Internet, located
+on the Berkeley campus in California USA.
+The MIDI data streams do not flow through
+the Berkeley SIP server, only short messages
+to do session management. 
+
+<P>
+Note that if you wish to network
+several sfront clients on your own internal
+network, your network nonetheless needs to 
+be connected to the public Internet in order
+for the Berkeley SIP server to set up your
+session.
+
+<H4>Creating a session</H4>
+
+<P>
+To create a session, the session participants
+choose a name and passphrase for their
+session, and enter these items as options
+on the sfront command line. The right panel
+shows the syntax for session names and
+passphrases.
+
+<P>
+Session names and passphrases should be treated
+as <A HREF="#security">secrets</A>. Sfront uses
+the passphrase as part
+of an authentication system, to ensure all 
+network input comes from a session member. 
+
+<P>
+If a malicious attacker discovers your name and
+passphrase, he can forge packets into your
+session. By cranking up the volume or sending
+lots of notes, he could blow out your speakers.
+He might also be able to exploit SAOL or sfront
+bugs to take over your machine and delete all
+of your files. 
+
+<P>
+Note that players do not manually
+specify the Internet addresses of the
+session members. The SIP server takes
+care of this task for you. The SIP server also
+handles, in most cases, problems
+that arise through the use of Network Address Translation
+(NAT) boxes. 
+
+<P>
+However, if you are behind a firewall, you may need
+to reconfigure your firewall to let certain types
+of network traffic through. The right panel provides
+more information.
+
+<H4>Complex sessions</H4>
+
+<P>
+In the examples described in this chapter,
+we only use the <TT>-session</TT>
+and <TT>passphrase</TT> sfront networking options. 
+
+<P>
+However, for more complex sessions, you may
+need to use the other 
+<A HREF="../cmdline/index.html#network">network command line</A>
+options, as described in Part I/5.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Session Options</H2>
+<TT>
+<pre>
+-session name.
+
+The name of session, chosen
+by the session participants 
+and treated as a secret. If
+the name contains spaces, it
+should be enclosed in double
+quotes. 
+
+-passphrase key.
+
+A secret phrase, at least 20 
+characters long, shared among 
+the session participants. If
+the passphrase has spaces, it 
+should be enclosed in double
+quotes.
+
+Example:
+
+-session twentieth_century_plusplus 
+-passphrase "17jdk+-  +-$ieurjfkghj"
+
+The IP number for the Berkeley
+SIP server changed on Oct 6,
+2004, and sfront versions 0.87
+and later are aware of the new
+server. 
+</pre>
+</TT>
+
+<H2>Firewalls</H2>
+
+<TT>
+<pre>
+Sfront networking sends
+and receives UDP packets on 
+ports 5060 and 5061. Sfront
+sends on these ports first.
+Configure your firewall to
+allow this to happen. Email
+me configuration details for
+different firewall setups,
+and I'll add them to this
+section.
+
+At present, sfront does not
+work with SIP proxies and 
+ALGs. <B>Do not</B> attempt to 
+use the -sip_ip and -sip_port
+options for this purpose, but
+<B>do</B> send me email if you are
+interested in testing proxy or 
+ALG support that may be added 
+to a future sfront release. 
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="testing">Network Testing</A></H2>
+
+<P>
+Sfront networking has a special test mode,
+so that new users can experiment with
+networking without other session members.
+The test mode is activated by using the
+special session name <TT>mirror</TT>.
+
+<P>
+The mirror session always has two members:
+the sfront client under test, and a client
+running on a machine in Berkeley California.
+
+<P>
+The Berkeley client, conceptually, acts as
+a simple reflector for Real Time Protocol
+(<A HREF="http://www.ietf.org/html.charters/avt-charter.html">RTP</A>)
+packets that hold the MIDI data.
+When the Berkeley client receives a packet,
+it returns it to the sending client unaltered. 
+
+<P>
+From an audio perspective, the mirror session implements a
+simple delay line effect, with the round
+trip time from Berkeley setting the delay
+period. To make short echoes easier to hear,
+the MIDI data sent to the Berkeley client
+is transposed up by a perfect fifth (use 
+the sfront option <A HREF="../cmdline/index.html#m_semitones">
+m_semitones</A> to change this interval).
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+The sfront distribution includes the 
+<BR><BR>
+<TT>sfront/examples/rtime/mirror</TT> 
+<BR><BR>
+example, that is set up to test 
+sfront networking using the mirror
+session. The right panel shows an
+edited console screen of a mirror
+session using this example, which we
+describe in detail below.
+
+<H4>The <TT>mirror</TT> session</H4>
+
+<P>
+The mirror example is a physical model
+of a marimba, controlled by pressing
+alpha keys on the ASCII keyboard. To
+execute the example, simply <TT>cd</TT>
+to 
+<BR><BR>
+<TT>sfront/examples/rtime/mirror</TT> 
+<BR><BR>
+and type <TT>make</TT>.
+
+<P>
+The Makefile runs <TT>sfront</TT>,
+<TT>gcc</TT>, and the executable
+produced by gcc in sequence, as
+shown on the right panel. 
+
+<P>
+After printing a banner with 
+information about using the 
+ASCII keyboard, a successful
+run prints the four network
+messages shown in abbreviated
+form on the right
+panel.
+
+<P>
+Each message describes a
+different phase of network 
+startup:
+
+<UL>
+<LI><B>Contacting SIP server.</B>
+The first phase of networking; the
+sfront client checks in with the SIP
+server at Berkeley. 
+<LI><B>SIP server contact successful,
+awaiting client SIP.</B> The SIP 
+server has added the sfront client 
+to the special mirror session. The
+sfront client awaits a SIP message
+from the server that describes how
+to contact the packet reflector client.
+<LI><B>SIP INVITE accepted from [...]</B>
+The sfront client now knows how to 
+contact the packet reflector client.
+Any alpha keys (a to z) you press from
+this point on will result in MIDI packets
+being sent to the packet reflector.
+<LI><B>Media flowing from [...]</B>
+The sfront client is receiving reflected
+packets. This message may appear before
+you press the first alpha key, because
+occasional keep-alive packets are also
+sent to the reflector.
+</UL>
+
+<P>
+The right panel also shows 
+error messages that may 
+occur if startup is not
+successful, and offers 
+suggestions for debugging
+a failed session.
+
+<H4>Playing the mirror example</H4>
+
+<P>
+After this network startup phase
+completes, you should be able to
+press the letter keys on the 
+keyboard, and hear a perfect
+fifth marimba chord. 
+
+<P>
+The lower chord note
+happens as soon as you hit the
+key; the higher note happens 
+once the MIDI note returns
+from Berkeley, and so will
+be delayed. 
+
+<P> 
+If you are located far from
+Berkeley, these delays may
+be very long. Note that 
+your distance from Berkeley
+does not impact the delays
+of sessions other than the
+special mirror session.
+
+<P>
+Sfront networking maintains a
+model of the delay time between
+clients. If a network packet 
+undergoes significantly more
+delay than normal, it will be
+ignored when it arrives. The
+sonic result is that most 
+key presses will be chords,
+but some will be single notes.
+The sfront option <A HREF="../cmdline/index.html#latetime">
+latetime</A> adjusts the mechanism
+for dropping late notes.
+
+<P>
+MIDI packets lost on the 
+Internet have a more complex
+behavior. Each packet sent has
+<I>recovery</I> information so
+that the receiver can adjust
+if earlier notes were lost on
+the network. Usually, this
+information is used to 
+recover lost information about
+the end of notes, so that 
+a note does not stay stuck
+on forever. In some cases,
+though, the start of a new
+note can also be recovered.
+
+<P>
+The sfront option 
+<A HREF="../cmdline/index.html#fec">fec</A>
+lets an sfront client trade
+off network bandwidth usage
+and the strength of the 
+recovery system.
+
+<P>
+If you have a MIDI controller
+hooked up to your machine,
+you can replace the <TT>ascii</TT>
+control driver with a MIDI
+driver, and play the mirror
+in a more comfortable way.
+The sfront networking system
+is not aware of the control
+driver in user -- any driver
+should work, but only the 
+<TT>linmidi</TT> driver has
+been tested. 
+
+<P>
+Running as root under Linux
+lets the client use POSIX 
+real-time schedules to 
+eliminate clicks and pops.
+However, running as root
+increases the security
+risk of using sfront
+networking, because a 
+successful exploit gives
+the attacker root access.
+
+<P>
+Because a mirror session
+uses more server bandwidth
+and CPU than simple SIP
+serving, we limit the 
+length of a mirror session
+to several minutes, and 
+limit the number of 
+simultaneous mirror sessions.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>A Successful <TT>mirror</TT> Session</H2>
+
+<TT>
+<pre>
+
+sfront -session mirror -aout linux \
+       -playback -cin ascii -orc \
+        mirror.saol -sco mirror.sasl
+
+gcc -O3 sa.c -lm  -o sa
+
+./sa
+
+[... banner deleted ...]
+
+Netstat: Contacting SIP server
+Netstat: Server contact successful 
+Netstat: SIP INVITE from [...]
+Netstat: Media flowing from [...] 
+
+</pre>
+</TT>
+
+<H2>Session Failure: SIP</H2>
+
+<TT>
+<pre>
+./sa
+
+Netstat: Contacting SIP server
+Netstat: SIP server is overloaded 
+Netstat: Please try again later. 
+
+
+Comment: Only 5 clients per 
+session can run, for any session.
+If you see this message in the
+mirror session, chances are
+that many people tried to
+start a mirror session at once.
+Exit and try again in a 
+few minutes. Send email to
+
+lazzaro@cs.berkeley.edu
+
+if this persists for several
+retries over 15 minutes or so.
+
+</pre>
+</TT>
+
+<H2>Session Failure: Reflector</H2>
+
+<TT>
+<pre>
+./sa
+
+Netstat: Contacting SIP server
+Netstat: SIP contact successful. 
+
+[no further messages]
+
+Comment: The client at Berkeley
+that reflects packets probably
+has crashed; is is uncommon, but
+not impossible, for this message
+to indicate an overloaded mirror
+session. Exit and try again in a 
+few minutes. Send email to
+
+lazzaro@cs.berkeley.edu
+
+if this persists for several
+retries over 15 minutes or so.
+
+</pre>
+</TT>
+
+<H2>Session Failure: Generic</H2>
+
+<TT>
+<pre>
+./sa
+
+Netstat: Contacting SIP server
+Netstat: Server not responding.
+Netstat: Server not responding.
+Netstat: Server not responding.
+
+
+Comment: This error is the hardest
+to diagnose. Perhaps the SIP server
+or the Berkeley network it connects
+to has crashed. Or perhaps your own
+network connection is not working.
+Finally, it might be an sfront 
+networking bug. Try accessing the
+
+http://brass.cs.berkeley.edu/
+
+webpage; if you can reach this
+page successfully, the problem
+is probably related to the SIP
+server or sfront networking, 
+and so send me email at
+
+lazzaro@cs.berkeley.edu
+
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="performance">Network Musical Performance</A></H2>
+
+<P>
+In this section, we describe
+how to use sfront networking
+for network musical performance,
+by walking through the sfront
+example:
+
+<BR><BR>
+<TT>sfront/examples/rtime/nmp_audio</TT> 
+<BR><BR>
+
+<P>
+This setup lets several musicians
+perform together. Each musician
+runs a copy of the client on an
+computer connected to the public
+Internet. Each computer must have
+a soundcard. 
+
+<P>
+As configured,
+the example works for 2 or 3
+musicians; for larger groups, use
+the 
+<TT><A HREF="../cmdline/index.html#bandsize">-bandsize</A></TT>
+option to increase the maximum 
+session size.
+
+<P>
+The SAOL file has three SAOL
+physical models of percussive
+instruments: a plucked string
+sound on MIDI preset 0, a 
+marimba sound on MIDI preset 1,
+and a vibraphone-like sound on
+MIDI preset 2.
+
+<P>
+As configured, this example uses
+the ascii control driver. The
+numeric keys above the letter
+keys can be used to pick MIDI
+preset 0, 1, or 2, and the letter
+keys can be used as a two-octave
+pentatonic scale. If an external
+MIDI keyboard is available, the
+<TT>linmidi</TT> OSS driver can
+be used instead of the ASCII
+driver (<TT>alsamidi</TT> and
+<TT>freebsdmidi</TT> have not
+been tested but should work).
+
+<P>
+Before the session begins, the
+participants should decide on
+a session name and a passphrase.
+These items should be treated
+as a secret; if a malicious 
+attacker learns the passphrase,
+he can forge packets into your
+session. We discuss good 
+secrecy practices in detail in
+an <A HREF="#security">later
+section</A> in this chapter.
+
+<P> 
+Once a session name and 
+password has been decided 
+upon, each participant 
+should configure the 
+Makefile of their sfront
+client, as shown on the
+right panel, and then
+type <TT>make</TT> to
+start the session.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Makefile Configuration</H2>
+
+<TT>
+<pre>
+Change this line:
+
+
+NETWORK = -session "your_session" \
+          -passphrase "passwd"
+
+
+near the top of the Makefile in 
+
+sfront/examples/rtime/nmp_audio
+
+to the session name and passphrase 
+you chose for your session. 
+
+Be sure to pick a non-obvious 
+session name and passphrase 
+("jam session" is not a good
+choice for session name), for
+security and practical reasons
+(your name + password might
+match another current session).
+
+The passphrase must have at 
+least 20 characters. Both session
+name and passphrase should be 
+treated as a <A HREF="#security">secret</A>.
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+The right panel shows a successful network
+musical performance with three session
+members, as seen by one of the sfront
+clients.
+
+<P>
+Just like the mirror test session, this
+test session begins with a successful
+SIP server contact. Then, as the other
+session members join in, SIP INVITE
+messages arrive for the new member, and
+soon afterwards MIDI starts flowing.
+
+<P>
+Note that a session member does not need
+to wait for the other members to arrive
+before playing -- in fact, playing warm
+up notes helps the media connection happen
+quickly.
+
+<P>
+The failure modes we described for the
+<A HREF="#testing">mirror test</A> session
+can also happen in normal sessions. 
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>A Successful <TT>nmp_audio</TT> Session</H2>
+
+<TT>
+<pre>
+
+sfront -session "your_session" \
+       -passphrase "passwd" \
+       -aout linux -playback \
+       -cin ascii -orc nmp.saol \
+       -sco nmp.sasl
+
+gcc -O3 sa.c -lm  -o sa
+./sa
+
+Netstat: Contacting SIP server
+Netstat: Server contact successful 
+Netstat: SIP INVITE from [member 1]
+Netstat: SIP INVITE from [member 2]
+Netstat: Media flowing from [member 1] 
+Netstat: Media flowing from [member 2] 
+</pre>
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+The right panel shows another way that
+network musical performance sessions can
+fail. This example shows a session from
+the view of two players in the session.
+One of the players misspelled the 
+session name.
+
+<P>
+The result is two separate sessions, 
+each with one member. Each client 
+waits for the second member, who
+never arrives. The SIP server can't
+detect this problem, just like the
+phone company doesn't know when a
+subscriber has dialed a wrong number.
+
+<P>
+Note that mistyping the passphrase
+causes the same symptoms. The 
+solution is easy: type carefully!
+
+<H4>Clients without audio output</H4>
+
+<P>
+In some situations, a player might
+want to join a session using an 
+sfront client that does not
+send audio to the soundcard on the
+machine. This requirement usually
+occurs when testing or debugging
+a session.
+
+<P>
+For example, a player might wish
+to run two sfront clients on the
+same machine: under most audio
+drivers, only one sfront client
+may access the soundcard on the
+machine. In other situations,
+a player may log in remotely to
+a distant machine, and connect
+an sfront client to a session
+in progress. 
+
+<P>
+The sfront example directory:
+<BR><BR>
+<TT>sfront/examples/rtime/nmp_null</TT> 
+<BR><BR>
+is an sfront networking
+client that does not access the
+audio driver. By running a copy
+of both the <TT>nmp_null</TT> and
+<TT>nmp_audio</TT> driver in the
+same session, a player
+can test network musical 
+performance without enlisting a
+second person,
+by moving the mouse between the two
+<TT>xterm</TT> windows running
+the clients.
+
+<P>
+The <TT>nmp_null</TT> client
+may be run on a local or a
+remote machine. When running
+the <TT>nmp_audio</TT> and
+<TT>nmp_null</TT> on the same
+machine, the demo might be
+marred by audio artifacts due
+to the two processes competing
+for CPU. If this occurs, see
+the Makefile of <TT>nmp_audio</TT>
+for suggestions.
+
+<P>
+Note that the <TT>krate</TT> 
+parameter in <TT>silence.saol</TT>
+has a relatively low value, 
+resulting in a relatively
+high sample period. The low sampling
+period reduces the CPU load on 
+the system, but also increases
+latency. If lower latency is desired, try
+increasing <TT>krate</TT> and
+recompiling.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Session Failure: Spelling Mistake</H2>
+
+<TT>
+<pre>
+Client 1:
+
+sfront -session "yoor_session" \
+       -passphrase "passwd" \
+
+[... many lines deleted ...]
+
+Netstat: Contacting SIP server
+Netstat: Server contact successful 
+
+[no further messages]
+
+
+Client 2:
+
+sfront -session "yrrr_session" \
+       -passphrase "passwood" \
+
+[... many lines deleted ...]
+
+Netstat: Contacting SIP server
+Netstat: Server contact successful 
+
+[no further messages]
+
+
+Comment: In this example, one
+player misspelled with session
+name (a password misspelling 
+will also cause the error). The
+result is that both clients are
+in different sessions, and so
+no connection is made. Just
+like your phone company can't
+tell you've dialed a wrong
+number, the SIP server can't
+detect this user error.
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="streaming">Network Streaming</A></H2>
+
+<P>
+Sfront networking clients can be configured
+to stream a MIDI file to other members of
+its session. The sfront example:
+<BR><BR>
+<TT>sfront/examples/rtime/nmp_stream</TT> 
+<BR><BR>
+creates a streamable MP4 file from a MIDI
+file, and then streams the MP4 file to
+other session members. The local client
+also hears the streaming performance
+through the soundcard, along with any
+MIDI events generated by the other
+session members. 
+
+<P>
+To run this example, set the <TT>-session</TT>
+and <TT>-passphrase</TT> options in the
+Makefile, and then type make.
+
+<P>
+The right panel shows key parts of the
+example execution. Note that the 
+<TT>-mstr</TT> option must be used
+when creating the mp4 file, and that
+the <TT>-bitc</TT> option must be
+used when executing the mp4 file.
+
+<P>
+Note that sfront networking in its 
+current form is optimized for low-latency
+applications such as network musical
+performances, not for file streaming.
+In the current system, clients process
+received MIDI commands upon receipt. 
+A system optimized for streaming would 
+buffer MIDI commands to smooth out network
+jitter.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Streaming Example</H2>
+
+<TT>
+<pre>
+Part 1: Create mp4 file
+
+sfront -mstr bach.mid    \
+       -orc stream.saol  \
+       -sco stream.sasl  \
+       -bitout stream.mp4
+
+Note: use -mstr, not -midi, for 
+      MIDI file.
+
+
+
+Part 2: Stream mp4 file
+
+sfront -session your_session \ 
+       -passphrase passwd    \ 
+       -aout linux           \
+       -playback -cin fstr   \
+       -bitc stream.mp4
+
+
+Note: Use -bitc, not -bit, for 
+      MP4 file.
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="security">Network Security</A></H2>
+
+<P>
+Sfront networking includes an authentication
+system to protect you against unwanted 
+intruders into your session. These intruders
+may be benign (a stranger arrives playing
+notes in tune and on time), irritating 
+(a player injects many loud notes at once,
+hurting eardrums and perhaps speakers too),
+or truly malicious (an attacker examines 
+the sfront source code and finds an exploit,
+which he uses to hijack your machine and
+delete you files, using RTP or SIP packets
+as the attack medium).
+
+<P>
+Your protection against these forgeries
+lies in the secrecy of your session name
+and passphrase. These items are used to
+attach <I>digital signatures</I> to each
+SIP and RTP packet sent by a client. When
+a packet receives a SIP and RTP packet,
+it checks the signature, and discards it
+if its incorrect. Precautions are also
+taken against <I>replay attackers</I>, 
+who collect your legitimate packets to
+play back later in time at you. 
+
+<P>
+This system breaks down if someone finds
+out your passphrase; even finding out
+your session name can make an attack
+a bit easier. People can find out your
+name in three ways:
+
+<OL>
+<LI>
+To get ready for the session, you 
+communicate the session and passphrase
+to the other session members, and an
+attacker is listening in. See the
+right panel for risk reduction ideas.
+<LI>
+You choose a session and passphrase
+that is easy to guess. See this
+<A HREF="http://www.stack.nl/~galactus/remailers/passphrase-faq.html">FAQ</A> on choosing
+passphrases, written for PGP but
+applicable to sfront networking.
+<LI>
+You meet someone in a chat room who
+seems nice enough, and invite her
+to play in a session ... but he is
+actually malicious. He finds out 
+the passphrase because you purposely
+gave it to him, in order to play 
+together.
+</OL>
+
+<P>
+The third problem is less amenable
+to technical solutions, since its
+actually a social problem. Perhaps
+the best technical solution is the
+<A HREF="http://www.cs.caltech.edu/~adam/local/trust.html">
+web of trust</A> concept
+for evaluating the intentions of
+strangers, based on a cryptographic
+technique somewhat reminiscent of the 
+<A HREF="http://www.cs.virginia.edu/oracle/">
+Six Degrees of Kevin Bacon</A> game.
+
+<P>
+Finally, note that sfront networking
+does not encrypt your packets, it 
+only authenticates them. A passive
+attacker could record your compositions,
+and do with them what they wish. 
+
+
+<H4> Security and SAOL</H4>
+
+<P>
+As specified by MPEG, SAOL is a safe
+language, in the sense that Java is
+safe. For example, a SAOL decoder must
+prevent an attempt to index an array
+out of bounds, and terminate the program.
+
+<P>
+However, as discussed in the <A HREF="../use/index.html#deviant">
+incompatibilities</A> section of this
+manual, sfront does not fully implement
+a safe model at the present time. Users
+should be careful when running SAOL programs
+from untrusted sources with sfront, as an
+attacker could write a SAOL program that
+is malicious. 
+
+<P>
+Users should also check SAOL network
+code they write themselves for inadvertent
+safety errors, especially if this code
+is offered publicly for others to use.
+Use the sfront <A HREF="../cmdline/index.html#isoflags">
+conformance</A> options to help find safety errors.
+
+<P>
+Note that sfront networking does not let
+session members run SAOL programs by 
+sending them along in packets -- an 
+attacker would need to trick you into
+running a malicious SAOL program by 
+using social methods.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Secure Passphrase Transmission</H2>
+
+<TT>
+<pre>
+1. The Best Methods.
+
+   -- Face-to face (in person).
+   -- Over the telephone.
+   -- <A HREF="http://www.openpgp.org">Secure email</A>
+   -- Secure file copy (scp/<A HREF="http://www.openssh.com">ssh</A>)
+   -- Password-protected webpage on a 
+      <A HREF="http://www.modssl.org/">secure webserver</A>
+   -- Short Message Service, done 
+      end-to-end over cellular.
+
+
+2. Risky methods.
+
+   -- Regular email. Email is not
+      secure. Many people can read
+      it as it travels and queues.
+      However, this attack takes
+      forethought and some skill.
+      
+   -- A password-protected webpage
+      on a non-secure web server.
+      Attackers can watch the page
+      download, and watch you log
+      in. However, the page won't
+      show up on Google, and a 
+      snooping attack takes some
+      forethought and skill.
+
+   -- Instant messenger. Not 
+      secure (usually), but takes
+      some forethought and skill
+      to snoop.
+
+
+3. Really bad ideas.
+
+   -- Announcing session and 
+      passphrase on mailing lists.
+
+   -- A non-password protected 
+      webpage. Google will index
+      it eventually, since a session
+      member will slip up and link
+      to it. Then, its a search away.
+</pre>
+</TT>      
+      
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="details">Technology Details</A></H2>
+
+<P>
+Our Network Musical Performance <A
+HREF="http://john-lazzaro.github.io/nmp/">webpage</A> includes
+links to technical publications on sfront networking, including a <A
+HREF="http://john-lazzaro.github.io/sa/pubs/pdf/nossdav01.pdf">
+paper</A> from the NOSSDAV conference describing the system.  If you
+read this paper, you may find it easier tuning the <A
+HREF="../cmdline/index.html#network"> network parameters</A> for good
+performance over temperamental links.
+
+<P>
+Sfront uses RTP MIDI (a RTP payload format for MIDI)
+to send MIDI over the network. RTP MIDI is an <A
+HREF="http://www.ietf.org">IETF</A> Proposed Standard (<A
+HREF="http://www.rfc-editor.org/rfc/rfc4695.txt">RFC 4695</A> and <A
+HREF="http://www.rfc-editor.org/rfc/rfc4696.txt">RFC 4696</A>).  See
+our <A
+HREF="http://john-lazzaro.github.io/rtpmidi/">webpage</A> on
+RTP MIDI for more information.
+
+<P>
+Note that the NOSSDAV paper and IETF RFCs do not discuss the
+techniques we use for handling NAT, and the techniques we use for
+security. We briefly discuss these methods below.
+
+<P>
+Our NAT techniques
+are based on Dan Kegel's <A HREF="http://www.alumni.caltech.edu/~dank/peer-nat.html">peer-to-peer</A>
+techniques, but are adapted for the SIP
+and RTP environment. 
+
+<P>
+Our SIP security techniques are based on
+standard SIP authorization, but use an
+<A HREF = "http://www.ietf.org/rfc/rfc2104.txt">HMAC-MD5-16</A>
+signature. 
+
+<P>
+Our RTP security techniques are loosely
+based on the Secure RTP standard under
+development in the IETF 
+<A HREF="http://www.ietf.org/html.charters/avt-charter.html">AVT</A>
+working group, but we do not encrypt
+the payload, and use a truncated
+HMAC-MD5-16 signature for authorization.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<P>
+<B>Next section:</B>
+<A HREF="../cmdline/index.html">Part I/5: Command Line Options</A></H2>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+</TT>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+sfront reference manual</A>->
+<STRONG>networking</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+</BODY>
+</HTML>

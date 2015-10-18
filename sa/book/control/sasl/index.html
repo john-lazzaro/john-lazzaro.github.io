@@ -1,0 +1,791 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part III/1: The SASL Score Language</TITLE>
+<META name="keywords" content="MP4-SA, SASL, instr, command, table,
+tempo, end, streaming, priority, use if late">
+<META name="description" content="The SASL Score Language. Describes
+the semantics of score files, and the command lines for creating
+SAOL instances, modifying SAOL variables and tables, and setting
+tempo.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+instrument control</A>-><STRONG>the SASL score language</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part III/1: The SASL Score Language</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="70%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#sasl">SASL Scores</A>.</B> Triggering semantics.
+<LI>
+<B><A HREF="#instr">Instr Command</A>.</B> Creating instances of
+instruments.
+<LI>
+<B><A HREF="#control">Control Command</A>.</B> Changing SAOL
+variables.
+<LI>
+<B><A HREF="#tempo">Tempo and End Commands</A>.</B> Changing
+simulation behavior.
+<LI>
+<B><A HREF="#table">Table Command</A>.</B> Updating wavetables using SASL. 
+<LI>
+<B><A HREF="#stream">Streaming and SASL</A>.</B> Real-time flags for SASL.</B> 
+
+</UL>
+
+
+</TD>
+<TD WIDTH="70%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>SASL Commands:</H2>
+
+<B>
+<P>
+<A HREF="#instr">instr</A> 
+<A HREF="#control">control</A> 
+<A HREF="#tempo">tempo</A> 
+<A HREF="#tempo">end</A> 
+<A HREF="#table">table</A> 
+</B>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+SASL (pronounced "sassil") is the score language for MP4-SA. 
+
+<P>
+A SASL score is an unordered list of SASL commands. A SASL command
+performs a single action at a moment in time, such as changing the
+value of a SAOL variable or creating a new instance of a SAOL
+instrument.
+
+<P>
+The three examples in the <A HREF="../../tut/index.html">tutorial</A>
+in Part I introduce most of the SASL commands. The right panel has
+direct links to the examples.
+
+<P>
+In this chapter, we explain how a SASL score interacts with a SAOL
+program, and describe the five types of SASL commands. We also discuss
+the use of SASL commands in streaming and real-time applications of
+MP4-SA.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>From Part I:</H2>
+
+<P><B><A HREF="../../tut/index.html#simple">Example 1</B></A>. Introduces
+the SASL <B>instr</B> and <B>end</B> commands.
+
+<P><B><A HREF="../../tut/index.html#melody">Example 2</B></A>. Shows
+how to initialize instrument parameters with the SASL <B>instr</B>
+command. Introduces the SASL <B>tempo</B> command.
+
+<P><B><A HREF="../../tut/index.html#reverb">Example 3</B></A>. Shows
+how to label SASL <B>instr</B> commands. Introduces the SASL
+<B>control</B> command.
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="sasl">SASL Scores</A></H2>
+
+<P>
+A SAOL program executes by moving a simulated clock forward in time,
+performing calculations along the way in a synchronous fashion.  A
+SASL score is a list of commands that trigger actions relative to the
+clock time. 
+
+<P>
+SASL commands are one line long. The newline marks the end of the
+command.
+
+<P>
+A SASL command is a list of elements, separated by spaces
+(and for some parts of some commands, colons). These elements may be
+floating-point nunbers, SAOL and SASL keywords, and the instrument and
+variable names from the companion SAOL program.
+
+<P>
+SASL commands in a score file need not appear in order of execution.
+The trigger time of commands in a SASL score indicate the order that
+the commands are executed.  The first number on a SASL command line
+indicates indicates the trigger time for the command.
+
+<P>
+A SASL score may span several ASCII files.  MP4-SA tools concatenate
+the score files and execute each SASL command at the appropriate time.
+
+<P>
+A SAOL program processes SASL commands at k-rate granularity. It
+compares the simulated clock value with the trigger times of SASL
+commands, and runs unexecuted commands that have a trigger time 
+less than or equal to the current clock value.
+
+<P>
+The simulated clock has units of seconds, while command trigger time
+has units of beats. At each k-pass, trigger times are converted from
+beats to seconds, using the current value of the global tempo.
+
+<P>
+The global tempo has a default value of 60 beats per minute, or one
+beat per second. The core opcode <A HREF=
+"../../saol/simple/index.html#tempo">settempo</A> lets SAOL
+instruments change the tempo value, and the tempo command lets a SASL
+score change the tempo.
+
+<P>
+In the following sections, we describe the semantics of the SASL
+commands. In Part III/3, we present a <A
+HREF="../saolc/index.html#order">table</A> that shows the exact
+execution order of these commands in a SAOL simulation.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="instr">Instr Command</A></H2>
+
+<P>
+The SASL <B>instr</B> command creates a new instance of a SAOL
+instrument. The right panel shows the syntax of the command.
+
+<H4>Syntax</H4>
+
+<P>
+An <B>instr</B> command optionally begins with a label. The SASL
+<B>control</B> command uses this label to reference the instance.  The
+label name must obey the <A HREF="../../saol/vars/index.html#names">
+naming</A> rules described in Part II/1. Multiple <B>instr</B>
+commands may use the same label name.
+
+<P>
+The first required element is the trigger time. The trigger time is a
+floating-point value, in units of beats, that indicates when to create
+the instance.
+
+<P>
+The trigger time is followed by the name of the SAOL instrument to
+instantiate. Following the name is a floating-point duration value
+that indicates how long the instance should execute.
+
+<P>
+The command ends with a list of floating-point values for initializing
+the instrument parameters of the new instance.
+
+<H4>Semantics</H4>
+
+<P>
+When a SASL <B>instr</B> command triggers, it creates an instance
+of the specified SAOL instrument. See the <A HREF="#sasl">previous
+section</A> for details on when a SASL command triggers.
+
+<P>
+The instrument parameters of the new instance are set to the
+initialization values specified by the command. If the command has too
+few values, the remaining instrument parameters are set to
+zero.
+
+<P>
+If the duration value is <TT>-1</TT>, the instance executes
+indefinitely. Otherwise, the duration value indicates how long the
+instrument should execute, in units of beats.
+
+<P>
+At the start of each k-pass, a termination time is computed, by using
+the global tempo to convert the duration value from beats to seconds,
+and adding this value to the creation time of the instance.
+
+<P>
+If this termination time is less than or equal to the current clock
+time, the instance is scheduled for termination at the end of the
+current execution cycle.
+
+<P>
+A <A HREF= "../saolc/index.html#order">table</A> in Part II/3 shows
+the timing of instance creation and termination in an orchestra cycle.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Instr Command Syntax:</H2>
+<TT>
+<pre>
+
+[label :] trigger name dur p1 p2 ...
+
+
+
+label: optional text label that 
+tags the instr command for
+reference by the control 
+command. the text label follows 
+the lexicography of SAOL <A HREF="../../saol/vars/index.html#names">names</A>.
+
+trigger: floating-point 
+number, the starting time for 
+the instance, in units of 
+beats.
+
+name: the name of the SAOL 
+instrument to instantiate.
+
+dur: floating-point number
+the duration of the instance,
+in units of beats. a value
+of -1 indicates indefinite
+duration.
+
+p1, p2 ...: floating-point
+numbers, the values of
+the instrument parameters
+to use during initialization.
+
+
+Examples:
+
+0.394 sawtooth 0.4 -12.3
+
+1.203 trumpet 23.4 1 3 45.0
+
+top: 1 square -1 
+
+</pre>
+</TT>
+
+
+<H2>Relevent Tutorial Examples:</H2>
+
+<P><B><A HREF="../../tut/index.html#melody">Example 2</B></A>. Shows
+unlabeled <B>instr</B> commands, with finite durations, that are
+modulated by tempo changes.
+
+<P><B><A HREF="../../tut/index.html#reverb">Example 3</B></A>. Shows
+labelled <B>instr</B> commands.
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="control">Control Command</A></H2>
+
+<P>
+The SASL <B>control</B> command changes the value of a SAOL
+variable. The right panel shows the syntax of the <B>control</B>
+command.
+
+<H4>Syntax</H4>
+
+<P>
+The command begins with the trigger time, that indicates when to
+change the value of the SAOL variable.
+
+<P>
+The trigger time is followed by an optional label element, that refers
+to instances created by labelled SASL <B>instr</B> commands. The label
+name must obey the <A HREF="../../saol/vars/index.html#names">
+naming</A> rules described in Part II/1.
+
+<P>
+Following the keyword <B> control</B> is the name of the SAOL variable
+to change, and the new floating-point value for the variable.
+
+<H4>Semantics</H4>
+
+<P>
+When a <B>control</B> command triggers, it changes the value of a SAOL
+variable. 
+
+<P>
+The command has different semantics, depending on the
+presence of the optional label element. 
+
+<P>
+If no label is present, the command changes the SAOL global 
+variable with the specified name to the new value. Both
+i-rate and k-rate global variables may be targeted.
+
+<P>
+If a label is present, then all instances created by SASL <B>instr</B>
+commands with that label are examined. If an instance has an
+<B>imports</B> variable with the specified name, the command changes
+the variable to the new value. 
+
+<P>
+Variables targeted by labelled <B>control</B> commands must be
+k-rate. Variables in user-defined opcodes are not reachable by
+labelled control commands.
+
+<P>
+The <A HREF= "../saolc/index.html#order">table</A> in Part II/3 shows
+the timing of <B>control</B> command during an orchestra cycle. 
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Control Command Syntax:</H2>
+<TT>
+<pre>
+
+trigger [label] <B>control</B> var number
+
+
+
+trigger: the time to execute the 
+control command, in units of beats.
+
+label: optional text label that 
+links the control command to an
+instr command.
+
+var: name of the SAOL variable to
+change. if no label is present in
+control command, changes a global
+variable in the SAOL program. if
+a label is present, changes an
+instrument imports variable that
+has no matching global variable.
+
+number: the new value for the
+variable. 
+
+
+Examples:
+
+0.102 control freq 12.0
+
+10.23 rainbow control ampl 2
+
+
+</pre>
+</TT>
+
+<H2>Relevent Tutorial Example:</H2>
+
+<P><B><A HREF="../../tut/index.html#reverb">Example 3</B></A>. Shows
+labelled <B>control</B> commands that change an instrument variable,
+and unlabelled <B>control</B> commands that change a global variable.
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="tempo">Tempo and End Commands</A></H2>
+
+<P>
+The SASL <B>tempo</B> and <B>end</B> commands change the behavior of
+the SAOL program execution.  The right panel shows the syntax for both
+commands.
+
+<H4>Tempo Command</H4>
+
+<P>
+When the <B>tempo</B> command triggers, it changes the value of
+the global tempo. Tempo values in SAOL have units of beats per minute.
+
+<P>
+If multiple <B>tempo</B> commands trigger in a k-cycle, the
+command with the latest trigger time sets the new tempo value.
+
+<H4>End Command</H4>
+
+<P>
+When the <B>end</B> triggers, it ends the simulation, and no further
+audio is produced. The <B>end</B> command with the earliest trigger
+time has precedence.
+
+<P>
+The <A HREF= "../saolc/index.html#order">table</A> in Part II/3 shows
+the timing of <B>tempo</B> and <B>end</B> commands during an orchestra cycle. 
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Tempo Command Syntax</H2>
+<TT>
+<pre>
+
+trigger <B>tempo</B> number
+
+
+
+trigger: the time to execute the 
+tempo command, in units of beats.
+
+number: the new value of the tempo,
+in units of beats/minute.
+
+
+Examples:
+
+0.283 tempo 130.0
+
+0.12  tempo 4
+
+</pre>
+<TT>
+
+<H2>End Command Syntax</H2>
+<TT>
+<pre>
+
+trigger <B>end</B>
+
+
+trigger: the time to end the 
+SAOL simulation, in units of
+beats.
+
+
+Examples:
+
+129.0934 end
+
+
+</pre>
+<TT>
+
+<H2>Relevent Tutorial Example:</H2>
+
+<P><B><A HREF="../../tut/index.html#melody">Example 2</B></A>. 
+Uses multiple <b>tempo</B> commands to modulate a melody line.
+Also uses the <B>end</B> command.
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="table">Table Command</A></H2>
+
+<P>
+The SASL <B>table</B> command acts to create wavetables in a SAOL
+program. The right panel shows the syntax of a <B>table</B> command.
+
+<H4>Syntax</H4>
+
+<P>
+The command begins with the trigger time, that indicates when to
+create the SAOL table.
+
+<P>
+The keyword <B>table</B> is followed the name of the wavetable to
+create, and the wavetable generator for initializing the table. The
+specified generator must be one of the SAOL <A
+HREF="../../saol/wave/index.html#decl">wavetable generators</A>, or
+the special keyword <B>destroy</B>.
+
+<P>
+The command ends with a list of parameters to supply
+to the wavetable generator.
+
+<H4>Semantics</H4>
+
+<P>
+The <B>table</B> command specifies a SAOL wavetable.  When the command
+triggers, this SAOL wavetable is changed as described below.
+
+<P>
+If this wavetable is a global wavetable in the SAOL program, the
+contents of this wavetable are replaced by a new wavetable.  The new
+wavetable is created by the specified generator, which is run using
+the specified parameters.
+
+<P>
+If the wavetable generator element is specified as the
+keyword <B>destroy</B>, the current contents of the wavetable are
+destroyed, and can no longer be accessed by the SAOL program.
+
+<P>
+The <A HREF= "../saolc/index.html#order">table</A> in Part II/3 shows
+the timing of <B>table</B> commands during an orchestra cycle.
+
+<H4>Future Tables</H4>
+
+<P>
+As we <A HREF="../../saol/wave/index.html#decl">described</A> in Part
+II/4, a SAOL instrument may declare a wavetable as <B>imports
+table</B> even if no global wavetable exists with the same name.
+
+<P>
+If the wavetable specified in the <B>table</B> command is not a global
+wavetable, the wavetable is created as a new global wavetable, or
+<I>future</I> wavetable. 
+
+<P>
+The wavetable is created by the specified generator, which is run
+using the specified parameters.
+
+<P>
+Once the future wavetable is created, calls to instruments that import
+the table may legally execute, with semantics identical to global
+tables.
+
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Syntax</H2>
+<TT>
+<pre>
+
+trigger <B>table</B> var gen p1 p2 ...
+
+
+
+trigger: the time to execute the 
+table command, in units of beats.
+
+var: name of the SAOL table to
+change. may be a global table,
+or an instrument import table
+that has no matching global
+table.
+
+gen: wavetable generator to 
+use to initialize the table.
+see <A HREF="../../saol/wave/index.html">Part II/4</A> for the list
+of wavetable generators. gen
+may also be the keyword 
+<B>destroy</B>, which destroys
+any existing wavetable created
+for this wavetable name.
+
+p1, p2 ...: parameters for
+the wavetable generator, 
+see <A HREF="../../saol/wave/index.html">Part II/4</A> for
+legal parameter lists for
+the different wavetable 
+generators.
+
+</pre>
+</TT>
+
+<H2>Example SASL Score</H2>
+
+<TT>
+<pre>
+
+5 table orig data 3 4 5 6
+10 table newtable data 3 7 8 9
+15 newtone 10
+
+</pre>
+</TT>
+
+<H2>Companion SAOL Program</H2>
+
+<TT>
+<pre>
+
+// first table line of 
+// SASL score replaces
+// global table orig
+
+globals {
+table orig(data, 3, 1,2,3);
+}
+
+
+instr newtone () {
+
+// second line of SASL
+// creates newtable.
+// note that newtone
+// instance is created
+// after newtable is
+// created
+
+imports table newtable;
+
+}
+
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="stream">Streaming and SASL</A></H2>
+
+<P>
+In the examples in the <A HREF="../../tut/index.html">tutorial</A> in
+Part I, an ASCII file contains all the SASL commands for a
+performance.  Some of these examples use <TT>sfront</TT> to create a
+binary encoding of the SAOL and SASL files. This program places all
+the SASL commands at the start of the file, and encodes the trigger
+times for all commands.
+
+<P>
+A binary MP4 encoding that has SASL commands distributed throughout
+the file is a better match for some applications.  For example, an
+application for real-time audio streaming over a slow computer network
+could benefit from distributed SASL commands. In this case, SASL
+commands occuring later in the performance are not needed immediately,
+and may be postponed without affecting the audio output.
+
+<P>
+The MP4 binary file format has provisions for distributed SASL
+commands. Trigger times are optional for these commands, to support
+efficient encoding for real-time streaming applications over a
+low-latency network.
+
+<P>
+Distributed commands <I>without</I> timestamps are executed at the
+next opportunity for executing commands of its type in the <A
+HREF="../saolc/index.html#order">execution order</A>.  Distributed
+commands <I>with</I> timestamps follow the trigger semantics described
+in an <A HREF="#sasl">earlier section</A> in this chapter.
+
+<H4>Real-time Flags</H4>
+
+<P>
+Several flags may be added to SASL commands for real-time
+applications. A "*" may be added to each command, indicating that the
+command is a "high-priority" event that should be executed even if CPU
+cycles are scarce.
+
+<P>
+A "use-if-late" flag may also be added to the binary encoding of a
+distributed SASL command, that instructs the decoder to execute a
+command even if latency problems result in an MP4 data stream falling
+"out of sync" with real-time.
+
+
+<P>
+<B>Next:</B>
+<A HREF="../midi/index.html">Part III/2: MIDI Instrument Control</A></H2>
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+instrument control</A>-><STRONG>the SASL score language</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>
+
+
+
+
+

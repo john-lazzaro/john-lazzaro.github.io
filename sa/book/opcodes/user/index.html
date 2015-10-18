@@ -1,0 +1,960 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part IV/4: User-Defined Opcodes</TITLE>
+<META name="keywords" content="MP4-SA, opcodes, user-defined opcodes, 
+user, user defined opcodes, return, polymorphic opcodes, xsig, 
+iopcode, kopcode, aopcode, opcode">
+<META name="description" content="User-defined opcodes in the SAOL
+language of MPEG 4 Structured Audio.">
+
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+advanced opcodes</A>-><STRONG>user-defined opcodes</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part IV/4: User-Defined Opcodes</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="65%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#example">Example</A>.</B> Rewrite of tutorial example with
+user-defined opcodes.
+<LI>
+<B><A HREF="#header">Opcode Declarations</A>.</B> Parameters and variables.
+<LI>
+<B><A HREF="#block">Opcode Statement Block</A>.</B> Return statements.
+<LI>
+<B><A HREF="#calls">Opcode Calls</A>.</B> Rate and width calling 
+conventions.
+</UL>
+</TD>
+
+<TD WIDTH="35%" VALIGN=top BGCOLOR="#CCFFCC">
+<B>
+
+<H2>Language Elements:</H2>
+
+<A HREF="#header">aopcode</A> 
+<A HREF="#header">iopcode</A> 
+<A HREF="#header">kopcode</A> 
+<A HREF="#header">opcode</A> 
+<A HREF="#block">return</A> 
+<A HREF="#header">xsig</A> 
+
+</B>
+
+</TD>
+</TR>
+
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+In this chapter, we describe how to write opcode definitions and how
+to call user-defined opcodes.
+
+<P>
+To introduce opcode definitions, we rewrite one of examples from the
+<A HREF="../../tut/index.html#simple">tutorial introduction in Part
+I</A> to use several user-defined opcodes.
+
+<P>
+We describe how to declare parameters and variables in opcode
+definitions, and we explain opcode rate and width semantics. 
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="example">Example</A></H2>
+
+<P>
+The right panel shows a SAOL program that generates a stereo test tone
+pair (the fundamental tone in one channel, the first harmonic in the
+other channel). 
+
+<P>
+The instrument <TT>otone</TT> generates the audio signal, with the
+help of the user-defined a-rate opcode <TT>update</TT> and the
+user-defined polymorphic opcode <TT>coeff</TT>. 
+
+<P>
+We begin by examining the <TT>otone</TT> instrument definition, which
+has a single parameter <TT>freq</TT> that sets the frequency of the
+test tone pair.  An i-rate variable <TT>a</TT> holds the coefficient
+for the oscillator algorithm, and a-rate arrays <TT>s</TT> and
+<TT>out</TT> hold the oscillator state and instrument output
+respectively.
+
+<H4>Calls to User-defined Opcodes</H4>
+
+<P>
+The code block of the instrument <TT>otone</TT> has two calls to
+user-defined opcodes. 
+
+<P>
+In the i-rate part of the code block, the polymorphic user-defined
+opcode <TT>coeff</TT> converts a frequency value into the proper
+coefficient value for the oscillator algorithm. The definition of
+<TT>coeff</TT> defines its sole calling parameter as polymorphic.
+
+<P>
+In Part II/3 we presented a <A
+HREF="../../saol/simple/index.html#opcode">rule</A> for determining
+the rate of a polymorphic core opcode call. The <TT>coeff</TT> call in
+<TT>otone</TT> also obeys this rule, which in this case indicates that
+<TT>coeff</TT> is i-rate because the instrument parameter
+<TT>freq</TT> is i-rate.
+
+<P>
+The a-rate part of the code block begins with an <B>if</B> statement
+that initializes the oscillator state vector <TT>s</TT>. An assignment
+statement calls the user-defined a-rate opcode <TT>update</TT> that
+generates the stereo audio output signal. An <B>output</B> statement
+sends this signal to <B>output_bus</B> to end the code block.
+
+<P>
+The opcode call to <TT>update</TT> uses three aspects of SAOL opcodes
+that are not used by any core opcodes.
+
+<OL>
+<LI>
+Opcode parameters may be arrays. The width of the array expression
+in the opcode call must match the width the array in the opcode
+header. 
+<LI>
+If an opcode call uses a signal variable as a calling argument,
+this variable is <B>passed by reference</B> to the opcode, and
+the opcode may vary its value. In this case, the array <TT>s</TT>
+is passed by reference to <TT>update</TT>, which overwrites its
+value on each call.
+<LI>
+Opcodes may return array expressions. In this case, <TT>update</TT>
+returns an expression of width 2, that is assigned to the array
+<TT>out</TT>.
+</UL>
+
+<H4>Fixed-rate Opcode Definitions</H4>
+
+<P>
+The definition of the a-rate opcode <TT>update</TT> follows the
+instrument definition of <TT>otone</TT>. The definition begins with
+the keyword <B>aopcode</B> (indicating that the opcode returns an
+a-rate value) followed by the name of the opcode and its formal
+parameters.
+
+<P>
+The <TT>update</TT> opcode has two formal parameters, an a-rate array
+<TT>s</TT> and an i-rate scalar <TT>a</TT>. It also has a declared
+a-rate variable <TT>w</TT>. 
+
+<P>
+Like core opcodes, each syntactic call to a user-defined opcode has a
+separate set of variables. These variables are initialized to zero
+during the first opcode call, and maintain their state from call to
+call.
+
+<P>
+The code block of <TT>update</TT> consists of four a-rate statements.
+As an a-rate opcode with only a-rate statements, the rate semantics of
+<TT>update</TT> are easy to understand: each call to <TT>update</TT>
+results in the execution of all statements in the code block. 
+
+<P>
+Two statements in the code block update the state of the formal
+parameter <TT>s</TT>, and so the opcode only makes sense when called
+with a variable for the first argument (as opposed to an expression).
+
+<P>
+The final line of <TT>update</TT> is the SAOL statement <B>return</B>,
+that generates the return value for the opcode and hands control back
+to the caller. In this case, the argument for <B>return</B> is a 
+list of two scalar expressions, and so <TT>update</TT> returns an
+expression of width 2. 
+
+<P>
+A return statement always has the rate of the opcode: in the case of
+aopcode <TT>update</TT>, the return statement is a-rate.
+
+<H4>Polymorphic Opcode Definitions</H4>
+
+<P>
+The definition of the polymorphic opcode <TT>coeff</TT> completes the
+program. The keyword <B>opcode</B> starts a polymorphic opcode
+definitions, and polymorphic formal parameters and signal variables
+are declared using the keyword <B>xsig</B>.
+
+<P>
+The code block for <TT>coeff</TT> assigns the correct coefficient
+value to the polymorphic variable <TT>rval</TT> and then returns
+that value. 
+
+<P>
+Note that the assignment expression uses standard name <B>s_rate</B>.
+Opcodes may access the standard names of the instrument that calls the
+opcode, directly or indirectly (through a nested opcode call).
+However, the variables and parameters of the caller are not visible.
+
+<P>
+Like most polymorphic opcodes, the formal parameters, variables, and
+all statements in the <TT>coeff</TT> opcode are polymorphic. This
+design approach ensures that all execution semantics of the opcode
+switch to the actual rate of the opcode call.
+
+<P>
+The right panel shows a simple SASL program for driving this program,
+and includes an Internet <A HREF="http://john-lazzaro.github.io/sa/book/opcodes/user/example/osine/output.wav">link</A> to a WAV
+file of the audio generated by the program.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+
+<H2><A HREF="example/osine/osine.saol"><TT>osine.saol</TT></A></H2>
+<TT>
+<pre>
+global {
+  outchannels 2; 
+}
+
+//
+// instr otone
+// plays a sine wave
+// and its octave
+//
+// uses two user-defined
+// opcodes, coeff() and
+// update()
+//
+
+instr otone (freq)    
+     
+{
+
+  // variable declaration
+
+  ivar a;
+  asig init;
+  asig s[2], out[2];
+
+  //***************
+  // runs at i-rate 
+  //***************
+
+  a = coeff(freq);
+
+  //***************
+  // runs at a-rate 
+  //***************
+
+  if (init == 0)
+    {
+      init = 1;
+      s[0] = 0.5;
+    }
+
+  out = update(s,a);
+
+  output(out);
+
+}
+
+// 
+// opcode definition
+// 
+// name: update
+// rate: a-rate 
+// width: 2
+//
+// expects to be passed,
+// BY REFERENCE, the
+// state array for the
+// oscillator. opcode 
+// updates state array,
+// and returns a stereo
+// signal, one channel 
+// is the fundamental 
+// tone, the other is
+// the first harmonic
+//
+
+aopcode update(asig s[2], 
+	       ivar a)
+
+{
+  // scales harmonic
+
+  asig w; 
+
+  s[0] = s[0] - a*s[1];
+  s[1] = s[1] + a*s[0];
+
+  w = 2.0;
+
+  return(s[1], w*s[1]*s[0]);
+
+}
+
+
+// 
+// opcode definition
+// 
+// name: coeff
+// rate: polymorphic
+// width: 1
+// 
+// 
+// parameter hertz is the
+// desired frequency of the
+// sine wave oscillator. 
+// returns the coefficient
+// value that produces that
+// frequency
+//
+
+opcode coeff(xsig hertz)
+
+{
+  xsig rval;
+  
+  rval = 2*sin(3.1415927*hertz/s_rate);
+  return(rval);
+}
+
+</pre>
+</TT>
+
+
+<H2><A HREF="example/osine/osine.sasl"><TT>osine.sasl</TT></A></H2>
+
+<TT>
+<pre>
+0.25 otone 4.0 1000
+4.50 end
+</pre>
+</TT>
+
+<H2><A HREF="http://john-lazzaro.github.io/sa/book/opcodes/user/example/osine/output.wav"><TT>output.wav</TT></A></H2>
+
+<pre>
+<P>
+[576,044 bytes, on the Web]
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="header">Opcode Declarations</A></H2>
+
+<P>
+In this section, we look at the process of declaring opcode parameters
+and variables in detail.
+
+<P>
+Four types of opcodes may be declared: a-rate opcodes, k-rate opcodes,
+i-rate opcodes, and polymorphic opcodes. The right panel shows a
+minimal opcode definition for each case.
+
+<P>
+The opcode keyword is followed by the name of the opcode. Opcode names
+must be unique, and must follow the <A
+HREF="../../saol/vars/index.html#names">naming rules</A> details in
+Part II/1, with the exception that opcodes may share a name with a
+local or global variable.
+
+<H4>Parameter Declarations</H4>
+
+<P>
+Opcodes may have zero, one, or several formal parameters, using the
+parameter syntax shown on the right panel. A user-defined opcode has a
+fixed number of parameters, set by the number of parameters in the
+parameter list.
+
+<P>
+A formal parameter may be scalar or array signal variable (declared
+using <B>ivar</B>, <B>ksig</B>, <B>asig</B>, and the polymorphic
+<B>xsig</B> keywords) or a wavetable (declared using the keyword
+<B>table</B>).  See right panel for example parameters.
+
+<P>
+Opcode parameters declarations follow these rules:
+
+<OL>
+<LI>
+A fixed-rate opcode may not have a formal parameter with a rate faster
+than the opcode rate, and may not have polymorphic parameters.
+<LI>
+The width specifier for an array parameter may be an integer greater
+than zero, or the keyword <B>inchannels</B> or <B>outchannels</B>.
+</OL>
+
+<P>
+If the opcode is called from the <B>global</B> block,
+<B>inchannels</B> and <B>outchannels</B> code the width the
+<B>input_bus</B> or <B>output_bus</B>. If the opcode is called from an
+instrument, <B>inchannels</B> and <B>outchannels</B> code the input or
+output audio port width of the instrument.
+
+<H4>Variable Declarations</H4>
+
+<P>
+All variables types that may be declared in the variable block of an
+instrument definition may also be used in a core opcode definition
+(see right panel). An opcode may not may not have signal variables
+with a rate faster than the opcode rate.
+
+<P>
+Polymorphic opcode signal variables must be polymorphic (declared
+using the <B>xsig</B> keyword) or a fixed rate no faster than the
+fastest formal parameter of the opcode.  If the opcode only has
+polymorphic parameters, only <B>xsig</B> and <B>ivar</B> variables may
+be declared.
+
+<P>
+Note that <B>imports</B> and <B>exports</B> variables act only to
+exchange data with <B>global</B> block variables. Instrument variables
+may not be imported into an opcode, and opcode variables may not serve
+as targets for SASL <B>control</B> commands.
+
+<P>
+Like core opcodes, each syntactic opcode call to a user-defined opcode
+has a separate set of variables. A user-defined opcode may also be
+called by an oparray call, for applications where state sharing between
+multiple opcode calls is required.
+
+<P>
+Variables are initialized during the first opcode call, using the
+initialization semantics of instrument variables. Variables maintain
+their state from call to call.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Minimal Opcode Definitions</H2>
+
+<TT>
+<pre>
+iopcode name() {} // i-rate
+kopcode name() {} // k-rate
+aopcode name() {} // a-rate
+opcode  name() {} // polymorphic
+
+</pre>
+</TT>
+
+<H2>Sample Parameter Lists</H2>
+
+<TT>
+<pre>
+// no parameters
+
+aopcode name() 
+
+
+// one parameter
+
+kopcode name(ksig x)
+
+
+// several parameters
+
+iopcode name(table a, ivar b[2])
+
+</pre>
+</TT>
+
+<H2>Variable Declarations</H2>
+
+
+<TT>
+<pre>
+The declaration syntax for the
+following instrument variables
+are also permitted in the opcode
+variable block.
+
+<A HREF="../../saol/vars/index.html#vars_instr">
+signal variables</A>, including
+array signal variables and imports
+and/or exports signal variables.
+The <B>xsig</B> keyword may be used
+in polymorphic opcodes. See left
+panel for restrictions.
+
+<A HREF="../filter/index.html#oparray">
+oparrays</A> constructions.
+
+<A HREF="../../saol/wave/index.html#decl">
+tables</A>, including imports and/or
+exports tables, and tablemaps. Tablemap
+definitions may use tables defined as
+opcode parameters.
+
+When used in as array or oparray
+width specifier: 
+
+  The keyword <B>inchannels</B>
+  codes the audio input channel
+  width of the calling instrument.
+  If called from the global block,
+  <B>inchannels</B> codes the width
+  of <B>input bus</B>.
+
+  The keyword <B>outchannels</B>
+  indcates the width is the number of
+  audio output channels of the 
+  calling instrument. If called from
+  the global block, <B>inchannels</B>
+  codes the width of <B>input bus</B>.
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="block">Opcode Statement Block</A></H2>
+
+<P>
+Earlier chapters describe the SAOL language statements that may be
+used in the statement block of instruments. These statements may also
+be used in opcodes. 
+
+<P>
+In addition, opcodes may use the <B>return</B> statement, described on
+the right panel. A <B>return</B> statement runs at the rate of the
+opcode.  The statement generates the return value of the opcode, and
+cedes control back to the caller.
+
+<P>
+Statements in fixed-rate opcodes may not be faster than the rate of
+the opcode. Statements in polymorphic opcodes must be polymorphic, or
+a fixed rate no faster than the fastest formal parameter of the
+opcode.
+
+<H4>Statement Execution</H4>
+
+<P>
+Statements that have the same rate as the opcode execute every time
+the opcode statement block runs. Statements that are slower than
+the opcode rate execute following the rules below:
+
+<OL START=1> 
+<LI>
+I-rate statements in a k-rate or a-rate opcode execute
+once, the first time the statement block executes. These i-rate
+statements execute before any k-rate or a-rate statements run, but
+after any wavetable generator initializations happen.
+<LI>
+K-rate statements in an a-rate opcode execute in the first
+a-pass the statement block executes in an execution cycle, but do not
+run during subsequent a-passes in the cycle. The k-rate statements
+execute after any i-rate statements, but before a-rate statements.
+</OL>
+
+<P>
+After any slower-rate statements execute, the statements that share
+the rate of the opcode are executed, in order, until a <B>return</B>
+statement occurs.  At that point, the return value is generated, and
+control flow is ceded to the caller.
+
+<P>
+If a statement block completes execution without hitting a
+<B>return</B> statement, the opcode cedes control back to the
+opcode. In this case, the return value is undefined.
+
+<H4>Expressions in Statements</H4>
+
+<P>
+Expressions in statements may use the standard names, except for
+standard names whose rate is faster than the opcode rate. The standard
+names take on the value of the calling instrument.
+
+<P>
+SAOL does not support recursive opcodes, in any form. An opcode
+definition may not include a call to itself, or a call to another
+opcode that calls the original opcode, directly or indirectly.
+
+<P>
+See the right panel for special conditions that apply to
+certain statements in an opcode definition.
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>return</TT> Syntax Forms</H2>
+
+<TT>
+<pre>
+
+return();
+return(expr);
+return(expr[,expr, ...]);
+
+</pre>
+</TT>
+
+<H2><TT>return</TT> Semantics</H2>
+
+<TT>
+<pre>
+A return statement runs at the 
+rate of the opcode.
+
+After executing a return statement,
+an opcode returns control to the 
+caller.
+
+Exprs may not have a rate faster
+than the opcode. Expr may be 
+scalar or have a width. A null
+return statement has scalar width,
+and returns an undefined value.
+
+The sum of the widths of all exprs
+is the width of the return statement.
+All return statements in an opcode
+must have the same width. 
+
+If an opcode has no return statements,
+it returns an undefined value of scalar
+width at the end of statement block
+execution.
+
+The return value of an opcode is the
+scalar or array expression value made
+by concatenating the values of all
+the exprs in the return statement, in
+order of appearance.
+
+</pre>
+</TT>
+
+<H2><TT>instr</TT> in Opcode Definitions</H2>
+
+<TT>
+<pre>
+If an instr statement appears in an
+opcode definition, the rate of the
+statement is the fastest of
+
+-- the fastest expression in the
+   statement's argument list.
+-- the fastest guarding expression
+   in a surrounding if-else or 
+   while block.
+-- <B>the rate of the opcode 
+   definition in which it resides</B>.
+
+</pre>
+</TT>
+
+<H2><TT>extend</TT> in Opcode Definitions</H2>
+
+<TT>
+<pre>
+If an extend statement appears in an
+opcode definition, the rate of the
+statement is the fastest of
+
+-- the fastest expression in the
+   statement's argument list.
+-- the fastest guarding expression
+   in a surrounding if-else or 
+   while block.
+-- <B>the rate of the opcode 
+   definition in which it resides</B>.
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="calls">Opcode Calls</A></H2>
+
+<P>
+In this section, we describe the process of calling a user-defined
+opcode. The rules in this section are a super-set of the <A
+HREF="../../saol/simple/index.html#opcode">core opcode rules</A>
+described in Part II/3. 
+
+<P>
+We begin by updating the five rate semantic rules for core opcodes.
+The first rate rule is unchanged from the <A
+HREF="../../saol/simple/index.html#rate1">first core opcode rate
+rule</A>, and describes how an opcode call affects the expression that
+contains it:
+
+<B>
+<OL TYPE=1>
+<LI>
+To calculate the rate of an expression that includes an opcode call,
+treat the opcode call like a signal variable that has the rate of the
+opcode.
+</OL>
+</B>
+
+<P>
+The second rule concerns the arguments for fixed-rate parameters, It
+also covers array formal parameters and calling by reference, two
+aspects of user-defined opcodes that are not used by core opcodes.
+
+<B>
+<OL START=2>
+<LI>
+Each argument in an opcode call argument list matches up with its
+associated formal parameter in the opcode definition.</B> For opcodes with
+a fixed number of parameters, the argument list must have the same
+number of parameters.
+<OL TYPE=a>
+<LI>
+For signal parameters, if the associated argument is an expression,
+the expression is evaluated, and passed by value.  If an associate
+argument is a variable, an indexed variable, or the writable standard
+names <B>MIDIctrl</B> or <B>params</B>, it is passed by
+reference. Expressions are evaluated in the order they appear in the
+argument list.
+<LI>
+The width of the formal parameter must match the width of the 
+associated argument. 
+<LI>
+If a signal parameter is declared at a fixed rate, the argument
+must not have a faster rate.
+</OL>
+</OL>
+</B>
+
+<P>
+<A NAME="rate3">The</A> third rate rule defines how k-rate opcodes
+execute, it they are used in an a-rate statement. It is unchanged from
+<A HREF="../../saol/simple/index.html#rate3">core opcode rate rule
+3</A>.
+
+<B>
+<OL START=3> 
+<LI>
+If a k-rate opcode is used in an a-rate statement, it executes the
+first time the statement runs in the execution cycle, and its return
+value is stored for future use. For all subsequent opcode calls in the
+same execution cycle, the stored return value is reused: the opcode
+does not execute a second time.
+</OL>
+</B>
+
+<P>
+The fourth rate rule defines how i-rate opcodes execute, it they are
+used in an i-rate or k-rate statement. It is unchanged from <A
+HREF="../../saol/simple/index.html#rate4">core opcode rate rule 4</A>.
+
+<B>
+<OL START=4> 
+<LI>
+If a i-rate opcode is used in a k-rate or a-rate statement, it
+executes the first time the statement runs, and its return value is
+stored for future use. For all subsequent opcode calls during the
+instrument's lifetime, the stored return value is reused: the opcode
+does not execute a second time.
+</OL>
+</B>
+
+<P>
+The final rule governs the rate of polymorphic opcodes. It is expanded
+from the <A HREF="../../saol/simple/index.html#rate5">core opcode
+version</A> of polymorphic rate rules, which we restricted to simplify
+the introductory explanation of opcode semantics.
+
+<B>
+<OL START=5>
+<LI>
+The rate of a rate-polymorphic opcode is the fastest of:</B> 
+<OL TYPE=a">
+<LI>
+The fixed-rate formal parameters of the opcode definition, and
+<LI>
+The arguments to the opcode call, and
+<LI>
+The fastest guard expression of an <B>if</B>, <B>if-else</B>, or
+<B>while</B> statement guarding the call, and
+<LI>
+The rate of an opcode enclosing the call.
+</OL>
+If none of these conditions act to set the rate of the opcode,
+the opcode defaults to k-rate.
+</OL>
+</B>
+
+<P>
+Core opcode calls return a scalar value. User-defined opcodes
+may return an array value, whose width is determined by the
+width of the <B>return</B> statements in the opcode. The 
+return value of the opcode takes the rate of the opcode.
+
+<P>
+Each syntactically distinct opcode call has its own set of state
+variables. The <B>oparray</B> construction, described in an <A
+HREF="../filter/index.html#oparray">earlier chapter</A> supports
+applications where state sharing is necessary. User-defined opcodes
+may be used in oparrays, and follow the rules for opcode calls
+described above.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Rate Matching Errors</H2>
+
+<H4>Statements in <TT>global</TT></H4>
+
+<TT>
+<pre>
+Only i-rate opcodes may be used in 
+expressions used in statements in 
+the global block
+</pre>
+</TT>
+
+<H4><TT>if</TT> and <TT>if-else</TT></H4>
+
+<TT>
+<pre>
+Code block(s) may not contain opcodes 
+that are executed slower than the guard
+statement.
+</pre>
+</TT>
+
+<H4><TT>while</TT></H4>
+
+<TT>
+<pre>
+All opcodes in the code block must
+run at the rate of the guard
+expression.
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="summary">Summary</A></H2>
+
+<P>
+This section completes Part IV. of the MPEG 4 Structured Audio
+Book. In Part V we introduce <B>templates</B>, a SAOL language
+construct for defining a family of <B>instr</B> definitions.
+<B>
+<P>
+Appendix A:
+</B>
+<A HREF="../../template/index.html">Part V: Templates</A></H2>
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+advanced opcodes</A>-><STRONG>user-defined opcodes</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+</BODY>
+</HTML>

@@ -1,0 +1,240 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>MP4-SA: A Simple Example</TITLE>
+<META name="keywords" content="MP4-SA, example, SAOL, SASL,
+MP4">
+<META name="description" content="A simple example showing
+SAOL and SASL files that generate a tone. Using sfront,
+we turn these files into audio.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><STRONG>a simple example</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H1>MP4-SA: A Simple Example </H1>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>Introduction</H2>
+
+<P>
+In this example, we show a SAOL instrument (a sine wave oscillator)
+and a SASL score that uses the instrument.  We use sfront to translate
+the SAOL and SASL files into a C program to generate audio. We also
+use sfront to encode the ASCII SAOL and SASL files into a compact binary
+format suitable for storage and transmission.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+</TD>
+</TR>
+
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>The SASL Score</H2>
+
+<P>
+The panel on the right shows the SASL score for this example.  A SASL
+score is a list of commands (one per line) that script a sequence of
+audio events. Events happen at a particular <I>score time</I>, which
+is measured in beats; a global tempo value converts beats to time.
+
+<P>
+The score begins with an <B>instr</B> command, which triggers that
+start of a new note. The first field indicates the start time of the
+note.  The second field (<TT>tone</TT>) indicates the instrument to
+play; this name corresponds to code written in the SAOL file. The
+final number is the duration of the note.
+
+<P> 
+The final line is an <B>end</B> command, that indicates when to stop
+computing audio output.
+
+<P>
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<H2><A HREF="sine/sine.sasl">sine.sasl</A> [26 bytes]</H2>
+
+<pre>
+0.25 tone 4.0
+4.50 end
+</pre>
+
+</TT>
+</TD>
+
+</TR>
+
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>The SAOL Program</H2>
+
+<P>
+The panel on the right shows the SAOL program for this example. The
+program defines the instrument <TT>tone</TT> (a sine wave oscillator)
+that is used in the SASL score.
+
+<P> 
+A SAOL instrument begins with a preamble similar to a C function, as
+shown on the first line. Also note that comments in SAOL use the C++
+syntax: all text on a line after // is ignored.
+
+<P> 
+After the preamble are declarations for the variables that hold the
+state of the oscillator.  SAOL type definitions declare the time scale
+for computing with the defined variables. These variables, typed as
+<TT>asig</TT>, compute at the audio sampling rate (32 kHz by
+default). SAOL variables are 32-bit floating point numbers initialized
+to 0.
+
+<P> 
+Next is the code to compute the behavior of the instrument, that runs
+at the audio sampling rate. The code begins with an <B>if</B>
+statement, to initialize the state variables at the start of a
+note.  The <B>if</B> statement is followed by two assignment
+statements, that implement an iterative algorithm to compute sine
+waves.  Note that SAOL uses a C-like syntax for assignment,
+expression evaluation, and conditionals.
+
+<P> 
+Finally, the <TT>output</TT> command puts the current sine wave
+sample on the system audio output bus.
+
+
+</TD>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<H2><A HREF="sine/sine.saol">sine.saol</A>
+[280 bytes]</H2>
+
+<pre>
+instr tone ()    
+     
+{
+
+  // variable declaration
+
+  asig x, y, init;
+  
+  // computing starts here 
+
+  if (init == 0)
+    {
+      init = 1;
+      x = 0.5;
+    }
+  
+  x = x - 0.196307*y;
+  y = y + 0.196307*x;
+  
+  output(y);
+
+}
+</pre>
+</TT>
+</TD>
+</TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>Running the Example</H2>
+
+<P>
+The right panel shows how to use the SAOL to C
+translator <B>sfront</B> to generate audio
+for this example.
+
+<P>
+Sfront generates the C file sa.c.  We compile and execute this file to
+create audio output, saved in the WAV file <A
+HREF="http://john-lazzaro.github.io/sa/book/simple/sine/output.wav">output.wav</A>
+(click on the link to hear audio, if you are connected to the
+Internet, and if your browser supports audio playback).
+
+<P>
+Sfront also encodes the ASCII SAOL and SASL files into a 
+compact binary file suitable for storage and transmission.
+In this example, sfront creates the binary file is sine.mp4.
+
+<P>
+Dividing the size of sine.mp4 file (131 bytes) into the size of the
+output.wav file (288044 bytes) yields a lossless compression ratio of
+2198. This compression ratio is about 100 times better than a
+perceptual audio encoder (such as MPEG 2 Level 3) would provide!
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Running sfront:</H2>
+<pre>
+<TT>
+sfront -orc sine.saol -sco sine.sasl\
+-bitout sine.mp4 -aout output.wav
+</TT>
+</pre>
+<H2>Creates the files:</H2>
+<pre>
+<TT>
+<A HREF="sine/sa.c">sa.c</A> [30603 bytes]
+
+sine.mp4 [131 bytes]
+
+
+</TT>
+
+<H2>Compiling and executing sa.c:</H2>
+<pre>
+<TT>
+gcc -O2 sa.c -lm -o sa ; ./sa
+</TT>
+</pre>
+
+<H2>Creates the file:</H2>
+<pre>
+<TT>
+<A HREF="http://john-lazzaro.github.io/sa/book/simple/sine/output.wav">output.wav</A> [288044 bytes, on the Web]
+</TT>
+</pre>
+
+</TD>
+</TR>
+
+</TABLE>
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+Return to <STRONG><A HREF="../../index.html">mp4-sa</A>.
+</STRONG></SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>

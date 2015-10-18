@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Appendix F: Language Rules</TITLE>
+<META name="description" content="An index to semantics, syntax,
+width, rate, and other types of rules in MP4-SA.">
+<META name="keywords" content="MP4-SA">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+appendices</A>-><STRONG>language rules</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Appendix F: Language Rules</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+
+<H2>Atomic Elements</H2>
+
+<P>
+How to form correct <A
+HREF="../../saol/vars/index.html#numbers">numbers</A>.  How to form
+correct <A HREF="../../saol/vars/index.html#names">names</A> for
+variables and other elements in SAOL, including
+<A HREF="../../opcodes/user/index.html#header">user-defined opcodes</A>.
+
+<H2>Bus Rules</H2>
+
+<P>
+How to determine the width of the <A
+HREF="../../saol/bus/index.html#output">audio input port</A> and the
+<A HREF="../../saol/bus/index.html#send">audio output port</A> of an
+instrument. How to determine the <A
+HREF="../../saol/bus/index.html#determine">execution order</A> of the
+instruments in a SAOL program, and how to use this ordering to
+determine the width of <A
+HREF="../../saol/bus/index.html#apply">user-defined buses</A>.
+
+<H2>Decoder Execution Order</H2>
+
+<P>
+Table <A HREF="../../tut/index.html#trace">introducing</A> the
+execution cycle (i-pass, k-pass, and a-pass code synchronized to
+decoder k-cycles and a-cycles).  How to determine the <A
+HREF="../../saol/bus/index.html#determine">execution order</A> of the
+instruments in a SAOL program.  <A
+HREF="../../saol/bus/index.html#apply">Introduction</A> and <A
+HREF="../../control/saolc/index.html#order">detailed description</A>
+of how this ordering impacts the execution of a SAOL program.
+
+<H2>Opcode Call Semantics</H2>
+
+<P>
+The calling semantics for core opcodes are <A
+HREF="../../saol/simple/index.html#opcode">introduced</A> early in the
+book, and <A
+HREF="../../saol/simple/index.html#summary">summarized</A> in a table.
+Near the end of the book, we explain the calling semantics for <A
+HREF="../../opcodes/user/index.html#calls">user-defined</A> opcodes.
+Oparray calling are <A
+HREF="../../opcodes/filter/index.html#frac">introduced</A> as part of
+the <B>fracdelay</b> core opcode description. The special semantics of
+<A HREF="../../opcodes/sproc/index.html#special">specialop</A> opcodes
+are introduced during the discussion of the 5 core opcodes that are
+<B>specialop</B>.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Opcode Definitions</H2>
+
+<P>
+Rules for legal user-defined opcodes that result in useful
+computation are divided into rules for declaring useful
+<A
+HREF="../../opcodes/user/index.html#header">parameters and
+variables</A> and rules for <A
+HREF="../../opcodes/user/index.html#block">statement blocks</A>.
+
+
+<H2>Parameter Lists</H2>
+
+<P>
+How to form correct parameter lists for <A
+HREF="../../saol/vars/index.html#preamble">instruments</A> and <A
+HREF="../../opcodes/user/index.html#header">user-defined opcodes</A>.
+
+<H2>Pitch Types</H2>
+
+<P>
+A <A HREF="../../saol/simple/index.html#pitch">conversion table</A>
+shows the four ways to represent pitch in SAOL.
+
+<H2>Precedence</H2>
+
+<P>
+The <A HREF="../../saol/exstat/index.html#logic">precedence</A> table
+for SAOL expressions. See also this <A
+HREF="../../saol/exstat/index.html#arith">explanation</A> of the
+concept of precedence.
+
+<H2>Statement Semantics</H2>
+
+<P>
+Rate semantics for <A
+HREF="../../saol/exstat/index.html#assign">assignment </A>, <A
+HREF="../../saol/exstat/index.html#if">if and if-else</A>, and <A
+HREF="../../saol/exstat/index.html#while">while</A> statements, as
+well as a <A HREF="../../saol/exstat/index.html#summary">summary
+table</A> for these three statements. Rate and width semantics for the
+bus and audio <A HREF="../../saol/bus/index.html#output">output</A>,
+<A HREF="../../saol/bus/index.html#ancillary">outbus</A>, and <A
+HREF="../../saol/bus/index.html#ancillary">spatialize</A> statements.
+Rate and width semantics of control-oriented <A
+HREF="../../control/saolc/index.html#instr">instr</A>, <A
+HREF="../../control/saolc/index.html#extend">extend</A>, and <A
+HREF="../../control/saolc/index.html#turnoff">turnoff</A> statements.
+The user-defined opcode chapter explains the rate and width semantics
+of the
+<A
+HREF="../../opcodes/user/index.html#block">return</A> statement.
+
+
+
+
+<pre>
+
+</pre>
+
+<B><P>
+Appendix G:</B>
+</B>
+<A HREF="../cor1/index.html">COR 1 SAOL changes</A>
+
+</TD>
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+appendices</A>-><STRONG>language rules</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>
+
+

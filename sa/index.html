@@ -1,0 +1,208 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>MPEG 4 Structured Audio -- Developer Tools</TITLE>
+<META name="keywords" content="John Lazzaro, John Lazaro, Jon Lazzaro,
+Jon Lazaro, John Lazarro, Jon Lazarro, John Lazzarro, Jon Lazzarro,
+John Lazzarow, John Wawrzynek, MPEG, MPEG 4, MPEG-4, MP4, MPEG-4
+Structured Audio, MP4, SA, MP4-SA, MP4/SA, computational audio,
+structured audio, MIDI files, audio compression, music synthesis,
+computer music, DSP, digital signal processing, audio scripting, audio
+signal processing, sound signal processing, digital audio workstation,
+digital audio, physical models, WAV, AIFF, audio signal processing,
+digital signal processing, reverb, chorus, flange, sampling, hip-hop,
+tracker, mod tracker, content creation">
+<META name="description" content="MPEG-4 Structured Audio tools and
+documentation for content creators and application developers, featuring
+the Sfront MP4-to-C translator. Tools for audio scripting, audio signal
+processing, digital signal processing, DSP, DSP education.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL><STRONG>mp4-sa</STRONG></SMALL></FONT>
+</TD>
+</TR>
+</TABLE>
+
+<H1>MPEG-4 Structured Audio: Developer Tools</H1>
+<H3>By <A HREF="../index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek</A>, <A HREF="http://www.cs.berkeley.edu/">
+CS Division</A>, <A HREF="http://www.berkeley.edu/">UC Berkeley.</A></H3>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>MPEG-4 Structured Audio</H2>
+
+<P>
+MPEG-4 Structured Audio (MP4-SA) is an ISO/IEC standard (edited by <A
+HREF="http://www.linkedin.com/in/edsmedia">Eric Scheirer</A>) that
+specifies sound not as sampled data, but as a computer program that
+generates audio when run. Computer scientists call this approach
+Kolmogorov encoding.
+
+<P>
+MP4-SA combines a powerful language for computing audio (SAOL,
+pronounced "sail") and a musical score language (SASL, pronounced
+"sassil") with legacy support for the MIDI format. MP4-SA also defines
+an efficient encoding of these elements into a binary file
+format (MP4-SA) suitable for transmission and storage.
+
+<P>
+MP4-SA is different from standards like the MIDI File Format, because it
+includes not only the notes to play, but the method for turning
+notes into sound. As a result, MP4-SA is normative -- an MP4-SA file
+will sound identical when converted by any compliant decoder. 
+
+<P>
+If the instrument models use algorithmic synthesis instead of
+wavetables, an MP4-SA file can describe realistic musical performances
+without using any audio data -- just score data, mixdown cues, and DSP
+algorithms. In this case, the MP4-SA file is about the same size as a
+MIDI File, but is a lossless encoding of the audio heard at
+mixdown. Just like a WAV file -- but 50 to 1000 times smaller!
+
+<H2>An Example</H2>
+
+<P>
+This <A HREF="book/simple/index.html">example</A> shows how to create
+audio content in MPEG-4 Structured Audio.  It shows a SAOL and a SASL
+program that generates a tone burst sound. Audio output for the
+example was created using sfront, a translator that converts MP4-SA
+files into efficient C programs that generate audio.
+
+
+</TD>
+<TD WIDTH="40%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>The MP4-SA Book</H2>
+
+<P>
+We wrote an online <A HREF="book/index.html">book</A> to show
+how to create audio content for MPEG 4 Structured Audio.
+
+<P>
+The book includes a <A HREF="book/tut/index.html">tutorial
+introduction</A> and sections on the <A
+HREF="book/saol/index.html">SAOL language</A>, SASL and MIDI <A
+HREF="book/control/index.html">instrument control</A>, and <A
+HREF="book/opcodes/index.html">advanced opcodes</A>.
+
+<P>
+Book <A HREF="book/append/index.html">appendices</A> list the core
+opcodes (<A HREF="book/append/corea/index.html">alphabetically</A> and
+by <A HREF="book/append/coref/index.html">functional type</A>), <A
+HREF="book/append/stnames/index.html">standard names</A>, <A
+HREF="book/append/wave/index.html">wavetable generators</A>, <A
+HREF="book/append/lang/index.html">language elements</A> and <A
+HREF="book/append/rules/index.html">language semantic rules</A>.
+
+
+<H2><TT>sfront</TT></H2>
+
+<P>
+<A HREF="sfman/user/install/index.html#download">Download</A> the
+latest version of sfront, a translator that converts MP4-SA files into
+efficient C programs that generate audio for 
+<A HREF="sfman/user/use/index.html">rendering</A>, 
+<A HREF="sfman/user/rtime/index.html">interactive</A> 
+and <A HREF="sfman/user/rtime/index.html#plug-in">plug-in</A> applications.
+
+<P>
+Sfront is written by John Lazzaro and John Wawrzynek, and is freely
+redistributable under the terms of the BSD license (without the
+advertising clause).
+
+<P>
+The sfront <A HREF="sfman/index.html">reference manual</A> describes
+how to <A HREF="sfman/user/install/index.html">install</A> and <A
+HREF="sfman/user/use/index.html">use</A> the program.  Developers can learn
+how to add <A HREF="sfman/devel/cdriver/intro/index.html">control</A> and
+<A HREF="sfman/devel/adriver/index.html">audio</A> drivers to
+sfront, as well as learn about the internals of sfront and the C
+programs it creates.
+
+
+<H2>Additional Resources</H2>
+
+<P>
+<A HREF="video/index.html">View</A>
+our multimedia presentation on Structured Audio, <A
+HREF="pubs/index.html">read</A> our papers on the topic, and see
+related work on <A HREF="../nmp/">
+Network Musical Performance</A> and <A HREF="../rtpmidi/">RTP MIDI</A>.
+
+<P>
+Pick up the MPEG <A
+HREF="saolc.tar.gz"> saolc</A>
+reference software.  Surf the <A
+HREF="http://web.media.mit.edu/~eds/mpeg4/">MIT Structured Audio</A>
+site, and other <A HREF="etc/links/index.html">websites</A> that link
+to us.
+
+</TD>
+
+<TD WIDTH="10%" VALIGN=top BGCOLOR="#FFFFCC">
+
+<P>
+<H2><center>Links</center></H2>
+
+<center><A HREF="book/simple/index.html">Introductory Example</A></center><br>
+
+<H3><center>*</center></H3>
+
+<P>
+<H4><center><A HREF="book/index.html">The MP4-SA Book</A></center></H4>
+
+<center><A HREF="book/tut/index.html">Tutorial Introduction</A></center><br>
+<center><A HREF="book/saol/index.html">SAOL</A></center><br>
+<center><A HREF="book/control/index.html">SASL and MIDI</A></center><br>
+<center><A HREF="book/opcodes/index.html">Advanced Opcodes</A></center><br>
+<center><A HREF="book/special/index.html">Special Topics</A></center><br>
+<center><A HREF="book/append/index.html">Appendices</A></center><br>
+
+<P>
+<H3><center>*</center></H3>
+
+<P>
+<center><A HREF="sfman/index.html">sfront Reference Manual</A></center><br>
+
+<P>
+<center><A HREF="sfman/user/install/index.html#download">Download sfront&nbsp 
+0.99</center>
+<center>8/31/11</A></center>
+
+<P>
+<H3><center>*</center></H3>
+
+<P>
+<center><A HREF="../nmp/">
+Network Musical Performance</A></center>
+</TD>
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL><STRONG>mp4-sa</STRONG></SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="copyright/index.html">Copyright 2000 John Lazzaro and John
+Wawrzynek.</A> 
+
+</BODY>
+</HTML>

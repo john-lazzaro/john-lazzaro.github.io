@@ -1,0 +1,787 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part IV/1: Sound Synthesis Core Opcodes</TITLE>
+<META name="keywords" content="MP4-SA, core, opcodes, core opcodes, 
+kline, aline, kexpon, aexpon, kphasor, aphasor, pluck, buzz, grain">
+<META name="description" content="Core opcodes specialized for sound
+synthesis. These core opcodes are a part of the SAOL language of MPEG
+4 Structured Audio.">
+
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+advanced opcodes</A>-><STRONG>sound synthesis core opcodes</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part IV/1: Sound Synthesis Core Opcodes</H1>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="65%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#env">Envelope Generators</A>.</B> Linear and exponential 
+waveforms.
+<LI>
+<B><A HREF="#buzz">Subtractive Synthesis</A>.</B> Alias-free pulse
+waveforms.
+<LI>
+<B><A HREF="#pluck">Plucked String Synthesis</A>.</B> Karplus-Strong
+synthesis.
+<LI>
+<B><A HREF="#grain">Granular Synthesis</A>.</B> Temporal wavetable
+method.
+<LI>
+<B><A HREF="#phasor">Low-Level Opcodes</A>.</B> Phase pointer opcodes.
+</UL>
+</TD>
+
+<TD WIDTH="35%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Core Opcodes:</H2>
+
+<P><B>
+<A HREF="#env">aexpon</A>
+<A HREF="#env">aline</A>
+<A HREF="#phasor">aphasor</A>
+<A HREF="#buzz">buzz</A>
+<A HREF="#grain">grain</A>
+<A HREF="#env">kexpon</A>
+<A HREF="#env">kline</A>
+<A HREF="#phasor">kphasor</A>
+<A HREF="#pluck">pluck</A>
+
+</B>
+
+</TD>
+</TR>
+
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+In this section, we describe core opcodes that generate signal
+waveforms. Each section describes a different type of signal
+generation algorithm.
+
+<P>
+The opcodes in this chapter share some general properties.  When
+called, each opcode returns the next sample in the waveform. Each
+opcode assumes that it is being called once per a-pass (or for k-rate
+opcodes, once per k-pass).
+
+<P>
+All opcodes in this chapter have internal state variables, that keep
+track of the generative process that creates the waveform. Like all
+opcodes, this state is associated with a single syntactic opcode call.
+
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="env">Envelope Generators</A></H2>
+
+<P>
+Four core opcodes (<B>kline</B>, <B>aline</B>, <B>kexpon</B> and
+<B>aexpon</B>) generate piece-wise waveforms suitable for
+envelopes. See the right panel (below) for opcode headers.
+
+<P>
+These opcodes provide an alternative to using <A
+HREF="../../saol/wave/index.html#playback">table playback</A> opcodes
+to play <A HREF="../../saol/wave/index.html#env">envelope
+wavetables</A>, as described in Part II/4.
+
+
+<P>
+The envelope opcodes return the current value of the envelope
+signal. When the envelope waveform is completed, the opcodes return
+zero for all subsequent calls.
+
+<P>
+Because these opcodes return zero after envelope completion, an
+audible "end-click" may result for envelope waveforms that do not end
+close to zero. To handle this issue, always specify envelopes that end
+close to zero, and shift and scale the opcode return value to add a DC
+bias if needed.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<pre> </pre>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>Linear Envelopes</H4>
+
+<P>
+The <B>kline</B> and <B>aline</B> opcodes generate piecewise
+linear envelopes at the k-rate and a-rate, respectively. 
+
+<P>
+These opcodes specify the endpoint values for each linear segment (for
+the first segment, <TT>x1</TT> and <TT>x2</TT>) and the amount of time
+(in seconds) it takes to traverse from one endpoint to the next (for
+the first segment, <TT>dur1</TT>).
+
+<P>
+The <B>kline</B> and <B>aline</B> opcodes must have at least one
+segment. The parameter list must end with an endpoint value, and
+all durations must be greater or equal to zero.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>Linear Envelopes</H2>
+<TT>
+<pre>
+
+aopcode aline(ivar x1, ivar dur1, 
+              ivar x2 [,ivar dur2, 
+              ivar x3 ...])
+
+kopcode kline(ivar x1, ivar dur1, 
+              ivar x2 [,ivar dur2, 
+              ivar x3 ...])
+
+
+
+Functional form for first segment:
+
+ x1 + (x2 - x1)*(t/dur1)
+
+where t is time, with value 0 at the
+time of the first call. on subsequent
+calls, t is incremented by 1/arate
+(for aline) or 1/krate (for kline).
+
+
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>Exponential Envelopes</H4>
+
+<P>
+The <B>kexpon</B> and <B>aexpon</B> opcodes generate piecewise
+exponential envelopes at the k-rate and a-rate, respectively. 
+
+<P>
+These opcodes specify the endpoint values for the each exponential
+segment (for the first segment, <TT>x1</TT> and <TT>x2</TT>) and the
+amount of time (in seconds) it takes to traverse from one endpoint to
+the next (for the first segment, <TT>dur1</TT>).
+
+<P>
+See the right panel for the functional form of the exponential
+segments.
+
+<P>
+The <B>kexpon</B> and <B>aexpon</B> opcodes must have at least one
+segment. The parameter list must end with an endpoint value. All
+durations must be greater or equal to zero. All endpoint values
+must share the same sign, and no endpoint value may be zero.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Exponential Envelopes</H2>
+<TT>
+<pre>
+
+aopcode aexpon(ivar x1, ivar dur1, 
+              ivar x2 [,ivar dur2, 
+              ivar x3 ...])
+
+kopcode kexpon(ivar x1, ivar dur1, 
+              ivar x2 [,ivar dur2, 
+              ivar x3 ...])
+
+
+
+Functional form for first segment:
+
+ x1*((x2/x1)^(t/dur1))
+
+where t is time, with value 0 at the
+time of the first call. on subsequent
+calls, t is incremented by 1/arate
+(for aexpon) or 1/krate (for kexpon).
+
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="buzz">Subtractive Synthesis</A></H2>
+
+<P>
+In Part II/4, we <A
+HREF="../../saol/wave/index.html#period">explain</A> the pitfalls of
+directly generating the square and pulse waveforms popular in
+subtractive synthesis, and describe the <A
+HREF="../../saol/wave/index.html#period">buzz</A> core wavetable
+generator for creating alias-free pulse waveforms.
+
+<P>
+The right panel shows the <B>buzz</B> core opcode, that returns
+alias-free pulse waveforms using the same algorithm as the
+<B>buzz</B> core wavetable generator. 
+
+<P>
+Note that the <TT>num</TT>, <TT>low</TT>, and <TT>r</TT> parameters
+are k-rate. By temporally modulating these parameters, the programmer
+can produce complex time-varying spectra. This capability differentiates
+the <B>buzz</B> core opcode from the <B>buzz</B> core wavetable generator. 
+
+<P>
+The algorithm description of the right panel introduces the concept of
+a phase pointer, which we will use in several other core opcodes. A
+phase pointer cycles between zero and one, in increments sized by
+frequency parameter to the opcode (in this case <TT>cps</TT>).
+Negative values of <TT>cps</TT> act to decrement the phase pointer.
+
+<P>
+The <B>buzz</B> core opcode computes cosine partials up to the Nyquist
+limit, if the <TT>num</TT> parameter is specified as a negative
+number.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>Band-Limited Pulse Generation</H2>
+<TT>
+<pre>
+
+aopcode buzz(asig cps, ksig num,
+             ksig low,  ksig r)
+
+
+algorithm:
+
+phase pointer p initialized to
+zero during the first call to 
+buzz, and incremented by cps/arate
+on subsequent calls. if p is 
+greater that 1 after an increment,
+p is set to its fractional value.
+
+
+given p, buzz returns:
+
+cos(2*pi*(low+1)*p) +
+r*cos(2*pi*(low+2)*p) +
+r*r*cos(2*pi*(low+3)*p) +
+... +
+r^(num)*cos(2*pi*(low+num+1)*p)
+
+scaled by the value
+
+(1 - abs(r))/(1 - abs(r^(num+1)))
+
+or if abs(r) is 1,
+
+1/(num + 1)
+
+---
+
+Nyquist scaling:
+
+if num <= 0, then:
+
+   num = - low + arate/2/cps
+
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="pluck">Plucked String Synthesis</A></H2>
+
+<P>
+Several musical instruments use plucked strings to generate
+sound.  The core opcode <B>pluck</B> models the sound of plucked
+strings, using a simple version of the Karplus-Strong algorithm. The
+right panel shows the header syntax for this opcode.
+
+<H4>Buffer Playback</H4>
+
+<P>
+The <B>pluck</B> opcode shares several characteristics with the table playback
+opcode <A HREF="../../saol/wave/index.html#playback"><B>oscil</B></A>
+described in Part II/4. 
+
+<UL> 
+<LI> 
+It uses a buffer of samples to represent a single cycle of a
+waveform.
+<LI>
+It generates a signal by
+playing out the buffer repeatedly at a frequency set by the a-rate
+parameter <TT>cps</TT>. 
+<LI>
+It returns an interpolated sample value from
+the buffer with each opcode call, using the interpolation method set
+by the global parameter <B>interp</B>.
+</UL>
+
+<P>
+However, while the <B>oscil</B> opcode plays out values from a
+wavetable, the <B>pluck</B> opcode plays out values from an internal
+buffer, whose values are updated at regular intervals. The update
+algorithm creates the spectral characteristics of a plucked string
+decay.
+
+<H4>Buffer Management</H4>
+
+<P>
+When <B>pluck</B> is called for the first time, it creates an internal
+buffer that holds the number of samples specified by the parameter
+<TT>buflen</TT>. 
+
+<P>
+The internal buffer is initialized with the first <TT>buflen</TT>
+samples of the wavetable parameter <TT>init</TT>.  If <TT>init</TT>
+has fewer samples than <TT>buflen</TT>, then the internal buffer is
+initialized with multiple cycles of <TT>init</TT>.
+
+<P>
+At regular intervals (set by the <TT>smoothperiod</TT> parameter)
+the internal buffer is replaced with a smoothed version of the
+buffer. The right panel shows the exact filter, which uses the
+parameter <TT>atten</TT> as a scaling term. 
+
+<P>
+Qualitatively, each filter pass reduces the high-frequency content of
+the waveform, modeling the spectral decay characteristic of a plucked
+string. 
+
+<P>
+Note that modulating the k-rate <TT>atten</TT> and
+<TT>smoothperiod</TT> parameter alters the spectral evolution of the
+sound.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><TT>pluck</TT></H2>
+<TT>
+<pre>
+
+aopcode pluck(asig cps, ivar buflen
+              table init, ksig atten,
+              ksig smoothperiod)
+
+Algorithm:
+
+
+Initialization:
+
+Upon first call to pluck, an internal
+buffer is created with buflen samples.
+
+The wavetable init (with length tlen)
+is used to initialize the buffer. 
+
+If buflen is less than tlen, the first
+buflen samples of init are used to
+initialize the table.
+
+If buflen is greater than tlen, copies
+of init that start at position 0, tlen,
+2*tlen ... of the internal buffer are
+used to initialize the buffer.
+
+
+Update:
+
+On call number (smoothperiod, 
+2*smoothperiod, 3*smoothperiod, 
+ect.) to pluck, a new buffer
+(also of length buflen) replaces
+the old buffer.
+
+The sample in position x of the
+new buffer has the value
+
+atten*0.2*(old[(x-2) % buflen] + 
+           old[(x-1) % buflen] +
+           old[(x) % buflen]   +
+           old[(x+1) % buflen] +
+           old[(x+2) % buflen])
+
+where % is the integer modulo 
+operator (circular wrap around),
+and old[] is the old buffer.
+
+Playback
+
+Each call returns an interpolated 
+sample value from the current 
+buffer, under the control of 
+cps, using the semantics of the
+wavetable playback opcode <A HREF="../../saol/wave/index.html#playback">oscil</A>.
+
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="grain">Granular Synthesis</A></H2>
+
+<P>
+Certain natural sounds are composed of many copies of a prototype
+sound.  For example, the sound of a rainstorm is the sum of the sound
+of individual raindrops landing on a surface.
+
+<P>
+Granular synthesis methods model these sounds in a direct way, by
+generating waveforms for each individual event (or <I>grain</I>), and
+adding the waveforms together to produce an ensemble sound.
+
+<P>
+The core opcode <B>grain</B> implements granular synthesis, using
+wavetable playback as the synthesis technique for the grain. The
+right panel shows the header syntax for the opcode.
+
+<P>
+The opcode consists of two parts, a control engine for launching
+grain events, and a synthesis engine for generating the sound for a
+grain.
+
+<H4>Control Engine</H4>
+
+<P>
+The job of the control engine is to launch new grains, under the
+influence of k-rate parameters <TT>density</TT> and
+<TT>time</TT>. Once launched, grains live for a certain period of time
+and then die, without intervention from the control engine.
+
+<P>
+The <TT>density</TT> parameter, with units of Hz, controls how many
+grains per second are launched. In the algorithm description, we refer
+to the density period, which is the reciprocal of the <TT>density</TT>
+parameter.
+
+<P>
+During the first call to <B>grain</B>, the internal density clock is
+set to zero, and on subsequent calls it is incremented by the sampling
+period. Whenever the density clock exceeds the density period, the
+density clock is reset to zero.
+
+<P>
+During an opcode call that results in a reset to zero, if the
+<TT>time</TT> parameter is less than the density period, then a new
+grain is launched, after waiting <TT>time</TT> seconds. If
+<TT>time</TT> is greater than or equal to the density period, no grain
+is launched.
+
+<P>
+When a launch occurs, the current values of k-rate parameters 
+<TT>freq</TT>, <TT>amp</TT>, <TT>dur</TT>, and <TT>phase</TT>
+are used to initialize the new grain, as we describe in the
+next subsection. 
+
+<H4>Synthesis Engine</H4>
+
+<P>
+A grain lasts <TT>dur</TT> seconds, and is then destroyed. During this
+time period, the table parameter <TT>wave</TT> is played back to form
+the basic signal for the grain.
+
+<P>
+The properties of the <TT>wave</TT> parameter are used to determine
+the playback algorithm. If <TT>wave</TT> has:
+
+<UL>
+<LI>
+both its sampling rate and base frequency parameters set (by using the
+table <A HREF="../../saol/wave/index.html#lowcore">low-level</A> core
+opcodes) the looping part of playback algorithm of the opcode <A
+HREF="../../saol/wave/index.html#playback"><B>loscil</B></A> is used.
+<LI>
+its sampling rate but not its base frequency parameters set, the
+playback algorithm of the opcode <A
+HREF="../../saol/wave/index.html#playback"><B>doscil</B></A> is used.
+<LI>
+neither its sampling rate or its base frequency parameters set, the
+playback algorithm of the opcode <A
+HREF="../../saol/wave/index.html#playback"><B>oscil</B></A> is used.
+
+</UL>
+
+<P>
+If the <B>doscil</B> or <B>oscil</B> algorithm is used, the
+<TT>freq</TT> parameter sets the playback frequency of the table.
+
+<P>
+For all algorithms, the <TT>phase</TT> parameter sets the position in
+<TT>wave</TT> to start table playback, where <TT>phase</TT> is
+in the range <TT>[0.0:1.0]</TT>. The starting sample playback
+position is the value of <TT>phase</TT> scaled by the length of the table.
+
+<P>
+The basic signal of the grain is multiplied by the signal 
+produced by playing back the <TT>env</TT> table with the 
+algorithm of the <B>doscil</B> table. The sample rate
+for the <TT>env</TT> table is altered so that envelope
+playback takes  <TT>dur</TT> seconds.
+
+<P>
+Finally, the grain signal is multiplied by <TT>amp</TT> to
+produce the final signal for the grain. The signals of
+all active grains are summed, and this sample value is
+returned by the <B>grain</B> core opcode.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><TT>grain</TT></H2>
+<TT>
+<pre>
+
+aopcode grain(table wave, table env,
+              ksig density, 
+              ksig freq, ksig amp,
+              ksig dur, ksig time,
+              ksig phase)
+
+
+parameters:
+
+wave: wavetable used to generate the
+basic signal of grains.
+
+env: wavetable used to generate the
+envelope shape for grains.
+
+density: frequency of grain generation,
+in Hertz.
+
+freq: playback frequency of a grain 
+launched during the call to the
+grain opcode. only used if the
+wave table parameter indicates
+loscil or oscil playback (see
+left panel).
+
+amp: amplitude scaling of a grain 
+launched during the call to the
+grain opcode.
+
+dur: lifetime, in seconds, for a
+grain launched during the call
+to the grain opcode.
+
+time: delay time, in seconds, for
+launching a new grain.
+
+phase: sets the starting index in
+the wave table parameter, for a
+grain during the call to the
+grain opcode. see left panel
+for details.
+
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="phasor">Low-Level Opcodes</A></H2>
+
+<P>
+Several opcodes in this section use the phase pointer concept to
+simplify their implementation.
+
+<P>
+The <B>aphasor</B> and <B>kphasor</B> opcodes generate a phase pointer
+waveform given a frequency value, at the a-rate and k-rate
+respectively. SAOL programmers may use these opcodes in their own
+sound generation algorithms.
+
+<P>
+The right panel shows the header syntax and exact algorithm
+for these opcodes.
+
+<P>
+<B>Next section:</B>
+<A HREF="../filter/index.html">Part IV/2: Filter Core Opcodes</A></H2>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>Phase Loops</H2>
+
+<TT>
+<pre>
+
+aopcode aphasor(asig cps)
+
+kopcode kphasor(ksig cps)
+
+
+algorithm:
+
+phase pointer p initialized to
+zero during the first call to 
+buzz, and incremented by cps/arate
+(for aphasor) or cps/krate (for
+kphasor) on subsequent calls. if p is 
+greater that 1 after an increment,
+p is set to its fractional value.
+
+negative cps values are permitted,
+and act to decrement p.
+
+opcode returns phase pointer p.
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+advanced opcodes</A>-><STRONG>sound synthesis core opcodes</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro
+and John Wawrzynek.</A>
+
+
+</BODY>
+</HTML>

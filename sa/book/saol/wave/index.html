@@ -1,0 +1,2096 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part II/4: SAOL Wavetables</TITLE>
+<META name="keywords" content="MP4-SA, wavetables, table, tablemap,
+oscil, loscil, koscil, doscil, tableread, tablewrite, ftlen, ftloop,
+ftloopend, ftsr, ftbasecps, ftsetloop, ftsetend, ftsetbase, ftsetsr,
+samples, sample playback, sampler, SAOL, MP4, buzz, concat, cubicseg,
+data, empty, expseg, harm, harm_phase, lineseg, periodic, polynomial,
+random, sample, spline, step, window">
+<META name="description" content="Using wavetables in SAOL: the table
+and tablemap variable types, wavetable generators, core opcodes for
+tables, global parameters for tables, and sfront table support.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+SAOL</A>-><STRONG>wavetables</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part II/4: SAOL Wavetables </H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="60%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF=#intro>Introduction</A>.</B>
+<LI>
+<B><A HREF=#example>An Example</A>.</B>
+Rewriting a tutorial example with wavetables.
+<LI>
+<B><A HREF=#decl>Declarations</A>.</B> Declaring tables and tablemaps.
+<LI>
+<B><A HREF=#period>Periodic Waveforms</A>.</B>
+Tables for additive and subtractive synthesis.
+<LI>
+<B><A HREF=#env>Envelope Waveforms</A>.</B> Piece-wise wavetable
+generators.
+<LI>
+<B><A HREF=#sample>Sound Files</A>.</B> Reading audio files into
+wavetables.
+<LI>
+<B><A HREF=#playback>Table Playback</A>.</B> Core opcodes for table
+readout.
+<LI>
+<B><A HREF=#lowcore>Low-Level Core Opcodes</A>.</B> Accessing table structures.
+<LI>
+<B><A HREF=#lowgen>Low-Level Generators</A>.</B> Useful wavetable
+initializations.
+</UL>
+</TD>
+<TD WIDTH="40%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<B>
+<H2>Core Opcodes:</H2>
+
+<P>
+<A HREF="#playback">doscil</A>
+<A HREF="#lowcore">ftbasecps</A>
+<A HREF="#lowcore">ftlen</A>
+<A HREF="#lowcore">ftloop</A>
+<A HREF="#lowcore">ftloopend</A>
+<A HREF="#lowcore">ftsetsr</A>
+<A HREF="#lowcore">ftsetbase</A>
+<A HREF="#lowcore">ftsetloop</A>
+<A HREF="#lowcore">ftsetend</A>
+<A HREF="#lowcore">ftsr</A>
+<A HREF="#playback">koscil</A>
+<A HREF="#playback">loscil</A>
+<A HREF="#playback">oscil</A>
+<A HREF="#speedt">speedt</A>
+<A HREF="#lowcore">tableread</A>
+<A HREF="#lowcore">tablewrite</A>
+
+
+<H2>Wavetable Generators:</H2>
+
+<P>
+<A HREF="#period">buzz</A>
+<A HREF="#lowgen">concat</A>
+<A HREF="#env">cubicseg</A>
+<A HREF="#lowgen">data</A>
+<A HREF="#lowgen">empty</A>
+<A HREF="#env">expseg</A>
+<A HREF="#period">harm</A>
+<A HREF="#period">harm_phase</A>
+<A HREF="#env">lineseg</A>
+<A HREF="#period">periodic</A>
+<A HREF="#lowgen">polynomial</A>
+<A HREF="#lowgen">random</A>
+<A HREF="#sample">sample</A>
+<A HREF="#env">spline</A>
+<A HREF="#env">step</A>
+<A HREF="#lowgen">window</A>
+
+</B>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+Sound generation methods often involve the playback of 
+audio samples from large data buffers. 
+
+<P>
+These buffers may contain computed waveforms, digital recordings of
+natural sounds, or may be a scratch pad memory for dynamic synthesis.
+
+<P>
+The SAOL language includes the <B>table</B> data type for implementing
+wavetable buffers.  A wavetable stores a sample array and a header of
+related information (including table length, sample rate, and loop
+points) in one structure.
+
+<P>
+A set of core opcodes support wavetable playback.  Other core opcodes
+read and write parts of the wavetable data structure.  Wavetable
+<I>generators</I> may be used to initialize wavetable values at
+declaration.
+
+<P>
+We begin this chapter with an example that introduces wavetable
+operation. We then detail the <B>table</B> declaration syntax, and
+describe wavetable generators and core opcodes for the most common
+table applications.
+
+<P>
+We conclude with descriptions of the wavetable core opcodes and
+generators that are useful for programming at a low level of
+abstraction.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="example">An Example</A></H2>
+
+<P>
+The <A HREF="../../tut/index.html#melody">second example</A> in the
+tutorial in Part I uses a shaped sine wave instrument model.  In the
+tutorial example, the sine wave is computed used an iterative
+algorithm and the envelope is computed using a core opcode.
+
+<P>
+The right panel shows another implementation of this instrument, that
+uses wavetables to generate the sine wave and the envelope. We use
+this example to introduce the basic usage of the <B>table</B> data
+type.
+
+<P>
+The wavetable used to generate the sinusoid, <TT>cyc</TT>, is declared
+as a global variable, and imported into the instrument <TT>vtone</TT>.
+
+<P>
+A <B>table</B> declaration includes instructions for setting the
+initial values of the table. In the declaration for <TT>cyc</TT>, the
+wavetable generator <B>harm</B> initializes the 128-sample wavetable
+with one cycle of a sine wave.
+
+<P>
+The wavetable <TT>shape</TT> holds the envelope for the instrument,
+and is declared in <TT>vtone</TT>.  The <B>lineseg</B> generator,
+specialized for creating piece-wise linear envelopes, initializes
+<TT>shape</TT>.
+
+<P>
+The <TT>shape</TT> declaration shows that the parameters of a
+generator may be expressions. In this case, we use the standard name
+<B>dur</B> to customize the envelope to match the length of the note.
+
+<P>
+The code block for <TT>vtone</TT> is very simple. One i-pass statement
+converts the MIDI note number parameter into a frequency.  One k-pass
+statement uses the core opcode <B>ftsetsr</B> to set the sample rate
+of the envelope wavetable.
+
+<P>
+The real work is done in the a-pass. Two core opcodes, <B>doscil</B>
+and <B>oscil</B>, play back the envelope and sine wave tables. The
+return values of these opcodes are multiplied to create the final
+waveform, which is sent to the <B>output_bus</B>.
+
+<P>
+The a-rate core opcode <B>doscil</B> plays a table back once.  The
+opcode does sample rate conversion between the sample rate of the
+table and the <B>global</B> sample rate.
+
+<P>
+The a-rate core opcode <B>oscil</B> plays a table back in a loop,
+treating the table as a single cycle of a periodic waveform.
+
+<P>
+By default, the table playback core opcodes uses linear interpolation.
+
+<P>
+We used the SASL file from the <A HREF="../../tut/index.html#melody">
+second tutorial example</A> to drive the <TT>vtone</TT> instrument. If 
+you are connected to the Internet, and if your
+web browser supports WAV file playback, you can click <A
+HREF="http://john-lazzaro.github.io/sa/book/saol/wave/examples/tsine/output.wav">here</A> to listen to audio output
+created using <TT>sfront</TT>.
+
+<P> 
+We also used sfront to create a binary encoding of the SAOL and
+SASL file for this performance. This MP4 file is 399 bytes. 
+
+<P> 
+Note that this file is small, even though the tables we used for
+the envelopes are large, because only the wavetable generator parameters
+are stored in the file. The initial values for the tables themselves
+are computed as part of the file decoding process.
+
+<P>
+This example shows how <B>table</B> data types are used in SAOL. In
+the rest of this chapter, we describe <B>table</B> declarations,
+applications-oriented wavetable generators, playback core opcodes, and
+low-level core opcodes and generators in detail.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><A HREF="examples/tsine/tsine.saol">tsine.saol</A></H2>
+<pre>
+global {
+
+  table cyc(harm, // sine series
+	    128,  // 128 samples long
+	    1     // f1 weight
+	    );    // no partials
+
+  srate 44100;   
+
+}
+
+//
+// instr vtone
+// table-driven version
+// of tutorial example 2
+//
+
+instr vtone (num) {
+
+  // declarations
+
+  // sinewave global table
+
+  imports exports table cyc; 
+ 
+  // envelope table
+  //
+  // piecewise linear
+  // shape
+  //
+  // 0.3 second attack 
+  // 0.2 second release
+  
+  table shape(lineseg,
+
+  // fixed table length: 128 elements
+
+  128, 
+
+  // (x0, y0) is (0,0)
+
+  0, 0,      
+
+  // end of attack segment: (x1, y1)
+
+  127*(((dur < 0.5) ? 
+       dur/2 : 0.3)/dur), 1,
+
+  // end of sustain segment: (x2, y2)
+
+  127*(((dur < 0.5) ? 
+       dur/2 : (dur - 0.2))/dur), 1,
+
+  // end of release segment: (x3, y3)
+
+  127, 0);
+
+  ivar freq; // frequency of sine
+
+  asig y;    // voice output
+
+
+  // **********************
+  // computed during i-pass
+  // **********************
+
+  // turns MIDI number into 
+  // wavetable frequency
+
+  freq = cpsmidi(num);
+  
+  // **********************
+  // computed during k-pass
+  // **********************
+
+  if (itime == 0) // first k-pass only
+    {
+      ftsetsr(shape, 128/dur);
+    }
+
+  // **********************
+  // computed during a-pass
+  // **********************
+
+  y = doscil(shape)*oscil(cyc, freq);
+  
+  output(y);
+
+}
+</pre>
+
+<P>
+<pre>
+<B><A HREF="http://john-lazzaro.github.io/sa/book/saol/wave/examples/tsine/output.wav">output.wav</A></B> [464 Kbytes, on the Web]
+</pre>
+
+<P>
+<pre>
+<B>tsine.mp4</B> [399 bytes]
+</pre>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="decl">Declarations</A></H2>
+
+<P>
+The right panel shows the <B>table</B> declaration syntax.  The
+<B>table</B> name must adhere to the <A
+HREF="../vars/index.html#names">naming rules</A> described in Part
+II/1.  A set of parameters, enclosed in parenthesis, complete the
+declaration.
+
+<P> 
+The first parameter must be a valid wavetable generator name.  The
+right panel shows the 16 SAOL wavetable generators.
+
+<P>
+The second parameter is an expression that sets the number of samples
+in the table.  The remaining parameters have a different meaning for
+each wavetable generator. For most generators, these fields are signal
+expressions.
+
+<P>
+As shown in the example in last section, <B>table</B> declarations may
+happen in the <B>global</B> block or in an <B>instr</B> block.
+
+<P>
+For <B>global</B> wavetables, the expressions may use i-rate global
+variables. These variables may be initialized by the <A
+HREF="../vars/index.html#vars_global"><B>startup instr</B></A> which
+runs before <B>global</B> wavetables are created.
+
+<P>
+For <B>instr</B> wavetables, the expressions may use <A
+HREF="../vars/index.html#preamble"><B>instr</B> parameters</A>,
+imported i-rate <B>global</B> variables, and i-rate <A
+HREF="../vars/index.html#stnames"><B>standard names</B></A>.
+
+<H4>Importing Tables</H4>
+
+<P>
+An <B>instr</B> accesses a global wavetable by declaring an
+<B>instr</B> wavetable with the same name as the global wavetable. The
+example on the right panel shows the two forms of declaration.
+
+<P>
+The <B>imports exports</B> declaration accesses the global wavetable
+directly using a pointer. Changes made to the wavetable structure by
+an <B>instr</B> affect the global copy.
+
+<P>
+The <B>imports</B> declaration makes a copy of the global
+wavetable at <B>instr</B> instantiation. Changes to the <B>instr</B>
+table do not change the global data.
+
+<P>
+The <B>imports</B> declaration may be used even if no global wavetable
+with the same name exists. In this case, the table is created by a
+SASL <B>table</B> command, which we explain in Part III/1 of the book.
+
+<H4>Tablemaps</H4>
+
+<P>
+Some wavetable applications create a set of related sample buffers,
+and play back one buffer from the set. For example, a sampled piano
+instrument may use a set of 88 wavetables, one for each note on the
+piano keyboard.
+
+<P>
+To support these applications, SAOL has a special data type, the
+<B>tablemap</B>, that is an array of wavetables. The right panel
+shows the <B>tablemap</B> declaration syntax and an example.
+
+<P>
+In this example, we declare the tables <TT>cyc0</TT>, <TT>cyc1</TT>,
+<TT>cyc2</TT>. We also declare the <B>tablemap</B> <TT>cyc</TT>, that
+is an array of wavetables.
+
+<P>
+In the code block, we index <TT>cyc</TT> to select a wavetable
+argument for the core opcode <B>oscil</B>.  Unindexed <B>tablemap</B>
+variables may not be passed as opcode arguments.
+
+<P>
+The index for a <B>tablemap</B> is an expression whose value is
+rounded to the nearest integer to select a wavetable. The first
+wavetable in a <B>tablemap</B> has the array index 0.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<H2> Declaration Syntax </H2>
+<TT>
+<pre>
+table name(gen, size [, p1, p2 ...]);
+
+</pre>
+</TT>
+<H2> Wavetable Generators </H2>
+<TT>
+<pre>
+buzz
+concat
+cubicseg
+data
+empty
+expseg
+harm
+harm_phase
+lineseg
+periodic
+polynomial
+random
+sample 
+spline
+step
+window
+
+</pre>
+</TT>
+<H2> Imports Example</H2>
+<TT>
+<pre>
+globals {
+table cyc0(harm, 128, 1);
+table cyc1(harm, 128, 0.5, 0.25);
+table cyc2(harm, 128, 0.5, 0.1);
+}
+
+instr test {
+
+imports exports table cyc0;// form 1
+imports table cyc1, cyc2;  // form 2
+
+}
+
+</pre>
+</TT>
+
+<H2> Tablemap Declaration</H2>
+<TT>
+<pre>
+tablemap name(t1 [, t2, t3 ...]);
+
+</pre>
+</TT>
+
+<H2> Tablemap Example</H2>
+<TT>
+<pre>
+
+instr tmap (freq, bright) {
+
+table cyc0(harm, 128, 1);
+table cyc1(harm, 128, 0.5, 0.25);
+table cyc2(harm, 128, 0.5, 0.2, 0.1);
+tablemap cyc(cyc0, cyc1, cyc2);
+
+output(oscil(cyc[bright],freq));
+
+}
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="period">Periodic Waveforms</A></H2>
+
+<P>
+Three wavetable generators (<B>harm</B>, <B>phase_harm</B>, and
+<B>buzz</B>) produce a single cycle of a periodic waveform.  Looped
+playback of wavetables produced with these generators is click-free.
+The definitions of these generators are shown on the right panel,
+along with the related generator <B>periodic</B>.
+
+<H4> Harm </H4>
+
+<P>
+The simplest generator, <B>harm</B>, specifies a waveform as a
+harmonic series of <I>N</I> zero-phase sine waves.  Generator
+parameters include the size of the table, which must be greater than
+zero, and the <I>N</I> sinusoid amplitudes.
+
+<P> 
+We use this generator in the <A HREF="#example">example</A> at
+the start of the chapter to produce a pure tone.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<TT>
+<pre>
+x is table index
+y(x) is table value
+
+</pre>
+
+<H2>harm</H2>
+
+<pre> 
+declaration:
+
+table t(harm, size, a1 [, a2, a3 ...]);
+
+algorithm:
+
+for x in [0, size-1]:
+
+y(x) =
+a1*sin(2*pi*x/size) +
+a2*sin(4*pi*x/size) +
+a3*sin(6*pi*x/size) +
+...
+
+</pre>
+
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>Harm_phase and Periodic</H4>
+
+<P>
+The <B>harm_phase</B> generator specifies an amplitude parameter and a
+phase parameter (specified in radians) to each sinusoid, and the
+<B>periodic</B> generator also adds a frequency parameter.
+
+<P>
+Note that if the frequency parameters to the <B>periodic</B> generator
+are non-integral, the looped wavetable produces a discontinuous
+waveform. 
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>harm_phase</H2>
+
+<pre> 
+declaration:
+
+table t(harm_phase, size, a1, ph1
+	[, a2, ph2, a3, ph3 ...]); 
+
+algorithm:
+
+for x in [0, size-1]:
+
+y(x) =
+a1*sin(ph1 + 2*pi*x/size) +
+a2*sin(ph2 + 4*pi*x/size) +
+a3*sin(ph3 + 6*pi*x/size) +
+...
+
+</pre>
+
+<H2>periodic</H2>
+
+<pre> 
+declaration:
+
+table t(periodic, size, f1, a1, ph1
+   [, f2, a2, ph2, f3, a3, ph3 ...]); 
+
+algorithm:
+
+for x in [0, size-1]:
+
+y(x) =
+a1*sin(ph1 + 2*pi*f1*x/size) +
+a2*sin(ph2 + 2*pi*f2*x/size) +
+a3*sin(ph3 + 2*pi*f3*x/size) +
+...
+
+</pre>
+
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4> Buzz </H4>
+
+<P>
+Newcomers to computer music often try to duplicate the pulse waveforms
+used in analog subtractive synthesis directly, by writing a program to
+generate a pulse waveform. This approach can lead to unsatisfactory
+results, due to aliasing problems.
+
+<P>
+A better way is to generate pulse-like waveforms additively into a
+table, stopping near the Nyquist limit (half the sampling frequency)
+to prevent aliasing. The <B>harm</B> generator could be used to create
+a pulse waveform in this way, by specifying a series of sinusoids with
+decreasing amplitudes.
+
+<P>
+The <B>buzz</B> generator simplifies this task. It specifies an
+algorithm for generating a family of alias-free pulse-like waveforms
+using a few parameters.
+
+<P>
+The right panel shows the algorithm for <B>buzz</B>. The generator
+sums a series of harmonic cosine functions starting at the partial
+specified by parameter <TT>low</TT>, where partial 0 is the
+fundamental.
+
+<P>
+The first cosine waveform has unity scaling, while subsequent cosines
+are scaled by increasing powers of the parameter <TT>r</TT>.  Since
+<TT>r</TT> has no restrictions on its value, amplitude series that are
+decreasing (<TT>abs(r) < 1)</TT> and increasing (<TT>abs(r) > 1</TT>)
+may be generated. The phase of successive partials may also be flipped
+by specifying a negative <TT>r</TT>.
+
+<P>
+The two remaining parameters are the number of partials <TT>num</TT>
+and the size of the wavetable <TT>size</TT>. If both are specified as
+positive values, the equation on the right panel is computed. Note
+that a bad choice of parameters will result in aliasing.
+
+<P>
+Alternatively, either <TT>size</TT> or <TT>num</TT> may be set to -1.
+In this case, the generator chooses the smallest wavetable size or the
+largest number of harmonics, respectively, that does not alias.
+
+<P>
+Finally, the <B>buzz</B> generator scales the final waveform to have a
+peak amplitude independent of the parameters.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>buzz</H2>
+
+<pre> 
+declaration:
+
+table t(buzz, size, num, low, r);
+
+
+algorithm:
+
+for x in [0, size-1]:
+
+y(x) =
+cos(2*pi*(low+1)*x/size) +
+r*cos(2*pi*(low+2)*x/size) +
+r*r*cos(2*pi*(low+3)*x/size) +
+... +
+r^(num)*cos(2*pi*(low+num+1)*x/size)
+
+
+scale table by:
+
+(1 - abs(r))/(1 - abs(r^num))
+
+
+nyquist scaling if:
+
+size = -1: table size scaled to 
+           largest harmonic low+num
+
+num = -1: largest num that fits 
+	  the specified table size
+
+size and num may not both be -1
+
+</pre>
+
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="env">Envelope Waveforms</A></H2>
+
+<P>
+Five generators (<B>step</B>, <B>lineseg</B>, <B>expseg</B>,
+<B>spline</B>, and <B>cubicseg</B>) produce wavetables that are useful
+for signal envelopes. For each description, see the right panel for
+parameter syntax and algorithms.
+
+<H4>Shared properties</H4>
+
+<P>
+For each generator, the envelope is specified as a piece-wise
+waveform.  Table <I>break points</I> are listed as pairs of <TT>y</TT>
+table values and <TT>x</TT> table indices.  The generators
+interpolate between the break points to create a waveform.
+
+<P>
+The first table break point must have an index parameter of zero, and
+the sequence of table index values must not be decreasing.  Setting
+two consecutive <TT>x</TT> indexes to the same value is permitted, and
+produces a discontinuous waveform.  In this case, the second
+<TT>y</TT> value becomes the actual wavetable value for the <TT>x</TT>
+index, while the first <TT>y</TT> value fixes the trajectory of the
+previous piece-wise segment.
+
+<P>
+The wavetable size may be specified directly by setting the
+<TT>size</TT> parameter to a value greater than zero.  If the
+<TT>size</TT> parameter is set to <TT>-1</TT>, the table size is
+inferred from the last break point specified.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<TT>
+<pre> </pre>
+
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>Interpolation methods</H4>
+
+<P>
+The <A NAME="step"><B>step</B></A> generator does no
+interpolation. The waveform it produces looks like a stair step. For
+two adjacent break points <TT>(x1, y1)</TT> and <TT>(x2, y2)</TT>, the
+table takes on the value <TT>y1</TT> for <TT>x1 <= x < x2</TT>.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+
+<H2>step</H2>
+
+<pre> 
+declaration:
+
+table t(step, size, x1, y1, 
+        x2 [, y2,  x3 ...]);
+
+algorithm:
+
+for x in [0, size-1]:
+
+x1 <= x < x2  --> y(x) = y1
+x2 <= x < x3  --> y(x) = y2
+...
+
+error if:
+
+-- x1 != 0
+-- series of xk values decreases
+-- series ends with a <B>yk</B>
+
+</pre>
+
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+The <A NAME="lineseg"><B>lineseg</B></A> generator does linear
+interpolation between break points. We use the <B>lineseg</B>
+generator in the <A HREF="#example">example</A> at the start of the
+chapter.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+
+<H2>lineseg</H2>
+
+<pre> 
+declaration:
+
+table t(lineseg, size, x1, y1, 
+        x2, y2 [, x3, y3 ...]);
+
+algorithm:
+
+for x in [0, size-1]:
+
+if x1 <= x < x2
+  y(x) linearly interpolates
+  between y1 and y2  
+
+if x2 <= x < x3
+  y(x) linearly interpolates
+  between y2 and y3  
+
+...
+
+error if:
+
+-- x1 != 0
+-- series of xk values decreases
+-- series ends with a <B>xk</B>
+
+</pre>
+
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+The <A NAME="expseg"><B>expseg</B></A> generator does exponential
+interpolation between break points. Note that the generator algorithm
+restricts the <TT>y</TT> values to be nonzero and of uniform sign.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+
+<H2>expseg</H2>
+
+<pre> 
+declaration:
+
+table t(expseg, size, x1, y1, 
+        x2, y2 [, x3, y3 ...]);
+
+algorithm:
+
+for x in [0, size-1]:
+
+if x1 <= x < x2
+  y(x) exponentially interpolates
+  between y1 and y2  
+  i.e.
+   y(x) = y1*(y2/y1)^((x-x1)/(x2-x1))
+
+if x2 <= x < x3
+  y(x) exponentially interpolates
+  between y2 and y3  
+
+...
+
+error if:
+
+-- x1 != 0
+-- series of xk values decreases
+-- all yk's aren't the same sign
+-- any yk is zero
+-- series ends with a <B>xk</B>
+
+</pre>
+
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+The <A NAME="spline"><B>spline</B></A> generator interpolates between
+break points using cubic splines.
+
+<P>
+Generating the spline interpolation requires solving a third-order
+algebraic equation. For some break points, this equation may not have a
+solution. 
+
+<P>
+To avoid this situation, the expression <TT>x1*x1 + x2*x2 -
+2*x1*x2</TT> should not be equal to zero.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+
+<H2>spline</H2>
+
+<pre> 
+declaration:
+
+table t(spline, size, 
+            x1, y1,
+       [k2, x2, y2,
+        k3, x3, y3,]
+        kn, xn, yn);  
+
+algorithm:
+
+for x in [0, size-1]:
+
+if x1 <= x < x2
+  y(x) fits a cubic spline
+  between y1 and y2  
+  i.e.
+   y(x) = a*x^3 + b*x^2 + cx + d
+   where this function passes
+   through (x1,y1) and (x2,y2)
+   and has derivative 0 at x1
+   and k2 and x3
+
+if x2 <= x < x3
+  y(x) fits a cubic spline
+  between y2 and y3  
+  i.e.
+   y(x) = a*x^3 + b*x^2 + cx + d
+   where this function passes
+   through (x2,y2) and (x3,y3)
+   and has derivative k2 at x2
+   and k3 at x3
+
+...
+
+derivative of final spline 
+ending is 0 (kn is ignored).
+
+error if:
+
+-- x1 != 0
+-- series of xk values 
+   is decreasing
+-- series does not end
+   with a <B>yk</B>
+-- a spline doesn't exist (see text)
+
+</pre>
+
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+The <A NAME="cubicseg"><B>cubicseg</B></A> generator also interpolates
+between break points using a cubic formula.
+
+<P>
+The parameter specification for <B>cubicseg</B> is different than the
+other generators in this family. The <TT>x</TT> values are specified
+via the series <TT>infl1, x1, infl2, x2 ...</TT>. The first <TT>x</TT>
+value <TT>infl1</TT> must be zero.
+
+<P>
+While the <B>spline</B> generator creates gently changing waveshapes,
+the <B>cubicseg</B> generator can be used to generate a spiked
+waveshapes as well as smooth waveshapes.
+
+<P>
+Like the <B>spline</B> generator, care must be taken to ensure that
+the cubic equation by the parameters specified is solvable. These
+conditions are too complex to calculate manually. The <B>cubicseg</B>
+generator is best used with a computer program for cubic curve design.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+
+<H2>cubicseg</H2>
+
+<pre> 
+declaration:
+
+table t(cubicseg, size, infl1, y1,
+         x1, y2, infl2, y3,
+         x2, y4, infl3, y5
+         [,x3, y6, infl4, y7]);
+
+algorithm:
+
+for x in [0, size-1]:
+
+if infl1 <= x < infl2
+  y(x) fits a cubic polynomial
+  between y1 and y3  
+  i.e.
+   y(x) = a*x^3 + b*x^2 + cx + d
+   where this function passes
+   through (infl1,y1), (x1,y2),
+   and (infl2,y3) and has
+   derivative 0 at x1.
+
+if infl2 <= x < infl3
+  y(x) fits a cubic polynomial
+  between y3 and y5  
+  i.e.
+   y(x) = a*x^3 + b*x^2 + cx + d
+   where this function passes
+   through (infl2,y3), (x2,y4),
+   and (infl3,y5) and has
+   derivative 0 at x2.
+...
+
+error if:
+
+-- infl1 != 0
+-- infl, x, infl, ... series decreases 
+-- series doesn't ends with <B>infl, y</B>
+-- any polynomial doesn't exist
+
+</pre>
+
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="sample">Sound Files</A></H2>
+
+<P>
+The SAOL generator <B>sample</B> fills a wavetable with sample data.
+The right panel shows the declaration syntax for this generator.
+
+<P>
+When used in ASCII SAOL programs, the <B>sample</B> generator reads in
+data from an audio file. Because file access is system dependent, the
+MP4-SA standard leaves exact implementation details to the decoder. In
+this section, we describe how <TT>sfront</TT> implements the
+<B>sample</B> generator.
+
+<P>
+The second parameter of the generator specifies the name of the audio
+file to read into the table. The filename is specified in double
+quotes, and is expected to be in the same directory as the SAOL
+file. Microsoft WAV files (indicated by .wav and .WAV extensions) and
+Electronic Arts AIFF files (indicated by .aif and .AIF extensions) are
+supported by <TT>sfront</TT>.
+
+<P>
+The optional <TT>skip</TT> parameter (rounded to an integer value)
+specifies the number of samples to skip at the start of the audio
+file. If <TT>skip</TT> is specified, sample number <TT>skip+1</TT> in
+the audio file becomes the first sample of the wavetable.
+
+<P>
+The first parameter of the generator specifies the wavetable size.  If
+the <TT>size</TT> parameter is set to <TT>-1</TT>, the <B>sample</B>
+generator sets the wavetable size to be the number of samples in the
+audio file (minus the number of skip samples). If the <TT>size</TT>
+parameter is set to a positive value, the wavetable takes on that
+size, and the audio file is truncated or zero-padded as needed.
+
+<P>
+Sfront supports 8-bit, 16-bit, and 24-bit samples in AIFF and WAV
+files.  The integer audio samples are converted to floating point
+numbers that lie between <TT>-1.0</TT> and <TT>+1.0</TT>.  The
+sampling rate of the file becomes the sampling rate of the wavetable.
+
+<P>
+In sfront, the left and right channels in a stereo WAV or AIFF file
+are summed to mono by default.  The right panel shows the @n syntax
+for selecting a specific channel (left or right) of a stereo file to
+place in the table.
+
+<P>
+AIFF and WAV files may also hold information about looped playback the
+sample. Sfront converts this information into the loop start, loop
+end, and base frequency of the wavetable.
+
+<H4>Bitstream issues</H4>
+
+<P>
+In the previous subsection, we described the way <TT>sfront</TT>
+implements the second parameter of the <B>sample</B> generator for
+ASCII SAOL files.  For binary MP4 files, however, the second parameter
+of this generator has a normative interpretation.  This parameter
+points to another part of the MP4 file, that holds large blocks of
+sample data.
+
+<P>
+When <TT>sfront</TT> generates an MP4 binary encoding of a ASCII SAOL
+file, it loads the audio data from files specified in <B>sample</B>
+generators into the part of the MP4 file that holds sample data
+blocks.  It encodes the second parameter of each <B>sample</B>
+generator to point to the appropriate sample block. When inserting WAV
+or AIFF file data into an MP4 file, <TT>sfront</TT> includes any
+looped playback data stored in the file.
+
+<P>
+Note that the size of an MP4 binary file expands significantly if
+large audio sample files are included in the file. Content creators
+working on low-bitrate applications should consider synthesis-based
+sound generation techniques as an alternative to the <B>sample</B>
+generator.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+
+<H2>sample</H2>
+
+<pre> 
+declaration:
+
+table t(sample, size, 
+	"name.wav" [,skip]);
+
+table t(sample, size, 
+	"name.aif" [,skip]);
+
+
+algorithm:
+
+monaural AIFF or WAV file is read into
+table. skip is an optional parameter, 
+that specifies how many samples to skip
+over at the beginning of the file.
+
+file sample rate is table sample rate.
+
+if size is set to -1, table size is
+the number of samples in the file, 
+minus skip (if specified). if size is
+specified, audio file is truncated
+or zero-padded as needed.
+
+table values lie between -1.0 and 
++1.0, by scaling 16-bit signed 
+integers from the file by 1/32768.
+24-bit samples scale by 1/8388608.
+8-bit samples scale by 1/128 (after
+re-zeroing, if needed).
+
+if name.wav or name.aif is a stereo
+file, sfront averages the left and
+right channel to produce a mono
+signal. to select a single channel
+of a stereo file to place in the
+table, sfront supports the following
+syntax:
+
+table t(sample, size, 
+	"name.wav@0" [,skip]);
+
+table t(sample, size, 
+	"name.wav@1" [,skip]);
+
+table t(sample, size, 
+	"name.aif@0" [,skip]);
+
+table t(sample, size, 
+	"name.aif@1" [,skip]);
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4><A NAME="speedt">Warping Tables</A></H4>
+
+<P>
+The i-rate core opcode <B>speedt</B> is a useful tool for processing
+wavetables initialized with the <B>sample</B> generator. It shrinks
+or expands the length of a wavetable, without changing the pitch of
+the sample.
+
+<P>
+The right panel shows the <B>speedt</B> header syntax. The <TT>in</TT>
+variable holds the original wavetable. The <TT>factor</TT> parameter
+specifies the amount of expansion or compression.
+
+<P>
+The <TT>out</TT> wavetable must be large enough to hold the processed
+table. For example, a <TT>factor</TT> value of 2 requires an
+<TT>out</TT> table twice as large as the <TT>in</TT> table.
+Typically, <TT>out</TT> is initialized at the correct size using the
+<A HREF="#lowgen"><B>empty</B></A> wavetable generator.
+
+<P>
+The algorithm for table warping is non-normative. Different decoders
+will produce different sample values for a given <TT>factor</TT>
+value.  In addition, the range of acceptable <TT>factor</TT> values is
+also decoder-dependent.
+
+<P>
+The <B>speedt</B> implementation in <TT>sfront</TT> expands wavetables
+up to a <TT>factor</TT> value of <TT>2</TT>, and compresses wavetables
+down to a <TT>factor</TT> value of <TT>0.001</TT>. To achieve higher
+expansion ratios, implement a cascade of several <B>speedt</B> calls.
+
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+
+<H2>Speedt</H2>
+
+<TT>
+<pre>
+iopcode speedt(table in, table out,
+	       ivar factor)
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="playback">Table Playback</A></H2>
+
+<P>
+The core opcodes <B>oscil</B>, <B>koscil</B>, <B>doscil</B>, and
+<B>loscil</B> play back wavetables.  Each opcode is customized for a
+particular sound generation method. See the right panel next to each
+opcode description for the declaration syntax.
+
+<H4>Shared properties</H4>
+
+<P>
+The playback opcodes work in a similar way. Each opcode has an
+internal pointer to the wavetable, that indicates the current
+sample. The internal pointer always starts at the first sample in the
+wave table.
+
+<P>
+When the opcode is called, it returns the current sample, and
+updates the internal pointer for the next call. The opcodes
+differ primarily in the method for incrementing the pointer.
+
+<P>
+The semantics of the playback opcodes assume that the opcode is called
+once per a-pass (for <B>oscil</B>, <B>doscil</B>, and <B>loscil</B>)
+or once per k-pass (for <B>koscil</B>). If an opcode is placed inside
+a <B>while</B> loop and called multiple times per pass, the effective
+frequency increases by that multiple.
+
+<P>
+In general, the internal pointer does not increment in an integral
+fashion. The playback opcodes interpolate the return value from
+nearby wavetable values. 
+
+<P>
+By default, the playback opcodes do linear interpolation.  The
+interpolation level can be set by the <B>global</B> parameter
+<B>interp</B>. Setting <B>interp</B> to 0 yields the default linear
+interpolation.
+
+<P>
+If <B>interp</B> is set to 1, the MP4-SA decoder uses a more
+sophisticated method of interpolation. The exact method of
+interpolation, however, is unspecified by the SAOL language standard,
+and different decoders may use different methods.  
+
+<P>
+For most opcodes that use interpolation, sfront uses band-limited
+interpolation if <B>interp</B> is set to 1 (sfront's <A
+HREF="../../opcodes/sgen/index.html#grain">grain</A> operator is an
+exception, and uses linear interpolation).  Sfront has command-line
+options to set the accuracy of the band-limited interpolation.  Later
+in this chapter, we <A HREF="#sinc_read">discuss</A> special issues
+when using band-limited interpolation with low-level core opcodes such
+as <B>tableread</B>.
+
+<P>
+If the goal is to achieve normative (i.e. decoder-independent)
+high-quality table playback, the content creator has two options.  One
+option is to use the playback core opcodes with linear interpolation,
+and use larger table sizes to improve audio quality.
+
+<P>
+A second option is to write SAOL code to play back tables directly,
+using the <A HREF="#lowcore">low-level core opcodes</A>.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Interp Global Parameter</H2>
+
+<TT>
+<pre>
+
+global {
+interp 0;  // linear 
+           // interpolation
+}
+
+global {
+interp 1;  // non-normative 
+           // higher-quality
+	   // interpolation
+}          
+</pre>
+</TT>
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>Waveform Playback</H4>
+
+<P>
+Two of the core opcodes, <B>oscil</B> and <B>koscil</B>,
+are specialized for creating signals by repeating a 
+single cycle of a waveform stored in a table. 
+
+<P>
+These opcodes have two required parameters, a table
+specifier <TT>t</TT> and the <TT>freq</TT> parameter
+that specifies how many times per second the entire
+table should be played through. 
+
+<P>
+The <TT>freq</TT> parameter may be negative, in which case the
+internal pointer is decremented instead of incremented.
+
+<P>
+If the <TT>loops</TT> parameter is provided, the opcode
+loops around the table <TT>loops</TT> times, and then
+returns 0 with every call.
+
+<P>
+The opcodes differ only in their rate. The a-rate <B>oscil</B>
+opcode produces signal values as described above if it is
+called once a-pass, while the k-rate <B>koscil</B> has the
+described semantics if it is called once per k-pass.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>Waveform Playback</H2>
+
+<TT>
+<pre>
+aopcode oscil(table t, 
+	      asig freq 
+	      [,ivar loops])
+
+kopcode koscil(table t, 
+	      ksig freq 
+	      [,ivar loops])
+
+</pre>
+</TT>
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>One-Shot Playback</H4>
+
+<P>
+The a-rate <B>doscil</B> core opcode plays back the wavetable
+<TT>t</TT> once, and then returns 0.
+
+<P>
+The opcode considers the wavetable to be a recording of a pitched
+sound. In playing the wavetable, it generates a sound whose pitch is
+identical to the original sound.
+
+<P>
+If the "recording" sample rate is identical to the SAOL program audio
+sample rate, <B>doscil</B> simple advances the internal pointer by 1
+at each call. 
+
+<P>
+If the two sample rates differ, <B>doscil</B> increments
+the internal pointer by the ratio of the wavetable sample rate and the
+audio sample rate.
+
+<P>
+The wavetable passed to <B>doscil</B> must have its sample rate value
+set.  The <B>ftsetsr</B> core opcode may be used to set the sample
+rate of wavetable, as we did in the <A HREF="#example">example</A>
+earlier in the chapter.
+
+<P>
+By default, a wavetable initialized with the <B>sample</B>
+generator has its sample rate set to the audio file sample rate.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>One-Shot Playback</H2>
+
+<TT>
+<pre>
+aopcode doscil(table t)
+
+</pre>
+</TT>
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>Loop Playback</H4>
+
+<P>
+The a-rate <B>loscil</B> core opcode expands the semantics of
+<B>doscil</B>, by playing back the wavetable recording at an arbitrary
+pitch (specified by the parameter <TT>freq</TT>).
+
+<P>
+To play the table back at the correct pitch, <B>loscil</B> needs to
+know the original pitch of the sound recorded in the wavetable.  The
+optional parameter <TT>basefreq</TT> supplies this information.
+
+<P>
+If <TT>basefreq</TT> is not supplied, the base frequency of the
+wavetable is used, as set by the core opcode <A
+HREF="#lowcore"><B>ftbasecps</B></A>, or as set by the <B>sample</B>
+wavetable generator when reading in a WAV file with looped playback
+information.
+
+<P>
+Given a base frequency value and the sampling rate of the table, the
+<B>loscil</B> opcode increments its internal pointer to achieve the
+signal pitch requested by <TT>freq</TT>. If <TT>freq</TT> is 
+negative, the internal pointer is decremented.
+
+<P>
+The <B>loscil</B> opcode returns sample values indefinitely, by
+looping a portion of the wavetable. The optional parameters
+<TT>loopstart</TT> and <TT>loopend</TT> supply the loop points,
+expressed as fractional array indices into the wavetable.
+
+<P>
+The internal pointer for <B>loscil</B> starts at index 0, and advances
+to the <TT>loopend</TT> position. It then cycles from the
+<TT>loopstart</TT> position to the <TT>loopend</TT> position
+indefinitely. If the internal pointer is decremented in this regime,
+cycling in the reverse direction happens.
+
+<P>
+If the <TT>loopstart</TT> and <TT>loopend</TT> parameters are not
+provided, <B>loscil</B> uses the loop start and loop end values for
+the wavetable, as set by the core opcodes <A HREF="#lowcore"><B>
+ftloop</B></A> and <A HREF="#lowcore"><B>ftloopend</B></A>, or as set
+by the <B>sample</B> wavetable generator when reading in a WAV file
+with looped playback information.
+
+<P>
+If the wavetable loop values are not set, <B>loscil</B> loops
+through the entire wavetable indefinitely.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Loop Playback</H2>
+
+<TT>
+<pre>
+aopcode loscil(table t, 
+	      asig freq 
+	      [,ivar basefreq,
+	        ivar loopstart,
+	        ivar loopend])
+
+</pre>
+</TT>
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="lowcore">Low-Level Core Opcodes</A></H2>
+
+<P>
+Eleven core opcodes access wavetables at the lowest level of
+abstraction. These opcodes let programmers write replacements for the
+playback opcodes, and create other wavetable utility routines.
+
+<P>
+The k-rate core opcodes <B>ftsetsr</B> and <B>ftsetbase</B> change the
+sampling rate and base frequency of the wavetable <TT>t</TT>.  The
+parameter value <TT>x</TT> holds the new value, which must be greater
+than zero.  The opcode returns the value <TT>x</TT>.
+
+<P>
+The k-rate core opcodes <B>ftsetloop</B> and <B>ftsetend</B> change
+the loop start point and loop end point of the wavetable <TT>t</TT>.
+The parameter value <TT>x</TT> holds the new value, where <TT>x</TT>
+must round to a valid wavetable index. The opcode returns the value
+<TT>x</TT>.
+
+<P>
+The polymorphic opcodes <B>ftlen</B>, <B>ftsr</B>, <B>ftbasecps</B>,
+<B>ftloop</B> and <B>ftloopend</B> return the values of the length,
+sampling rate, base frequency, loop start point, and loop end point of
+the wavetable <TT>t</TT>, respectively.
+
+<P>
+Finally, the polymorphic opcodes <B>tableread</B> and
+<B>tablewrite</B> read and write values into wavetables.
+The <TT>index</TT> parameter for these opcodes specify
+the table position to read or write.
+
+<P>
+For <B>tableread</B>, if <TT>index</TT> is an integer value, the value
+of the wavetable at that index is returned. If <TT>index</TT> is not
+an integer, the return value is interpolated from nearby values, using
+the same interpolation methods as the <A HREF="#playback">playback
+opcodes</A>.  
+
+<P>
+For <B>tablewrite</B>, <TT>index</TT> is rounded to the nearest
+integer, and the <TT>val</TT> parameter value is inserted at
+that table position. The <B>tablewrite</B> opcode returns the
+value of <TT>val</TT>.
+
+<P>
+For both <B>tableread</B> and <B>tablewrite</B>, the index value must
+be in a valid range for the wavetable.
+
+<P>
+<A NAME="sinc_read">In</A> many cases, SAOL programs use
+<B>tableread</B> to implement customized versions of table playback
+opcodes (such as <B>doscil</B>).  Recall that to pitch-shift samples
+with <B>doscil</B>, the sample rate of the table is shifted up or down
+(using <B>ftsetsr</B>).
+
+<P>
+When using <B>tableread</B> in this way, sfront users should note that
+the band-limited interpolation algorithm expects <B>tableread</B>
+tables to have their sample rate set to the value <B>doscil</B> would
+require to create the desired pitch-shift.  Sfront relies on this
+sample rate to ensure that band-limited interpolation is alias-free.
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2> To Write Tables </H2>
+
+<TT>
+<pre>
+kopcode ftsetsr(table t, ksig x)
+kopcode ftsetbase(table t, ksig x)
+kopcode ftsetloop(table t, ksig x)
+kopcode ftsetend(table t, ksig x)
+
+opcode  tablewrite(table t,
+		   xsig index,
+		   xsig val)
+
+</pre>
+
+</TT>
+<H2> To Read Tables </H2>
+
+<TT>
+<pre>
+opcode ftlen(table t)
+opcode ftsr(table t)
+opcode ftbasecps(table t)
+opcode ftloop(table t)
+opcode ftloopend(table t)
+
+opcode  tableread(table t, xsig index)
+
+</pre>
+</TT>
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="lowgen">Low-Level Generators</A></H2>
+
+<P>
+In the previous sections, we describe the SAOL generators that
+initialize wavetables for use in specific sound generation
+algorithms. In this section, we describe the remaining SAOL
+generators, that are oriented for use in more general contexts.
+
+<P>
+See the right panel for declaration syntax and algorithms for these
+generators.
+
+
+<H4>Simple Generators</H4>
+
+<P>
+Several generators perform simple initialization, to prepare
+wavetables for access by the <A HREF="#lowcore"><B>tableread</B></A>
+and <A HREF="#lowcore"><B>tablewrite</B></A> opcodes.
+
+<P>
+The <B>empty</B> generator fills a wavetable with zero values. The
+<TT>size</TT> parameter must be greater than zero.
+
+<P>
+The <B>data</B> generator fills a wavetable with parameter values.  If
+the <TT>size</TT> parameter has a value of <TT>-1</TT>, the wavetable
+size matches the number of parameters.
+
+<P>
+If the <TT>size</TT> parameter is set to a value greater than zero,
+the wavetable takes on that size, and the parameter list is truncated
+or zero-padded as needed.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+
+<H2>empty</H2>
+
+<pre> 
+declaration:
+
+table t(empty, size);
+
+algorithm:
+
+for x in [0, size-1]:
+
+y(x) = 0
+
+</pre>
+
+<H2>data</H2>
+
+<pre> 
+declaration:
+
+table t(data, size, p0 [, p1 ...]);
+
+algorithm:
+
+for x with a px parameter:
+
+y(x) = px
+
+
+</pre>
+
+
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>Continuous Curves</H4>
+
+<P>
+The <B>polynomial</B> generator fills a wavetable with the values of
+an <I>N</I>th order polynomial, whose coefficients are supplied as
+generator parameters. The <TT>size</TT> parameter must have a value
+greater than zero.
+
+See the right panel for the exact polynomial description.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+
+<H2>polynomial</H2>
+
+<pre> 
+declaration:
+
+table t(polynomial, size, xmin, xmax,
+                  a0 [,a1, a2, a3);
+
+algorithm:
+
+for x in [0, size-1]:
+
+y(x) = a0 + a1*y + a2*y*y + ...
+
+where
+
+y = xmin + 
+    (xmax - xmin)*((size - x)/size)
+
+error if xmin = xmax
+
+</pre>
+
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>Table Concatenation</H4>
+
+<P>
+The <B>concat</B> generator takes a list of wavetables as
+parameters. The generator concatenates the data in these tables, and
+uses the result to initialize its own table. 
+
+<P>
+If the <TT>size</TT> parameter has a value of <TT>-1</TT>, the
+wavetable size is the size of the concatenated data array.
+
+<P>
+If the <TT>size</TT> parameter is set to a value greater than zero,
+the wavetable takes on that size, and the concatenated data array
+is is truncated or zero-padded as needed.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+
+<H2>concat</H2>
+
+<pre> 
+declaration:
+
+table t(concat, size, t1 [, t2 ...])
+
+
+algorithm:
+
+t1, t2, ... are tables. all declared
+tables must appear on lines that 
+precede the concat generator line.
+
+t1 is the concatenation of the
+table arrays
+
+</pre>
+
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>Pseudorandom Tables</H4>
+
+<P>
+The <B>random</B> generator fills a wavetable with values generated by
+a pseudorandom number generator, whose distribution is specified by
+the parameters. The <TT>size</TT> parameter sets the size of table,
+and must have a value greater than zero.
+
+<P>
+The <TT>dist</TT> parameter specifies the distribution type, as an
+integer between <TT>1</TT> and <TT>5</TT>. The parameters <TT>p1</TT>
+and <TT>p2</TT> have different meanings for each distribution type.
+
+<P>
+A <TT>dist</TT> value of <TT>1</TT> indicates a uniform distribution.
+All floating point values between <TT>p1</TT> and <TT>p2</TT> have an
+equal probability of being chosen for each table value.
+
+<P>
+A <TT>dist</TT> value of <TT>2</TT> indicates a linear ramp
+distribution.  Table values may lie between <TT>p1</TT> and
+<TT>p2</TT>, obeying the distribution shown on the right panel.  Note
+that <TT>p1</TT> may not equal <TT>p2</TT>.
+
+<P>
+A <TT>dist</TT> value of <TT>3</TT> indicates an exponential (Poisson)
+distribution. The <TT>p1</TT> value parameterizes the distribution,
+as shown on the right panel. 
+
+<P>
+A <TT>dist</TT> value of <TT>4</TT> indicates a Gaussian distribution.
+The <TT>p1</TT> value is the mean of the distribution. The <TT>p2</TT>
+value is the variance, and must be greater than zero.
+
+<P>
+A <TT>dist</TT> value of <TT>5</TT> indicates the table is filled with
+a random binary sequence, that obeys a Poisson distribution. The
+<TT>p1</TT> value parameterizes the Poisson distribution. 
+
+<P>
+To fill the table <TT>t</TT> of length <TT>len</TT> we use the
+following algorithm.
+
+<P>
+First, we initialize all table values to 0.
+
+<P>
+Then, we draw a number the Poisson distribution. We round the
+number to an integer value <TT>i</TT>, and set <TT>t(i) = 1</TT>.
+
+<P>
+Next, we draw another number from the Poisson distribution. We round
+this number to an integer value <TT>j</TT>, and set <TT>t(i + 1 + j) =
+1</TT>.
+
+<P>
+We continue drawing numbers and setting <TT>t</TT> in this fashion,
+until the algorithm requires us to set a table index that is greater
+or equal to <TT>len</TT>.
+
+<H4>Window Tables</H4>
+
+The generator <B>window</B> initializes a table to one of a
+set of windowing functions useful for digital signal processing
+applications. We describe this generator along with its associated
+opcodes in <A HREF="../../opcodes/sproc/index.html#window">Part IV</A>
+of the book.
+
+<P>
+<B>Next:</B>
+<A HREF="../bus/index.html">Part II/5: SAOL Buses and Execution Order</A></H2>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+
+<H2>random</H2>
+
+<pre> 
+declaration:
+
+table t(random, size, dist, p1, p2)
+
+algorithm:
+
+dist takes on integer values that
+indicate a probability distribution
+
+for x in [0, size-1]:
+
+
+dist = 1: uniform distribution
+
+each table value filled with number
+in the range p1 to p2, with uniform
+probability.
+
+
+dist = 2: linear distribution
+
+each table value filled with number
+p(y) from p1 to p2, with probability
+
+p(y) = abs(d*(y-p1)), if y in [p1, p2]
+p(y) = 0,             otherwise
+
+where d = 2/((p2 - p1)*(p2 - p1))
+
+
+dist = 3: exponential distribution
+
+each table value filled with number
+p(y), with probability
+
+p(y) = (1/p1)*exp(-y/p1), if y > 0 
+p(y) = 0,                 otherwise
+
+
+dist = 4: Gaussian distribution
+
+each table value filled with number
+p(y), with probability
+
+p(y) = (1/sqrt(2*pi*p2))*
+       exp(-(p1-y)*(p1-y)/(2*p2))
+
+
+dist = 5: Poisson Binary Sequence
+
+see main text for algorithm, which
+uses distribution:
+
+p(y) = (1/p1)*exp(-y/p1), if y > 0 
+p(y) = 0,                 otherwise
+
+to fill table with a binary sequence.
+
+
+<A HREF="../../special/slib/index.html">Slib</A> defines the <A HREF="../../special/slib/index.html#random">constants</A>
+RANDOM_UNIFORM, RANDOM_LINEAR,
+RANDOM_EXPON, RANDOM_GAUSSIAN,
+and RANDOM_PROCESS to use
+as the dist parameter in 
+the random wavetable generator.
+
+</pre>
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+SAOL</A>-><STRONG>wavetables</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+
+</BODY>
+</HTML>

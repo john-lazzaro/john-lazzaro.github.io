@@ -1,0 +1,203 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part V: Special Topics</TITLE>
+<META name="keywords" content="MP4-SA, SAOL, language,
+MIDI, SASL, template, templates, map, maplist,
+with, preset, debug, printf, cpp, pre-processor, macro,
+MACRO, include, include, define, conditionals">
+<META name="description" content="Special topics about
+MP4-SA. Chapters cover the SAOL template language contruct,
+SAOL program debugging using sfront's rate-semantic
+printf() statement, and the development of large SAOL
+programs by using include files, macros, and conditional
+compilation.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../index.html">
+the mp4-sa book</A>-><STRONG>special topics</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part V: Special Topics</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="45%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>Introduction</H2>
+
+<P>
+MPEG-4 Structured Audio (MP4-SA) is an ISO/IEC standard (edited by
+Eric Scheirer) that specifies sound not as audio data, but as a
+computer program that generates audio when run.
+
+<P>
+
+For an introduction to MP4-SA see the <A
+HREF="../tut/index.html">introductory tutorial</A> presented in Part I
+of the book. For a complete description of the SAOL language, see <A
+HREF="../saol/index.html">Part II</A>.  
+
+<P>
+In Part V of the book, we show ways to solve
+common problems that arise when writing SAOL
+programs.
+
+<P>
+In the <A HREF="debug/index.html">first chapter</A> we show
+useful methods for debugging MP4-SA programs. We describe an
+sfront extension to SAOL for program debugging:  
+a rate-sensitive version of the C printf statement.
+ 
+<P>
+In the <A HREF="../template/index.html">second chapter</A> we describe 
+an advanced SAOL language feature, the template construct.
+Templates are a concise way to generate a family of instruments 
+whose properties vary in a regular way.
+
+<P>
+In the <A HREF="slib/index.html">third chapter</A> we describe
+<B>Slib</B>, a SAOL library distributed with sfront that provides
+support utilities to simplify low-level SAOL programming.
+
+<P>
+In the <A HREF="au/index.html">fourth chapter</A> we show
+how to write AudioUnit plug-ins in SAOL.
+
+<!--
+<P>
+In the <A HREF="large/index.html">third chapter</A> we
+introduce methods for managing large MP4-SA programs, whose code may
+be distributed over many files. We show how to use the pre-processor
+integrated with sfront to define macros, read in header files, and
+conditionally process SAOL programs.
+-->
+
+<P>
+<B>Next:</B>Part V/1: <A HREF="debug/index.html">SAOL Debugging<A>
+
+</TD>
+<TD WIDTH="55%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Part V: Table of Contents</H2>
+
+<H4>1. <A HREF="debug/index.html">Debugging SAOL Programs</A></H4>
+<UL>
+<LI>
+<B><A HREF="debug/index.html#report">Reported Errors</A>.</B>
+<LI>
+<B><A HREF="debug/index.html#crash">Program Crashes</A>.</B>
+<LI>
+<B><A HREF="debug/index.html#runtime">Finding Runtime Errors</A>.</B>
+<LI>
+<B><A HREF="debug/index.html#printf"><TT>printf</TT></A>.</B> 
+<LI>
+<B><A HREF="debug/index.html#irate">I-rate Methods</A>.</B> 
+<LI>
+<B><A HREF="debug/index.html#krate">K-rate Methods</A></B> 
+<LI>
+<B><A HREF="debug/index.html#arate">A-rate Methods</A></B> 
+</UL>
+
+<H4>2. <A HREF="../template/index.html">Templates</A></H4>
+<UL>
+<LI>
+<B><A HREF="../template/index.html#simple">A Simple Example</A></B>
+<LI>
+<B><A HREF="../template/index.html#maplist">Template Variables</A></B>
+<LI>
+<B><A HREF="../template/index.html#preset">Preset Maplists</A></B> 
+</UL>
+
+<H4>3. <A HREF="slib/index.html">The Slib Library</A></H4>
+<UL>
+<LI>
+<B><A HREF="slib/index.html#trig">Trigonometric Opcodes</A>.</B> 
+<LI>
+<B><A HREF="slib/index.html#numc">Numeric Constants</A>.</B>
+<LI>
+<B><A HREF="slib/index.html#symc">Symbolic Constants</A>.</B>
+<LI>
+<B><A HREF="slib/index.html#ssm">The Scaled Smoothed MIDI Library</A>.</B>
+<LI>
+<B><A HREF="slib/index.html#midic">MIDI Constants</A>.</B>
+<LI>
+<B><A HREF="slib/index.html#gmidi">General MIDI Presets</A>.</B> 
+</UL>
+
+
+<H4>4. <A HREF="au/index.html">AudioUnit Plug-Ins</A></H4>
+<UL>
+<LI>
+<B><A HREF="au/index.html#demystified">AudioUnits Demystified</A>.</B> 
+<LI>
+<B><A HREF="au/index.html#limits">SAOL Plug-Ins</A>.</B>
+<LI>
+<B><A HREF="au/index.html#aumu">A Softsynth Example</A>.</B>
+<LI>
+<B><A HREF="au/index.html#aufx">An Effects Example</A>.</B>
+<LI>
+<B><A HREF="au/index.html#debug">Debugging</A>.</B>
+</UL>
+
+<!--
+<H4>3. <A HREF="large/index.html">Developing Large SAOL Programs</A></H4>
+
+<UL>
+<LI>
+<B><A HREF="large/index.html#sfront"><TT>sfront</TT> Development Features</A></B> 
+<LI>
+<B><A HREF="large/index.html#include"><TT>#include</TT></A></B>
+<LI>
+<B><A HREF="large/index.html#define"><TT>#define</TT></A></B>
+<LI>
+<B><A HREF="large/index.html#condition"><TT>#if</TT> and <TT>#ifdef</TT></A></B>
+</UL>
+-->
+
+</TD>
+
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../index.html">
+the mp4-sa book</A>-><STRONG>special topics</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+
+</BODY>
+</HTML>

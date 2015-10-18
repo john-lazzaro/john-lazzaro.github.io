@@ -1,0 +1,768 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>Sfront Reference Manual: Part I/3: Sfront Real-Time Operation</TITLE>
+<META name="keywords" content="MP4-SA, SASL, SAOL, MP4, render, midi,
+stream, timesync, real time, real-time, interaction, control, encode,
+encoding, decode, decoding, omissions, extensions">
+<META name="description" content="A part of the Sfront reference
+manual, that describes how to use the program in real-time applications.
+Sfront is a program that translates MP4-SA files into C programs.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+sfront reference manual</A>->
+<STRONG>real-time</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The <TT>sfront</TT> Reference Manual</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part II/3: Sfront Real-Time Operation</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="100%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#stream">Real-time Playback</A>.</B> Sending audio
+directly to sound hardware.
+<LI>
+<B><A HREF="#rt">Real-time Interaction</A>.</B> Sfront
+engines with real time audio and control input.
+<LI>
+<B><A HREF="#plug-in">Plug-in Development</A>.</B> Sfront
+engines that act as AudioUnit plug-ins under Mac OS X.
+</UL>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+This chapter describes how to use <TT>sfront</TT> in stand-alone
+real-time applications. 
+
+<P>
+We begin with basic sound playback, and show how to route audio output
+to a speaker under different operating systems. 
+
+<P>
+We then describe real-time interaction, with a MIDI keyboard and with
+an audio input source.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="stream">Real-time Playback</A></H2>
+
+<P>
+Sfront can create C programs that send audio
+output directly to the sound card of a computer.
+The <TT>-aout</TT> command-line option is used
+to specify the hardware driver for audio output.
+
+<P>
+The right panel shows the currently supported hardware arguments to
+the <TT>-aout</TT> option, and describes an example program to test
+real-time playback.
+
+<P>
+If your hardware is not supported, use the <TT>-aout std</TT>
+command-line option to create a C program that places audio samples on
+standard output. When executing the program on the command line, pipe
+the output to a sound player that can drive the audio hardware.
+
+<H4>Latency</H4>
+
+<P>
+Real-time programs come in two flavors: interactive and streaming.
+
+<P>
+Interactive programs create audio on the fly, in response to user
+input. These programs work best if the delay (or latency) from user
+input to audio output is as short as possible (2 ms is ideal, 10 ms is
+barely tolerable). However, if the latency is too short, audio output
+glitches may happen.
+
+<P>
+Short latency is not as important in audio streaming work. It is
+usually better to use longer latency values, to minimize the chances
+of audio output glitches. For some audio hardware, 20-40ms of latency
+is optimal for streaming; other hardware prefers latencies in the
+200-400ms range.
+
+<P>
+Sfront chooses a default latency value, based on the nature of the
+SAOL program (interactive or streaming) and the type of audio
+hardware.  The <TT><A
+HREF="../cmdline/index.html#latency">-latency</A></TT> command-line
+option overrides the default latency. Try setting the latency to a
+longer time value to minimize audio output artifacts.
+
+<H4>Temporal modes</H4>
+
+<P>
+Sfront programs run under one of three temporal modes: render,
+playback, or timesync. These modes define a set of real-time
+behaviors, described on the right panel.
+
+<P>
+In most cases, the default temporal mode for an audio driver works
+well. Users can override the default behavior by adding the
+<TT>-render</TT>, <TT>-playback</TT>, or <TT>-timesync</TT> flag to
+the sfront command line.
+
+<P>
+Real-time audio drivers usually default to playback mode.  Programs
+running in playback mode accurately compute audio output audio, as
+long as samples are being computed fast enough to keep the audio
+hardware supplied with data.
+
+<P>
+However, if the audio hardware is in danger of running out of samples,
+the decoder deviates from MP4-SA compliance, in an effort to maintain
+the sample stream. Once the danger of sample underrun has past, the
+decoder returns to accurate computation.
+
+<P>
+A SAOL program may also implement graceful degradation techniques
+directly, by monitoring the <TT><A HREF=
+"../../../book/control/saolc/index.html#stnames">cpuload</A></TT>
+standard name and pre-emptively reducing CPU usage. 
+
+<P>
+In contrast to playback mode, render mode computes an accurate
+rendition of the MP4-SA performance at all times. The <A
+HREF="../use/index.html">file rendering</A> audio drivers use render
+mode as the default, and always set <TT>cpuload</TT> to zero.  When
+render mode is used with a real-time audio driver, <TT>cpuload</TT>
+updates to reflect the current CPU usage.
+
+<P>
+The timesync mode forces the program to use at least 1 ms of real
+time to compute 1 ms of audio, by temporarily halting program execution
+if audio is computing too fast. Timesync mode may be used
+to make an audio driver that is not real-time by nature (such as the 
+<TT>-aout null</TT> dummy driver) to behave in a real-time fashion.
+
+<H4> Under Linux ... </H4>
+
+<P>
+Under Linux, if the C program generated by sfront runs as root, audio
+glitches and dropouts are significantly reduced. The Linux features
+used in root mode are described in the <TT>sched_setscheduler</TT> man
+page. <!--These features are used in other popular Linux audio programs
+such as <A HREF="http://www.xmms.org">xmms</A>.-->
+
+<P>
+We have tested sfront root mode carefully, and added special
+"watchdog" features to detect poorly written SAOL programs. However,
+any remaining bugs in sfront could have dangerous effects when the C
+files sfront creates are run as root. In particular, the machine could
+lock up, requiring a hard reboot, and files may be damaged as a
+result. <B>Use this feature at your own risk.</B>
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Output Hardware Options</H2>
+
+<TT>
+<pre>
+See <A HREF="../cmdline/index.html#aout">reference section</A> of
+sfront manual for details on
+using these options.
+
+ option            Environment
+------------------------------
+-aout linux        Linux.
+
+-aout coreaudio    Mac OS X 
+
+-aout pa_win_wmme  Microsoft Windows
+                   (WMME library).
+            
+-aout pa_win_ds    Microsoft Windows
+                   (Directsound).
+
+-aout irix         SGI Irix.
+
+-aout freebsd      FreeBSD.
+
+-aout hpux         HPUX.
+
+-aout std          Generic -- pipe
+                   the output of 
+                   the C program to  
+                   a sound player app.
+
+-aout null         Generic -- ignore
+                   the output of the
+                   the C program. 
+
+</pre>
+</TT>
+
+<H2>Example</H2>
+
+<TT>
+<pre>
+sfront/examples/rtime/aatest 
+contains a simple audio streaming
+test. To run this test under Linux,
+cd into aatest and type "make". 
+
+To run aatest on other platforms, 
+see the README file in the aatest
+directory for details.
+
+</pre>
+</TT>
+
+<H2>Temporal modes</H2>
+
+<TT>
+<pre>
+The real-time behavior
+of an sfront program
+depends on the temporal
+mode it uses. Sfront
+sets the default mode to
+fit the chosen drivers.
+Use one of these options
+to override the default:
+
+
+ option       description
+--------------------------
+-render       Execute the SAOL
+              program as 
+              accurately as
+              possible. Update
+              the SAOL standard
+              name cpuload if a
+              real-time driver 
+              is in use; set 
+              cpuload to 0 if
+              no real-time 
+              drivers are in use.
+
+-playback     Execute the SAOL
+              program to keep
+              up with real-time
+              constraints, even
+              if accuracy is 
+              sacrificed. Update
+              the SAOL standard
+              name cpuload.
+
+-timesync     Use the -playback 
+              accuracy semantics.
+              Also, force the 
+              SAOL program to 
+              take at least 1ms
+              real-time to compute
+              1ms audio. Use this
+              flag with the null
+              and std audio drivers
+              to force real-time 
+              behavior.
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="rt">Real-Time Interaction</A></H2>
+
+<P>
+Sfront can create C programs that can accept real-time audio input
+(which is placed on the <B>input_bus</B>) and control input (which
+provides SASL and MIDI commands to drive the program). The type of
+interactive input is specified by choosing an audio input and control
+driver.
+
+<H4>Audio Input</H4>
+
+<P>
+The <TT>-ain</TT> command-line option is used
+to specify the hardware driver for audio input.
+
+<P>
+The right panel shows the currently supported hardware arguments to
+the <TT>-ain</TT> option, and describes an example program to test
+real-time audio input. To reduce the time delay from input to output,
+use the <TT><A HREF="../cmdline/index.html#latency">-latency</A></TT>
+option to tune system performance.
+
+<P>
+If your hardware is not supported, use the <A HREF="../use/index.html#input"><TT>-ain
+std</TT></A> command-line option to create a C program that reads
+audio samples from standard input. When executing the C program on the
+command line, pipe the output of a separate sound recording program
+into the C program.
+
+<H4>Control Input</H4>
+
+<P>
+The <TT>-cin</TT> command-line option is used to specify the driver
+for control input.  The right panel shows the control input drivers
+present in sfront.
+
+<P>
+Three drivers support real-time input from a MIDI In soundcard jack
+under Linux: the <TT>linmidi</TT> driver for OSS, the <TT>alsamidi</TT>
+driver for simple MIDI input under ALSA, and the <TT>alsaseq</TT>
+driver for the ALSA sequencer. 
+
+<P>
+The <TT>coremidi</TT> driver supports MIDI input under Mac OS X
+(i.e. from a USB, Firewire, PCI or Cardbus slot). Virtual MIDI sources
+are not supported (yet).
+
+<P>
+The <TT>win32</TT> supports soundcard MIDI In under Microsoft Windows,
+and should work with both WMME and DirectSound Windows audio drivers
+(but has not been tested). 
+
+<P>
+Use the <TT>examples/rtime/linmidi</TT> program to test MIDI In 
+performance under Linux. See the README in this example directory
+for details on using the example under Windows.
+
+<P>
+The <TT>ascii</TT> driver provides simple real-time MIDI input from an
+ASCII keyboard.  The <TT>examples/rtime/ascii</TT> example program
+shows how to use this driver under Linux, Mac OS X, and other Unix
+variants.
+
+<P>
+The <TT>gliss</TT> driver is a platform-independent test driver
+for the control interface, and is used by the <TT>examples/gliss</TT>
+example.
+
+<H4><A NAME="interact">OS X notes</A></H4>
+
+<p>
+The <TT>coreaudio</TT> driver uses the default audio devices specified
+in System Preferences.
+
+<P>
+If <TT>coreaudio</TT> is specified for both input and output, it is
+necessary that default input and output devices in System Preferences
+refer to the same device.  To do this, use the <B>Audio
+MIDI Setup</B> utility to create an aggregate input/output device, and
+make the aggregate device the default in System Preferences.
+
+<H4><A NAME="interact">Linux/FreeBSD notes</A></H4>
+
+<P>
+When used for interactive work, the Linux and FreeBSD audio drivers
+use the playback temporal mode by default, with a latency of 0.002
+seconds.  If audio artifacts are a problem, try increasing the latency
+time by using the <TT><A
+HREF="../cmdline/index.html#latency">-latency</A></TT> option.
+
+<P>
+The Linux and FreeBSD audio driver prints out suggestions for the best
+sfront flags to use for a particular SAOL program and control driver
+setup, at the start of execution of the C program generated by sfront.
+Read these instructions and re-run sfront for best results.
+
+<P>
+The linux audio driver detects if the C program generated by sfront is
+running as root, and uses special operating system features to reduce
+audio dropouts (see the man page for <TT>sched_setscheduler</TT> for
+details). Two root modes may be available for interactive use:
+
+<UL>
+<LI> Playback mode, which always keeps the mouse and
+ASCII keyboard "alive." The C program may be terminated at any
+time via control-C. Playback mode is the default root mode.
+<LI> Timesync mode, which disables mouse and alphanumeric
+keyboard input during use. Input is disabled once a NoteOn or NoteOff
+command is received via the MIDI In jack, and is restored 5 seconds
+after the last NoteOn or NoteOff command is received. Set this mode
+by using the <TT>-timesync</TT> sfront command-line option.
+</UL>
+
+<P>
+The Linux audio driver will print out the root modes available for a
+given control driver and SAOL program. Timesync mode offers superior
+quality over playback mode, but is only available in certain
+configurations. 
+<!--
+<P>
+To learn more about tuning your Linux system for
+real-time interactive performance, read the <A
+HREF="http://www.linuxdj.com/audio/quality/">Linux Audio-Quality
+HOWTO</A>, especially the sections on <A
+HREF="http://www.linuxdj.com/audio/quality/#dropouts">dropouts</A>.
+-->
+<P>
+We have tested sfront root mode carefully, and added special
+"watchdog" features to detect poorly written SAOL programs. However,
+any remaining bugs in sfront could have dangerous effects when the C
+files sfront creates are run as root. In particular, the machine could
+lock up, requiring a hard reboot, and files may be damaged as a
+result. <!--In addition, using root mode with sfront networking has
+security implications.--> <B>Use sfront root mode at your own risk</B>.
+
+<H4><A NAME="fstr">File Streaming</A></H4>
+
+<P>
+If sfront reads an MP4 file using the <TT>-bit</TT> option, it
+compiles score information into the <TT>sa.c</TT> file from the entire
+file (configuration and streaming sections).  For MP4 files with large
+streaming sections, the generated <TT>sa.c</TT> may be too large to
+compile, or may run inefficiently.
+
+<P>
+The <TT>fstr</TT> control driver handles large MP4 files 
+more efficiently. The driver opens the MP4 file during
+execution of the <TT>sa.c</TT> file, and inserts score
+information into the running decoder at the correct time.
+The <TT>-bitc</TT> option should be used with this driver,
+so that the streaming score information does not get compiled
+into the <TT>sa.c</TT> file:
+
+<TT>
+<pre>
+sfront -bitc file.mp4 -cin fstr 
+       -aout linux -playback
+gcc -O3 sa.c -lm -o sa
+./sa
+</pre>
+</TT>
+
+<P>
+The <TT>examples/claps</TT> example shows the <TT>fstr</TT> control driver
+in action. Use the:
+
+<TT>
+<pre>
+make stream
+</pre>
+</TT>
+
+<P>
+command to demonstrate the driver.
+Note that this technique only helps for MP4
+files with large streaming sections. If 
+large amounts of score data are present in
+the configuration section, this method does
+not help the data-size problem.
+
+<H4>Writing New Control Drivers</H4>
+
+<P>
+See <A HREF="../../devel/intro/index.html">Part II/1</A> for
+information on writing a control driver for sfront.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+
+<H2>Audio Input Options</H2>
+
+<TT>
+<pre>
+
+See <A HREF="../cmdline/index.html#ain">reference section</A> of
+sfront manual for details on
+using these options, including
+the stability of each driver.
+
+ option           Environment     
+------------------------------
+-ain linux        Linux.
+
+-ain coreaudio    Mac OS X
+
+-ain pa_win_wmme  Microsoft Windows
+                  (WMME library).
+            
+-ain pa_win_ds    Microsoft Windows
+                  (Directsound).
+
+-ain irix         SGI Irix.
+
+-ain freebsd      FreeBSD.
+
+-ain hpux         HPUX.
+
+-ain std          Generic -- pipe
+                  the output of 
+                  the C program to  
+                  a sound player app.
+
+-ain null         Generic -- ignore
+                  the output of the
+                  the C program. 
+</pre>
+</TT>
+
+<H2>Example</H2>
+
+<TT>
+<pre>
+sfront/examples/rtime/linain 
+contains a simple reverb system
+that uses real-time audio input
+and output. 
+
+To run this test under Linux, 
+cd into linain and type "make". 
+
+To run aatest on other platforms, 
+see the README file in the aatest
+directory for details.
+
+</pre>
+</TT>
+
+<H2>Control Input Options</H2>
+
+<TT>
+<pre>
+
+See <A HREF="../cmdline/index.html#cin">reference section</A> of
+sfront manual for details on
+using these options, including
+the stability of each driver.
+
+ option       function     
+--------------------------
+-cin linmidi  uses the MIDI port
+              of soundcards under
+              Linux (OSS). Generates
+              MIDI commands. 
+	      
+-cin alsamidi uses the MIDI port
+              of soundcards under
+              Linux (ALSA). Generates
+              MIDI commands.
+
+-cin alsaseq  supports the ALSA 
+              sequencer under 
+              Linux, for more 
+              sophisticated MIDI
+              control than alsamidi.
+
+-cin coremidi supports external MIDI
+              input in Mac OS X.
+
+-cin freebsdmidi   
+              
+              uses the MIDI port
+              of soundcards under
+              FreeBSD (pcm). Generates
+              MIDI commands.
+  
+-cin ascii    maps the ASCII     
+              keyboard as a  
+              MIDI device. 
+
+-cin gliss    plays piano      
+              glissandos, 
+              up uses MIDI
+              control, down
+              uses SASL.
+
+-cin fstr     plays MP4 streaming
+              packets from a file.
+
+-cin win32    uses the MIDI port
+              of soundcards under
+              Windows. Generates
+              MIDI commands.
+</pre>
+</TT>
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="plug-in">Plug-in Development</A></H2>
+
+<P>
+Sfront can be used to build AudioUnit plug-ins for use on Mac OS X.
+AudioUnit plug-ins can be run inside popular commercial applications,
+such as Ableton Live, Logic, GarageBand, and Final Cut Pro.  
+
+<P>
+Sfront can create AudioUnits that act as virtual instruments that are
+controlled via a MIDI stream (MusicDevice AU type), in-line audio
+signal processors (Effect AU type), and signal processors that also
+receive a MIDI control stream (MusicEffect AU type).
+
+<P>
+The right panel shows the <TT>sfront</TT> command line options related
+to AudioUnits. 
+
+<P>
+This <A
+HREF="../../../book/special/au/index.html">chapter</A> of the MP4-SA
+book provides details on how to use <TT>sfront</TT> to create
+AudioUnits.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>AudioUnit command-line options</H2>
+
+<pre>
+To create an MusicDevice AU (type aumu):
+
+-aout audiounit -cin aucontrolm
+
+An Effect AudioUnit (type aufx):
+
+-aout audiounit -ain audiounit -cin aucontrol
+
+A MusicEffect AudioUnit (type aumf):
+
+-aout audiounit -ain audiounit -cin aucontrolm
+
+To activate debug mode, use -aout audiounit_debug 
+in lieu of -aout audiounit.
+
+--
+
+To set the AU subtype and manufacturer fields:
+
+-au_component_subtype Hiss
+-au_component_manu ucBe
+
+To set the manufacturer prefix for 
+the bundle ID string:
+
+-au_manu_url edu.berkeley.eecs
+
+To set the AU bundle name:
+
+-au_filesystem_name hiss
+
+Name and manufacturer strings in the user-interface:
+
+-au_ui_name "Inline Noise Generator"
+-au_ui_manu "John Lazzaro, UCB EECS"
+
+--
+
+To set the bundle name of a Cocoa UI view:
+
+-au_view_bundlename Filter
+
+To set the name of the class in the UI view
+that implements the AUCocoaUIBase protocol:
+
+-au_view_baseclass Filter_ViewFactory
+</pre>
+</tt>
+
+<P>
+See this <A HREF="../../../book/special/au/index.html">book chapter</A>
+for more details on AudioUnit development.
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<P>
+<B>Next section:</B>
+<A HREF="../cmdline/index.html">Part I/4: Command Line Options</A></H2>
+<!--
+<A HREF="../network/index.html">Part I/4: Networking</A></H2>
+-->
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+</TT>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+sfront reference manual</A>->
+<STRONG>real-time</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+</BODY>
+</HTML>

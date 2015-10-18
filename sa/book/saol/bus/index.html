@@ -1,0 +1,1548 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part II/5: SAOL Buses and Execution Order</TITLE>
+<META name="keywords" content="MP4-SA, SAOL, buses, audio buses, send, 
+route, sequence, effects, execution order, order rules, overriding
+rules, input_bus, output_bus, output, outbus, spatialize">
+<META name="description" content="Creating buses and instantiating
+effects instrument in SAOL. Using the send, route, and sequence 
+statements to build signal paths. Determining execution order. Using
+input_bus and output_bus and inchannels and outchannels.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+SAOL</A>-><STRONG>buses and execution order</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part II/5: SAOL Buses and Execution Order</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="70%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#output">Output Statement</A>.</B> Determining the output
+width of an instrument.
+<LI>
+<B><A HREF="#simple">Simple Audio Output</A>.</B> For programs without
+<B>send</B> and <B>route</B> statements.
+<LI>
+<B><A HREF="#effects">Effects Instruments</A>.</B> Instances that
+process audio input.
+<LI>
+<B><A HREF="#send">Send Statements</A>.</B> Creating effects instances.
+<LI>
+<B><A HREF="#route">Route Statements</A>.</B> Redirecting the audio output
+port.
+<LI>
+<B><A HREF="#graphs">Signal Flow Graphs</A>.</B> Using <B>send</B> and
+<B>route</B> statements together.
+<LI>
+<B><A HREF="#determine">Determining Execution Order</A>.</B> Rules and
+how to override them.
+<LI>
+<B><A HREF="#apply">Applying Execution Order</A>.</B> The impact of
+execution order.
+<LI>
+<B><A HREF="#system">System Buses</A>.</B> The <B>input_bus</B> and
+<B>output_bus</B>.
+<LI>
+<B><A HREF="#standard">Standard Names</A>.</B> Recap of audio-related
+standard names
+<LI>
+<B><A HREF="#ancillary"><TT>outbus</TT> and <TT>spatialize</TT></A>.</B>
+Other statements for audio output.
+<LI>
+<B><A HREF="#summary">Summary</A>.</B>
+
+</UL>
+</TD>
+
+<TD WIDTH="30%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>In This Chapter</A></H2>
+
+<H4>Statements:</H4>
+<B>
+<TT>
+<P>
+<A HREF="#ancillary">outbus</A>
+<A HREF="#output">output</A>
+<A HREF="#route">route</A>
+<A HREF="#send">send</A>
+<A HREF="#determine">sequence</A>
+<A HREF="#ancillary">spatialize</A>
+</TT>
+</B>
+
+<H4>Other Language Elements:</H4>
+<B>
+<TT>
+<P>
+<A HREF="#standard">inchan</A>
+<A HREF="#system">inchannels</A>
+<A HREF="#standard">inGroup</A>
+<A HREF="#effects">input</A>
+<A HREF="#system">input_bus</A>
+<A HREF="#standard">outchan</A>
+<A HREF="#system">outchannels</A>
+<A HREF="#system">output_bus</A>
+<A HREF="#samplerate">srate</A>
+</TT>
+</B>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P> 
+In this chapter we describe how audio signals flow between instrument
+instances in a SAOL program.  
+
+<P> 
+We begin by showing how an instrument writes audio signals to its
+output port.
+
+<P>
+We describe how simple audio output works in SAOL.  In this default
+model, the output ports of all instruments sum onto the system
+<B>output_bus</B> that becomes the final audio output of the program.
+
+<P>
+We describe the general audio model of SAOL, where instruments may
+have audio input as well as output. We describe how to specify the
+structure of multi-instrument systems, and how to determine the width
+of audio buses and the order of instrument execution.
+
+<P>
+We end the chapter with a description of the standard names related
+to audio buses, and a discussion of the ancillary audio output 
+statements <B>outbus</B> and <B>spatialize</B>.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="output">Output Statement</A></H2>
+
+<P>
+A SAOL instrument has a single output port, that holds the audio
+output of the instrument. An instrument generates sound on its
+output port by using the a-rate <B>output</B> statement.
+
+<P>
+At the start of an a-pass, the value of the output port is set to
+zero. An instrument uses <B>output</B> statements to sum values onto
+the output port.  Once the a-pass of the instrument has ended, the
+output port value maintains its value until the start of the next
+a-pass.
+
+<P>
+Like a signal variable, the output port has a width. Unlike a 
+signal variable, the width of the output port is not 
+declared as an integer value.
+
+<P>
+Instead, we infer the width of the output port. In most cases,
+we can determine the width of the output port from the 
+properties of the <B>output</B> statements in the instrument.
+
+<P>
+As shown on the right panel, an <B>output</B> statement takes a list
+of signal expressions as arguments. The width of the <B>output</B>
+statement is the sum of the widths of its arguments.
+
+<P>
+Given this definition of the width of an output statement, we 
+can state several rules about the audio output port of an
+instrument:
+<OL TYPE=1>
+<LI>
+The output port has the width of the widest <B>output</B>
+statement.
+<LI>
+An <B>output</B> statement with width greater than one must have the
+width of the output port.
+<LI>
+An <B>output</B> statement with width greater than one sums data onto
+the output port channel-by-channel fashion.
+<LI>
+A <B>output</B> statement with width equal to one sums its single 
+data value onto each channel of the output port.
+</OL>
+
+<P>
+The right panel shows examples that follow and break these rules.
+
+<P>
+The standard name <B>outchan</B> indicates the output port width.  To
+declare an array <TT>test</TT> whose width is the output port width,
+use the syntax &nbsp <TT>test[<B>outchannels</B>]</TT>.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Syntax</H2>
+<TT>
+<pre>
+output(a1 [,a2, a3 ...]);
+
+a1, a2, ... are signal expressions
+
+output statement is a-rate.
+
+output width is the sum of the
+width of a1, a2, ...
+
+</pre>
+</TT>
+
+<H2>Example [legal]</H2>
+<TT>
+<pre>
+
+instr trichannel() {
+
+asig mono, stereo[2], tri[3];
+
+output(mono, stereo); // width 3
+output(tri);          // width 3
+output(mono);         // width 1
+
+// audio port after a-pass:
+// 0: mono + tri[0] + mono 
+// 1: stereo[0] + tri[1] + mono
+// 2: stereo[1] + tri[2] + mono
+
+}
+
+</pre>
+</TT>
+
+<H2>Example [illegal]</H2>
+<TT>
+<pre>
+
+instr rule2_braker() {
+
+asig stereo[2], tri[3];
+                
+output(tri);    // audio port 
+                // takes width 3
+
+output(stereo); // this statement
+                // is width 2 
+                // --> error
+}
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<B><A NAME="resolve">Unresolved Output Width</A></A>
+</B>
+
+<P>
+The output width rules work well for most
+SAOL coding styles. The right panel
+shows two instruments that are exceptions.
+In these examples, the rules do not
+resolve the width of the instruments.
+
+<P>
+The first example, <TT>self_ref</TT>, uses
+arrays of width <B>outchannels</B>
+in its <B>output</B> statement. This
+coding method lets programmers create
+instruments that have an arbitrary output
+width. As a direct consequence, however, 
+the output width rules fail to resolve a
+width value.
+
+<P>
+The second example, <TT>no_output</TT>, has
+no <B>output</B> statements, but uses the
+standard name <B>outchan</B> in its code.
+The output width of the instrument is 
+needed so that <B>outchan</B> may take
+on its value, but the rules fail to resolve
+a value.
+
+<P> 
+
+In cases like these examples, SAOL
+programmers may code the output width
+in an explicit way, via <B>global</B> 
+block code. We describe this binding
+method in a <A HREF="#binding">later
+section</A> of the chapter.
+
+<P>
+Well-written programs use 
+this binding method for instruments
+that do not resolve. If
+an instrument width is
+left unresolved, the actual
+width of the instrument
+is not normative: two decoders
+may behave in different ways in 
+response to the same code. 
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Unresolved Example 1</H2>
+
+<TT>
+<pre>
+
+instr self_ref() {
+
+  asig a[outchannels], i;
+
+
+  // all statements a-rate
+
+  i = 0;
+
+  while (i < outchan)
+   {
+     a[i] = arand(1);
+   }
+
+  output(a); // width ???
+}
+
+
+</pre>
+</TT>
+
+<H2>Unresolved Example 2</H2>
+
+<TT>
+<pre>
+
+instr no_output() {
+
+  exports ksig osize;
+
+  osize = outchan; // width ???
+}
+</pre>
+</TT>
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="simple">Simple Audio Output</A></H2>
+
+<P>
+In this section, we describe audio output operation for programs
+that have no <B>send</B> or <B>route</B> statements. The right
+panel shows an example program of this type.
+
+<P>
+Every SAOL program includes an <B>output_bus</B>.  The
+<B>outchannels</B> global parameter sets the width of the
+<B>output_bus</B> (the default width is one).  There is also a
+storage location for the final audio output of the system, that is the
+same width as the <B>output_bus</B>.
+
+<P>
+At the start of each a-pass, all channels of the <B>output_bus</B> are
+set to zero. The final audio output of the system is also set to zero.
+As each active instrument instance completes its a-pass, the final
+value of its output port is added to the <B>output_bus</B>.
+
+<P>
+If the output port of an instrument has a width greater than one, its
+width must match the <B>output_bus</B> width, and the output port is
+added to <B>output_bus</B> on a channel-by-channel basis.  If the
+audio output port of an instrument has width one, this output port
+value is added to each channel of the <B>output_bus</B>.
+
+<P>
+After all instances execute, the <B>output_bus</B> is summed onto
+final audio output of the system.  The final audio output is clipped
+to fall in the range -1.0 to +1.0, and is then usually sent to a file
+(for storage) or to a D/A converter (for listening).
+
+<P>
+Note that no information flows from one a-pass to the next on the
+<B>output_bus</B>, as the <B>output_bus</B> is initialized to zero 
+at the start of each a-pass.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Example</H2>
+<TT>
+<pre>
+
+global {
+outchannels 2;  // stereo output
+}
+
+
+instr mono () {
+
+asig a;
+
+output(a);
+}
+
+
+instr stereo () {
+
+asig b[2];
+
+output(b);
+}
+
+
+// output_bus at end of a-pass:
+//
+// 0: a + b[0], clipped to [-1,1]
+// 1: a + b[1], clipped to [-1,1]
+
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="effects">Effects Instruments</A></H2>
+
+<P> 
+An instrument instance that process audio input is called an
+<I>effects</I> instrument. Effects instruments are created at the
+start of program execution, by <B>send</B> statements in the
+<B>global</B> block.
+
+<P> 
+Effects instrument instances have an <I>audio input port</I> that
+holds the input values for the instance.  The audio input port is
+specified in the <B>send</B> statement as a set of buses, as we
+describe in the <A HREF="#send">next section</A>. The audio input port
+has a width determined by these bus widths.
+
+<P>
+At the start of an a-pass, the buses that make up the audio input port
+of an effects instance are set to zero. As the a-pass proceeds, other
+instruments may sum onto these buses.
+
+<P>
+When the a-pass of an effects instance begins, the value of its audio
+input port is copied into the a-rate array standard name
+<B>input</B>. We describe this process in more detail in the <A
+HREF="#send">next section</A>.
+
+<P>
+The standard name <B>inchan</B> holds the width of the audio input
+port.  The array width specifier <B>inchannels</B> also denotes the
+width of the audio input port; it may be used to declare other arrays
+in the effects instrument.
+
+<P>
+An effects instrument typically processes the value held by the
+<B>input</B> standard name, and writes a modified version to its audio
+output port.
+
+<P>
+See the right panel for an example of an effects instrument.
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Example</H2>
+<TT>
+<pre>
+
+// effects instrument
+// scales the audio input port
+
+instr scale(sfactor) 
+
+{
+  ivar i;
+
+  // inchannels width of port
+  ivar w[inchannels];
+
+  /****************
+  /* runs at i-rate
+  /****************
+  
+  i = 0;
+  while (i < inchan)
+   {
+     w[i] = sfactor;	
+     i = i + 1;
+   }
+
+  /****************
+  /* runs at a-rate
+  /****************
+
+  // input holds audio input port
+
+  output(w*input);
+}
+
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="send">Send Statements</A></H2>
+
+<P>
+A <B>send</B> statement instantiates an effects instrument.  It
+specifies the parameter initialization for the instrument, and
+declares the structure of its audio input port.
+
+<P>
+A <B>send</B> statement may only appear in a <B>global</B> block.  It
+executes at the start of a simulation, after the i-pass of the
+<B>startup</B> instrument. The <B>send</B> statement argument list has
+three sections, that are separated by semicolons.
+
+<P> 
+The first section specifies the name of the instrument to be
+instantiated. The <B>send</B> statement in the example on the right
+panel instantiates the instrument <TT>scale</TT> (defined in the right
+panel of the <A HREF="#effects">last section</A>).
+
+<P> 
+The second section is an i-rate expression list, whose values
+initialize the instrument parameters of the instance.  In this
+example, the parameter <TT>sfactor</TT> of this instance of
+<TT>scale</TT> is initialized to 1.2. The number of instrument
+parameters must match the number of expressions in the list.
+
+<P>
+The third section specifies the audio input port for the instrument as
+a list of one or more buses.  Usually these buses are <I>user-defined
+buses</I>. Like the <B>output_bus</B>, a user-defined bus is
+initialized to zero at the start of each a-pass, and instruments may
+sum onto it during its a-pass.
+
+<P>
+User-defines buses have a width. Bus width may be specified using
+array declaration syntax, as <TT>bus2</TT> in the example shows.  Like
+a global array declaration, the bus width may be a positive integer,
+or the tokens <B>inchannels</B> or <B>outchannels</B>.  These tokens
+declare buses with the width of the <B>input_bus</B> or
+<B>output_bus</B> system buses.
+
+<P>
+User-defined buses may also be declared without a width, as
+<TT>bus1</TT> in the example shows. In this case, the bus width is
+inferred from the widths of instruments that write to it, as we detail
+in the <A HREF="#route">next section</A> of this chapter.
+
+<P>
+The width of the audio input port is the sum of the widths of the
+user-defined buses in the third section of its <B>send</B>
+statement. The value of the audio input port is the concatenation of
+the values on these buses, and is copied into the standard-name array
+<B>input</B> as detailed in the <A HREF="#effects">last
+section</A>.
+
+<P>
+All user-defined buses must appear in the third section of at least
+one <B>send</B> statement.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<H2>Example</H2>
+<TT>
+<pre>
+global {
+
+ivar i1; // set to 4 by startup()
+
+send(scale; 0.3*i1; bus1, bus2[3]);  
+
+}
+
+
+// if an instr named startup exists,
+// it runs at the start of program.
+// execution.
+
+instr startup() {
+
+exports ivar i1;
+
+i1 = 4;
+
+}
+</TT>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="route">Route Statements</A></H2>
+
+<P>
+The <A HREF="#simple">default behavior</A> of an instrument is to sum
+its audio output port to the system <B>output_bus</B>.  The
+<B>route</B> statement changes that default behavior, and redirects
+the output of an instrument to a user-defined bus.  A <B>route</B>
+statement may only appear in the <B>global</B> block.
+
+<P>
+The set of <B>route</B> statements that target a user-defined bus set
+the <I>implicit</I> width for the bus. This width must be compatible
+with any <I>explicit</I> width declarations that appear in <B>send</B>
+statements.
+
+<P>
+A <B>route</B> statements consists of a bus name, followed by a list
+of instruments. See the right panel for statement syntax.  An
+instrument in the list sums its audio output port onto a section of
+the targeted bus. The width of the <B>route</B> statement is the
+sum of the audio output port widths of the listed instruments.
+
+<P>
+Several <B>route</B> statements may target the same bus.  An
+instrument may be in the instrument list of several <B>route</B>
+statements, and may appear several times in the same <B>route</B>
+statement.  
+
+<P>
+If a <B>send</B> statement has declared a bus to have width
+<TT>N</TT>, all route statements that target the bus must have width
+<TT>N</TT> or width one. This rule also applies to <B>route</B>
+statements that target the <B>output_bus</B>, whose width is set by
+the global parameter <B>outchannels</B>.
+
+<P>
+If a <B>send</B> statement does not provide an explicit width for a
+bus, these rules describe the width semantics for <B>route</B>
+statements targeting the bus:
+
+<OL>
+<LI>
+All route statements targeting a bus either must have width one or
+must have the same non-scalar width.
+<LI>
+A user-defined bus has the width of the widest <B>route</B> statement
+targeting it.
+</OL>
+
+<H4>Bus Writing Behavior</H4>
+
+<P>
+If a <B>route</B> statement has width one (and thus has only one
+instrument in its list), this instrument writes its audio output port
+value to every channel of the targeted bus.
+
+<P>
+Otherwise, the first instrument on the list (that has width w1) adds
+its audio output bus value to the first w1 channels of the targeted
+bus, the second instrument on the list (that has width w2) adds its
+audio output bus to the next w2 channels of the targeted bus, etc. In
+this way, each instrument sums onto its own section of the bus.
+
+<P>
+Note that a <B>route</B> statement redirects all active instances of
+an instrument. There is no way in SAOL to route difference instances
+of the same instrument to different buses.
+
+<H4><A NAME="binding">Unresolved Instrument Widths</A></H4>
+
+<P>
+A <B>route</B> statements may also act to bind instruments with
+unresolved widths (as described in a <A HREF="#resolve"> previous</A>
+section). To bind an unresolved instrument, use a <B>route</B>
+statement to route it to a bus whose width is known (for example, a
+bus whose width is declared in a <B>send</B> statement, or the
+<B>output_bus</B>).
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<H2>Syntax</H2>
+<TT>
+<pre>
+
+route(busname, inst1 [,inst2, ...]);
+
+</pre>
+</TT>
+
+<H2>Example (for next section)</H2>
+<TT>
+<pre>
+
+global {
+
+outchannels 2;
+route(drybus, left, right);
+send(rvb; ; drybus);
+route(rvbus, rvb);
+send(mix; 0.2, 1 ; rvbus, drybus);
+
+}
+
+
+instr left()
+
+{
+  output(arand(0.2));
+}
+
+instr right()
+
+{
+  output(arand(0.2));
+}
+
+instr rvb() 
+
+{
+  output(
+        reverb(input[0]+input[1],5));
+}
+
+instr mix(rev, dry)
+
+{
+  asig out[2];
+
+  out = rev*input[0];
+  out[0] = out[0]+ dry*input[1];
+  out[1] = out[1]+ dry*input[2];
+  output(out);
+}
+</pre>
+</TT>
+
+</TT>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="graphs">Signal Flow Graphs</A></H2>
+
+<P> 
+A set of <B>send</B> and <B>route</B> statements act together to map
+out a diagram. The instances created by <B>send</B> statements, along
+with instruments instanced by SASL lines, create the boxes in this
+diagram. The <B>route</B> statements draw lines between the boxes, via
+buses.
+
+<P> 
+The right panel shows the graph implied by the example code shown in
+the right panel of the <A HREF="#route">previous section</A>. In this
+example, the non-effects instruments <TT>left</TT> and <TT>right</TT>
+are sent through the effects instrument <TT>rvb</TT>, and the dry and
+wet outputs are combined in the <TT>mix</TT> effects instrument.
+
+<P>
+The graph of this program suggests the correct execution order for
+the different instruments during the a-pass. 
+
+<OL>
+<LI>
+The <TT>left</TT> and <TT>right</TT> instruments should run, and add
+their outputs onto sections of the <TT>drybus</TT>.
+<LI>
+The <TT>rvb</TT> should execute, adding its output onto the
+<TT>rvbus</TT>.
+<LI>
+The <TT>mix</TT> should run and add its output to the
+<TT>output_bus</TT>.
+</OL>
+
+<P>
+Note that if a different order is used, different sound would be
+produced. For example, if steps 2 and 3 were reversed, the initial
+zero value of the <TT>rvbus</TT> bus would be processed by
+<TT>mix</TT>, since <TT>mix</TT> would run before <TT>rvb</TT>.
+
+<P>
+SAOL examines the <B>send</B> and <B>route</B> statements to deduce
+the best execution order of the instruments in the program.  In the
+next section, we describe the rules SAOL uses for execution order, and
+how to override them.  </TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Graph of the <A HREF="#route">Example</A> Above</H2>
+<TT>
+<pre>
+--------     ---------
+| left |     | right |
+--------     ---------
+   |             |
+   |             |
+   |             |
+**************************drybus
+   |               |      (w=2)
+   |               |
+   |               |
+-------            |
+| rvb |            |
+-------            |
+   |               |
+   |               |
+   |               |
+***********rvbus   |
+       |   (w=1)   |
+       |           |
+       |           |
+     ------------------
+     |      mix       |
+     ------------------
+             |
+             |
+             |
+******************** output_bus
+                     (w=2)
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="determine">Determining Execution Order</A></H2>
+
+<P>
+The right panel shows the four rules for determining
+the execution order of instruments in a SAOL program.
+
+<P>
+The first rule codifies the idea that instruments that produce a
+signal should run before instruments that use the signal. The second
+rule handle cases where the first rule breaks down because of loops in
+graph. The final two rules deal with special instruments.
+
+<P>
+If the ordering between two instruments is not specified by these
+rules, the instruments may run in any order.
+
+<P>
+Applying these rules to the example in the <A HREF="#graphs">previous
+section</A>, rule 1 dictates that instrument <TT>rvb</TT> runs after
+instruments <TT>left</TT> and <TT>right</TT>, but before instrument
+<TT>mix</TT>. The execution order of <TT>left</TT> and <TT>right</TT>
+is left unspecified.
+
+<P>
+The ordering specified by these rules may be overridden by the
+<B>sequence</B> statement. A <B>sequence</B> statement has a
+list of instruments as parameters. The order of instruments in
+the list sets the order of their execution.
+
+<P>
+The right panel shows the syntax of the <B>sequence</B> statement, and
+a sample <B>sequence</B> command that sets an explicit ordering for
+the <TT>left</TT> and <TT>right</TT> instruments of the <A HREF="#graphs">example above</A>.
+
+<P>
+<B>Sequence</B> statements may only be used in the <B>global</B>
+block.  The set of <B>sequence</B> statements in a <B>global</B> block
+may not specify an ordering loop.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Execution Order Rules</H2>
+
+<OL>
+<LI>
+If instrument 1 is routed to a bus which is sent to an effects
+instrument 2, instrument 1 executes before instrument 2.
+<LI>
+If loops are created by <B>send</B> and <B>route</B> statements, the
+order of the <B>send</B> statements in the <B>global</B> block defines
+the order of the instances created by the <B>send</B> statements. A
+<B>send</B> statement that creates the backward part of a loop does not
+execute.
+<LI>
+Instances of the <B>startup</B> instrument execute first.
+<LI>
+If a <B>send</B> statement has the <B>output_bus</B> in its bus list,
+the instrument instanced by the <B>send</B> statement executes last.
+This instrument has special semantics, which we describe in a 
+<A HREF="#system">later section</A>.
+</OL>
+
+<H2>Sequence Syntax</H2>
+<TT>
+<pre>
+sequence(inst1, inst2 [,inst3 ...]);
+
+</pre>
+</TT>
+
+<H2>Sequence Example</H2>
+<TT>
+<pre>
+sequence(left, right);
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="apply">Applying Execution Order</A></H2>
+
+<P>
+The execution order of instruments is used in several
+ways in a SAOL program.
+
+<H4>Width Assignment</H4>
+
+<P>
+The execution order is used in the process of determining the width of
+user-defined buses and of instrument audio input and output ports. See
+the right panel for details.
+
+<P>
+Recall that in earlier sections, we described the process of
+determining the width of audio <A HREF="#send">input</A> and <A
+HREF="#output">output</A> ports and of <A HREF="#route">user-defined
+buses</A>. The right panel defines the correct behavior in unusual
+"edge cases" where looped signal graphs make the width of buses
+and instruments depend on ordering.
+
+
+<H4><A NAME="startup">Run-Time Ordering</A></H4>
+
+<P>
+In the tutorial introduction, we <A
+HREF="../../tut/index.html#execution">describe</A> how SAOL simulated
+time is broken up into a-cycles and k-cycles. We show that the a-pass
+code for an instrument runs during an a-cycle and the i-pass and
+k-pass code for an instrument runs during a k-cycle.
+
+<P>
+The execution order defines the order that the i-pass and k-pass code
+of each instrument in a program runs within a single k-cycle, and
+defines the order that the a-pass code of each instrument runs within
+a single a-cycle.
+
+<P>
+The only exception to this ordering happens in the case of the
+<B>startup</B> instrument. If an instrument named <B>startup</B>
+exists in the program, an instance of this instrument is created
+before the first k-cycle begins, and its i-pass is immediately
+run. 
+
+<P>
+This exception allows global i-rate variables to be initialized by the
+<B>startup</B> instrument, so that i-rate expressions in the global
+block can use these variables during SAOL program initialization. See
+<A HREF="../../control/saolc/index.html#order">Part III/3</A> for the
+exact timing of the i-pass execution of the <B>startup</B> instrument.
+
+<P>
+Note that the execution order define an ordering for instruments
+<I>within</I> a single k-cycle or a-cycle, but not <I>between</I>
+successive k-cycle or a-cycles. 
+
+<P>
+For example, to execute a program consisting of two instruments for
+five consecutive a-cycles, it is legal to execute all five a-cycles
+for the first instrument in the execution order, followed by five
+a-cycles for the second instrument. This behavior is legal since the
+order within each a-cycle is preserved.
+
+<P>
+The SAOL language is designed so that program semantics are not
+affected by this type of inter-cycle re-ordering.  For example, the
+semantics of <B>import</B> and <B>export</B> (as explained in an <A
+HREF="../vars/index.html#vars_instr">earlier chapter</A>) set a
+deterministic method for sharing global variables that is not affected
+by inter-pass instrument ordering.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Width Assignment</H2>
+
+<P>
+Instrument width assignment is done in execution order. The following
+steps are repeated for each instrument as it appears in the execution
+order. 
+
+<OL>
+<LI>
+If the instrument is not a target of a <B>send</B> statement, its
+audio input port width is set to 1.  If an instrument is a target of a
+<B>send</B> statement, the width of its audio input port is determined
+by examining the <B>send</B> statement, as described in an earlier <A
+HREF="#send">section</A> of this chapter. 
+<LI>
+Using the <A HREF="#output">rules</A> described in an
+earlier section, we determine the width of the output
+port for the instrument.  If an width of the output
+port is unresolved, use the method in this earlier
+<A HREF="#binding">section</A> to resolve its width, if possible.
+<LI>
+Any <B>route</B> statement whose instruments all have a defined output
+port width may set the width of its targeted bus, and detect any width
+mismatch syntax errors, as described in an earlier <A
+HREF="#route">section</A>.
+</OL>
+
+<P>
+At the start of the process, a subset of buses have a known width: the
+<B>input_bus</B>, the <B>output_bus</B>, and all buses whose widths
+are declared in <B>send</B> statements. As the algorithm processes
+each instrument, step 3 acts to define the width of the remaining
+buses.
+
+<P>
+The results of the algorithm are unspecified if step 1 fires for a
+<B>send</B> statement before its buses have defined widths. SAOL
+programmers should explicitly define bus widths, if necessary, to
+avoid this issue.
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="system">System Buses</A></H2>
+
+<P>
+In this section, we formally define the behavior
+of the system buses <B>input_bus</B> and 
+<B>output_bus</B>. The <B>input_bus</B> is a
+system bus that lets SAOL programs process
+external audio streams, such as WAV files and 
+live microphones. The <B>output_bus</B> holds
+the final audio output of the SAOL decoder.
+
+<H4>Bus Widths</H4>
+
+<P>
+The global parameters <B>inchannels</B> and <B>outchannels</B> 
+may be used to set the width of the <B>input_bus</B> and
+<B>output_bus</B>, respectively. See the right panel for an example.
+
+<P>
+If the global parameter <B>inchannels</B> is not set, the 
+<B>input_bus</B> has the width of the external audio stream.
+If no audio stream is provided, the <B>input_bus</B> has a
+width of zero. If the global parameter <B>outchannels</B> is
+not set, the <B>output_bus</B> has a scalar width.
+
+<H4>Referencing Widths</H4>
+
+<P>
+In the <B>global</B> block, an array may be declared
+that has the same width as the <B>input_bus</B> or
+<B>output_bus</B>, by using the tokens <B>inchannels</B>
+or <B>outchannels</B> respectively. The width of the
+systems buses may be used in expressions in the 
+<B>global</B> block, by using the standard names
+<B>inchan</B> and <B>outchan</B>. See the right
+panel for examples.
+
+<P>
+Note that <B>inchannels</B>, <B>outchannels</B>, 
+<B>inchan</B> and <B>outchan</B> serve a different
+role in instrument code. In an instrument, these 
+tokens and standard names code instrument input 
+and output width, not the width of <B>input_bus</B>
+and <B>output_bus</B>. 
+
+<P>
+SAOL does not provide direct access to the width of the
+<B>input_bus</B> or <B>output_bus</B> in instrument code.
+However, elements of a <B>global</B> block table may be 
+initialized with <B>inchan</B> and <B>outchan</B>;
+these global variables may then be imported into
+instrument code. Similar tricks with <B>global</B>
+block calls to user-defined opcodes (described in 
+<A HREF="../../opcodes/user/index.html">Part IV/4</A>) may be
+used to initialize global scalar variables with the
+system bus widths.
+
+<H4><A NAME="samplerate">Sampling Rates</A></H4>
+
+<P>
+The global parameter <B>srate</B> sets the audio sampling
+rate of the program. If this parameter is not set, the
+audio sampling rate is set to the sampling rate of the
+external audio input. If no audio input is provided, the
+audio sampling rate is 32,000 cycles per second.
+
+<H4>Route and Send Statements</H4>
+
+<P>
+The <B>input_bus</B> may not be the target of a <B>route</B>
+statement, but may be used in a <B>send</B> statement.
+
+<P>
+The <B>output_bus</B> may be the target of a <B>route</B>
+statement. If the <B>route</B> statement has non-scalar
+width, the width of the <B>route</B> statement must match
+the width of the <B>output_bus</B>.
+
+<P>
+An <B>output_bus</B> used in a <B>send</B> statement has
+special semantics, as detailed below.
+
+<H4>Semantics</H4>
+
+<P>
+At the start of an a-pass, the <B>input_bus</B> is initialized with
+audio samples from the external audio source. The <B>input_bus</B> may
+be sent to effects instruments using a <B>send</B> statement.  Since
+the <B>input_bus</B> may not be target of a <B>route</B> statement,
+its value is unaltered throughout the a-pass.
+
+<P> 
+At the start of an a-pass, the <B>output_bus</B> is initialized to
+zero.  All programs have a storage location for the final audio output
+of the system. At the start of an a-pass, final audio output of the
+system is initialized to zero.
+
+<P>
+During the a-pass, instruments that have not been redirected to
+user-defined buses via the <B>route</B> statement sum onto the
+<B>output_bus</B>. In addition, <B>route</B> statements may also
+target the <B>output_bus</B>.
+
+<P>
+If the <B>output_bus</B> is not used in a <B>send</B> statement, then
+at the end of the a-pass, the values of the <B>output_bus</B> sums
+onto the final audio output of the system. In this case, the width of
+the final audio output is the width of <B>output_bus</B>.
+
+<P>
+If the <B>output_bus</B> is used in a <B>send</B> statement, then the
+output of the instance created by that <B>send</B> statement sums onto
+the final audio output of the system. In this case, the width of the
+final audio output is the audio output port of the this instance.
+The <B>output_bus</B> may only be used in a single <B>send</B> statement.
+
+<P>
+The final audio output is clipped to fall in the range
+<TT>[-1,1]</TT> and is then usually sent to a file (for storage) or
+to a D/A converter (for listening).
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>Example</H2>
+
+<TT>
+<pre>
+
+global {
+
+// sets system bus width
+
+inchannels  1;
+outchannels 2;
+
+// array widths match system buses
+
+ksig inscale[inchannels];
+ksig outscale[outchannels];
+
+// using input_bus in a send
+// using inchan and outchan
+
+send(rvb; inchan + outchan; input_bus);
+
+// output_bus in a send statement
+
+send(scale; 0.5 ; output_bus);
+
+}
+
+</pre>
+</TT>
+ 
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="standard">Standard Names</A></H2>
+
+<P>
+Throughout the chapter, we have referred to
+standard names that are used in the audio
+system. The right panel lists these standard
+names for reference.
+
+<P>
+The <B>input</B> array may be used only in an instrument, and 
+holds the value of the audio input port. It's companion array,
+<B>inGroup</B>, codes the bus structure of the <B>send</B>
+statement that created the instance. See the code examples
+on the right panel for the semantics of <B>inGroup</B>.
+
+<P> 
+In an instrument, <B>inchan</B> and <B>outchan</B> refer
+to the width of the audio input port and the audio 
+output port of the instrument. In the <B>global</B> block,
+<B>inchan</B> refers to the width of the <B>input_bus</B>,
+and <B>outchan</B> refers the width of <B>output_bus</B>. 
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>Bus Standard Names</H2>
+<TT>
+<PRE>
+ivar inchan;
+asig input[inchannels];
+ivar inGroup[inchannels];
+ivar outchan;
+</PRE>
+</TT>
+
+<H2>InGroup Examples</H2>
+<TT>
+<PRE>
+
+// width of bus1: 4
+// width of bus2: 2
+// width of bus3: 1
+
+send(test1; ; bus1);
+
+// inside test1, standard name
+// inGroup is width 4, and has 
+// the value [1 1 1 1]
+
+send(test2; ; bus2, bus3);
+
+// inside test2, standard name
+// inGroup is width 3, and has 
+// the value [1 1 2]
+
+send(test3; ; bus1, bus2, bus3);
+
+// inside test3, standard name
+// inGroup is width 7, and has 
+// the value [1 1 1 1 2 2 3]
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="ancillary"><TT>outbus</TT> and <TT>spatialize</TT></A></H2>
+
+<P>
+The <B>output</B> statement is the primary way for an instrument to
+generate audio output. In this section, we describe two other a-rate
+statements that may generate audio output, the <B>outbus</B> and
+<B>spatialize</B> statements.
+
+<H4><TT>outbus</TT></H4>
+
+<P>
+The <B>outbus</B> statement adds a value directly to a bus. This
+statement is useful for creating secondary bus structures that are
+independent from the main signal path flowing through the audio input
+and output ports of the instruments. These secondary buses may play a
+role similar to effects and monitor buses on audio mixing consoles.
+
+<P>
+The first parameter of the <B>outbus</B> statement is the bus name,
+and the remaining parameters are a list of expressions to add to the
+bus. The <B>outbus</B> statement has a width, which is the sum of the
+widths of its expression parameters.  The right panel shows the syntax
+of the statement.
+
+<P>
+If the <B>outbus</B> statement has a scalar width, the value of
+the expression is added to each channel of the named bus. Otherwise,
+the width of the <B>outbus</B> statement must match the width of
+the named bus, and the array value formed by the concatenation of
+the expressions in the <B>outbus</B> statement is added to the
+named bus.
+
+<P>
+The <B>outbus</B> statement does not create new buses, and does not
+play a role in determining the width of buses. The statement can only
+write to buses that already exist: the <B>output_bus</B>, or
+user-defined buses created in <B>send</B> statements. If only
+<B>outbus</B> statements write to a user-defined bus, the <B>send</B>
+statement that creates the bus should declare the bus width
+explicitly.
+
+
+<P>
+An <B>outbus</B> statement may not appear in an instrument that is
+instantiated by a <B>send</B> statement that uses the
+<B>output_bus</B>. The <B>outbus</B> statement may not target the
+special system <B>input_bus</B>.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><TT>outbus</TT></H2>
+<TT>
+<pre>
+outbus(busname, exp1 [,exp2, ...]);
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4><TT>spatialize</TT></H4>
+
+<P>
+The <B>spatialize</B> statement places a monophonic sound in the
+3-dimensional space surrounding a listener. The <B>spatialize</B>
+statement bypasses the SAOL bus system entirely, and adds audio sample
+data to the final audio output.
+
+<P>
+The right panel shows the syntax of the <B>spatialize</B> statement.
+The first parameter to <B>spatialize</B> is a scalar expression of
+the monophonic sound, and may be a-rate or slower.
+
+<P>
+The remaining parameters describe the position the monophonic sound
+should be placed in space. These parameters may be k-rate or slower.
+
+<P>
+The second parameter codes the azimuthal angle where the sound should
+be placed, in radians. Zero degrees is directly in front of the
+listener, and <TT>pi/2</TT> is to right of the listener.
+
+<P>
+The third parameter codes the elevation angle where the sound should
+be placed, in radians. Zero degrees is in the horizontal plane of the
+listener, and <TT>pi/2</TT> is directly above the listener.
+
+<P>
+The fourth parameter codes the distance the sound is from the
+listener, in meters.
+
+<P>
+All <B>spatialize</B> statements sum onto the final audio output of
+the system. As usual, the <B>output_bus</B> (or the output of the
+instance that is sent the <B>output_bus</B>) also sums onto the final
+audio output of the system.
+
+<P>
+The final audio output is clipped to <TT>[-1,1]</TT> at the end of the
+a-pass, and is then usually sent to a file (for storage) or to a D/A
+converter (for listening).
+
+<P>
+The method the <B>spatialize</B> statement uses to place sound is
+non-normative. The final audio result may sound different on
+different decoders.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>spatialize</TT></H2>
+
+<TT>
+<pre>
+spatialize(audio, azimuth, 
+           elevation, distance);
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="summary">Summary</A></H2>
+
+<P>
+This chapter is the last chapter of Part II. In Part II, we
+have described most of the SAOL language in a detailed way.
+
+<P>
+Several statements and standard names that involve the control of
+instruments have been postponed until <A
+HREF="../../control/saolc/index.html">Part III/3</A>, since a complete
+knowledge of SASL (<A HREF="../../control/sasl/index.html">Part
+III/1</A>) and MIDI (<A HREF="../../control/midi/index.html">Part
+III/2</A>) is necessary to understand these structures.
+
+<P>
+In addition, we postpone a description of 
+user-defined opcodes until <A
+HREF="../../opcodes/user/index.html">Part IV/4</A>.  <A HREF="../../opcodes/index.html">Part IV</A> specializes in
+opcodes, and includes a complete description of the core opcode
+library, as well as a few language structures specialized for opcodes.
+
+<P>
+We also postpone a discussion of templates, a language feature
+for constructing families of instruments that share common code, until
+<A HREF="../../template/index.html">Part V/2</A>.
+
+<P>
+<B>Next: </B>
+<A HREF="../../control/index.html">Part III: Instrument Control</A></H2>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<pre> </pre>
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+SAOL</A>-><STRONG>buses and execution order</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+
+</BODY>
+</HTML>

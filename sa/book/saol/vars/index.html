@@ -1,0 +1,1109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part II/1: SAOL Numbers and Variables</TITLE>
+<META name="keywords" content="MP4-SA, syntax, semantics, numbers, 
+names, standard names, variables, parameters, declarations, declaration,
+global variables, instr variables, imports, exports, array, scalar,
+SASL, SAOL, MP4">
+<META name="description" content="Variable declarations, numeric
+constants, standard names, and instr parameters in the language of
+MPEG 4 Structured Audio.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+SAOL</A>-><STRONG>numbers and variables</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part II/1: SAOL Numbers and Variables</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="100%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#numbers">Numbers</A>.</B> Shows correct syntax for
+numeric constants.
+<LI>
+<B><A HREF="#names">Names</A>.</B> Choosing legal names for your SAOL
+variables (and other elements).
+<LI>
+<B><A HREF="#decl">Declarations</A>.</B> Describes the types of 
+variable declarations in SAOL.
+<LI>
+<B><A HREF="#preamble">Instr Parameters</A>.</B> Declaring parameters in
+the <B>instr</B> preamble.
+<LI>
+<B><A HREF="#vars_instr"> Instr Variables</A>.</B> Syntax for scalar and
+array variable declarations, including imports and exports.
+<LI>
+<B><A HREF="#vars_global"> Global Variables</A>.</B> How to declare
+and initialize global variables.
+<LI>
+<B><A HREF="#stnames"> Standard Names</A>.</B> Describes the
+general-purpose standard names, and provides links for the
+special-purpose ones.
+<LI>
+<B><A HREF="#glo_param">Global Parameters</A>.</B> Shows how to
+change system defaults with global parameters.
+</UL>
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+In this chapter, we describe the atoms of SAOL expressions:
+
+<UL>
+<LI>
+Numbers
+<LI>
+<B>instr</B> parameters
+<LI>
+<B>instr</B> signal variables
+<LI>
+<B>global</B> signal variables
+<LI>
+Standard names
+</UL>
+
+<P>
+We introduced these elements in the <A
+HREF="../../tut/index.html#simple">tutorial examples</A> in Part I of
+this book.
+
+<P>
+In this chapter, we provide a complete description of each element
+type. We explain the declaration syntax for variables, and define the
+rate and width properties for all elements. These properties are the
+foundation of the rate and width rules for SAOL expressions and
+statements covered in <A HREF="../exstat/index.html">Part II/2</A>.
+
+<P>
+We also describe global parameters, and explain the rules for setting
+a-rate and k-rate values.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="numbers">Numbers</A></H2>
+
+<P>
+Numbers in SAOL expressions are represented as 32-bit floating point
+quantities. The panel on the right shows correct and incorrect ways to
+write numbers in SAOL, in the context of a SAOL assignment statement.
+
+<P>
+The SAOL language specification specifies the floating-point
+representation loosely ("32-bit") instead of requiring the IEEE 754
+floating point format, so that digital signal processing chips that
+use non-standard floating-point formats may host compliant MP4-SA
+decoders.
+
+<P>
+The rate and width rules we present in <A
+HREF="../exstat/index.html">Part II/2</A> treat numbers as i-rate
+quantities with scalar width.
+
+<P>
+There are several SAOL language constructs that use positive integers
+(for example, the width specifier in an array declaration).  Unless
+otherwise noted, these integers may take any value up to
+4,294,967,295.
+
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Legal number syntax:</H2>
+
+<TT>
+<pre>
+a =  32.0;  // floating point number
+a =   32;   // also floating point! 
+a = -6.0;   // a negative number
+a = .0923;  // no digit before . ok
+a = -.0923; // even with minus sign
+
+a = 23e+12; // exponent may have plus,
+a = 23e-12; // minus,
+a = 23e12;  // or neither
+
+a = 2.0e-12; // mantissa may have .
+a = .2e12;   // no digit before . ok
+</pre>
+</TT>
+
+<H2>Illegal number syntax:</H2>
+
+<TT>
+<pre>
+a =   +1;   // illegal use of +
+a = 2e12.0; // illegal use of . 
+a = 2 3e-1; // illegal space
+a = 2,302;  // illegal comma
+</pre>
+</TT>
+
+<H2>Common error:</H2>
+
+<TT>
+<pre>
+a =  1/10;  // is equal to 0.1,
+            // not zero!
+</pre>
+</TT>
+ 
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="names">Names</A></H2>
+
+<P>
+The names chosen for variables must conform to SAOL naming rules.
+These rules also apply to other named elements in SAOL, such as
+buses and <B>instr</B>s.
+
+<P>
+Names must start with a letter or the underscore symbol. The rest of
+the characters may be letters, digits, or the underscore symbol. SAOL
+names are case sensitive (abba and ABBA are different names in
+SAOL). Two names that share the first 16 characters are considered
+identical.
+
+<P>
+SAOL language keywords, standard names, core opcode names, and core
+wavetable names may not be used as names.  The right panel shows a
+list of these <I>reserved words</I>. In addition, all names starting
+with <TT>_sym_</TT> are reserved.
+
+<P>
+<A HREF="#decl">Jump to next section.</A>
+
+</TD>
+
+<TD WIDTH="25%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>Reserved Words</H2>
+
+<TT>
+<pre>
+abs            
+acos           
+aexpon         
+aexprand       
+agaussrand     
+aline          
+alinrand       
+allpass        
+ampdb          
+aopcode        
+aphasor        
+apoissonrand   
+arand          
+asig           
+asin           
+atan           
+balance        
+bandpass       
+bandstop       
+biquad         
+buzz           
+ceil           
+channel        
+chorus         
+comb           
+compressor     
+concat         
+cos            
+cpsmidi        
+cpsoct         
+cpspch         
+cpuload        
+cubicseg       
+data           
+dbamp          
+decimate       
+delay          
+delay1
+destroy
+direction
+doscil
+downsamp
+dur
+else
+empty
+exp
+exports
+expseg
+extend
+fft
+fir
+firt
+flange
+floor
+frac
+fracdelay
+ftbasecps
+ftlen
+ftloop
+ftloopend
+ftsetbase
+ftsetend
+ftsetloop
+ftsetsr
+ftsr
+fx_speedc
+gain
+gettempo
+gettune
+global
+grain
+harm
+harm_phase
+hipass
+iexprand
+if
+ifft
+igaussrand
+iir
+iirt
+ilinrand
+imports
+inchan
+inchannels
+ingroup
+input
+input_bus
+inputmod
+instr
+int
+interp
+</pre>
+</TT>
+
+</TD>
+<TD WIDTH="25%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>(continued)</H2>
+<TT>
+<pre>
+iopcode
+irand
+itime
+ivar
+k_rate
+kexpon
+kexprand
+kgaussrand
+kline
+klinrand
+kopcode
+koscil
+kphasor
+kpoissonrand
+krand
+krate
+ksig
+lineseg
+listenerDirection
+listenerPosition
+log
+log10
+lopass
+loscil
+map
+max
+maxBack
+maxFront
+midicps
+midioct
+midipch
+min
+minBack
+minFront
+octcps
+octmidi
+octpch
+oparray
+opcode
+oscil
+outbus
+outchan
+outchannels
+output
+output_bus
+params
+pchcps
+pchmidi
+pchoct
+periodic
+pluck
+polynomial
+port
+position
+pow
+preset
+random
+released
+return
+reverb
+rms
+route
+s_rate
+samphold
+sample
+sasbf
+sblock
+send
+sequence
+settempo
+settune
+sgn
+sin
+soundfile
+spatialize
+speedt
+spline
+sqrt
+srate
+startup
+step
+table
+tablemap
+tableread
+tablewrite
+template
+time
+turnoff
+upsamp
+while
+window
+with
+xsig
+</pre>
+</TT>
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="decl">Declarations</A></H2>
+
+<P>
+If a signal variable appears in the code block of an <B>instr</B>
+definition, it also must appear in exactly one of two places in the
+<B>instr</B> definition: the parameter list of the <B>instr</B>
+preamble or the variable declaration block. Some <B>instr</B> variable
+declarations may also require a corresponding <B>global</B>
+declaration.
+
+<P>
+The next three sections describe preamble parameter, <B>instr</B>
+variable, and <B>global</B> variable declarations.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="preamble">Instr Parameters</A></H2>
+
+<P>
+Parameter declarations are a part of the <B>instr</B> preamble. The
+panel on the right shows the three types of legal <B>instr</B>
+preambles, declaring zero, one, or many parameters.
+
+<P>
+Each parameter and declared variable in an <B>instr</B> must have a
+unique name.  Parameters hold 32-bit floating point values.
+
+<P>
+<B>Instr</B> parameters are always scalar width and always
+i-rate. Syntactic elements such as <B>ksig</B>, <B>
+imports</B>, and <TT>[3]</TT> are illegal in a parameter
+declaration.
+
+<P>
+As shown in the tutorial in Part I of the book, <B>instr</B>s may be
+instantiated by SASL <B>instr</B> commands or by SAOL <B>send</B>
+statements. In later chapters of the book, we show other ways to
+instantiate <B>instr</B>s in MP4-SA.
+
+<P>
+Each type of instantiation has a method for initializing the value of
+the <B>instr</B> parameters. If the instantiation method does not
+supply an initialization value, the parameter is set to zero.
+
+<P>
+Aside from the issues described above, <B>instr</B> parameters behave
+exactly like <B>ivar</B> scalar signal variables.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Legal <TT>instr</TT> Preambles</H2>
+<TT>
+<pre>
+instr none () { }
+
+instr one (p1) { }
+
+instr many (p1, p2, p3) { }
+
+</pre>
+</TT>
+
+<H2>Illegal <TT>instr</TT> Preambles</H2>
+
+<TT>
+<pre>
+instr bad(imports p1) { } // illegal use of "import"
+
+instr bad1(ksig p1) { }   // illegal: rates not allowed
+
+instr bad2(p1[4]) { }     // illegal: array not allowed
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="vars_instr">Instr Variables</A></H2>
+
+<P>
+Signal variable declarations in SAOL <B>instr</B>s occur after the
+open curly-brace of the <B>instr</B> preamble. The first SAOL
+statement in the <B>instr</B> marks the end of the variable
+declaration section: declarations and statements cannot be
+interspersed.
+
+<P>
+Each declared variable and parameter in an <B>instr</B> must have a
+unique name. Signal variables hold 32-bit floating point values and
+are initialized to zero.
+
+<H4>Scalars</H4>
+
+<P> 
+The simplest variable declaration consists of a rate identifier
+(<B>ivar</B> for i-rate, <B>ksig</B> for k-rate, or <B>asig</B> for
+a-rate), a name, and a semicolon (see right panel for examples).
+These variables are scalars, and have width 1. Multiple variables can
+be declared on the same line, separated by commas.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Legal Declarations</H2>
+<TT>
+<pre>
+instr foo () {
+
+ivar a;
+ksig b,c;
+asig d;
+
+b = a;
+
+}
+</pre>
+</TT>
+
+<H2>Illegal Declarations</H2>
+<TT>
+<pre>
+instr foo () {
+
+ivar a;  // legal
+asig d;  // legal 
+
+a = 1;
+
+ksig b; // illegal: must precede a = 1;
+
+b = a;
+
+}
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H4>Arrays</H4>
+
+<P> 
+Array declarations build on this syntax, by adding an open bracket, a
+width specifier and a closed bracket. Arrays and scalars may share the
+same declaration line.  The width specifier, that sets the width of
+the array, is usually numeric (an integer greater than zero).
+
+<P>
+Alternatively, the keyword <B>inchannels</B> or <B>outchannels</B> may
+serve as a width specifier. In an <B>instr</B>, arrays declared with
+the width specifier <B>inchannels</B> take the width of the audio
+input presented to the instrument. Arrays declared with the width
+specifier <B>outchannels</B> take the width of the audio data written
+by <B>output</B> statements in the <B>instr</B>. In <A
+HREF="../bus/index.html">Part II/5</A> we describe how to determine
+these widths for an <B>instr</B>.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Legal Array Declarations</H2>
+<TT>
+<pre>
+ivar a[3];
+ksig b,c[2];
+asig d[inchannels],f[outchannels];
+</pre>
+</TT>
+
+<H2>Illegal Array Declarations</H2>
+<TT>
+<pre>
+ivar a[0];   // illegal: must be >= 1
+ksig c[2.0]; // illegal: must be integer
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4>Imports and Exports</H4>
+
+<B>Global</B> variables are not visible inside of <B>instr</B>s by
+default.  <B>Global</B> variables must be <I>imported</I> or
+<I>exported</I> by an <B>instr</B> to provide read or write
+access. This process involves declaring a variable in the <B>instr</B>
+with the same name and rate identifier as the <B>global</B> variable,
+prepended with the keywords <B>imports</B> and/or <B>exports</B>.
+
+<P>
+Both scalar and array <B>global</B> variables may be imported or
+exported into an <B>instr</B>.  The rate and width of the
+<B>global</B> and <B>instr</B> variables must be the same. Since
+globals may not be <B>asig</B>, neither may imported or exported
+<B>instr</B> declarations. See the right panel for examples.
+
+<P>
+If an <B>instr</B> variable is declared with <B>imports</B>, then at
+the start of the i-pass (for <B>ivar</B>s) or at the start of each
+k-pass (for <B>ksig</B>s), the value of the <B>global</B> variable is
+copied into the <B>instr</B> variable.
+
+<P>
+If an <B>instr</B> variable is declared with <B>exports</B>, then at
+the end of the i-pass following <B>instr</B> instantiation (for
+<B>ivar</B>s) or at the end of each k-pass (for <B>ksig</B>s), the
+final value of the <B>instr</B> variable is copied into the
+<B>global</B> variable.
+
+<P>
+If both <B>imports</B> and <B>exports</B> are used, both behaviors
+described above happen. 
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Legal <TT>imports</TT> and <TT>exports</TT></H2>
+<TT>
+<pre>
+global {
+ivar a, c;
+ksig b[3];
+}
+
+instr example () {
+
+imports ivar a;
+exports ivar c;
+imports exports ksig b[3];
+
+}
+</pre>
+</TT>
+
+
+<H2>Illegal <TT>imports</TT> and <TT>exports</TT></H2>
+<TT>
+<pre>
+global {
+ivar a;
+}
+
+instr example () {
+
+imports ivar a[2]; // illegal: size mismatch
+imports ksig a;    // illegal: rate mismatch
+}
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H4><A NAME="import_sasl">Imports for SASL</A></H4>
+
+<P>
+If an <B>instr</B> signal variable is declared using the
+<B>imports</B> keyword, but no global variable of the same name exists
+in the <B>global</B> block, the <B>import</B> semantics described
+in the previous section do not apply.
+
+<P>
+Instead, the <B>imports</B> keyword signifies that a variable may be
+targeted by a SASL labelled <B>control</B> command.  This SASL command
+writes a new value into a <B>ksig</B> variable of an <B>instr</B>
+instance at the start of a k-pass.
+
+<P>
+Only scalar <B>ksig</B> variables may be used in this construction,
+and only <B>imports</B> may be used in the declaration, not
+<B>exports</B>.
+
+<P>
+An <A HREF="../../tut/index.html#reverb">example</A> in the tutorial
+in Part I shows this usage of the <B>imports</B> keyword in detail.
+A <A HREF="../../control/sasl/index.html#control">later section</A>
+of this book explains SASL control statements in detail.
+
+<P>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Imports for SASL:</H2>
+<TT>
+<pre>
+See <A HREF="../../tut/index.html#reverb">tutorial example</A>.
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="vars_global">Global Variables</A></H2>
+
+<P>
+Global signal variables are scalar or array variables declared in a
+<B>global</B> block of a SAOL program.  Global signal variables may be
+declared <B>ivar</B> or <B>ksig</B> but not <B>asig</B>.  The
+<B>imports</B> and <B>exports</B> keywords may not be used with global
+variables. Apart from these differences, global declarations share the
+same syntax as <B>instr</B> declarations.
+
+<P>
+Global variable names must be unique among all the global variables.
+
+<P> 
+Array declarations may use the keywords <B>inchannels</B> or
+<B>outchannels</B> as width specifiers. For global arrays, these
+keywords indicate that the array should take the same width as the
+the <B>input_bus</B> or <B>output_bus</B>, respectively. These
+system buses are dedicated to external audio input and output, and are
+<A HREF="../bus/index.html#system">described</A> in detail in Part
+II/5.
+
+<H4> <A NAME="distglobal">Distributed Global Blocks</A></H4>
+
+<P>
+The MP4-SA standard states that only one global block may
+exist in a SAOL program. This restriction makes it difficult to
+develop modular SAOL libraries. 
+
+<P>
+Sfront relaxes this rule, and permits many global blocks in a SAOL
+program. To create MP4 files that comply with the standard, sfront
+collapses all global blocks into a single large global block when
+encoding <TT>.mp4</TT> files.
+
+<H4> <TT>startup</TT> </H4>
+
+<P> 
+Global variables hold 32-bit floating-point numbers initialized to
+zero. To initialize global variable to non-zero values, define an
+<B>instr</B> named <B>startup</B> and assign initialization values to
+the global variables in its code block (using <B>imports</B> and 
+<B>exports</B> to access the global variables).
+
+<P>
+This method works because the SAOL <B>instr</B> execution rules ensure
+that if the <B>instr startup</B> is defined, it is instanced and 
+run at i-rate as part of the start up sequence of a SAOL program,
+before the first k-cycle begins. 
+
+<P>
+In addition, by default the <B>startup</B> instrument executes first
+in each execution cycle, so that k-rate global variables may also be
+initialized. See <A HREF="../bus/index.html#startup">Part II/5</A> for
+more details on the <B>startup</B> instrument.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Legal Global Declarations</H2>
+<pre>
+<TT>
+global {
+
+ivar a;
+ksig b[2],c;
+ivar d[outchannels];
+ksig e[inchannels];
+
+}
+</TT>
+</pre>
+
+<H2>Illegal Global Declarations</H2>
+<pre>
+<TT>
+global {  // all lines below are illegal
+
+asig a;         // a-rate globals not allowed 
+imports ksig c; // imports globals not allowed 
+exports ksig c; // exports globals not allowed 
+ivar d[0];      // width 0 not allowed
+
+}
+</TT>
+</pre>
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="stnames">Standard Names</A></H2>
+
+<P>
+Standard names are read-only variables that hold system
+information. The panel on the right lists the SAOL standard names and
+the declaration each would have if it were a normal variable.
+
+<P>
+This book describes most standard names in chapters related to their
+function. The list on the right panel includes links to the parts of
+chapters on buses, MIDI control, SAOL instrument control, and MPEG 4
+integration that describe the standard names related to these topics.
+
+<P>
+Two standard names are general purpose in nature, and we explain them
+now. The <B>ivar</B> standard name <B>k_rate</B> holds the k-rate of
+the SAOL program, and the <B>ivar</B> standard name <B>s_rate</B>
+holds the a-rate of the SAOL program.
+
+<P>
+SAOL programs often compute constant values based on the value of
+k_rate and s_rate. The sfront distribution includes a library of SAOL
+utilities, called <A HREF="../../special/slib/index.html">Slib</A>,
+that defines a set of useful <A
+HREF="../../special/slib/index.html#timec">constants</A>
+derived from k_rate and s_rate.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Standard Names</H2>
+
+<H4>Described in this section</H4>
+<TT>
+<PRE>
+ivar k_rate;
+ivar s_rate;
+</PRE>
+</TT>
+
+<H4>For buses: see <A HREF="../bus/index.html#standard">Part II/5</A></H4>
+<TT>
+<PRE>
+ivar inchan;
+ivar outchan;
+asig input[inchannels];
+ivar inGroup[inchannels];
+</PRE>
+</TT>
+
+<H4>For MIDI: see <A HREF="../../control/midi/index.html#stnames">Part III/2</A></H4>
+<TT>
+<PRE>
+ivar preset;
+ivar channel;
+ksig MIDIctrl[128];
+ksig MIDItouch;
+ksig MIDIbend;
+</PRE>
+</TT>
+
+<H4>For instr control: see 
+<A HREF="../../control/saolc/index.html#stnames">Part III/3</A></H4>
+<TT>
+<PRE>
+ivar dur;
+ksig itime;
+ksig released;
+ivar time;
+ksig cpuload;
+</PRE>
+</TT>
+
+<H4>For AudioBIFS: see <A HREF="../../../sfman/devel/cdriver/data/index.html#bifs">Sfront manual</A></H4>
+<TT>
+<PRE>
+imports ksig position[3];
+ksig direction[3];
+ksig listenerPosition[3];
+ksig listenerDirection[3];
+ksig minFront;
+ksig maxFront;
+ksig minBack;
+ksig maxBack;
+imports exports ksig params[128];
+</PRE>
+</TT>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="glo_param">Global Parameters</A></H2>
+
+<P>
+Global parameters may be used to change system constants in SAOL.
+Global parameters are set in the <B>global</B> block, using the syntax
+shown in the right panel. Each global parameter may only be set once.
+
+<P>
+Unlike <B>instr</B> parameters, global parameters may not be used as
+variables in SAOL expressions. Use the <A HREF="#stnames">standard
+name</A> related to the global parameter instead.
+
+<P>
+There are five global parameters.  The parameters <B>inchannels</B>
+and <B>outchannels</B> concern the special buses <B>input_bus</B> and
+<B>output_bus</B> and are explained in <A
+HREF="../bus/index.html#system">Part II/5</A>. The parameter <B>interp</B>
+concerns wavetables and is explained in <A
+HREF="../wave/index.html#playback">Part II/4</A>.
+
+<P>
+The last two global parameters, <B>srate</B> and <B>krate</B>,
+set the a-rate and k-rate of the system. The <B>srate</B> parameter
+may be set to an integer in the range 4000 Hz to 96000 Hz. 
+
+<P>
+The <B>krate</B> parameter may be set to an integer in the range 1 Hz
+to the audio sampling rate. 
+
+<P>
+The k-rate of a SAOL program defaults to 100 Hz. The a-rate of a SAOL
+program defaults to 32,000 Hz. (but see this <A
+HREF="../bus/index.html#samplerate">exception</A> if processing external audio
+input).
+
+<P>
+If <B>krate</B> does not evenly divide into <B>srate</B>, the k-rate
+of the SAOL program is the first integer larger than <B>krate</B>
+which does evenly divide <B>srate</B>.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Syntax</H2>
+<TT>
+<PRE>
+globals {
+
+srate 48000; // note: no = 
+
+}
+</PRE>
+</TT>
+
+<H2>The Global Parameters</H2>
+
+<H4>Described in this section</H4>
+<TT>
+<PRE>
+srate
+krate
+</PRE>
+</TT>
+
+<H4>For buses: see <A HREF="../bus/index.html#system">Part II/5</A></H4>
+<TT>
+<PRE>
+inchannel
+outchannel
+</PRE>
+</TT>
+
+<H4>For wavetables: see <A HREF="../wave/index.html#playback">Part II/4</A></H4>
+<TT>
+<PRE>
+interp
+</PRE>
+</TT>
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<P>
+<B>Next section:</B>
+<A HREF="../exstat/index.html">Part II/2: Expressions and Statements</A></H2>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<pre> </pre>
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+SAOL</A>-><STRONG>numbers and variables</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>

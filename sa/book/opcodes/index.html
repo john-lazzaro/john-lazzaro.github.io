@@ -1,0 +1,213 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part IV: Advanced Opcodes</TITLE>
+<META name="keywords" content="MP4-SA, SAOL, language,
+MIDI, SASL, core opcodes, user-defined opcodes, polymorphic
+opcodes, return, return statement, specialop, oparray, kline, aline,
+kexpon, aexpon, kphasor, aphasor, pluck, buzz, grain, port, hipass,
+lopass, bandpass, bandstop, biquad, allpass, comb, fir, iir, firt, iirt, 
+fft, ifft, rms, gain, balance, compressor, sblock, decimate, 
+upsamp, downsamp, samphold, delay, delay1, fracdelay, reverb, 
+chorus, flange">
+<META name="description" content="Advanced Opcodes in SAOL. Covers the
+core opcodes not discussed in Part II of the book. Describes
+user-defined opcodes.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../index.html">
+the mp4-sa book</A>-><STRONG>advanced opcodes</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part IV: Advanced Opcodes</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="45%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>Introduction</H2>
+
+<P>
+MPEG-4 Structured Audio (MP4-SA) is an ISO/IEC standard (edited by
+Eric Scheirer) that specifies sound not as audio data, but as a
+computer program that generates audio when run.
+
+<P>
+For an introduction to MP4-SA see the <A
+HREF="../tut/index.html">introductory tutorial</A> presented in Part I
+of the book. For a complete description of the SAOL language, see <A
+HREF="../saol/index.html">Part II</A>.  
+
+<P>
+Part IV discusses advanced topics in SAOL opcodes.  Opcodes provide
+access to an algorithm through a function call syntax.
+
+<P>
+Core opcodes are library functions that perform fixed algorithms.
+Part IV begins with pointers to earlier sections of the book that
+introduce core opcodes.  <A HREF="../saol/simple/index.html">Part
+II/3</A> describes core opcodes semantics and introduces 50 simple
+core opcodes, and Part II/4, describes an additional 16 core opcodes
+for wavetable <A HREF="../saol/wave/index.html#playback">playback</A>,
+<A HREF="../saol/wave/index.html#lowcore">manipulation</A>, and <A
+HREF="../saol/wave/index.html#sample">time-warping</A>.
+
+<P>
+The first several chapters in Part IV finish the description of the
+core opcode library. Chapters are devoted to core opcodes that support
+<A HREF="sgen/index.html">sound synthesis</A> algorithms, <A
+HREF="filter/index.html">filtering</A> operations, and <A
+HREF="sproc/index.html">signal processing</A> operations like Fourier
+analysis.
+
+<P>
+The <A HREF="user/index.html">final chapter</A> describes user-defined
+opcodes. We introduce the rate and width semantics for user-defined
+opcodes.  We explain the syntax for fixed-rate and rate-polymorphic
+opcode call definitions, including techniques for passing variables by
+reference.
+
+<P>
+Part IV ends with pointers to several core opcode indices.
+
+</TD>
+<TD WIDTH="55%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Part IV: Table of Contents</H2>
+
+<H4>Preamble: Links to Earlier Chapters</H4>
+
+<UL>
+<LI>
+<B>Part II/3: <A HREF="../saol/simple/index.html">Simple Core Opcodes</A></B>
+<LI>
+<B>Part II/4: Wavetables</B>
+<UL>
+<LI>
+<B><A HREF="../saol/wave/index.html#playback">Table Playback Opcodes</A></B>
+<LI>
+<B><A HREF="../saol/wave/index.html#lowcore">Table Manipulation Opcodes</A></B>
+<LI>
+<B><A HREF="../saol/wave/index.html#sample">Time-Warping Opcode</A></B>
+</UL>
+</UL>
+
+<H4>1. <A HREF="sgen/index.html">Sound Synthesis Core Opcodes</A></H4>
+<UL>
+<LI>
+<B><A HREF="sgen/index.html#env">Envelope Generators</A>.</B> Linear and exponential waveforms.  
+<LI>
+<B><A HREF="sgen/index.html#buzz">Subtractive Synthesis</A>.</B> Alias-free pulse waveforms. 
+<LI>
+<B><A HREF="sgen/index.html#pluck">Plucked String Synthesis</A>.</B>  Karplus-Strong synthesis. 
+<LI>
+<B><A HREF="sgen/index.html#grain">Granular Synthesis</A>.</B> Temporal wavetable method. 
+</UL>
+
+<H4>2. <A HREF="filter/index.html">Filter Core Opcodes</A></H4>
+<UL>
+<LI>
+<B><A HREF="filter/index.html#fir">FIR Filters</A>.</B> Table and parameter coefficients.
+<LI>
+<B><A HREF="filter/index.html#iir">IIR Filters</A>.</B> Biquad and arbitrary order.
+<LI>
+<B><A HREF="filter/index.html#par">Parametric Filters</A>.</B> Classic filter shapes.
+<LI>
+<B><A HREF="filter/index.html#delay">Delays</A>.</B> Also covers oparrays.
+<LI>
+<B><A HREF="filter/index.html#dline"><TT>allpass</TT> and <TT>comb</TT></A>.</B> 
+Recirculating filters.
+<LI>
+<B><A HREF="filter/index.html#noneff"><TT>reverb</TT>, <TT>chorus</TT> and <TT>flange</TT></A>.</B> 
+Effects opcodes.
+</UL>
+
+<H4>3. <A HREF="sproc/index.html">Signal Processing Core Opcodes</A></H4>
+<UL>
+<LI>
+<B><A HREF="sproc/index.html#gain">Level Matching</A>.</B> Absolute and
+relative. Specialops.
+<LI>
+<B><A HREF="sproc/index.html#window">Window Wavetables</A>.</B> 
+Generating window function tables.
+<LI>
+<B><A HREF="sproc/index.html#samp">Sample Rate Conversion</A>.</B> Between
+a-rate and k-rate.
+<LI>
+<B><A HREF="sproc/index.html#comp">Gain Control</A>.</B> 
+Compressor/limiter/expander/noise-gate.
+<LI>
+<B><A HREF="sproc/index.html#fft">Fourier Analysis</A>.</B>  FFT and IFFT opcodes. 
+<LI>
+<B><A HREF="sproc/index.html#port">Portamento</A>.</B> K-rate opcode
+for pitch changes.
+</UL>
+
+<H4>4. <A HREF="user/index.html">User-Defined Opcodes</A></H4>
+<UL>
+<LI>
+<B><A HREF="user/index.html#example">Example</A>.</B> Tutorial example with
+user-defined opcodes.
+<LI>
+<B><A HREF="user/index.html#header">Opcode Declarations</A>.</B> Parameters and variables.
+<LI>
+<B><A HREF="user/index.html#block">Opcode Statement Block</A>.</B> Return statements.
+<LI>
+<B><A HREF="user/index.html#calls">Opcode Calls</A>.</B> Rate and width calling 
+conventions.
+</UL>
+
+<H4>Postscript: Links to Appendices</H4>
+
+<UL>
+<LI>
+<A HREF="../append/corea/index.html">
+Appendix B: Core Opcode Sorted Alphabetically</A>
+<LI><A HREF="../append/coref/index.html">
+Appendix C: Core Opcode Sorted by Opcode Type</A>
+</UL>
+
+</TD>
+
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../index.html">
+the mp4-sa book</A>-><STRONG>advanced opcodes</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+</BODY>
+</HTML>

@@ -1,0 +1,1096 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part IV/2: Filter Core Opcodes</TITLE>
+<META name="keywords" content="MP4-SA, core, opcodes, core opcodes, 
+hipass, lopass, bandpass, bandstop, biquad, allpass, comb, 
+fir, iir, firt, iirt, delay, delay1, fracdelay, reverb, chorus, 
+flange">
+<META name="description" content="Core opcodes specialized for sound
+filtering. These core opcodes are a part of the SAOL language of MPEG
+4 Structured Audio.">
+
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+advanced opcodes</A>-><STRONG>filter core opcodes</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part IV/2: Filter Core Opcodes</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="65%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#fir">FIR Filters</A>.</B> Table and parameter coefficients.
+<LI>
+<B><A HREF="#iir">IIR Filters</A>.</B> Biquad and arbitrary order.
+<LI>
+<B><A HREF="#par">Parametric Filters</A>.</B> Classic filter shapes.
+<LI>
+<B><A HREF="#delay">Integral Delays</A>.</B> Simple delay opcodes.
+<LI>
+<B><A HREF="#frac">Fractional Delays</A>.</B> Also introduces oparrays.
+<LI>
+<B><A HREF="#dline"><TT>allpass</TT> and <TT>comb</TT></A>.</B> 
+Recirculating filters.
+<LI>
+<B><A HREF="#noneff"><TT>reverb</TT>, <TT>chorus</TT> and <TT>flange</TT></A>.</B> 
+Effects opcodes.
+</UL>
+</TD>
+
+<TD WIDTH="35%" VALIGN=top BGCOLOR="#CCFFCC">
+<B>
+
+<H2>Core Opcodes:</H2>
+
+<A HREF="#dline">allpass</A> 
+<A HREF="#par">bandpass</A> 
+<A HREF="#par">bandstop</A> 
+<A HREF="#iir">biquad</A> 
+<A HREF="#noneff">chorus</A> 
+<A HREF="#dline">comb</A> 
+<A HREF="#delay">delay</A> 
+<A HREF="#delay">delay1</A> 
+<A HREF="#fir">fir</A> 
+<A HREF="#fir">firt</A> 
+<A HREF="#noneff">flange</A> 
+<A HREF="#frac">fracdelay</A> 
+<A HREF="#par">hipass</A> 
+<A HREF="#iir">iir</A> 
+<A HREF="#iir">iirt</A> 
+<A HREF="#par">lopass</A> 
+<A HREF="#noneff">reverb</A> 
+
+<H2>Other Elements:</H2>
+
+<A HREF="#oparray">oparray</A> 
+
+</B>
+
+</TD>
+</TR>
+
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+In this chapter, we describe the core opcodes for audio filters. These
+a-rate opcodes return a filtered version of the signal coded by the
+a-rate parameter <TT>in</TT>.
+
+<P>
+Most opcodes in this chapter are normative, and compute filters that
+sound identical on any compliant decoder. A few opcodes are
+non-normative, and are provided as convenient tools for algorithm
+prototyping.
+
+<P>
+We also introduce a SAOL language feature, the <B>oparray</B>, in
+conjunction with the <B>fracdelay</b> core opcode. Oparrays let
+several syntactically distinct calls to the same opcode share a
+single set of internal state variables. 
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="fir">FIR Filters</A></H2>
+
+<P>
+Two finite impulse response (FIR) filter core opcodes, <B>fir</B> and
+<B>firt</B>, are provided in SAOL. The right panel shows the
+header syntax for the opcodes.
+ 
+<P>
+Both opcodes return a filtered version of the signal provided by the
+a-rate parameter <TT>in</TT>.  During the first call to these opcodes,
+the internal filter state variables are initialized to zero.
+
+<P>
+Both opcodes are normative, in the sense that the filter coefficients
+parameters define the transfer function of the filter, assuming one
+opcode call per a-pass.
+
+<P>
+The method for implementing this transfer function is non-normative.
+
+<P>
+The <B>fir</B> opcode specifies the FIR filter coefficients as the
+list <TT>b0, b1, b2 ...</TT> of scalar k-rate parameters.
+
+<P>
+The <B>firt</B> opcode specifies the FIR filter coefficients as the
+table parameter <TT>t</TT>, whose length is the order of the filter.
+If the optional k-rate parameter <TT>order</TT> is less than the
+table length, this parameter determines the filter order, as specified
+on the right panel.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>FIR: Parameter Coefficients</H2>
+<TT>
+<pre>
+
+aopcode fir(asig in, ksig b0
+            [, ksig b1, 
+             ksig b2 ...])
+
+
+
+Implements transfer function
+
+                -1       -2
+H(z) = b0 + b1 z   + b2 z   ...
+
+Exact implementation is decoder
+dependent.
+
+</pre>
+</TT>
+
+<H2>FIR: Wavetable Coefficients</H2>
+<TT>
+<pre>
+
+aopcode firt(asig in, table t
+            [, ksig order]) 
+
+
+FIR coefficients are stored in
+the table t. If order is not
+supplied, let order be the
+length of table t. The 
+opcode implements the transfer
+function:
+
+                    -1         -2
+H(z) = t[0] + t[2]*z   + t[2]*z   
+
+                      -(order-1)
+      ... t[order-1]*z
+
+Exact implementation is decoder
+dependent.
+
+
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="iir">IIR Filters</A></H2>
+
+<P>
+The <B>iir</B> and <B>iirt</B> core opcodes implement Infinite Impulse
+Response (IIR) filters.  See the right panel for header syntax for
+these opcodes.
+
+<P>
+Both opcodes return a filtered version of the signal provided by the
+a-rate parameter <TT>in</TT>.  During the first call to these opcodes,
+the internal filter state variables are initialized to zero.
+
+<P>
+The <B>iir</B> opcode specifies the transfer function coefficients as
+a list of k-rate scalar parameters <TT>b0, b1, b2 ...</TT> for
+numerator coefficients, and an interleaved list of k-rate scalar
+parameters <TT>a1, a2 ...</TT> for denominator coefficients.
+
+<P>
+The <B>iirt</B> opcode specifies the transfer function coefficients as
+two wavetables, table <TT>b</TT> for numerator coefficients and table
+<TT>a</TT> for denominator coefficients.
+
+<P>
+These opcodes are normative in the sense that the coefficients
+supplied as parameters define the filter transfer function, assuming
+one opcode call per a-pass.
+
+<P>
+The actual method for implementing the transfer function is
+non-normative.
+
+<H4>Normative IIR Implementation</H4>
+
+<P>
+For some IIR transfer functions, control over the filter
+implementation is crucial to assuring filter stability. 
+
+<P>
+The core opcode <B>biquad</B> provides an exact implementation of a
+second-order filter structure, using the Transposed Direct Form II
+structure.
+
+<P>
+The right panel shows the header syntax and exact implementation
+of the <B>biquad</B> core opcode.
+
+<P>
+Normative implementations of higher-order filter structures may be
+created by composing several <B>biquad</B> opcode calls in a series
+or parallel manner.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>IIR: Parameter Coefficients</H2>
+<TT>
+<pre>
+
+aopcode iir(asig in, ksig b0
+            [, ksig a1, ksig b1,  
+               ksig a2, ksig b2,
+               ...])
+
+
+
+Implements transfer function
+
+                -1       -2
+        b0 + b1 z   + b2 z   ...
+H(z) = --------------------------
+                 -1       -2
+         1 + a1 z   + a2 z   ...
+
+Exact implementation of the 
+transfer function as a filter
+is decoder dependent.
+
+</pre>
+</TT>
+
+<H2>IIR: Wavetable Coefficients</H2>
+<TT>
+<pre>
+
+aopcode iirt(asig in, 
+             table a, table b
+             [, ksig order]) 
+
+
+Implements transfer function:
+
+                    -1       -2
+       b[0] + b[1]*z + b[2]*z   ...
+H(z) = --------------------------
+                   -1       -2
+         1 + a[1]*z + a[2]*z   ...
+
+
+Up to coefficients b[order-1] and
+a[order-1]. If optional parameter
+order is not supplied, the 
+length of tables a or b determine
+the order of the numerator and
+denominator respectively.
+
+Exact implementation of the 
+transfer function as a filter
+is decoder dependent.
+
+
+</pre>
+</TT>
+
+<H2>Transposed Direct Form II</H2>
+<TT>
+<pre>
+
+aopcode biquad(asig in, ivar b0,
+               ivar b1, ivar b2,  
+               ivar a1, ivar a2)
+
+
+At the first call, initializes
+internal storage variables d1 and
+d2 to zero. At each call, computes
+these equations in order, and 
+returns "ret".
+
+ret = d2 + b0*in
+d2  = d1 - a1*ret + b1*in
+d1  =    - a2*ret + b2*in
+
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="par">Parametric Filters</A></H2>
+
+<P>
+The IIR and FIR core opcodes described in the previous sections may be
+used to create normative implementations of the classic filter shapes
+(lowpass, highpass, bandpass, and bandstop) with dynamic transfer
+functions. However, these opcodes require the programmer to specify
+the coefficient values for the filters.
+
+<P>
+The non-normative filter core opcodes <B>lopass</B>, <B>hipass</B>,
+<B>bandpass</B> and <B>bandstop</B> let the programmer specify filter
+frequency response at a higher level of abstraction.
+
+<P>
+These opcodes return a filtered version of the signal provided by the
+a-rate parameter <TT>in</TT>. The right panel shows the header syntax
+for these opcodes.
+
+<P>
+The <B>lopass</B> and <B>hipass</B> opcodes have a single k-rate
+control parameter <TT>cut</TT> that sets the 6 dB cutoff point for the
+filter. 
+
+<P>
+The <B>bandpass</B> and <B>bandstop</B> opcodes have two k-rate
+control parameters, a <TT>cf</TT> parameter that sets the center
+frequency for the passband or stopband, and a <TT>bw</TT>
+parameter that sets the bandwidth of the passband or stopband,
+measured at the 6 dB cutoff points
+
+<P>
+The control parameter definitions assume the opcodes are called 
+once per a-pass.
+
+<P>
+Note that since the opcodes are non-normative, specifications such as
+the cutoff slope, the passband ripple, and the stopband ripple are
+decoder-dependent.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>Basic Filter Blocks</H2>
+<TT>
+<pre>
+
+aopcode lopass(asig in, ksig cut)
+
+aopcode hipass(asig in, ksig cut)
+
+
+cut: -6 dB cutoff point of the filter,
+specified in Hz.
+
+
+
+aopcode bandpass(asig in, 
+                 ksig cf, ksig bw)
+
+
+aopcode bandstop(asig in, 
+                 ksig cf, ksig bw)
+
+
+cf: center frequency of the passband
+or stopband, in Hz.
+
+bw: bandwidth of the passband or 
+stopband, measured as the distance
+between the -6dB cutoff point below
+and above the center frequency.
+
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="delay">Integral Delays</A></H2>
+
+<P>
+The core opcodes <B>delay1</B> and <B>delay</B> delay the signal
+parameter <TT>in</TT> for a fixed number of opcode calls. These
+opcodes are useful building blocks for filter design.
+
+<P>
+See the right panel for the header syntax and exact semantics for
+these opcodes.
+
+<P>
+The <B>delay1</B> opcode delays a signal for one opcode call.  If the
+opcode is called once per a-pass, it corresponds to a delay of a
+sample period. The first call to <B>delay1</B> returns zero.
+
+<P>
+The <B>delay</B> opcode implements a delay line as a shift register
+structure. The parameter <TT>t</TT> (units of seconds) sets the time
+delay of the line, assuming the opcode is called once per a-pass.
+
+<P>
+The delay line state variables are created during the first call to
+the opcode, and are initialized to zero.
+
+<P>
+During each call to <B>delay</B>, the delay line is
+shifted forward one position. The new value of the
+parameter <TT>in</TT> is inserted into the front of
+the delay line, and the value that falls off the end
+of the delay line is returned by the opcode.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>delay1</TT></H2>
+<TT>
+<pre>
+
+aopcode delay1(asig in)
+
+        -------
+        |  -1 |   
+in -----| z   |----- y
+        |     |
+        -------
+
+On first call, initialize 
+delay line value to zero.
+
+On each call, return y, 
+and insert parameter in
+into the unit delay.
+
+</pre>
+</TT>
+
+<H2><TT>delay</TT></H2>
+<TT>
+<pre>
+
+aopcode delay(asig in, ivar t)
+
+     ------------------
+     | floor(t*srate) |
+in --|     delay      |--- y
+     |     units      |
+     ------------------
+
+On first call, initialize
+delay line shift register
+values to zero.
+
+On each call, shift in 
+new value of in, and return
+value of y that falls out
+the end of the line.
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="frac">Fractional Delays</A></H2>
+
+<P>
+The filter and delay opcodes presented in the previous sections 
+share a common calling semantics. 
+
+<OL>
+<LI>
+Each call provides the opcode with the next input sample, via the
+parameter <TT>in</TT>
+<LI>
+Each call returns the next output sample of the filter or delay
+algorithm.
+<LI>
+Internal state variables are created and initialized to
+zero during the first opcode call, and updated 
+during each opcode call.
+</OL>
+
+<P>
+These semantics are incompatible with the function of the core opcode
+<B>fracdelay</B> (see the right panel for header syntax). 
+
+<P>
+This opcode creates a delay line structure, and lets the programmer
+insert and sum values into arbitrary taps along the line. It also lets
+the programmer read out the delay line value at a fractional position
+along the line, by interpolating between delay line positions using
+the interpolation method specified by the global parameter
+<B>interp</B>.
+
+<P>
+To provide this functionality, the <B>fracdelay</B> opcode includes
+a <TT>method</TT> parameter, that specifies the operation to be
+performed on the delay line. These operations include creating and
+initializing the delay line internal state, and shifting the contents
+of the delay line one cycle forward. The right panel describes each
+method in detail. Note that unlike previous filter opcodes, the 
+<B>fracdelay</B> opcode does not automatically shift its delay line
+with each call.
+
+<P>
+Supporting this type of semantics requires SAOL language support,
+since each syntactically distinct opcode call has its own set of
+internal variables. For proper operation, multiple calls to
+<B>fracdelay</B> need to modify the same set of internal variables
+(i.e. the delay line).  The SAOL atomic expression element
+<B>oparray</B> is designed for this application.
+
+<H4><A NAME="oparray">Oparray Declarations</A></H4>
+
+<P>
+The right panel shows a typical <B>oparray</B> declaration, as part of
+the stereo delay line example.
+
+<P>
+An <B>oparray</B> declaration creates the internal state variables for
+a fixed number of calls to an opcode. Each set of internal state 
+variables is called a <I>context</I>.
+
+<P>
+An <B>oparray</B> declaration shares the syntax of a signal array
+declaration, substituting the name of an opcode for the name of the
+variable. The declaration includes a <I>state specifier</I> that
+sets the number of contexts created.
+
+<P>
+The state specifier may be an integer greater than zero.
+Alternatively, the state specifier may be keywords <B>inchannels</B>
+or <B>outchannels</B>, setting the number of contexts equal to the
+width of the input audio port or output audio port of the instrument,
+respectively.
+
+<P>
+An <B>oparray</B> declaration may not occur in the <B>global</B>
+block. Only one <B>oparray</B> may be declared per opcode type
+per instrument.
+
+<H4>Oparray Calls</H4>
+
+<P>
+Oparray calls are opcode calls that use one of the contexts of an
+oparray declaration. Syntactically, oparray calls add an bracketed
+index element before the parameter list, that select the context for
+the call. 
+
+<P>
+The right panel shows example oparray calls as part of the stereo
+delay line example.
+
+<P>
+Oparray calls have the rate of the referenced opcode. The rate of the
+index expression may not be faster than the rate of the opcode.
+
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><TT>fracdelay</TT></H2>
+<TT>
+<pre>
+
+aopcode fracdelay(ksig method
+		  [, asig p,
+		     asig in])
+
+
+Fracdelay implements multi-tap
+delay lines. It is meant to be
+used with the oparray construct,
+so that several oparray fracdelay
+calls may access the same set of
+internal variables.
+
+Fracdelay has different behaviors,
+based on the value of the method
+parameter, which may take on 
+integral values between 1 and 5.
+
+
+Initialize (method == 1):
+
+This method creates internal
+variables for a delay-line that
+is p seconds long, and sets all
+delay-line values to zero. The
+number of locations in the delay
+line is floor(p*s_rate). Returns 0.
+
+
+Tap (method == 2):
+
+This method returns the current
+value in the delay line at 
+position p seconds. If necessary,
+interpolation is done between
+delay-line taps, using the
+interpolation method set by
+the global parameter interp. 
+
+
+Set (method == 3):
+
+This method sets the delay-line
+tap at position floor(p*s_rate)
+to the value of parameter in.
+Returns 0.
+
+
+Sum (method == 4):
+
+This method adds the value of
+parameter in to the delay-line
+tap at position floor(p*s_rate).
+Returns new delay-line tap value.
+
+
+Shift (method == 5):
+
+This method shifts the delay line
+forward one sample, shifting 0 into
+the beginning of the delay line.
+Returns the value shifted off 
+the end.
+
+
+<A HREF="../../special/slib/index.html">Slib</A> defines the <A HREF="../../special/slib/index.html#frac">constants</A>
+FRAC_INIT, FRAC_TAP, FRAC_SET,
+FRAC_SUM, and FRAC_SHIFT to use
+as the method parameter in 
+fracdelay calls.
+
+
+</pre>
+</TT>
+
+<H2>Oparray Example</H2>
+<TT>
+<pre>
+
+// a stereo delay line
+
+instr delayline(dtime)
+
+{
+  asig first, outval[2];
+  oparray fracdelay[2];
+
+  // on first pass, create
+  // space for delay lines
+
+  if (!first)
+    {
+      first = 1;
+      fracdelay[0](1,dtime);
+      fracdelay[1](1,dtime);
+    }
+
+  // do shift, collect output
+
+  outval[0] = fracdelay[0](5);
+  outval[1] = fracdelay[1](5);
+
+  // insert into front of line
+
+  fracdelay[0](3,0,input[0]);
+  fracdelay[1](3,0,input[1]);
+
+  // return result
+
+  output(outval);
+
+}
+</pre>
+</TT>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="dline"><TT>allpass</TT> and <TT>comb</TT></A></H2>
+
+<P>
+The core opcodes <B>allpass</B> and <B>comb</B> are normative
+implementations of recirculating filter structures. These filters are
+useful building blocks for reverberation models, and for certain sound
+effects. These opcodes are also useful for creating waveguide
+structures for physical instrument models.
+
+<P>
+The right panel shows the header syntax and exact implementation for
+<B>allpass</B> and <B>comb</B>.
+
+<P>
+Both opcodes use a shift register delay line structure to hold filter
+state. The parameter <TT>t</TT> (units of seconds) sets the time delay
+of the line, assuming the opcode is called once per a-pass.
+
+<P>
+On the first call to <B>allpass</B> and <B>comb</B>, the 
+delay line is created, and all values are initialized to
+zero. 
+
+<P>
+On each call to these opcodes, the delay line is shifted one sample
+forward, and the return value and delay line insertion value is
+computed as described on the right panel.
+
+<P>
+Note that the <TT>gain</TT> parameter for <B>allpass</B> and
+<B>comb</B> is i-rate. To create a comb or allpass filter structure
+with a temporally modulated gain, use the <B>delay</B> opcode as a
+starting point for writing the filter structure directly in SAOL.
+
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>allpass</TT></H2>
+<TT>
+<pre>
+aopcode allpass(asig in, 
+                ivar t, 
+                ivar gain)
+
+    ------------------
+    | floor(t*srate) |
+x-- |     delay      |--y
+    |     units      |
+    ------------------
+
+On first call, initialize
+delay line shift register
+to zero.
+
+On each call, return
+
+out = y - gain*in
+
+and insert
+
+x = out*gain + in
+
+into delay line.
+
+
+</pre>
+</TT>
+
+<H2><TT>comb</TT></H2>
+<TT>
+<pre>
+aopcode comb(asig in, 
+             ivar t, 
+             ivar gain)
+
+    ------------------
+    | floor(t*srate) |
+x-- |     delay      |--y
+    |     units      |
+    ------------------
+
+On first call, initialize
+delay line shift register
+to zero.
+
+On each call, return y,
+and insert
+
+x = in + gain*y
+
+into delay line.
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="noneff"><TT>reverb</TT>, <TT>chorus</TT> and <TT>flange</TT></A></H2>
+
+
+<P>
+The <B>allpass</B> and <B>comb</B> core opcodes are useful as
+normative building blocks for modeling room reverbation. 
+
+<P>
+The <B>allpass</B> and <B>comb</B> opcodes are also useful for
+simulating the sound effect created when several detuned versions of
+the same sustained sound are played simultaneously (called
+<I>chorusing</I>) and for simulating the <I>flanging</I> effect
+created by mixing a sound with a delayed version of itself.
+
+<P>
+An alternative normative approach to reverb and effects processing is
+to use the the <B>fracdelay</B> and <B>delay</B> opcodes as building
+blocks for recirculating filter designs.
+
+<P>
+The non-normative opcodes <B>flange</B>, <B>chorus</B>, and
+<B>reverb</B> provide convenient access to delay-based effects at a
+high level of abstraction for prototyping purposes. The right panel
+shows the header syntax for these opcodes.
+
+<P>
+These opcodes return the effected version of the signal provided by
+the a-rate parameter <TT>in</TT>. The opcode return value should be
+added to <TT>in</TT> by the programmer to create the complete
+effect. These opcodes are designed to be called once per a-pass.
+
+<P>
+Like all core opcodes, <B>flange</B>, <B>chorus</B>, and <B>reverb</B>
+return a scalar signal, producing a monophonic version of the effect. 
+
+<H4><TT>chorus</TT> and <TT>flange</TT></H4>
+
+<P>
+Chorus and flange effects are delay lines with smoothly varying
+delays. Chorus effects occur in the 20-40 millisecond range, and
+flange effects occur in the 1-10 millisecond range. 
+
+<P>
+The <B>flange</B> and <B>chorus</B> opcode do not let the user specify
+the absolute delay used in the effect, and as a result these opcodes
+are non-normative. However, the <TT>rate</TT> and <TT>depth</TT>
+parameters specify the delay <I>variation</I> for the <B>flange</B>
+and <B>chorus</B> opcodes.
+
+<P>
+The k-rate <TT>depth</TT> parameter sets the excursion from the mean
+time delay, as a percentage from 0 to 100 percent.  The k-rate
+<TT>rate</TT> parameter sets the frequency, in Hertz, of the
+low-frequency oscillator (LFO) that modulates the delay time about the
+mean.
+
+<P>
+For example, a flanger with a 2 ms mean delay, a 50 percent
+<TT>depth</TT>, and a sinusoidal LFO with a 5 Hz <TT>rate</TT> has a
+time delay that modulates between 1 ms and 3 ms sinusoidally, 5 times
+a second.
+
+<P>
+Note that the LFO waveform shape for the <B>flange</B> and
+<B>chorus</B> opcodes is non-normative.
+
+<H4><TT>reverb</TT></H4>
+
+<P> 
+The parameters for the <B>reverb</B> core opcode correspond to
+sonic characteristics of the reverberation sound. The reverberation
+algorithm is not specified by the standard.
+
+<P> 
+If the <B>reverb</B> opcode is called with a single i-rate
+control parameter <TT>f0</TT>, it is taken as the RT60 of
+the full-bandwidth reverberation signal. An RT60 value is
+the time it takes for an impulse input signal to fall in
+amplitude by 60dB.
+
+<P> 
+Alternatively, the <B>reverb</B> opcode may be called 
+with an arbitrary number of pairs of i-rate control
+parameters <TT>(f0, r0), (f1, r1) ...</TT>. In this case,
+each <TT>r</TT> value sets the RT60 time, in seconds,
+at a particular signal frequency <TT>f</TT>, in Hz.
+
+<P>
+<B>Next section:</B>
+<A HREF="../sproc/index.html">Part IV/3: Signal Processing Core Opcodes</A></H2>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>chorus</TT> and <TT>flange</TT></H2>
+<TT>
+<pre>
+
+aopcode chorus(asig in,
+               ksig rate, 
+	       ksig depth)
+
+
+aopcode flange(asig in,
+               ksig rate, 
+               ksig depth)
+
+
+
+rate: the rate of modulation of the
+time delay, in Hz.
+
+depth: the depth of the modulation,
+in percent. For example, a flanger
+effect typically uses a 15 ms delay.
+A depth of 50 percent implies the
+delay time varies from 7.5ms to 
+22.5ms, at a rate determined by 
+the rate parameter. note the waveform
+is non-normative, as is the absolute
+delay.
+
+note that depth is specified as a
+number between 0 and 100, not as a
+number between 0.0 and 1.0.
+
+</pre>
+</TT>
+
+
+<H2><TT>reverb</TT></H2>
+<TT>
+<pre>
+
+aopcode reverb(asig in, ivar f0
+               [, ivar r0, 
+                  ivar f1, 
+	          ivar r0 ...])
+
+
+
+with no optional parameters:
+
+f0: sets the decay time, in 
+seconds, for an input impulse
+to fall in amplitude 60dB.
+known as the RT60.
+
+
+with optional parameters:
+
+fk, rk: rk is the RT60 of the
+reverb (in seconds) at the 
+frequency fk (in Hertz). 
+
+last parameter must be an r,
+not an f.
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+advanced opcodes</A>-><STRONG>filter core opcodes</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro
+and John Wawrzynek.</A>
+
+</BODY>
+</HTML>

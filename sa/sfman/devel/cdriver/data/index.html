@@ -1,0 +1,2164 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>Sfront Reference Manual: Part II/2B: Control Driver Data Structures</TITLE>
+<META name="keywords" content="MP4-SA, SASL, SAOL, MP4, sfront,
+command line options.">
+<META name="description" content="A part of the Sfront reference
+manual, that is a collection of reference materials. Sfront is a 
+program that translates MP4-SA files into C programs.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../../index.html">mp4-sa</A>-><A HREF="../../../index.html">
+sfront reference manual</A>->
+<STRONG>control driver data structures</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../../index.html">The <TT>sfront</TT> Reference Manual</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part II/2B: Control Driver Data Structures</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="75%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B>SAOL Data Structures</B>
+<UL>
+<LI>
+<B><A HREF="#vars">SAOL Variables</A>.</B> Describes the
+structure used to describe SAOL variables.
+<LI>
+<B><A HREF="#global">Global Variables</A>.</B> The data 
+structures and constants that describe SAOL global variables
+and future tables.
+<LI>
+<B><A HREF="#istruct">Instrument Information</A>.</B> Describes
+the <TT>csys_instrstruct</TT> fields.
+<LI>
+<B><A HREF="#instr">SAOL Instruments</A>.</B> Describes the
+data structures that list all the instruments in a SAOL program.
+<LI>
+<B><A HREF="#target">Target Control Variables</A>.</B> An easier
+way to find imports control variables.
+<LI>
+<B><A HREF="#preset">Instr Preset Numbers</A>.</B> Mapping instr
+names to MIDI preset numbers.
+<LI>
+<B><A HREF="#sample">Sample Block Data</A>.</B> Data structures that
+list any sample blocks stored along with the SAOL file.
+<LI>
+<B><A HREF="#bus">Audio Bussing</A>.</B> Data structures that
+expose the audio pathways of a SAOL program.
+</UL>
+<LI>
+<B>Other Data Structures</B>
+<UL>
+<LI>
+<B><A HREF="#labels">SASL Labels</A>.</B> Data structures that
+list any SASL labels stored along with the SAOL file.
+<LI>
+<B><A HREF="#system">System Status</A>.</B> Runtime information
+available to the control driver.
+<LI>
+<B><A HREF="#bifs">AudioBIFS Standard Names.</B></A> Control
+driver access to <TT>params[]</TT> and other AudioBIFS names.
+<LI>
+<B><A HREF="#util">Utility Functions</A>.</B> Functions available
+to the control driver.
+<LI>
+<B><A HREF="#cmdline">Command Line Contents</A>.</B> Accessing
+command-line arguments from sfront and sa.c.
+<LI>
+<B><A HREF="#midi">MIDI and SASL Constants</A>.</B> Constants useful
+for handling MIDI and SASL events.
+</UL>
+</UL>
+
+</TD>
+<TD WIDTH="25%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Types</H2>
+
+<P>
+<A HREF="#bus">csys_bussstruct</A>,
+<A HREF="#istruct">csys_instrstruct</A>,
+<A HREF="#labels">csys_labelstruct</A>,
+<A HREF="#preset">csys_presetstruct</A>,
+<A HREF="#bus">csys_routestruct</A>,
+<A HREF="#sample">csys_samplestruct</A>,
+<A HREF="#bus">csys_sendstruct</A>,
+<A HREF="#target">csys_targetstruct</A>,
+<A HREF="#vars">csys_varstruct</A>
+
+<H2>Variables</H2>
+<P>
+<A HREF="#system">absolutetime</A>,
+<A HREF="#cmdline">csys_argc</A>,
+<A HREF="#cmdline">csys_argv</A>,
+<A HREF="#bus">csys_bus</A>,
+<A HREF="#global">csys_global</A>,
+<A HREF="#instr">csys_instr</A>,
+<A HREF="#labels">csys_labels</A>,
+<A HREF="#preset">csys_preset</A>,
+<A HREF="#bus">csys_route</A>,
+<A HREF="#sample">csys_sample</A>,
+<A HREF="#bus">csys_send</A>,
+<A HREF="#cmdline">csys_sfront_argc</A>,
+<A HREF="#cmdline">csys_sfront_argv</A>
+<A HREF="#target">csys_target</A>,
+<A HREF="#bifs">direction</A>,
+<A HREF="#system">endtime</A>,
+<A HREF="#system">globaltune</A>,
+<A HREF="#bifs">listenerDirection</A>,
+<A HREF="#bifs">listenerPosition</A>,
+<A HREF="#bifs">maxBack</A>,
+<A HREF="#bifs">maxFront</A>,
+<A HREF="#bifs">minBack</A>,
+<A HREF="#bifs">minFront</A>,
+<A HREF="#bifs">params</A>,
+<A HREF="#bifs">position</A>,
+<A HREF="#system">scorebeats</A>,
+<A HREF="#system">tempo</A>,
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+Control drivers communicate SASL, MIDI, and special events to
+the <TT>sa.c</TT> program. To communicate an event such as the
+creation of an instrument instance or the updating of a global
+variable, the control driver needs to be able to specify the
+name of the instrument or variable, in a language that the main
+program understands. 
+
+<P>
+This section describes the data structures, constants, and functions
+that are available to the control driver. These resources serve to map
+the ASCII name or MP4 symbol number of a SAOL element to an <I>index
+number</I> that the <TT>sa.c</TT> understands. These resources also
+supply information about the current state of the <TT>sa.c</TT>
+program, such as the current score time.
+
+<P>
+These resources are designed so that the control driver can be written
+to work with all SAOL programs.  By searching through the data
+structures, the control driver can discover the variables,
+instruments, and other SAOL elements as part of its initialization
+(i.e. during the <A
+HREF="../intro/index.html#driver"<TT>csys_setup</TT></A> call).
+
+<P>
+In this section, we first describe the resources that pertain to
+the SAOL program, and then describe the resources that reflect
+other aspects of the <TT>sa.c</TT> program. 
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="vars">SAOL Variables</A></H2>
+
+<P>
+A SAOL instrument may have parameter variables
+and local variables. In addition, the global
+block of a SAOL program may define global
+variables, and future global table variables
+may be defined implicitly.
+
+<P>
+In the following sections of this chapter, we
+define data structures that describe SAOL
+instruments and SAOL global variables. Both
+of these data structures uses 
+<TT>csys_varstruct</TT>
+to describe variables. The right
+panel shows this struct and explains its
+fields.
+
+<P>
+The most common reason for a control driver
+to examine a <TT>csys_varstruct</TT> is to
+find a particular variable, and then return
+its <TT>index</TT> value to the main 
+program. 
+
+<P>
+The other fields in <TT>csys_varstruct</TT>
+are attributes a control driver may need to
+search over to find the right variable to
+return. The <TT>name</TT> field is the ASCII
+name of the variable, useful for SAOL programs
+presented to sfront via the <TT>-orc</TT>
+option. The <TT>token</TT> field is the MP4
+file symbol number for the variable, useful
+for SAOL programs presented to sfront via 
+the <TT>-bit</TT> or <TT>-bitc</TT> options.
+
+<P>
+The remaining fields describe attributes of
+the variable, such as width, rate, and 
+import status. 
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>csys_varstruct</TT></H2>
+
+<TT>
+<pre>
+typedef struct csys_varstruct {
+  int index;
+  char * name;
+  int token;
+  int type;
+  int tag;
+  int width;
+  int use;
+} csys_varstruct;
+
+</pre>
+</TT>
+
+<H2>Field descriptions</H2>
+
+<TT>
+<pre>
+int index:  
+
+  The value that the control driver
+  function csys_saslevents() passes
+  to the caller, to identify the
+  variable. Also passed to service
+  functions to identify a variable. 
+    
+char * name: 
+
+  The ASCII name of the variable,
+  if one exists. If the SAOL program
+  is part of an MP4 file without a
+  symbol table entry for the variable,
+  the name is a##, where ## is the MP4
+  file token number for the variable
+        
+int token:
+
+  The MP4 symbol number for the 
+  variable in the MP4 file. This
+  value may be -1 if the SAOL did 
+  not originate in an MP4 file, in
+  some versions of sfront.
+
+int type:
+
+  The type of the variable, which 
+  takes on one of these constant
+   values:
+
+  CSYS_IRATE
+  CSYS_KRATE
+  CSYS_ARATE
+  CSYS_TABLE
+
+  The values of these symbols are
+  subject to change, so use the 
+  symbols to ensure future
+  compatability. The type codes
+  either the rate of the 
+  variable, or the fact that it is a
+  table (tables are always i-rate).
+
+int tag:     
+
+  Special attributes a SAOL variable 
+  may have, one of:
+
+  CSYS_NORMAL
+  CSYS_IMPORT
+  CSYS_EXPORT
+  CSYS_IMPORTEXPORT
+  CSYS_PFIELD 
+
+  The tag indicates if the SAOL 
+  variable has an imports or exports
+  tag, or is a parameter field in
+  an instr. If the variable has none
+  of these, it is tagged with
+  CSYS_NORMAL.
+
+int width:   
+
+  The width of the variable, for 
+  array signal variables. Scalars
+  and tables have width 1.
+
+int use:     
+
+  Codes whether SAOL program could
+  potentially read or write the 
+  variable.  Intended purpose is to
+  let control drivers optimize for
+  variables that are never read or
+  never written. Values are:
+
+  CSYS_UNUSED
+  CSYS_READ
+  CSYS_WRITTEN
+  CSYS_WRITTEN_AND_READ
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="global">Global Variables</A></H2>
+
+<P>
+The right panel shows the two data 
+structures that describe the global
+variables and future tables in a
+SAOL program.
+
+<P>
+The first data structure is an array
+of <A HREF="#vars"><TT>csys_varstruct</TT></A>
+structs. It is designed for applications where
+the control driver does not know the
+contents of the SAOL program a priori,
+but needs to build a model of the
+program as it executes.
+
+<P>
+The CSYS_GLOBALNUM constant lets the
+control driver know how many global
+variables exist. If it is nonzero,
+it is also the size of the array
+<TT>csys_global</TT>. 
+
+<P>
+Some control drivers may be written for a specific SAOL program in
+mind.  For these programs, it may be easier to use the second data
+structure described on the right panel. This set of constants code the
+<TT>csys_global[].index</TT> value for every global variable
+directly.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>csys_global</TT></H2>
+
+<TT>
+<pre>
+#define CSYS_GLOBALNUM ##
+
+<A HREF="#vars">csys_varstruct</A> csys_global
+  [max(1,CSYS_GLOBALNUM)];
+
+
+The symbol CSYS_GLOBALNUM holds 
+the number of global variables
+(signal and table) in the array. 
+The array csys_global[] holds the
+<A HREF="#vars">csys_varstruct</A> elements
+that describes the variable.
+
+If CSYS_GLOBALNUM is zero, there
+are no global variables. A dummy
+csys_global[1] will be defined in
+this case.
+
+</pre>
+</TT>
+
+<H2>Global Constants</H2>
+
+<TT>
+<pre>
+In addition to the csys_global[]
+array, a global constant:
+
+
+#define CSYS_SASL_GBL_varName ##
+
+is defined for each global variable.
+
+
+varName is the ASCII name for the
+variable, or a## if the variable
+is in an MP4 file without a symbol
+table entry for the variable.
+
+## is an integer that is the 
+csys_varstruct index value for
+the variable varName. 
+
+</pre>
+</TT>
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="istruct">Instrument Information</A></H2>
+
+<P>
+The control driver may access several
+datastructures that refer to SAOL
+instrs. These datastructures use the
+<TT>csys_instrstruct</TT> struct, shown
+on the right panel, to describe an
+instrument.
+
+<P>
+The <TT>csys_instrstruct</TT> struct
+shares much in common with the
+csys_varstruct struct described in
+the <A HREF="#vars">last</A> section.
+The <TT>index</TT> field of 
+<TT>csys_instrstruct</TT> is returned
+to functions such as <TT>csys_saslevent</TT>
+to specify an instrument, while the
+<TT>name</TT> and <TT>token</TT>
+fields provide ASCII and MP4 file
+names for an instrument.
+
+<P>
+The remaining fields describe attributes
+of the SAOL instrument code, such as the
+parameter fields and local variables of
+the instrument, the output width of the
+instrument, and the ways the instrument
+are used in the Structured Audio file.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>csys_instrstruct</TT></H2>
+
+<TT>
+<pre>
+typedef struct csys_instrstruct
+{
+  int index;
+  char * name;
+  int token;
+  int numvars;
+  <A HREF="#vars">csys_varstruct</A> * vars;
+  int outwidth;
+  int status;
+} csys_instrstruct;
+
+</pre>
+</TT>
+
+<H2>Field Descriptions</H2>
+
+<TT>
+<pre>
+int index:  
+
+  The value that the control driver
+  function csys_saslevents() passes
+  to the caller, to identify the
+  instr. Also passed to service
+  functions to identify a variable. 
+  
+    
+char * name: 
+
+  The ASCII name of the instr,
+  if one exists. If the SAOL program
+  is part of an MP4 file without a
+  symbol table entry for the instr,
+  the name is a##, where ## is the MP4
+  file token number for the instr.
+        
+int token:
+
+  The symbol number for the instr in 
+  the MP4 file. This value may be -1
+  if the SAOL did not originate in an
+  MP4 file, in some versions of sfront.
+  Note that the startup instrument
+  may not have a symbol associated 
+  with it -- use the status byte 
+  (see below) to locate the startup 
+  instrument.
+
+int numvars: 
+
+  The total number of pfields, local
+  signal variables, and local table
+  variables in the instr. Also 
+  available as the constant 
+  CSYS_instrName_VARNUM, with 
+  instrName matching the name 
+  string above.
+
+csys_varstruct * vars: 
+
+  An array, of size numvars, of 
+  <A HREF="#vars"><TT>csys_varstruct</TT></A> to
+  describe each pfield and local
+  signal or table variable. 
+
+int outwidth: 
+
+  The width of the output() 
+  statements in the instr. 
+
+int status:  
+
+  A status word that describes 
+  how the instr is used. Different
+  bits in the status words are set
+  to reflect each use of the instr.
+  A bitwise AND of the status word
+  with each constant below indicates
+  the instr is used in the manner
+  described:
+
+  CSYS_STATUS_EFFECTS
+
+      Indicates that the instr is
+      used as an effects instrument,
+      i.e. it is the target of a
+      send() statement in the global
+      block.
+
+  CSYS_STATUS_SCORE
+
+      Indicates the instr is used 
+      by a SASL score line. (for 
+      binary files, in either the
+      configuration or streaming part
+      of the file).
+
+  CSYS_STATUS_MIDI
+
+      Indicates the instr is used
+      by a MIDI event (for binary
+      files, in either the 
+      configuration or streaming
+      part of the file).
+
+  CSYS_STATUS_DYNAMIC
+
+      Indicates the instr is the
+      target of a SAOL instr
+      statement.
+
+  CSYS_STATUS_STARTUP
+
+      Indictates the instr is the 
+      startup instr.
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="instr">SAOL Instruments</A></H2>
+
+
+<P>
+The right panel shows the two data 
+structures that describe the instruments
+in a SAOL program.
+
+<P>
+The first data structure is the array <TT>csys_instr</TT>.  It is
+designed for applications where the control driver does not know the
+contents of the SAOL program a priori. The driver may search
+<TT>csys_instr</TT> to discover the structure of the SAOL program.
+
+
+<P>
+The CSYS_INSTRNUM indicates the number of instruments in the SAOL
+program. The ordering of instruments in <TT>csys_instr</TT> has
+meaning: it denotes the <A
+HREF="../../../../book/control/saolc/index.html#order">
+execution order</A> of the SAOL program.
+
+<P>
+Uses of the csys_instr array include: 
+
+<UL>
+<LI>
+Looking up the index values for
+instruments to return in 
+<TT>csys_midievents()</TT> and
+<TT>csys_saslevents()</TT> calls.
+<LI>
+Looking up the index values for imports variables in the <TT>vars</TT>
+field to implement <A
+HREF="../../../../book/control/sasl/index.html#control">labelled
+control statements</A>
+(but see the <A HREF="#target">
+next section</A> for a more
+efficient data structure for
+this purpose).
+</UL>
+
+<P> 
+In addition, several data 
+structured described in later
+sections of this chapter index
+into <TT>csys_instr[]</TT>.
+
+
+<P>
+Some control drivers may be written
+for a specific SAOL program in mind.
+For these programs, it may be easier
+to use the second data structure described
+on the right panel. This set of constants code the
+<TT>csys_instr[].index</TT> value for every
+instrument directly, as well as the
+<TT>csys_instr[].vars[].index</TT>
+value for variables that may be
+targeted by labelled SASL control
+statements.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+
+<H2><TT>csys_instr</TT></H2>
+
+<TT>
+<pre>
+
+#define CSYS_INSTRNUM ##
+
+ <A HREF="#istruct">csys_instrstruct</A>
+     csys_instr[CSYS_INSTRNUM];
+
+
+
+
+CSYS_INSTRNUM is the number of
+instrument definitions in the
+SAOL or MP4 file. csys_instr
+is an array that describe each
+instrument.
+
+Useful facts about csys_instr:
+
+[1] csys_instr[x].index == x
+
+This fact can simplify coding
+of control driver applications,
+and will not be broken going
+forward.
+
+[2] The order of instruments 
+in csys_instr[] is the execution
+order of the instruments in 
+the SAOL program.
+
+</pre>
+</TT>
+
+<H2>Instr Constants</H2>
+
+<TT>
+<pre>
+In addition to the csys_instr[]
+array, a global constant:
+
+
+#define CSYS_SASL_INSTR_instrName  ##
+
+is defined for each instr.
+
+
+instrName is the ASCII name for
+the instr, or a## if the instr
+is in an MP4 file without a symbol
+table entry for the instr.
+
+## is an integer that is the 
+csys_instrstruct index value for
+the instr instrName. This number
+can also be used to index into 
+csys_instr[]. 
+
+The symbol CSYS_SASL_NOINSTR can
+be used to specify the "no 
+instrument."
+
+
+<H2>Instr Variable Constants</H2>
+
+If an instr has variables that
+are fair targets for a SASL
+<A HREF="../../../../book/control/sasl/index.html#control">labelled control statements</A>
+(i.e. they are declared with the 
+imports tag and do not have a
+matching global variable), there
+will be a definition for
+
+CSYS_SASL_IMPORT_instrName_varName 
+
+Where instrName is the instrument
+name and varName is the variable
+name (ASCII or a## name, as described
+above for instrName).
+
+This constant will be the equal to
+
+csys_instr[].vars[].index 
+
+however, note that 
+
+csys_instr[].vars
+ [CSYS_SASL_IMPORT_instrName_varName]
+
+does not produce valid data -- a 
+search needs to be done to find the
+matching vars[] element.
+
+
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="target">Target Control Variables</A></H2>
+
+<P>
+The instrument variables that may targeted by a SASL <A
+HREF="../../../../book/control/sasl/index.html#control">labelled
+control statement</A> have several properties:
+
+<UL>
+<LI>
+Variables must be imports.
+<LI>
+Variables must be k-rate.
+<LI>
+Variables must be scalar (not arrays).
+<LI>
+Variables must be signal (not tables).
+<LI>
+Variables must not have a corresponding variable
+in the global block
+</UL>
+
+<P>
+Sfront uses these properties to construct the
+<TT>csys_target</TT> array, shown on the right
+panel, that lists all local variables of all
+instruments that may be targeted by labelled
+control statements.
+
+<P>
+Implementations of MP4 streaming
+decoders can search through this short 
+array for a candidate variable, and send
+the appropriate labelled control events 
+via the <TT>midi_saslevent()</TT> function.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>csys_targetstruct</TT></H2>
+
+<TT>
+<pre>
+typedef struct csys_targetstruct
+{
+  char * name;
+  int token;
+  int numinstr;
+  int * instrindex;
+  int * varindex;
+} csys_targetstruct;
+
+Describes a SAOL variable that
+appears as a local variable in
+one or more instruments, and that
+has the correct properties to be
+a target for a SASL labelled 
+control statement.
+
+char * name:  
+
+    The name of the control
+    variable, following the
+    conventions of the name
+    field of <A HREF="#istruct">csys_instrstruct</A>.
+
+int token:  
+
+    MP4 symbol number, that
+    follows the conventions
+    of the token field of 
+    <A HREF="#istruct">csys_instrstruct</A>.
+
+int numinstr: 
+
+    Number of instrs that have
+    this variable in targetable
+    form.
+
+int * instrindex:
+
+    An array, of size numinstr,
+    of indexes into <A HREF="#instr">csys_instr[]</A>,
+    one for each instr that has
+    the variable in a targetable
+    form. The csys_saslevent 
+    function requires this number
+    in the *id field for a 
+    labelled control statement.
+
+int * varindex;
+
+   An array, of size numinstr, 
+   that gives the vars[].index
+   value for the targeted 
+   variable. In other words
+
+   instrindex[i] == x
+   varindex[i] == y
+
+   then the 
+
+   csys_instr[x].vars[].index == y
+   
+   for the element of vars that
+   holds the targeted variable.
+   Note that y doesn't index 
+   into the vars[] array itself.
+   
+   The csys_saslevent function,
+   used for labelled control 
+   statements, required y in the
+   *pnum field.
+
+</pre>
+</TT>
+
+<H2><TT>csys_target</TT></H2>
+
+<TT>
+<pre>
+#define CSYS_TARGETNUM ##
+
+csys_targetstruct csys_target
+       [max(1,CSYS_TARGETNUM];
+
+
+CSYS_TARGETNUM is the number 
+of instr variables that are
+targetable by control statements
+in the SAOL program.
+
+If CSYS_TARGETNUM is greater
+than zero, csys_target is an
+array that holds information
+about each targetable 
+variable.
+
+
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="preset">Instr Preset Numbers</A></H2>
+
+<P>
+As explained in this <A
+HREF="../../../../book/control/midi/index.html#instr">section</A>
+of the MP4-SA book, a SAOL instrument that is capable of being
+controlled by MIDI events has one or more <I>preset</I> numbers.  A
+MIDI event stream sent to the <TT>sa.c</TT> program using the
+<TT>csys_midievent</TT> function should start with a series of <A
+HREF="../../../../book/control/midi/index.html#basic"><B>PChange</B></A>
+commands, that sets the MIDI preset number (and thus, the SAOL
+instrument) for each MIDI channel in use. 
+
+<P>
+These <B>PChange</B> commands will be in a valid MP4 file that uses
+MIDI events in SA_access_units. However, some control driver
+applications may need to dynamically set the preset number for each
+MIDI channel.
+
+<P>
+For example, a program for selecting SAOL instrument voices to be
+controlled by an MIDI keyboard would let the user choose SAOL
+instrument voices for each MIDI channel. This program would send
+<B>PChange</B> commands via the <TT>csys_midievent</TT> function to
+make the instrument selection happen.
+
+<P>
+The <TT>csys_presets</TT> array shown the right panel provides the
+mapping between SAOL instruments and preset numbers. The array
+contains one entry for each preset number defined in a SAOL instrument
+definition (recall each instrument may have multiple preset numbers,
+but no preset number may be used by two instruments).
+
+<P>
+The <TT>index</TT> entry for each array element points into the
+<A HREF="#instr"><TT>csys_instr</TT></A> array. The <TT>preset</TT>
+entry is the preset number. The array is ordered by preset number.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>csys_presetstruct</TT></H2>
+
+<TT>
+<pre>
+typedef struct csys_presetstruct {
+  int index;
+  int preset;
+} csys_presetstruct;
+
+
+Maps MIDI presets numbers to 
+SAOL instruments.
+
+index: 
+
+    An index into array
+    <A HREF="#instr">csys_instr</A> coding
+    the SAOL instr associated
+    with preset number.
+
+preset:
+
+    The preset number.
+  
+</pre>
+</TT>
+
+<H2><TT>csys_presets</TT></H2>
+
+<TT>
+<pre>
+#define CSYS_PRESETNUM    ##
+
+csys_presetstruct csys_presets
+     [max(1,CSYS_PRESETNUM)];
+
+
+The constant CSYS_PRESETNUM is the
+number of preset numbers defined
+in the SAOL program. If it is
+non-zero, then the array 
+csys_presets holds information
+about each preset defined, using
+the csys_presetstruct fields
+described above. 
+
+Elements in csys_presets are
+ordered with respect to preset
+number.
+
+</pre>
+</TT>
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="sample">Sample Block Data</A></H2>
+
+<P>
+SAOL wavetable declarations that use the
+sample wavetable generator are coded in an
+MP4 file by pointing to a sample event
+block that is encoded in the configuration
+block. SASL table commands in the configuration
+block that use the sample wavetable generator 
+also point to a sample event. 
+
+<P>
+These sample events have their own MP4 symbol
+number, and can be referenced by SASL table
+commands in the SA_access_unit event stream.
+
+<P>
+The <TT>csys_samples</TT> array
+holds information on all sample event
+blocks encoded in the configuration block.
+
+<P>
+Note that sfront writes all sample event
+blocks to WAV files in the local 
+directory, which are read by the <TT>sa.c</TT>
+program during execution. The 
+ <TT>csys_samples</TT> array includes
+the name of that file. 
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>csys_samplestruct</TT></H2>
+
+<TT>
+<pre>
+typedef struct csys_samplestruct 
+{
+  int index;
+  int token;
+  char * name;
+  char * fname;
+} csys_samplestruct;
+
+
+Describes a sample event.
+
+Fields:
+
+  int index: 
+
+     Index number for the 
+     sample event. Will be
+     used by future special
+     events.
+
+  int token:
+
+     The MP4 symbol number for
+     the sample event in the
+     binary file.
+	
+  char * name: 
+
+     An ASCII version of the
+     symbol number for the 
+     sample event, in the
+     form a##.
+
+  char *fname;
+
+     The name of the Microsoft
+     WAV file that holds the
+     sample block. This file
+     is placed in the same 
+     directory as the MP4 file
+     when sfront decodes the file.
+
+</pre>
+</TT>
+
+<H2><TT>csys_samples</TT></H2>
+
+<TT>
+<pre>
+
+#define CSYS_SAMPLENUM ##
+
+csys_samplestruct csys_samples
+        [max(1,CSYS_SAMPLENUM)];
+
+
+CSYS_SAMPLENUM is the number of
+sample events in the 
+configuration block. The array
+csys_samples[] holds information
+about each sample event.
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="bus">Audio Bussing</A></H2>
+
+<P>
+The <B>global</B> block of a SAOL program
+defines an audio signal processing path,
+through the use of <B>send</B> and 
+<B>route</B> statements. This 
+<A HREF="../../../../book/saol/bus/index.html">
+chapter</A> of the MP4-SA book 
+describes the audio pathway of SAOL
+programs in-depth.
+
+<P>
+Audio bus information cannot be directly
+used in any SASL or MIDI control driver 
+event. However, to support control driver
+applications that create graphical
+descriptions of SAOL programs, and to 
+support future special events, the
+control driver interface includes a 
+set of data structures that reflect
+the audio path of a SAOL program.
+The right panel describes these
+data structures.
+
+<P>
+The primary data structure, <TT>csys_bus</TT>,
+describes each bus in the SAOL program, 
+included the special <B>output_bus</B>
+and <B>input_bus</B>. Two secondary 
+data structures, <TT>csys_route</TT>
+and <TT>csys_send</TT>, describe each
+<B>send</B> and <B>route</B> statement.
+
+<P>
+Note that no data structure exists that
+holds information about <B>sequence</B>
+statements. The order of instruments in
+the <A HREF="#instr">csys_instr</A> array
+denotes the execution order of instruments,
+and implicitly codes all sequence statements.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>csys_busstruct</TT></H2>
+<TT>
+<pre>
+typedef struct csys_busstruct
+{
+  int index;
+  char * name;
+  int width;
+  int oflag; 
+} csys_busstruct;
+
+
+Describes a bus in a SAOL
+program.
+
+Fields:
+
+  int index:
+
+     The index value of
+     the bus, to be used
+     in future special
+     events.
+
+  char * name;
+
+     The name of the bus.
+     The special buses 
+     <B>input_bus</B> and 
+     <B>output_bus</B> will
+     always appear as those
+     strings. User-defined
+     buses may be given names
+     from the ASCII SAOL file,
+     or tokenized names from
+     the MP4-SA symbol numbers
+     (i.e. a##).
+
+  int width;
+
+     The width of the bus.
+
+  int oflag; 
+
+     The number of outbus()
+     statements, in all 
+     instruments, that write onto
+     this bus.
+
+</pre>
+</TT>
+
+<H2><TT>csys_bus</TT></H2>
+<TT>
+<pre>
+#define CSYS_BUSNUM ##
+ 
+csys_busstruct csys_bus
+    [max(1,CSYS_BUSNUM)];
+
+
+CSYS_BUSNUM is the number
+of audio buses in the SAOL
+program. csys_bus is an 
+array describing each bus.
+
+Note that 
+
+csys_bus[i].index == i
+
+</pre>
+</TT>
+
+<H2><TT>csys_sendstruct</TT></H2>
+<TT>
+<pre>
+typedef struct csys_sendstruct 
+{
+  int instr;
+  int nbus;
+  int * bus;
+} csys_sendstruct;
+
+Describes a SAOL send statement.
+
+Fields:
+
+ int instr:   
+
+   The instr the send statement
+   creates, coded as an index
+   into the <A HREF="#instr">csys_instr</A>
+   array. 
+
+ int nbus:
+
+   The number of buses that 
+   make up the SAOL input[]
+   standard name value sent
+   to the instr.
+
+ int *bus: 
+
+   An array, of size nbus, 
+   that lists the buses that
+   make up SAOL input[] 
+   standard name value sent
+   to the instr, in order. 
+   Each element of the array
+   indexes csys_bus[].
+
+</pre>
+</TT>
+
+<H2><TT>csys_send</TT></H2>
+<TT>
+<pre>
+#define CSYS_SENDNUM ##
+ 
+csys_sendstruct csys_send
+      [max(1,CSYS_SENDNUM)];
+
+CSYS_SENDNUM is the number of
+send statements in the global
+block of the SAOL program. 
+csys_send[] is an array that
+describes each send statement.
+
+</pre>
+</TT>
+
+<H2><TT>csys_routestruct</TT></H2>
+<TT>
+<pre>
+typedef struct csys_routestruct
+{
+  int bus;
+  int ninstr;
+  int * instr;
+} csys_routestruct;
+
+Describes a SAOL route statement.
+
+Fields:
+
+ int bus:
+
+   The bus the route statement
+   writes, coded as an index
+   into the csys_bus[] array.
+
+ int ninstr: 
+
+   The number of instrs whose
+   outputs are written to
+   the bus.
+
+  int *instr:
+
+   An array, of size ninstr,
+   that lists the instrs whose
+   outputs form the value added
+   to the bus, in order. Each 
+   element is an index into 
+   the <A HREF="#instr">csys_instr</A> array.
+
+
+</pre>
+</TT>
+
+<H2><TT>csys_route</TT></H2>
+<TT>
+<pre>
+#define CSYS_ROUTENUM ##
+ 
+csys_routestruct csys_route
+       [max(1,CSYS_ROUTENUM)];
+
+CSYS_ROUTENUM is the number of
+route statements in the global
+block of the program. The 
+array csys_route[] describes
+each route statement.
+
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="labels">SASL Labels</A></H2>
+
+<P>
+The MP4 binary file format supports two different ways of coding SASL
+commands. The configuration block (<TT>StructuredAudioSpecificConfig</TT>)
+at the start of the MP4 file, which contains the SAOL program, may
+also hold a SASL score.  holds the SAOL program, can also hold a SASL
+score. In addition, SASL lines can be coded in the
+<TT>SA_access_unit</TT> streaming events that follow the configuration
+block.
+
+<P>
+The control driver interface supports compliant 
+execution of SASL events in <TT>SA_access_unit</TT>s.
+These events may include labelled SASL control
+statements whose labels are also used in SASL
+instrument commands in the configuration block.
+
+<P>
+The <TT>csys_labels</TT> array shown on the right
+panel holds information about all labels used
+in the SASL score in the configuration block.
+
+
+<P>
+The array elements are <TT>csys_labelstruct</TT>
+structs, which provides the ASCII name and
+MP4 symbol for the label.  the index value 
+for the label which should be used as 
+an argument to <TT>csys_saslevent</TT> to 
+identify the label.
+
+<P>
+The <TT>csys_labels</TT> array is of size 
+CSYS_LABELNUM, and the numeric values for
+<TT>csys_labels[x].index</TT> is <TT>(x+1)</TT>.
+Thus, if a control driver wishes to create label
+values that are not used by any SASL commands
+in the configuration block, these labels 
+should have a numeric value greater than
+CSYS_LABELNUM. Use the constant 
+CSYS_NOLABEL to indicate an unlabeled 
+event.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>csys_labelstruct</TT></H2>
+
+<TT>
+<pre>
+
+typedef struct csys_labelstruct
+{
+  int index;
+  char * name;
+  int token;
+  int iflag[<A HREF="#instr">CSYS_INSTRNUM</A>];
+} csys_labelstruct;
+
+Describes SASL labels used in
+the configuration block.
+
+Fields:
+
+ int index:  
+
+   The value used in 
+   csys_saslevent calls
+   to identify the label.
+
+ char * name: 
+
+   The ASCII name of the
+   SASL label. If the 
+   label is part of an
+   MP4 file without a 
+   symbol table entry for
+   the label, the name is
+   a##, where ## is the 
+   MP4 symbol number.
+
+ int token: 
+
+   The MP4 symbol number
+   for the label. This 
+   number may be -1 if
+   the SASL did not come
+   from an MP4 file, in
+   some versions of sfront.
+
+ int iflag[CSYS_INSTRNUM]: 
+
+   For each instr k, 
+   iflag[k] is 1 if a SASL
+   instr statement exists
+   for the instr that uses
+   this label; otherwise,
+   iflag[k] is zero. The
+   index position of iflag[]
+   matches the index position
+   of the <A HREF="#instr">csys_instr[]</A>
+   array that describes each
+   instr in the SAOL program.
+
+
+</pre>
+</TT>
+
+<H2><TT>csys_labels</TT></H2>
+
+
+<TT>
+<pre>
+
+#define CSYS_LABELNUM  ##
+
+csys_labelstruct csys_labels
+       [max(1,CSYS_LABELNUM)];
+
+
+CSYS_LABELNUM is the number of
+unique SASL labels in the
+configuration block of the 
+MP4 file (or in the -sco 
+ASCII file). 
+
+If CSYS_LABELNUM is nonzero,
+csys_labels holds information
+about each label.
+
+Note that
+
+csys_labels[i].index == i + 1
+
+If a control driver wishes to
+create new label numbers, these
+numbers should be greater than
+CSYS_LABELNUM.
+
+The constant CSYS_NOLABEL codes
+that a statement is unlabelled.
+
+</pre>
+</TT>
+
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="system">System Status</A></H2>
+
+<P>
+When a control driver sends a
+new MIDI or SASL event to the
+main program to execute, it does
+not include a timestamp value.
+Instead, the control driver 
+checks the value of global
+variables that hold the current
+time, and uses this information
+to send new MIDI or SASl events
+at the correct time.
+
+<P>
+The right panel describes these
+internal variables and associated
+constants, that hold
+time and tempo information.
+
+<P>
+The variables
+are made available on a read
+only basis, so that the 
+control driver can present
+new events at the correct time,
+notes will be played in tune,
+ect. 
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Time Variables</H2>
+
+<TT>
+<pre>
+
+float scorebeats;
+
+   The current time of the 
+   score, in units of
+   score time (beats).
+
+float absolutetime;
+
+   The current time of the
+   score, in units of
+   seconds.
+
+float endtime;
+
+   The current ending time
+   of the score, in units
+   of score time (beats).
+
+float tempo;
+
+   The current tempo, in 
+   beats per second.
+
+</pre>
+</TT>
+
+<H2>Time Constants</H2>
+
+<TT>
+<pre>
+ARATE
+
+  Audio rate of the SAOL 
+  program, in units of
+  Hz.
+
+ATIME
+
+  1.0F/ARATE
+
+KRATE
+
+  Control rate of the
+  SAOL program, in units
+  of Hz.
+
+KTIME
+
+  1.0F/KRATE
+
+ACYCLE
+
+  The number of audio 
+  cycles in a control 
+  cycle. An integer.
+
+CSYS_GIVENENDTIME
+
+  Has the value 1 if 
+  the variable endtime
+  was given in a SASL
+  statement by the 
+  user, and thus should
+  be respected. If 0,
+  it is an estimate by
+  sfront of the last 
+  note played.
+
+</pre>
+</TT>
+   
+<H2>Tuning Variable</H2>
+
+<TT>
+<pre>
+float globaltune;
+
+  Current tuning of the 
+  SAOL program. Default
+  is 440Hz. It codes the
+  frequency of A below
+  middle C.
+
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="bifs">AudioBIFS Standard Names</A></H2>
+
+<P>
+The <A HREF="http://garuda.imag.fr/MPEG4/syssite/syspub/index.html">
+MPEG 4 Systems</A> standard 
+includes the audio mixdown tool
+for MPEG 4 Audio, which is 
+named AudioBIFS.
+
+<P>
+AudioBIFS uses a SAOL decoder to do audio
+processing. Several <A HREF="../../../../book/saol/vars/index.html#stnames">standard names</A> are 
+defined for use in AudioBIFS, including
+<B><TT>params[128]</TT></B>, an application
+dependent array that Structured Audio programs
+can read and write to communicate with the
+decoder.
+
+<P>
+To support writing control drivers that 
+implement AudioBIFS functionality, the
+control driver may read and write the
+global variables shown on the right panel.
+These variables are the underlying SAOL
+state variables for the AudioBIFS parameters.
+
+<P>
+In practice, <B><TT>params[128]</TT></B>
+is the most useful AudioBIFS standard name
+for most control drivers. Since it may be
+an lval in SAOL programs, it serves as a
+standard syntax to communicate application
+specific data between a SAOL program and an
+decoder.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>AudioBIFS Variables</H2>
+
+<TT>
+<pre>
+float direction[3];
+float listenerDirection[3];
+float listenerPosition[3];
+float minBack;
+float minFront;
+float maxBack;
+float maxFront;
+float params[128];
+float position[3];
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="util">Utility Functions</A></H2>
+
+<P>
+Most communication between a control driver and
+the main <TT>sa.c</TT> program is done via
+the <TT>csys_midievent</TT> and <TT>csys_saslevent</TT>
+functions. A secondary method of communication
+is via <I>utility functions</I> that the
+control driver may call.
+
+<P>
+At present, there is only one utility function,
+<TT>csys_terminate</TT>, that lets the control driver prematurely
+terminate the <TT>sa.c</TT> program, and print an error message on
+<TT>stderr</TT>.  The right panel describes this function.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>csys_terminate</TT></H2>
+
+<TT>
+<pre>
+void csys_terminate(char * message)
+
+Terminates the <TT>sa.c</TT> program,
+by printing the Run-Time Error
+banner on stdout. The string message
+is printed as part of the banner.
+<TT>sa.c</TT> will return -1 as
+its exit code.
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="cmdline">Command Line Contents</A></H2>
+
+<P>
+During initialization, the control driver
+may need to access the command-line options
+of the sfront invocation that created the
+<TT>sa.c</TT> file that created it. The
+control driver has access to these options
+in the <TT>csys_sfront_argc</TT> and 
+<TT>csys_sfront_argv</TT> variables shown
+on the right panel.
+
+<P>
+These variables are copied from the <TT>argc</TT>
+and <TT>argv</TT> parameters of the <TT>main</TT>
+function for sfront. The <TT>csys_sfront_argc</TT>
+variable indicates the total number of arguments on
+the command line, including the word "sfront". 
+
+<P>
+The <TT>csys_sfront_argv</TT> variable is an array
+of strings of size <TT>csys_sfront_argc</TT>. Each
+string is a command-line token, with separating
+spaces removed. Like all of the data structures
+available for inspection by the control driver,
+<TT>csys_sfront_argv</TT> and <TT>csys_sfront_argc</TT>
+may not be changed.
+
+<P>
+The control driver may also access the command line
+options of the <TT>sa.c</TT> program that contains
+it, by inspecting the  <TT>csys_argc</TT> and
+<TT>csys_argv</TT> variables described on the
+right panel. The control driver may also define
+command line options for users to put on the <TT>sa.c</TT>
+command line in order to configure the control
+driver.
+
+<P>
+The right panel shows the syntax that these 
+driver-specific command line options must follow.
+
+<P>
+In the section of this chapter that describes
+registering control drivers with sfront, we show
+how to communicate these options to users, by
+printing out help information when sfront executes.
+Alternatively, it could also print out help 
+information during the <TT>csys_setup</TT> call
+during <TT>sa.c</TT> execution.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>sfront</TT> command line</H2>
+
+<TT>
+<pre>
+int csys_sfront_argc;    
+char ** csys_sfront_argv; 
+
+</pre>
+</TT>
+
+<H2><TT>sa.c</TT> command line</H2>
+
+<TT>
+<pre>
+int csys_argc;    
+char ** csys_argv; 
+
+</pre>
+</TT>
+
+<H2>Command line convention</H2>
+
+<TT>
+<pre>
+A control driver may define its own
+command line arguments for the sa.c
+program (but not sfront). For driver
+xx, command line arguments must
+use the following convention:
+
+  -csys_xxx[_yyy] [p1 p2]   
+
+where
+
+   xxx   is the name of the driver
+   yyy   is the name of the option
+         for the driver. this can
+         be deleted if the driver 
+         only has one option.
+   p#    is a parameter for the option.
+         options can have zero,
+         one, or more than one 
+         parameters. a parameter
+         can not start with a -
+         (except when used as the
+         sign of a number) and may
+         not contain spaces.
+
+Example:
+
+The linmidi driver could define:
+
+  -csys_linmidi_transpose p1
+
+as an option for setting a constant
+transposition of MIDI note number. The
+same program could be invoked with 
+transpositions an octave above or below
+normal by using the options:
+
+  -csys_linmidi_transpose 12 
+  -csys_linmidi_transpose -12 
+
+</pre>
+</TT>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="midi">MIDI and SASL Constants</A></H2>
+
+<P>
+The description of the <TT>csys_midievent</TT>
+and <TT>csys_saslevent</TT> functions in 
+the next section includes the definition
+of several constants related to MIDI and
+SASL. The absolute value of some of these
+constants were carefully chosen, so that
+they could be useful in parsing MIDI and
+MP4 files. Those constants are shown on
+the right panel, along with the numerical
+values.
+
+<P>
+<B>Next section:</B>
+<A HREF="../code/index.html">Part II/2C: Writing the Control Driver.</A></H2>
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>SASL Event Constants</H2>
+
+<pre>
+<TT>
+
+These map to SASL code 
+numbers MP4 files.
+
+CSYS_SASL_INSTR    0x00
+CSYS_SASL_CONTROL  0x01
+CSYS_SASL_TABLE    0x02
+CSYS_SASL_ENDTIME  0x04
+CSYS_SASL_TEMPO    0x05
+
+
+These map to wavetable
+generator token numbers
+
+CSYS_SASL_TGEN_SAMPLE     0x6F
+CSYS_SASL_TGEN_DATA       0x70
+CSYS_SASL_TGEN_RANDOM     0x71
+CSYS_SASL_TGEN_STEP       0x72
+CSYS_SASL_TGEN_LINESEG    0x73
+CSYS_SASL_TGEN_EXPSEG     0x74
+CSYS_SASL_TGEN_CUBICSEG   0x75
+CSYS_SASL_TGEN_POLYNOMIAL 0x76
+CSYS_SASL_TGEN_SPLINE     0x77
+CSYS_SASL_TGEN_WINDOW     0x78
+CSYS_SASL_TGEN_HARM       0x79
+CSYS_SASL_TGEN_HARM_PHASE 0x7A
+CSYS_SASL_TGEN_PERIODIC   0x7B
+CSYS_SASL_TGEN_BUZZ       0x7C
+CSYS_SASL_TGEN_CONCAT     0x7D
+CSYS_SASL_TGEN_EMPTY      0x7E
+CSYS_SASL_TGEN_DESTROY    0x7F
+
+</pre>
+</TT>
+
+<H2>MIDI Event Constants</H2>
+
+<pre>
+<TT>
+The number of channels in MIDI
+
+CSYS_MIDI_NUMCHAN  16
+
+
+These map to MIDI command
+nibbles
+
+CSYS_MIDI_NOTEOFF  0x80
+CSYS_MIDI_NOTEON   0X90
+CSYS_MIDI_PTOUCH   0xA0
+CSYS_MIDI_CC       0xB0
+CSYS_MIDI_PROGRAM  0xC0
+CSYS_MIDI_CTOUCH   0xD0
+CSYS_MIDI_WHEEL    0xE0
+
+
+These map to MIDI controller
+numbers
+
+CSYS_MIDI_CC_BANKSELECT_MSB  0x00   
+CSYS_MIDI_CC_MODWHEEL_MSB    0x01   
+CSYS_MIDI_CC_BREATHCNTRL_MSB 0x02   
+CSYS_MIDI_CC_FOOTCNTRL_MSB   0x04
+CSYS_MIDI_CC_PORTAMENTO_MSB  0x05   
+CSYS_MIDI_CC_DATAENTRY_MSB   0x06
+CSYS_MIDI_CC_CHANVOLUME_MSB  0x07   
+CSYS_MIDI_CC_BALANCE_MSB     0x08   
+CSYS_MIDI_CC_PAN_MSB         0x0A   
+CSYS_MIDI_CC_EXPRESSION_MSB  0x0B   
+CSYS_MIDI_CC_EFFECT1_MSB     0x0C   
+CSYS_MIDI_CC_EFFECT2_MSB     0x0D   
+CSYS_MIDI_CC_GEN1_MSB        0x10   
+CSYS_MIDI_CC_GEN2_MSB        0x11   
+CSYS_MIDI_CC_GEN3_MSB        0x12  
+CSYS_MIDI_CC_GEN4_MSB        0x13
+CSYS_MIDI_CC_BANKSELECT_LSB  0x20   
+CSYS_MIDI_CC_MODWHEEL_LSB    0x21   
+CSYS_MIDI_CC_BREATHCNTRL_LSB 0x22   
+CSYS_MIDI_CC_FOOTCNTRL_LSB   0x24
+CSYS_MIDI_CC_PORTAMENTO_LSB  0x25   
+CSYS_MIDI_CC_DATAENTRY_LSB   0x26
+CSYS_MIDI_CC_CHANVOLUME_LSB  0x27   
+CSYS_MIDI_CC_BALANCE_LSB     0x28   
+CSYS_MIDI_CC_PAN_LSB         0x2A   
+CSYS_MIDI_CC_EXPRESSION_LSB  0x2B   
+CSYS_MIDI_CC_EFFECT1_LSB     0x2C   
+CSYS_MIDI_CC_EFFECT2_LSB     0x2D   
+CSYS_MIDI_CC_GEN1_LSB        0x30   
+CSYS_MIDI_CC_GEN2_LSB        0x31   
+CSYS_MIDI_CC_GEN3_LSB        0x32  
+CSYS_MIDI_CC_GEN4_LSB        0x33
+CSYS_MIDI_CC_SUSTAIN         0x40
+CSYS_MIDI_CC_PORTAMENTO      0x41   
+CSYS_MIDI_CC_SUSTENUTO       0x42 
+CSYS_MIDI_CC_SOFTPEDAL       0x43 
+CSYS_MIDI_CC_LEGATO          0x44
+CSYS_MIDI_CC_HOLD2           0x45
+CSYS_MIDI_CC_SOUNDCONTROL1   0x46
+CSYS_MIDI_CC_SOUNDCONTROL2   0x47
+CSYS_MIDI_CC_SOUNDCONTROL3   0x48
+CSYS_MIDI_CC_SOUNDCONTROL4   0x49
+CSYS_MIDI_CC_SOUNDCONTROL5   0x4A
+CSYS_MIDI_CC_SOUNDCONTROL6   0x4B
+CSYS_MIDI_CC_SOUNDCONTROL7   0x4C
+CSYS_MIDI_CC_SOUNDCONTROL8   0x4D
+CSYS_MIDI_CC_SOUNDCONTROL9   0x4E
+CSYS_MIDI_CC_SOUNDCONTROL10  0x4F
+CSYS_MIDI_CC_GEN5            0x50   
+CSYS_MIDI_CC_GEN6            0x51   
+CSYS_MIDI_CC_GEN7            0x52  
+CSYS_MIDI_CC_GEN8            0x53
+CSYS_MIDI_CC_PORTAMENTOSRC   0x54
+CSYS_MIDI_CC_EFFECT1DEPTH    0x5B
+CSYS_MIDI_CC_EFFECT2DEPTH    0x5C
+CSYS_MIDI_CC_EFFECT3DEPTH    0x5D
+CSYS_MIDI_CC_EFFECT4DEPTH    0x5E
+CSYS_MIDI_CC_EFFECT5DEPTH    0x5F
+CSYS_MIDI_CC_DATAENTRYPLUS   0x60
+CSYS_MIDI_CC_DATAENTRYMINUS  0x61
+CSYS_MIDI_CC_ALLSOUNDOFF     0x78
+CSYS_MIDI_CC_RESETALLCONTROL 0x79
+CSYS_MIDI_CC_LOCALCONTROL    0x7A
+CSYS_MIDI_CC_ALLNOTESOFF     0x7B
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+<B>Next section:</B>
+<A HREF="../code/index.html">Part II/2C: Writing the Control Driver.</A></H2>
+
+<P>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<pre> </pre>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../../index.html">mp4-sa</A>-><A HREF="../../../index.html">
+sfront reference manual</A>->
+<STRONG>control drivers</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>

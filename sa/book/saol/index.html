@@ -1,0 +1,216 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part II: The SAOL Language</TITLE>
+<META name="keywords" content="MP4-SA, SAOL, language,
+expressions, statements, wavetables, buses, execution
+order">
+<META name="description" content="A detailed description
+of the SAOL language, the computational audio language of
+MPEG 4 Structured Audio.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../index.html">
+the mp4-sa book</A>-><STRONG>the SAOL language</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part II: The SAOL Language</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="45%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>Introduction</H2>
+
+<P>
+MPEG-4 Structured Audio (MP4-SA) is an ISO/IEC standard (edited by
+Eric Scheirer) that specifies sound not as audio data, but as a
+computer program that generates audio when run. For an introduction to
+MP4-SA see this short <A HREF="../simple/index.html">example</A> or
+read the <A HREF="../tut/index.html">introductory tutorial</A>
+presented in Part I of the book.
+
+<P>
+In Part II of the book, we focus on the SAOL language. 
+
+<P>
+In the <A HREF="vars/index.html">first chapter</A> we describe the
+atomic units of SAOL expressions. We cover the lexical rules for
+numbers and names, and the declaration of signal variables and
+<B>instr</B> parameters. We describe the standard names and the
+<B>global</B> parameters.
+
+<P>
+In the <A HREF="exstat/index.html">second chapter</A> we descibe SAOL
+arithmetic and logical expressions and the statements for assignment,
+conditionals, and looping.
+
+<P>
+In the <A HREF="simple/index.html">third chapter</A> we descibe the
+core opcodes for general-purpose computation, and introduce rate and
+width rules for core opcodes.
+
+<P>
+In the <A HREF="wave/index.html">fourth chapter</A> we introduce the
+SAOL <I>wavetable</I> type, that is specialized for holding sample
+data. We introduce the set of core opcodes that directly manipulate
+wavetables, as well as the set of <I>wavetable generators</I> for
+initializing wavetables.
+
+<P>
+In the <A HREF="bus/index.html">fifth chapter</A>  we cover
+language features that relate to audio buses in SAOL. We describe the
+<B>send</B>, <B>route</B>, and <B>sequence</B> commands that create
+buses and <I>effects</I> <B>instr</B>s, and explain the rules of
+determining execution order of <B>instr</B> instances. We also
+describe the SAOL statements for writing to buses, and bus-specific
+standard names and global parameters.
+
+<P>
+<B>Next:</B><A HREF="vars/index.html">Part II/1: Numbers and Variables</A>
+
+</TD>
+<TD WIDTH="55%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Part II: Table of Contents</H2>
+<H4>1. <A HREF="vars/index.html">Numbers and Variables</A></H4>
+<UL>
+<LI>
+<B><A HREF="vars/index.html#numbers">Numbers and Names</A>.</B> Syntax for
+atoms.
+<LI>
+<B><A HREF="vars/index.html#preamble">Instr Parameters</A>.</B> 
+<B>Instr</B> preamble declarations.
+<LI>
+<B><A HREF="vars/index.html#vars_instr"> Instr Variables</A>.</B> Scalar and
+array declarations.
+<LI>
+<B><A HREF="vars/index.html#vars_global"> Global Variables</A>.</B> Declaration
+and initialization.
+<LI>
+<B><A HREF="vars/index.html#stnames"> Standard Names</A>.</B> Read-only system variables.
+<LI>
+<B><A HREF="vars/index.html#glo_param">Global Parameters</A>.</B> 
+To alter SAOL defaults.
+</UL>
+
+<H4>2. <A HREF="exstat/index.html">Expressions and Statements</A></H4>
+<UL>
+<LI>
+<B><A HREF="exstat/index.html#arith">Arithmetic</A>.</B> Basic expression evaluation.
+<LI>
+<B><A HREF="exstat/index.html#array">Arrays</A>.</B> Expressions and width.
+<LI>
+<B><A HREF="exstat/index.html#logic">Logic</A>.</B> Boolean and relational operations.
+<LI>
+<B><A HREF="exstat/index.html#assign">Assignment</A>.</B> Changing signal variables.
+<LI>
+<B><A HREF="exstat/index.html#if">If and If-Else</A>.</B> Conditional logic.
+<LI>
+<B><A HREF="exstat/index.html#while">While Statement</A>.</B> Iteration.
+</UL>
+<H4>3. <A HREF="simple/index.html">Simple Core Opcodes</A></H4>
+<UL>
+<LI>
+<B><A HREF="simple/index.html#opcode">Core Opcode Semantics</A>.</B> Rate
+and width rules. 
+<LI>
+<B><A HREF="simple/index.html#trans">Transcendentals</A>.</B> Trig,
+log, power functions.
+<LI>
+<B><A HREF="simple/index.html#quant">Quantization</A>.</B> Rounding functions.
+<LI>
+<B><A HREF="simple/index.html#random">Random Numbers</A>.</B> Also binary
+sequences.
+<LI>
+<B><A HREF="simple/index.html#loud">Loudness</A>.</B> dB conversions.
+<LI>
+<B><A HREF="simple/index.html#pitch">Pitch and Tempo</A>.</B> Musical notation
+conversions.
+</UL>
+
+
+<H4>4. <A HREF="wave/index.html">Wavetables</A></H4>
+<UL>
+<LI>
+<B><A HREF="wave/index.html#decl">Declarations</A>.</B> Declaring tables and tablemaps.
+<LI>
+<B><A HREF="wave/index.html#period">Periodic Waveforms</A>.</B>
+Additive and subtractive synthesis.
+<LI>
+<B><A HREF="wave/index.html#env">Envelope Waveforms</A>.</B> Piece-wise table
+generators.
+<LI>
+<B><A HREF="wave/index.html#sample">Sound Files</A>.</B> Reading audio files into tables.
+<LI>
+<B><A HREF="wave/index.html#playback">Table Playback</A>.</B> Core opcodes for table
+readout.
+</UL>
+
+
+<H4>5. <A HREF="bus/index.html">Buses and Execution Order</H4>
+<UL>
+<LI>
+<B><A HREF="bus/index.html#output">Output Statement</A>.</B> The output
+width of an <B>instr</B>.
+<LI>
+<B><A HREF="bus/index.html#effects">Effects Instruments</A>.</B> Instances that
+process audio input.
+<LI>
+<B><A HREF="bus/index.html#send">Send and Route Statements</A>.</B>
+Connecting instruments.
+<LI>
+<B><A HREF="bus/index.html#determine">Execution Order</A>.</B> Rules and overrides.
+<LI>
+<B><A HREF="bus/index.html#system">System Buses</A>.</B>
+<B>input_bus</B> and <B>output_bus</B>.
+<LI>
+<B><A HREF="bus/index.html#ancillary"><TT>outbus</TT> and <TT>spatialize</TT></A>.</B> Alternative output.
+</UL>
+
+</TD>
+
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../index.html">
+the mp4-sa book</A>-><STRONG>the SAOL language</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+
+</BODY>
+</HTML>

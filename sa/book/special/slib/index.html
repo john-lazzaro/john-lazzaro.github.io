@@ -1,0 +1,1418 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part V/3: The Slib Library</TITLE>
+<META name="keywords" content="Slib, SAOL, library, constants,
+pitch conversion, MIDI, MIDI scaling, General MIDI, opcode 
+library, hyperbolic, trigonometric">
+<META name="description" content="A low-level library to 
+improve readability of SAOL programs">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+special topics</A>-><STRONG>slib</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part V/3: The Slib Library </H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="65%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#load">Using Slib</A>.</B> Accessing
+a library feature in a program.
+<LI>
+<B><A HREF="#trig">Trigonometric Opcodes</A>.</B> 
+Additions to the core opcode library.
+<LI>
+<B><A HREF="#numc">Numeric Constants</A>.</B> Useful constants for
+audio programming.
+<LI>
+<B><A HREF="#symc">Coding Constants</A>.</B> Mnenomics
+for opcode/wavetable codes.
+<LI>
+<B><A HREF="#ssm">The SSM Library</A>.</B> High-level
+access to MIDI standard names.
+<LI>
+<B><A HREF="#midic">MIDI Constants</A>.</B> Useful constants for MIDI
+programming.
+<LI>
+<B><A HREF="#gmidi">General MIDI Presets</A>.</B> 
+General MIDI preset and drum-map constants.
+</UL>
+
+</TD>
+<TD WIDTH="35%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>Library Opcodes</H2>
+
+<A HREF="#trig"><B>tan</B></A> &nbsp 
+<A HREF="#trig"><B>sinh</B></A> &nbsp 
+<A HREF="#trig"><B>cosh</B></A> &nbsp 
+<A HREF="#trig"><B>tanh</B></A> &nbsp 
+<A HREF="#trig"><B>asinh</B></A> &nbsp 
+<A HREF="#trig"><B>acosh</B></A> &nbsp 
+<A HREF="#trig"><B>atanh</B></A> &nbsp 
+
+
+<H2>Commonly-Used Constants</H2>
+
+<A HREF="#mathc"><B>PI</B></A> &nbsp 
+<A HREF="#pitch"><B>CPS_MIDDLEC</B></A> &nbsp 
+<A HREF="#none"><B>NONE</B></A> &nbsp 
+<A HREF="#midic"><B>MIDI_SCALE</B></A> &nbsp 
+
+</UL>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+Good libraries make the process of writing 
+software easier. It also makes the job of
+maintaining completed programs easier, 
+especially when the maintainer is not the
+original author.
+
+<P>
+Slib is a SAOL library, distributed with sfront, that provides
+low-level support utilities to the SAOL programmer. The primary goal
+of Slib is to replace hard-coded constants and repetitive code
+fragments with easy-to-understand symbols and opcodes.
+
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><pre> </pre></H2>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="load">Using Slib</A></H2>
+
+<P>
+The remaining sections of this chapter describe
+Slib features. The right panel of each section
+begins with the <I>include statement</I> that
+should be placed at the top of a SAOL file that
+uses the feature.
+
+<P>
+For example, to use Slib's trigonometric functions
+in a program, add:
+
+<tt>
+<pre>
+#include &lt;Slib/trig.hs&gt
+</pre>
+</tt>
+
+<P>
+to the top of the program file. For this method
+to work, sfront needs to be properly configured
+to see its library directory, as described on the
+right panel.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>Sfront Library Paths</H2>
+
+<TT>
+<pre>
+Sfront currently pre-processes SAOL 
+and SASL source files before parsing
+them, if the platform has gcc 
+available. To do so, use the:
+
+<B>sfront -gcc -cpp</B>
+
+options. In addition sfront needs to 
+know the absolute path of the 
+sfront/lib directory. This can be 
+done via the command line using 
+the -Is option; for example, for
+my own setup:
+
+<B>sfront -gcc -cpp -Is /opt/sfront/lib</B>
+
+Alternatively, you can set the 
+environment variable 
+SFRONT_INCLUDE_PATH to the string
+/opt/sfront/lib. 
+
+By default, sfront searches the
+/usr/share/sfront directory, which
+is where the Debian and Redhat
+package distributions put Slib.
+
+See this <A HREF="http://john-lazzaro.github.io/sa/sfman/user/cmdline/index.html#preprocess">part</A> of the sfront reference
+manual for more information about
+using the pre-processor.
+</pre>
+</tt>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="trig">Trigonometric Opcodes</A></H2>
+
+<P>
+The SAOL core opcode library includes these
+trigonometric functions:
+
+<TT>
+<pre>
+opcode sin(xsig x)
+opcode cos(xsig x)
+opcode acos(xsig x)
+opcode asin(xsig x)
+opcode atan(xsig x)
+</pre>
+</TT>
+
+<P>
+Slib provides additional user-defined opcodes for trigonometry using
+the same calling conventions, as shown on the right panel.
+
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<TT>
+<PRE>
+#include &lt;Slib/trig.hs&gt
+
+opcode tan(xsig x)    
+
+   Tangent of x.
+
+opcode sinh(xsig x)
+
+   Hyperbolic sine of x.
+
+opcode cosh(xsig x)
+
+   Hyperbolic cosine of x.
+
+opcode tanh(xsig x)   
+
+   Hyperbolic tangent of x.
+
+opcode asinh(xsig x)
+
+   Inverse hyperbolic sine of x.
+
+opcode acosh(xsig x)
+
+   Inverse hyperbolic cosine of x.
+
+opcode atanh(xsig x)
+
+   Inverse hyperbolic tangent of x.
+</PRE>
+</tt>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="numc">Numeric Constants</A></H2>
+
+<P>
+A typical SAOL program has many literal constants. Some of these
+constants are from classical mathematics, like pi and e, while others
+are musical constants.  Manually entering these constants introduces
+inaccuracy and error into computations.
+
+<P>
+Slib contains symbol definitions for many
+constants of this type, which we describe
+in this section. These symbols may be used
+just like SAOL variable names in expressions.
+We show these symbols in related groups on
+the right panel.
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+Symbols for Euler's constant and for
+Pi are shown on the right panel. 
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<PRE>
+<A NAME="mathc">Math Constants</A>
+--------------
+
+#include &lt;Slib/std.hs&gt
+
+M_PI and PI
+
+  Pi (3.141...)
+
+M_E
+
+  e (Euler's constant, 2.71 ...)
+</PRE>
+</tt>
+
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<BR>
+<P>
+SAOL tempo computations are often 
+done relative to the default tempo
+value of 60 beats per second. The
+right panel shows constants related
+to this value.
+
+<P>
+Use these constants in conjunction with the tempo <A
+HREF="../../saol/simple/index.html#tempo">core opcodes</A>.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<PRE>
+<A NAME="tempo">Tempo constants</A>
+---------------
+
+#include &lt;Slib/std.hs&gt
+
+INIT_TEMPO
+
+  Initial tempo for MP4-SA 
+  (60 beats/second).
+
+INIT_INVTEMPO     
+
+  1/INIT_TEMPO (1/60 seconds/beat)
+</PRE>
+</tt>
+
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+<BR>
+The <TT>s_rate</TT> and <TT>k_rate</TT>
+standard names are constants that 
+describe the audio and control sampling
+rates of the SAOL program. Since these
+values are set by global parmeters, the
+standard names are constants.
+
+<P>
+
+Programs often derive a set of secondary
+execution cycle constants from 
+<TT>s_rate</TT> and <TT>k_rate</TT>. The
+right panel shows symbol definitions for
+common derived quantities.
+
+<P>
+<A HREF="#pitch">Next section</A>.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<PRE>
+<A NAME="timec">Temporal Constants</A>
+------------------
+
+#include &lt;Slib/std.hs&gt
+
+ACYCLE      
+
+   Number of a-passes in an execution
+   cycle [int(s_rate/k_rate)].
+
+ARATE       
+
+   Audio sample rate [s_rate Hz].
+
+ATIME       
+
+   Audio sampling period 
+   [1/s_rate seconds].
+
+KRATE       
+
+   Control sampling rate [k_rate Hz].
+
+KTIME
+
+   Control sampling period 
+   [1/k_rate seconds].
+
+SRATE       
+
+   Audio sample rate [s_rate Hz].
+
+STIME
+
+   Audio sample period 
+   [1/s_rate seconds].
+</PRE>
+</tt>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<BR>
+<P>
+SAOL supports four
+<A HREF="../../saol/simple/index.html#pitch">pitch
+representations</A> via a set of 12 conversion
+opcodes. 
+
+<P>
+Slib provides Middle C and Concert A constants
+for these representations, and macros for
+creating arbitrary constant values in these
+formats. Macros use the same syntax as opcode
+calls in expressions, but have no rate semantics
+issues. This example shows a legal uses of the
+pitch macro in SAOL code:
+
+<TT>
+<pre>
+
+instr ptest () {
+
+ksig k;
+asig a;
+
+k = kphasor(CPS_SEMITONES(7));
+a = aphasor(CPS_SEMITONES(0));
+
+}
+</pre>
+</TT>
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<PRE>
+<A NAME="pitch">Pitch Constants and Macros</A>
+--------------------------
+
+#include &lt;Slib/std.hs&gt
+
+CPS_MIDDLEC      
+CPS_CONCERTA 
+
+  Middle C (261.6256 Hz) and
+  Concert A (440 Hz) in
+  cps notation. 
+     
+MIDI_MIDDLEC
+MIDI_CONCERTA 
+
+  Middle C (note number 60) 
+  and Concert A (note number
+  69) in MIDI notation.
+
+PCH_MIDDLEC      
+PCH_CONCERTA 
+
+  Middle C (8) and Concert A 
+  (8.9) in pch notation.
+
+OCT_MIDDLEC      
+OCT_CONCERTA 
+
+  Middle C (8) and Concert A 
+  (8.75) in oct notation.
+
+CPS_SEMITONES(x)
+MIDI_SEMITONES(x)
+PCH_SEMITONES(x)
+OCT_SEMITONES(x)
+
+  These macros take a parameter, 
+  the number of semitones away 
+  from Middle C, and compute the
+  cps, MIDI, pch, or oct value.
+  Semitones may be a positive or
+  negative integral value. The
+  constant OCTAVESTEPS, the 
+  number of semitones per octave
+  (12), is provided for use with
+  these macros.
+</PRE>
+</tt>
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="symc">Coding Constants</A></H2>
+
+<P>
+Many core opcodes, core wavetables, and 
+SAOL and SASL language elements use 
+special integer constants to specify
+special behaviors. 
+
+<P>
+The most common constant value of this
+sort is -1, used to code indefinite 
+duration in SAOL and SASL instr statements,
+indefinite size in wavetable generators,
+and in many other contexts.
+
+<P>
+This convention can make SAOL programs 
+difficult to read -- in each case, the
+programmer needs to remember that the
+constant isn't playing a numeric role
+in the program, but rather a symbolic one.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<PRE>
+
+</PRE>
+</tt>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<P>
+The right panel shows a set of symbol 
+definitions to use instead of integers
+in these situation. The NONE symbol is
+defined to replace -1 in programs, to
+improve readability, much like the NULL
+constant improves readability in C
+programs.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<PRE>
+<A NAME="none">The NONE Constant</A>
+-----------------
+
+#include &lt;Slib/std.hs&gt
+
+NONE as a value of -1, and should
+be used in the following contexts:
+
+
+* For the size parameter in
+  wavetable generators, to indicate
+  that the generator should compute 
+  the size of the table.
+
+* For the duration parameter in SAOL
+  and SASL instr statements, to 
+  indicate indefinite duration.
+
+* The loops parameter in the oscil and
+  koscil core opcodes.
+
+* The nharm parameter in the buzz core
+  opcode and core wavetable generator.
+</PRE>
+</tt>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<BR>
+<P>
+The <A HREF="../../opcodes/filter/index.html#frac">
+fracdelay</A> core opcode has a method 
+parameter, which takes on integral values
+to code different delay line modes. The
+right panel shows a set of symbolic
+constants to use for the method parameter.
+
+<P>
+<A HREF="#random">Next section</A>.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<PRE>
+<A NAME="frac">fracdelay() Constants</A>
+---------------------
+
+#include &lt;Slib/std.hs&gt
+
+aopcode fracdelay(ksig method, 
+                  xsig p1, xsig p2) 
+
+This core opcode, which is 
+usually used via a sequence
+of oparray calls, has different
+semantics based on the value
+of the method parameter. Use
+these symbols for the method
+parameter:
+
+
+ FRAC_INIT (1)
+
+   Initializes delay line 
+   structure. p1 is the length
+   of the delay, in seconds.
+   Returns 0.
+
+ FRAC_TAP (2)
+
+   Returns data from the 
+   delay line. p1 is the
+   position to read, in seconds.
+   If p1 does not correspond
+   to an integral delay line
+   position, return value is
+   interpolated.
+
+ FRAC_SET (3)
+
+   Sets the delay line position 
+   p1 to value p2. p1 is 
+   truncated to an integral delay
+   line position. Returns 0.
+
+ FRAC_SUM (4)
+
+   Sums the value p2 into 
+   delay line position p1. p1
+   is truncated to an integral 
+   delay line position. Returns 
+   new value of delay line 
+   position that is updated.
+
+ FRAC_SHIFT (5)
+
+   Shifts delay line by 1. Shifts
+   a zero into the delay line,
+   returns value shifted off the
+   end of the delay line.
+
+</PRE>
+</tt>
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<BR>
+<P>
+The <A HREF="../../saol/wave/index.html#random">random</A> core
+wavetable generator has a dist parameter, which takes on integral
+values to code different random number distributions. The right panel
+shows a set of symbolic constants to use for the method parameter.
+
+<P>
+<A HREF="#window">Next section</A>.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<PRE>
+<A NAME="random">random wavetable generator</A>
+--------------------------
+
+#include &lt;Slib/std.hs&gt
+
+table t(random, size, 
+        dist, p1 [,p2])
+
+This core wavetable generator 
+creates a table of length size
+filled with random numbers. 
+The distribution of the random
+numbers depends on the integral
+value of the dist parameter. 
+Use these symbols for the dist
+parameter:
+
+ RANDOM_UNIFORM (1)
+
+  Uniform distribution over
+  [p1, p2].
+
+ RANDOM_LINEAR (2)
+
+  Linearly ramped distribution
+  from p1 to p2.
+
+ RANDOM_EXPON (3)
+
+  Poisson distribution, 
+  p(x) =  p1*exp(-p1*x).
+
+ RANDOM_GAUSSIAN (4)
+
+  Gaussian distribution,
+  mean p1 and variance p2
+
+ RANDOM_PROCESS (5)
+
+  Table holds a binary 
+  sequence (0.0 and 1.0) that
+  is generated by a Poisson
+  process specified by the 
+  formula  p(x) =  p1*exp(-p1*x)
+</PRE>
+</tt>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<BR>
+
+<P>
+The <A HREF="../../opcodes/sproc/index.html#window">window</A> core
+wavetable generator has a type parameter, which takes on integral
+values to code different window shapes. The right panel
+shows a set of symbolic constants to use for the type parameter.
+
+<P>
+<A HREF="#ssm">Next section</A>.
+
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<PRE>
+<A Name="window">window wavetable generator</A>
+--------------------------
+
+#include &lt;Slib/std.hs&gt
+
+table t(window, size, type [,p])
+
+This core wavetable generator 
+creates a table of length size
+holding a windowing function. 
+The type of window function 
+created depends on the integral
+value of the type parameter. The
+constants in this section are
+the supported windows.
+
+
+ WINDOW_HAMMING (1)
+
+   Hamming.
+
+ WINDOW_HANNING (2)
+
+   Hanning (raise cosine)
+
+ WINDOW_BARTLETT (3) 
+
+   Bartlett (triangular)
+
+ WINDOW_GAUSSIAN (4)
+
+   Gaussian
+
+ WINDOW_KAISER (5)
+
+   Kaiser, with parameter p
+
+ WINDOW_BOXCAR (6)
+
+   Boxcar
+</PRE>
+</tt>
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="ssm">The SSM Library</A></H2>
+
+<P>
+The <A HREF="../../control/midi/index.html#stnames"> MIDI standard
+names</A> <TT>MIDIctrl[128]</TT>, <TT>MIDIbend</TT>, and
+<TT>MIDItouch</TT> provide raw access to controller, pitch bend, and
+aftertouch values in MIDI contexts. 
+
+<P>
+The SSM library provides access to these standard names at a higher
+level of abstraction. As shown on the right panel, this library is
+loaded by including the <TT>Slib/ssm.hs</TT> file.
+
+<P>
+The SSM library is a set of symbols, such as SSMmodwheel, that use the
+functional name of MIDI controller channels. These k-rate 
+symbols can be used like MIDI standard names in expressions.
+
+<P>
+Each SSM name has several features:
+
+<OL>
+<LI>
+The value of the name is scaled to be in the
+range [0,1], [-1,1], or a binary 0/1 value,
+depending on the type of controller.
+<LI>
+By default, only the most-significant byte of
+two-byte controllers are used. If the symbol
+SSM_HIGHRES is defined before including 
+<TT>Slib/ssm.hs</TT>, both the LSB and MSB bytes
+are used.
+<LI>
+Non-binary controllers as smoothed at the k-rate,
+using the port command. By default, the half-time
+of this smoothing is <TT>4/k_rate</TT>. To use
+a different smoothing rate, define the symbol
+SSM_SMOOTHRATE to the smoothing time, in 
+seconds, before including <TT>Slib/ssm.hs</TT>.
+<LI>
+Each smoothed scaled symbol name, such as 
+SSMmodwheel, has a companion unsmoothed
+scaled symbol name starting with SM 
+(i.e. SMmodwheel).
+</OL>
+
+<P>
+<A HREF="#midic">Next section</A>.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<tt>
+<pre>
+The SSM Library
+---------------
+
+See left panel for optional
+symbols SSM_SMOOTHRATE
+and SSM_HIGHRES.
+
+#include &lt;Slib/ssm.hs&gt
+
+
+SSMattack
+
+ Range: [0,1]
+ Name: Sound Attack
+ Uses: MIDIctrl[73]
+
+SSMbalance
+
+ Range: [-1,+1]
+ Name: Stereo Balance
+ Uses: MIDIctrl[8,40]
+
+SSMbend
+
+ Range: [-1,+1]
+ Name: Pitch Bend Wheel
+ Uses: MIDIbend
+
+SSMbreath
+
+ Range: [0,1]
+ Name: Breath Controller
+ Uses: MIDIctrl[2,34]
+
+SSMbright
+
+ Range: [0,1]
+ Name: Sound Brightness
+ Uses: MIDIctrl[74]
+
+SSMbutton1 
+
+ Range: 0/1
+ Name: G.P Button 1
+ Uses: MIDIctrl[80]
+
+SSMbutton2
+
+ Range: 0/1
+ Name: G.P Button 2
+ Uses: MIDIctrl[81]
+
+SSMbutton3
+
+ Range: 0/1
+ Name: G.P Button 3
+ Uses: MIDIctrl[82]
+
+SSMbutton4
+
+ Range: 0/1
+ Name: G.P Button 4
+ Uses: MIDIctrl[83]
+
+SSMchorus
+
+ Range: [0,1]
+ Name: Chorus Level
+ Uses: MIDIctrl[93]
+
+SSMdataslider
+
+ Range: [0,1]
+ Name: Data Entry Slider
+ Uses: MIDIctrl[6, 38]
+
+SSMdetune
+
+ Range: [0,1]
+ Name: Detuning Amount
+ Uses: MIDIctrl[94]
+
+SSMeffect
+
+ Range: [0,1]
+ Name: Effects Level
+ Uses: MIDIctrl[91]
+
+SSMeffect1
+
+ Range: [0,1]
+ Name: Effect Control 1
+ Uses: MIDIctrl[12,44]
+
+SSMeffect2
+
+ Range: [0,1]
+ Name: Effect Control 2
+ Uses: MIDIctrl[13,45]
+
+SSMexpress
+
+ Range: [0,1]
+ Name: Expression
+ Uses: MIDIctrl[11,43]
+
+SSMfoot
+
+ Range: [0,1]
+ Name: Foot Controller
+ Uses: MIDIctrl[2, 34]
+
+SSMhold
+
+ Range: 0/1
+ Name: Hold Pedal
+ Uses: MIDIctrl[64]
+
+SSMhold2
+
+ Range: 0/1
+ Name: Hold 2 Pedal
+ Uses: MIDIctrl[69]
+
+SSMlegato 
+
+ Range: 0/1
+ Name: Legato Pedal
+ Uses: MIDIctrl[68]
+
+
+SSMlocal          
+
+  Range: 0/1
+  Name: Local Kbd Off/On
+  Uses: MIDIctrl[122]
+
+SSMmodwheel
+
+  Range: [0,1]
+  Name: Modulation Wheel
+  Uses: MIDIctrl[1, 33]   
+
+SSMpan
+
+  Range: [-1,+1]
+  Name: Stereo Panning
+  Uses: MIDIctrl[10,42]
+
+SSMphasor
+
+  Range: [0,1]
+  Name: Phasor Level
+  Uses: MIDIctrl[95]
+
+SSMporta
+
+  Range: 0/1
+  Name: Portamento On/Off
+  Uses: MIDIctrl[65]
+
+SSMportatime
+
+  Range: [0,1]
+  Name: Portamento Time
+  Uses: MIDIctrl[5, 36]
+
+SSMrelease
+
+  Range: [0,1]
+  Name: Sound Release
+  Uses: MIDIctrl[72]
+
+SSMslider1
+
+  Range: [0,1]
+  Name: G. P. Slider 1
+  Uses: MIDIctrl[16]
+
+SSMslider2
+
+  Range: [0,1]
+  Name: G. P. Slider 2
+  Uses: MIDIctrl[17]
+
+SSMslider3
+
+  Range: [0,1]
+  Name: G. P. Slider 3
+  Uses: MIDIctrl[18]
+
+SSMslider4
+
+  Range: [0,1]
+  Name: G. P. Slider 4
+  Uses: MIDIctrl[19]
+
+SSMsoft
+
+  Range: 0/1
+  Name: Soft Pedal
+  Uses: MIDIctrl[67]
+
+SSMsound6
+
+  Range: [0,1]
+  Name: Sound Control 6
+  Uses: MIDIctrl[75]
+
+SSMsound7
+
+  Range: [0,1]
+  Name: Sound Control 7
+  Uses: MIDIctrl[76]
+
+SSMsound8
+
+  Range: [0,1]
+  Name: Sound Control 8
+  Uses: MIDIctrl[77]
+
+SSMsound9
+
+  Range: [0,1]
+  Name: Sound Control 9
+  Uses: MIDIctrl[78]
+
+SSMsound10
+
+  Range: [0,1]
+  Name: Sound Control 10
+  Uses: MIDIctrl[79]
+
+SSMsust
+
+  Range: 0/1
+  Name: Sustenuto Pedal
+  Uses: MIDIctrl[66]
+
+SSMtimbre
+
+  Range: [0,1]
+  Name: Sound Timbre
+  Uses: MIDIctrl[71]
+
+SSMtouch
+
+  Range: [0,1]
+  Name: Aftertouch
+  Uses: MIDItouch
+
+SSMtremelo
+
+  Range: [0,1]
+  Name: Tremelo Level
+  Uses: MIDIctrl[92]
+
+SSMvar
+
+  Range: [0,1]
+  Name: Sound Variation
+  Uses: MIDIctrl[70]
+
+SSMvolume
+
+  Range: [0,1]
+  Name: Channel Volume
+  Uses: MIDIctrl[7, 39]
+
+Note that decoder support
+is needed to handle Registered
+and Non-Registered Parameters,
+since these are event-based.
+So, no definitions for Data
+Entry Button +/- and Parameter
+Number controllers appear above.
+Data Entry Slider is included,
+since its possible to use these
+values in a non-event-based way.
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="midic">MIDI Constants</A></H2>
+
+<P>
+The SSM library may not be appropriate for
+all MIDI applications. The right panel
+shows a set of constants for scaling
+MIDI data at a lower level of abstraction.
+
+<P>
+<A HREF="#gmidi">Next section</A>.
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<tt>
+<pre>
+MIDI number scaling
+-------------------
+
+#include &lt;Slib/std.hs&gt
+
+The constants in this section
+are for computing on the (7-bit)
+velocity and note-number values,
+and for creating alternatives 
+to the SSM library.
+
+
+MIDI_MAX      
+
+  Largest value for 7-bit
+  MIDI numbers. (127) 
+
+MIDI_SCALE    
+
+  To scale 7-bit MIDI
+  into [0, 1]. (1/127)
+
+MIDI_NULL        
+
+  The zero value for
+  bipolar 7-bit MIDI.
+  (64)
+
+MIDI_SSCALE
+
+  Use with MIDI_NULL
+  for [-1, 1] scaling.
+  (1/64)
+
+MIDI_BIGMAX   
+
+  Largest value for
+  14-bit MIDI numbers,      
+  used by MIDIbend, and
+  coded by two MIDIctrl[]
+  entries by some 
+  controllers. (16383)
+
+MIDI_BIGSCALE  
+
+  To scale 14-bit MIDI
+  into [0, 1] (1/16383).
+
+MIDI_BIGNULL   
+
+  The zero value for 
+  bipolar 14-bit MIDI.
+  (8192)
+
+MIDI_BIGSSCALE 
+
+  Use with MIDI_BIGNULL 
+  for [-1, 1] scaling. 
+  (1/8192)
+
+MIDI_MSBSHIFT  
+
+  Multiply MSB's of
+  MIDIctrl[] by this
+  value, and add to LSB
+  to get 14-bit MIDI.
+  (128).
+
+MIDI_OFF 
+
+  For binary 7-bit 
+  MIDIctrl[] entries.
+  Values greater than
+  MIDI_OFF are 1, else 0.
+  (63)
+</pre>
+</tt>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="gmidi">General MIDI Presets</A></H2>
+
+<P>
+The General MIDI specification assigns
+preset numbers to particular types of
+instrument timbres. It also defines 
+a percussion map.
+
+<P>
+The <TT>gmidi.hs</TT> library contains
+symbolic definitions for these presets.
+Several sample definitions are shown
+on the right panel; see the library
+file for the complete list.
+
+</TD>
+
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<tt>
+<pre>
+General MIDI presets
+--------------------
+
+#include &lt;Slib/gmidi.hs&gt
+
+
+Sample presets:
+
+Defined name        #   Description
+
+GM_ACOUSTICGRAND    0   Acoustic Grand
+GM_BRIGHTACOUSTIC   1   Brite Acoustic
+GM_ELECTRICGRAND    2   Electr. Grand
+
+                  [...]
+
+GM_APPLAUSE       126   Applause
+GM_GUNSHOT        127   Gunshot
+
+
+
+Sample note numbers:
+
+Definition            #   Description
+
+GMD_ACOUSTICBASSDRUM  35  Ac Bass Drum
+GMD_BASSDRUM1         36  Bass Drum 1
+GMD_SIDESTICK         37  Side Stick
+                    
+                     [...]
+
+GMD_MUTETRIANGLE      80  Mute Triangle
+GMD_OPENTRIANGLE      81  Open Triangle
+</pre>
+</tt>
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><pre> </pre></H2>
+
+<P>
+<B>Next: </B>
+<A HREF="../au/index.html">Part V/4: AudioUnit Plug-Ins</A>
+
+<!--
+<B>Next: </B>
+<A HREF="../large/index.html">Part V/3: Developing Large SAOL Programs</A>
+-->
+
+</TD>
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+special topics</A>-><STRONG>slib</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 2000 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+</BODY>
+</HTML>

@@ -1,0 +1,1341 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part IV/3: Signal Processing Core Opcodes</TITLE>
+<META name="keywords" content="MP4-SA, core, opcodes, core opcodes, 
+specialop, fft, ifft, rms, gain, balance, compressor, decimate, port,
+upsamp, downsamp, samphold, sblock, window">
+<META name="description" content="Core opcodes specialized for signal
+processing. These core opcodes are a part of the SAOL language of MPEG
+4 Structured Audio.">
+
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+advanced opcodes</A>-><STRONG>signal processing core opcodes</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part IV/3: Signal Processing Core Opcodes</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="65%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+<UL>
+<LI>
+<B><A HREF="#intro">Introduction</A>.</B>
+<LI>
+<B><A HREF="#gain">Level Matching</A>.</B> Absolute and
+relative.
+<LI>
+<B><A HREF="#special">Specialops</A>.</B> 
+Blending a-rate and k-rate semantics.
+<LI>
+<B><A HREF="#window">Window Wavetables</A>.</B> 
+Generating window function tables.
+<LI>
+<B><A HREF="#samp">Sample Rate Conversion</A>.</B> 
+Map between a-rate and k-rate.
+<LI>
+<B><A HREF="#comp">Gain Control</A>.</B> 
+Compressor/limiter/expander/noise-gate opcode.
+<LI>
+<B><A HREF="#fft">Fourier Analysis</A>.</B> 
+Core opcodes <B>fft</B> and <B>ifft</B>.
+<LI>
+<B><A HREF="#port">Portamento</A>.</B> Smooth
+pitch changes.
+</UL>
+</TD>
+
+<TD WIDTH="35%" VALIGN=top BGCOLOR="#CCFFCC">
+<B>
+
+<H2>Core Opcodes:</H2>
+
+<A HREF="#gain">balance</A> 
+<A HREF="#comp">compressor</A> 
+<A HREF="#samp">decimate</A> 
+<A HREF="#samp">downsamp</A> 
+<A HREF="#fft">fft</A> 
+<A HREF="#gain">gain</A> 
+<A HREF="#fft">ifft</A> 
+<A HREF="#port">port</A> 
+<A HREF="#gain">rms</A> 
+<A HREF="#samp">samphold</A> 
+<A HREF="#samp">sblock</A> 
+<A HREF="#samp">upsamp</A> 
+
+<H2>Wavetable Generator:</H2>
+
+<A HREF="#window">window</A> 
+
+</B>
+
+</TD>
+</TR>
+
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction</A></H2>
+
+<P>
+In this chapter, we complete our description of the core opcode
+library.
+
+<P>
+We describe opcodes that perform signal processing operations on a
+buffer of a-rate signal values.  These opcodes perform operations such
+as gain control, sample-rate conversion, and Fourier analysis on the
+buffer.
+
+<P>
+We describe the <B>specialop</B> semantics that govern several of the
+opcodes described in the chapter. A <B>specialop</B> opcode computes
+at the a-rate, but returns values at the k-rate.
+
+<P>
+We describe the core wavetable generator <B>window</B>, that computes
+popular windowing functions used in block-based signal processing.
+Several of the opcodes in this chapter have wavetable parameters
+that window buffer data.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<pre> </pre>
+
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="gain">Level Matching</A></H2>
+
+<P>
+The a-rate core opcodes <B>gain</B> and <B>balance</B> act as simple
+automatic gain control systems.  See the right panel for header
+syntax.
+
+<P>
+On each call, these opcodes return the scaled copy <TT>a*x</TT> of the
+input signal parameter <TT>x</TT>, where <TT>a</TT> is an internal
+variable that sets the attenuation of the system.  
+
+<P>
+The attenuation variable is initialized to 1 during the first opcode
+call, and is updated as specified by the gain control algorithm for
+each opcode.
+
+<H4><TT>gain</TT></H4>
+
+<P>
+The <B>gain</B> opcode returns a signal whose RMS power approximates
+the power level specified by the parameter <TT>g</TT>.
+
+<P>
+To perform this task, <B>gain</B> periodically recalculates the
+attenuation variable, using a formula (shown on the right panel) that
+measures the power level of recent values of the signal parameter
+<TT>x</TT>.
+
+<P>
+By default, the attenuation is updated once every control period (the
+inverse of the k-rate). The optional i-rate parameter <TT>length</TT>
+(units of seconds) overrides the default value for the attenuation
+period.
+
+<P>
+During the first call to <B>gain</B>, a buffer is created of
+sufficient size to hold the <TT>x</TT> values for an entire
+attenuation period, and the current <TT>x</TT> value is placed at the
+start of the buffer. Subsequent calls to <B>gain</B> fill successive
+positions in the buffer.
+
+<P>
+On the <B>gain</B> call that fills the buffer, a new attenuation value
+is computed, using the equation shown on the right panel.  The buffer
+is cleared, and future calls to <B>gain</B> refill the buffer in
+preparation for the next attenuation update.
+
+<H4><TT>balance</TT></H4>
+
+<P>
+The <B>balance</B> opcode returns a scaled copy of the parameter
+<TT>x</TT>. The returned signal has an RMS power level that
+approximates the power of the signal parameter <TT>ref</TT>.
+
+<P>
+To achieve this behavior, the opcode creates two buffers, to hold
+recent values of <TT>ref</TT> and <TT>x</TT>.  The opcode periodically
+updates the attenuation parameter, to reflect the energy of the
+signals in the two buffers.
+
+<P>
+The control period (<TT>1/k_rate</TT>) sets the default length of
+<B>balance</B>'s buffers, which may be overridden by the optional
+i-rate parameter <TT>length</TT>.
+
+<P>
+During the first call to <B>balance</B>, buffers are created for
+<TT>ref</TT> and <TT>x</TT> parameters, and the current values for
+<TT>ref</TT> and <TT>x</TT> are placed at the start of the buffers.
+Subsequent calls fill successive positions in the <TT>ref</TT> and
+<TT>x</TT> buffers.
+
+<P>
+On the opcode call that fills the buffers, a new attenuation
+value is computed, using the equation shown on the right panel.  The
+buffers are cleared, and future calls to <B>balance</B> refill
+the buffers in preparation for the next attenuation update.
+
+
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>gain</TT></H2>
+
+<TT>
+<pre>
+aopcode gain(asig x, ksig g
+             [, ivar length]) 
+
+
+on every call, return a*x.
+
+on first call:
+
+    set internal variable a 
+    to 1, and create buffer
+    xh. the optional parameter
+    length (units of seconds)
+    sets the buffer size. if
+    this parameter is not given,
+    set length to the 1/k_rate.
+
+    xh contains 
+
+    L = floor(length*s_rate)
+
+    samples. insert x into xh[0].
+
+on subsequent calls:
+
+    put x into next position
+    in xh. if xh is filled,
+    compute new value of a:
+
+             g*sqrt(L)
+a = -------------------------------
+    sqrt(xh[0]^2 + ... + xh[L-1]^2)
+
+    this completes one cycle of
+    the algorithm. on the next
+    call, insert x into xh[0],
+    starting the next cycle.
+
+</pre>
+</TT>
+
+<H2><TT>balance</TT></H2>
+
+<TT>
+<pre>
+aopcode balance(asig x,
+                asig ref
+             [, ivar length]) 
+
+
+on every call, return a*x.
+
+on first call:
+
+    set internal variable a
+    to 1. create buffers xh
+    and rh. optional parameter
+    length (units of seconds)
+    sets the buffer sizes. if
+    this parameter is not given,
+    set length to the 1/k_rate.
+
+    xh and rh contains 
+
+    L = floor(length*s_rate)
+
+    samples. insert x into xh[0] 
+    and ref into rh[0].
+
+on subsequent calls:
+
+    put x into next position
+    in xh, and ref into next
+    position of rh. if buffers
+    filled, compute the new
+    value of a:
+
+
+    sqrt(rh[0]^2 + ... + rh[L-1]^2)
+a = -------------------------------
+    sqrt(xh[0]^2 + ... + xh[L-1]^2)
+
+    this completes one cycle of
+    the algorithm. on the next
+    call, insert x into xh[0],
+    and ref into rh[0], starting
+    the next cycle.
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="special">Specialops</A></H2>
+
+<P>
+The <B>gain</B> opcode, if called without the optional <TT>length</TT>
+parameter, fills its buffer by accepting new <TT>x</TT> values
+with each a-rate call, and computes the signal energy of its 
+buffer once per k-rate.
+
+<P>
+The <B>rms</B> opcode also performs this function, but returns the
+signal energy as its k-rate return value. See the right panel for
+the header syntax and exact semantics for the <B>rms</B> opcode.
+
+<P>
+The <B>rms</B> opcode is an example of a SAOL <B>specialop</B>
+opcode, which has aspects of both <B>aopcode</B> and <B>kopcode</B>
+semantics. 
+
+<P>
+Like an a-rate opcode, the <B>rms</B> opcode runs at the a-rate in
+order to fill the buffer. But like a k-rate opcode, it also
+runs at k-rate, and returns a k-rate value.
+
+<P>
+Specialop calls may only appear in instrument code, and in
+<B>aopcode</B> user-defined opcodes (described in <A
+HREF="../user/index.html"> Part IV</A>). The rules below set the
+semantics of <B>specialop</B> opcodes:
+
+<OL>
+<LI>
+A <B>specialop</B> returns values at the k-rate.  For the purpose of
+evaluating the rate of expressions, a <B>specialop</B> is considered
+to be a <B>kopcode</B>.
+<LI>
+A <B>specialop</B> is evaluated at both the a-rate and the
+k-rate. However, the expression returns a value, and the statement
+containing it executes, at the k-rate.
+<LI>
+A <B>specialop</B> may appear in an a-rate statement. If so, its
+k-rate return semantics work in the same way as a normal k-rate
+opcode call.
+</OL>
+
+<P>
+Specialop calls may only appear in instrument code, and in
+<B>aopcode</B> user-defined opcodes (described in <A
+HREF="../user/index.html"> Part IV/4</A>). Specialop calls
+are also restricted in these ways:
+
+<OL>
+<LI>
+An expression containing a <B>specialop</B> opcode is
+considered a <B>specialop</B> expression. 
+<LI>
+A <B>specialop</B> expression may not appear in the code block or
+guard expression of a <B>while</B> statement.
+<LI>
+A <B>specialop</B> expression may only appear in the code block of an
+<B>if</B> or <B>if-else</B> statement if the guard expression of the
+statement is also <B>specialop</B>.
+</OL>
+
+<P>
+The right panel shows several examples of <B>specialop</B> 
+semantics, using the <B>rms</B> opcode.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>rms</TT></H2>
+
+<TT>
+<pre>
+specialop rms(asig x,
+            [, ivar length]) 
+
+as a specialop, it runs at the
+a-rate and k-rate, but only 
+returns values at the k-rate.
+
+k-rate, first call:
+
+   create the buffer xh, and
+   initialize values to zero.
+   the optional parameter length
+   (units of seconds, must be > 0)
+   sets the buffer size. if this
+   parameter is not given, set 
+   length to the 1/k_rate. 
+
+   xh contains:
+
+   L = floor(length*s_rate)
+
+   samples. create buffer index,
+   set it to zero (first element).
+
+
+k-rate, all calls:
+
+   return the value
+
+sqrt(xh[0]^2 + ... + xh[L-1]^2)
+-------------------------------
+           sqrt(L)
+
+
+a-rate, all calls:
+
+   place the x value into the 
+   buffer xh, at the position
+   of the buffer index. then
+   increment buffer index. if
+   index has value L, reset
+   the index to 0.
+
+</pre>
+</TT>
+
+<H2>Examples</H2>
+
+<TT>
+<pre>
+asig x;
+ksig k;
+
+// legal, rms runs at a-rate
+// and k-rate, but returns
+// a value at k-rate that is
+// assigned to y.
+
+y = rms(x);
+
+// legal, both rms run at a-rate
+// and k-rate, if condition is
+// true at k-rate, assignment
+// is made. rms in assignment
+// returns same value as rms in
+// conditional 
+
+if (rms(x) > y)
+ {
+   y = rms(x);
+ }
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="samp">Sample Rate Conversion</A></H2>
+
+<P>
+The <B>rms</B> opcode converts the information carried by an a-rate
+parameter to a k-rate return value. In this sense, it performs a type
+of sample-rate conversion.
+
+<P>
+In this section, we describe other core opcodes that perform
+sample-rate conversion.
+
+<H4>Downsampling Opcodes</H4>
+
+<P>
+Three other simple opcodes make a-rate signal information available at
+the k-rate. These opcodes are all <B>specialop</B> opcodes.
+
+<P>
+The <B>decimate</B> opcode returns (during its k-pass) one of the
+<TT>in</TT> parameter values that it received in the preceding set of
+a-pass calls. The opcode definition does not specify which <TT>in</TT>
+value is chosen.
+
+<P>
+The <B>downsamp</B> opcode buffers the <TT>in</TT> values of the last
+<TT>s_rate/k_rate</TT> opcode calls at the a-rate.  At the k-rate call
+following the a-rate calls, it returns the mean of the buffer.
+
+<P>
+If the <B>downsamp</B> call includes the optional table parameter
+<TT>win</TT>, the wavetable values are multiplied with the buffer
+values point by point, and opcode returns the sum of of all
+multiplication results. If the <TT>win</TT> table is shorter than the
+buffer, zeros are used for the extra window values.
+
+<P>
+The <B>sblock</B> opcode buffers <TT>in</TT> values of the last
+<TT>s_rate/k_rate</TT> opcode calls at the a-rate. During the k-rate
+call, it places these buffer values in the table provided by parameter
+<TT>t</TT>, which must have at least <TT>s_rate/k_rate</TT> table
+values. The opcode always returns zero.
+ 
+
+<H4>Upsampling Opcodes</H4>
+
+<P>
+The simplest way to upsample control information to the audio rate is
+to assign a k-rate value to an a-rate variable.  The <B>upsamp</B> and
+<B>samphold</B> core opcodes offer more sophisticated methods of
+upsampling.
+
+<P>
+The <B>upsamp</B> opcode upsamples the k-rate parameter <TT>in</TT> to
+a-rate via a shift-and-add technique. An optional table parameter
+<TT>win</TT> controls the spectral properties of the upsampling. The
+<B>upsamp</B> opcode reduces the aliasing artifacts produced by
+assigning k-rate values to a-rate variables directly. See the right
+panel for a complete explanation of this opcode.
+
+<P>
+The polymorphic <B>samphold</B> opcode performs a sample-and-hold
+operation on the polymorphic input parameter <TT>in</TT>, under the
+control of the k-rate parameter <TT>gate</TT>. It acts as an
+upsampling system if the <TT>in</TT> parameter is a-rate.
+
+<P>
+The <B>samphold</B> opcode returns the value of an internal state
+variable, that is initialized to zero at the start of the first
+call to the opcode. If the <TT>gate</TT> parameter is non-zero,
+the internal state variable is updated to the value of the 
+<TT>in</TT> parameter. 
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Downsampling Opcodes</H2>
+
+<TT>
+<pre>
+
+specialop decimate(asig in)
+
+specialop downsamp(asig in
+                   [,table win])
+
+specialop sblock(asig in,
+		 table t)
+
+see left panel for algorithms.
+
+</pre>
+</TT>
+
+<H2>Upsampling Opcodes</H2>
+
+<TT>
+<pre>
+
+opcode samphold(xsig in, 
+                ksig gate)
+
+see left panel for algorithm.
+
+
+asig upsamp(ksig in
+            [,table win])
+
+This opcode upsamples the
+k-rate in parameter to
+a-rate, using a smoothing
+buffer. In the interesting
+case, the buffer size is
+the size of the table win,
+and is several times greater
+than a_rate/k_rate in length.
+On the first call to upsamp, 
+the buffer buf[] is created, 
+and initialized to zeros.
+
+On the first a-pass call to
+upsamp in a given execution
+cycle, the contents of buf[]
+are shifted forward by 
+a_rate/k_rate samples. The last
+a_rate/k_rate buff[] values are
+set to zero. Then, all buf[]
+values is updated using this
+formula:
+
+buf[i] = buf[i] + 
+         input*win[i]
+
+This first a-pass call returns
+buf[0]; future a-pass calls in
+the execution cycle return buf[1],
+buf[2], ...
+
+If the win table has fewer than
+a_rate/k_rate elements, the buf[]
+has a size a_rate/k_rate, and zeros
+are used for the extra win values in
+the formula.
+
+If no win table is provided, a win of
+size a_rate/k_rate is used, with all
+samples of value 1. The buf[] is also
+a_rate/k_rate.
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="window">Window Wavetables</A></H2>
+
+<P>
+Several of the opcodes in the previous section let the programmer
+specify a windowing function as a wavetable of window values.
+
+<P>
+
+The core wavetable generator <B>window</B> simplifies the creation of
+windowing wavetables. The right panel shows the declaration syntax 
+and algorithm for this wavetable generator.
+
+<P>
+The <TT>size</TT> parameter sets the number of samples in the window
+table, and must be greater than zero. The <TT>type</TT> parameter is
+an integer that sets the window type.
+
+<P>
+The <B>window</B> generator produces six window types. 
+
+<OL>
+<LI>
+Hamming window.
+<LI>
+Hanning window.
+<LI>
+Bartlett window.
+<LI>
+Gaussian window.
+<LI>
+Kaiser window.
+<LI>
+Boxcar window
+</OL>
+
+<P>
+The numbering of the list indicates the value of the <TT>type</TT>
+parameter that produces the associated window shape.
+
+<P>
+The Kaiser window algorithm creates a family of windows, controlled by
+the optional parameter <TT>p</TT>.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>window</TT></H2>
+<TT>
+<pre>
+table t(window, size, type[,p]);
+
+
+Type parameter is an integer that
+codes the window shape. Listing
+below shows algorithm, for samples
+that lie in range 0 <= x <= size-1.
+
+
+[1] Hamming window. 
+
+0.54 - 0.46*cos(2*pi*x/(size-1))
+
+[2] Hanning window.
+
+0.54*(1 - cos(2*pi*x/(size-1)))
+
+[3] Bartlett window (triangle).
+
+     2*fabs(x - ((size-1)/2))
+1 -  ------------------------
+            (size-1)
+
+[4] Gaussian window:
+
+        exp(-((m-x)^2)/a)
+
+  where
+
+  m = size/2   a = (size*size)/18
+
+[5] Kaiser window
+
+   a = (size-1)/2
+
+   Io[p*sqrt(a^2 - (x-a)^2)]
+   -------------------------
+           Io[p*a]
+
+[6] Boxcar window -- all table
+    values are 1.
+
+
+<A HREF="../../special/slib/index.html">Slib</A> defines the <A HREF="../../special/slib/index.html#window">constants</A>
+WINDOW_HAMMING, WINDOW_HANNING,
+WINDOW_BARTLETT, WINDOW_GAUSSIAN,
+WINDOW_KAISER, and WINDOW_BOXCAR
+to use as the type parameter in 
+the window wavetable generator.
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="comp">Gain Control</A></H2>
+
+<P>
+The <B>compressor</B> opcode implements a complete gain control
+system. The opcode may be configured to perform gain control functions
+such as compression, expansion, noise-gating, and limiting. The right
+panel shows the header syntax and algorithm for this opcode.
+
+<P>
+The opcode returns a scaled version of the a-rate input signal
+parameter <TT>x</TT>, with a latency of set by the parameter
+<TT>look</TT>.  The scaling depends on the loudness of the a-rate
+signal parameter <TT>comp</TT>. For most uses, <TT>comp</TT> and
+<TT>x</TT> are set to the same value.
+
+<P>
+The opcode measures the loudness of <TT>comp</TT>, expressed in terms
+of decibels (dB), and changes the scaling of <TT>x</TT> in response to
+this loudness. The loudness is not computed as an instantaneous value,
+but by evaluating the signal over a short analysis window (set by the
+parameter <TT>look</TT>). 
+
+<P>
+In this scale, 90 dB corresponds to a signal with a peak waveform
+value of 1, 70 dB corresponds to a signal with a peak waveform value
+of 0.1, etc. The noise floor of the system is set by the
+k-rate parameter <TT>nfloor</TT>, in units of dB.
+
+<P>
+The parameters <TT>att</TT> and <TT>rel</TT> set the attack and
+release times (in seconds) for the loudness measurement of
+<TT>comp</TT>. Short attack and release times let the loudness track
+quick signal transients, while longer attack and release times result
+in a smoother loudness estimate. 
+
+<P>
+Given the loudness measurement of <TT>comp</TT>, the opcode calculates
+the scaling factor for the delayed version of <TT>x</TT> using the
+table shown on the right panel. The k-rate parameters <TT>nfloor</TT>,
+<TT>thresh</TT>, <TT>loknee</TT>, <TT>hiknee</TT>, and <TT>ratio</TT>
+control this scaling. All of these parameters have units of dB.
+
+<H4>Noise gating</H4>
+
+<P>
+The <TT>nfloor</TT> and <TT>thresh</TT> parameters control noise
+gating. If the loudness of <TT>comp</TT> is above <TT>thresh</TT>, the
+noise gate is open, and the opcode returns a delayed replica of the
+<TT>x</TT> signal. If the loudness of <TT>comp</TT> is below
+<TT>nfloor</TT>, the noise gate is closed, and the opcode returns
+zero. Non-normative interpolation occurs in the transition regime
+between <TT>nfloor</TT> and <TT>thresh</TT>.
+
+<P> 
+To turn off noise gating, both <TT>nfloor</TT> and <TT>thresh</TT>
+should be set to noise floor of this system (for most applications, a
+value of -40 dB yields good results).
+
+<H4>Compression/expansion</H4>
+
+<P>
+If the loudness of <TT>comp</TT> is above <TT>hiknee</TT>, the opcode
+acts as a compressor or expander. The value of <TT>ratio</TT>
+determines the exact behavior in this regime. If the loudness of
+<TT>comp</TT> increases by <TT>ratio</TT> dB, the opcode returns a
+delayed version of <TT>x</TT> whose loudness has increased by 1
+dB. Thus, <TT>ratio</TT> values greater than 1 dB result in
+compression, and ratio values between 0 and 1 dB result in
+expansion. Negative <TT>ratio</TT> values are prohibited.
+
+<P>
+If the loudness of <TT>comp</TT> is below <TT>loknee</TT>, the opcode
+performs as a "wire with latency", returning a replica of parameter
+<TT>x</TT> delayed by the analysis window time <TT>look</TT>.
+Non-normative interpolation occurs in the transition regime between
+<TT>loknee</TT> and <TT>hiknee</TT>.
+
+<H4>Cross-signal effects</H4>
+
+<P>
+By choosing the <TT>comp</TT> signal to be different than the
+<TT>x</TT> signal, the opcode produces a version of the <TT>x</TT>
+signal whose dynamics are shaped by the <TT>comp</TT> signal.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><TT>compressor</TT></H2>
+<TT>
+<pre>
+
+aopcode compressor(asig x, 
+        asig comp, ksig nfloor,
+        ksig thresh, ksig loknee,
+        ksig hiknee, ksig ratio,
+        ksig att, ksig rel,
+        ivar look)
+
+
+The compressor opcode delays
+the signal parameter x for 
+look seconds, and returns
+the delayed value after
+weighting it by R.
+
+R is determined by measuring
+the dB level of the signal
+parameter comp, as shown
+by the table. The parameters
+nfloor, thresh, loknee, and
+hiknee, and ratio are all in
+units of dB (90 dB corresponds
+to a signal amplitude of 1.0).
+
+ comp (dB) |     R
+-------------------------
+less than  |     0
+nfloor     | (noise gate:
+           |    closed)
+-------------------------
+between    |  0 < R < 1   
+nfloor and | (noise gate:
+thresh     |  transition)
+-------------------------
+between    |     1
+thresh and | (noise gate:
+loknee     |     open)
+-------------------------
+between    |  transition
+loknee and |    regime
+hiknee     |
+-------------------------
+greater    | R is set so  
+than       | that a ratio
+hiknee     | dB increase
+           | in comp
+           | yields a 1 
+           | dB increase
+           | in x.
+-------------------------
+
+given that:
+
+nfloor <= thresh 
+thresh <= loknee
+loknee <= hiknee
+ratio  >  0
+
+If ratio is < 1 dB, the 
+opcode acts as an expander.
+If ratio > 1 dB, the opcode
+it acts as a compressor.
+
+To compute comp dB value, 
+the opcode keeps a buffer of
+instantaneous dB values of 
+the comp signal, using the
+equation:
+
+90 + 20*log_10(abs(comp))
+
+This buffer length is set by
+the parameter look. The comp dB
+signal is computed by extrapoling
+signal trends in this buffer, 
+under the guidance of the 
+attack and release times of
+the opcode, set by parameters
+att and rel (which have units of
+seconds). Short att and rel values
+produce in quick changes in R,
+longer att and rel produce slower
+changes in R.
+</pre>
+</TT>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="fft">Fourier Analysis</A></H2>
+
+<P>
+The <B>fft</B> opcode computes a windowed and overlapped
+complex-valued Discrete Fourier Transform (DFT) on the a-rate
+parameter signal <TT>in.</TT> It stores the results in the wavetables
+<TT>re</TT> and <TT>im</TT>.
+
+<P>
+The complementary opcode <B>ifft</B> computes a windowed and
+overlapped Inverse Discrete Fourier Transform on the wavetable pair
+<TT>re</TT> and <TT>im</TT>, and returns samples of the resulting
+audio waveform.
+
+<P>
+These opcodes are designed to be used together to implement sound
+synthesis algorithms that use spectral modification techniques.  If a
+boxcar window is used for both <B>fft</B> and <B>ifft</B>, an fft-ifft
+pair has unity gain. See the right panel for the header syntax of
+<B>fft</B> and <B>ifft</B>.
+
+<H4><TT>fft</TT></H4>
+
+<P>
+The <B>fft</B> opcode is a <B>specialop</B>, that executes at the
+a-rate and k-rate, but returns a value at the k-rate. 
+
+<P>
+The <B>fft</B> opcode returns a 1 if a new DFT has been calculated
+since the last k-pass, and 0 otherwise.  If a new DFT has been
+computed, the real components are placed in the wavetable parameter
+<TT>re</TT>, and the imaginary components are placed in the wavetable
+parameter <TT>im</TT>.
+
+<P>
+The optional parameters <TT>len</TT>, <TT>shift</TT>, and
+<TT>size</TT> control the operation of the <B>fft</B> opcode.
+
+<P>
+The <TT>len</TT> parameter sets the size of the holding buffer for new
+audio samples. In most cases, <TT>len</TT> is also the size of the
+DFT.
+
+<P>
+The <TT>shift</TT> parameter controls the number of audio samples to
+add to the holding buffer before computing a new DFT. For a simple,
+non-overlapped DFT, <TT>shift</TT> is set to the same value as
+<TT>len</TT>. For an overlapped DFT, <TT>shift</TT> is set to a value
+smaller than <TT>len</TT>. For example, if <TT>len</TT> is 1024 and
+<TT>shift</TT> is 128, the opcode computes a new 1024 DFT every 128
+samples.
+
+<P> 
+On the first call to <B>fft</B>, a buffer <TT>hbuf</TT> of size
+<TT>len</TT> is created and zeroed, and the <TT>in</TT> parameter is
+placed in position <TT>hbuf[len - shift]</TT>.
+
+<P>
+Subsequent calls fill <TT>hbuf[len - shift + 1], hbuf[len - shift + 2]
+...</TT> until the buffer is filled, and then the DFT computation
+begins. The optional <TT>size</TT> parameter may be used to set the
+DFT size; if <TT>size</TT> is not used, the <TT>len</TT> parameter is
+used. The DFT size may be no larger than 8192, and must be a power of
+2.
+
+<P>
+The table <TT>win</TT> may be supplied to window the audio samples
+prior to computing the DFT. If it is not supplied, a boxcar window is
+used. When <TT>hbuf</TT> is filled for the first time, a buffer
+<TT>new</TT> with <TT>size</TT> values is created. Each buffer
+variable <TT>new[i]</TT> takes the value <TT>win[i]*hbuf[i]</TT>. If
+<TT>size</TT> is greater than <TT>len</TT>, the extra values of
+<TT>new[i]</TT> are set to zero.
+
+<P>
+Once <TT>new</TT> is filled, a DFT is performed on the buffer, and the
+real and imaginary results placed in the wavetables <TT>re</TT> and
+<TT>im</TT> respectively, which must be able to hold <TT>size</TT>
+values. The first position in each table holds the DC DFT value, the
+<TT>size/2</TT> position holds the Nyquist frequency coefficient
+value, and the positions after <TT>size/2</TT> hold values that code
+the reflection of the spectrum above the Nyquist frequency.
+
+<P>
+The <TT>shift</TT> parameter controls the data overlap between
+successive DFT calculations. After the first DFT is computed, the
+<TT>hbuf</TT> buffer is shifted forward by <TT>shift</TT> values.
+The <TT>shift</TT> spaces at the end of the buffer are the place
+where future calls to <TT>fft</TT> place <TT>in</TT> values. Once
+the <TT>hbuf</TT> buffer is refilled, the <TT>new</TT> is refilled,
+and a new DFT is performed.
+
+<P>
+The right panel describes the default values and legal ranges for the
+<TT>fft</TT> parameters <TT>len</TT>, <TT>shift</TT>, <TT>size</TT>,
+and <TT>win</TT>.
+
+<H4><TT>ifft</TT></H4>
+
+<P>
+The <B>ifft</B> opcode runs at a-rate, and returns audio samples
+created from the complex DFT values in the <TT>re</TT> and <TT>im</TT>
+tables. The opcode assumes these tables are in the format created by
+the <B>fft</B> opcode.
+
+<P>
+The optional parameters <TT>len</TT>, <TT>shift</TT>, and
+<TT>size</TT> control the operation of the <B>ifft</B> opcode.
+
+<P>
+The <TT>len</TT> parameter sets the size of the holding buffer for
+output audio samples. Since in most cases <TT>len</TT> is also the
+size of the IDFT, the <TT>size</TT> parameter defaults to
+<TT>len</TT>.  The IDFT size may be no larger than 8192, and must be a
+power of 2.
+
+<P>
+During the first call to <B>ifft</B>, the opcode computes the IDFT of
+the <TT>re</TT> and <TT>im</TT> tables. If <TT>re</TT> and <TT>im</TT> are
+greater than <TT>size</TT>, only the first <TT>size</TT> elements of
+the wavetables are used to compute the IDFT.
+
+<P>
+The first <TT>len</TT> components of the IDFT result are multiplied
+point-by-point by the windowing table <TT>win</TT>, and placed in an
+output buffer <TT>out</TT> of length <TT>len</TT>.
+
+<P>
+The value <TT>out[0]</TT> is returned on this first call, the next
+call returns <TT>out[1]</TT>, etc. Each sample is scaled by
+<TT>shift/len</TT>, so that an fft-ifft pair using boxcar windows has
+unity signal gain.
+
+<P>
+On the call where <TT>out[shift-1]</TT> is returned, the next IDFT is
+calculated, in the following way.
+
+<P>
+The contents of the <TT>out</TT> buffer are shifted forward
+<TT>shift</TT> elements, and the last <TT>shift</TT> values of
+<TT>out</TT> are set to zero. A new IDFT is computed, and
+the first <TT>len</TT> components of the result are multiplied
+point-by-point with the <TT>win</TT> table, and added into 
+the <TT>out</TT> buffer. Values from <TT>out[0]</TT> to 
+<TT>out[shift-1]</TT> are returned as described above, and
+the cycle repeats.
+
+<P>
+The right panel describes the default values and legal ranges for the
+<TT>ifft</TT> parameters <TT>len</TT>, <TT>shift</TT>, <TT>size</TT>,
+and <TT>win</TT>.
+
+<H4>Example</H4>
+
+<P>
+The right panel shows a simple example, using 
+<TT>fft</TT> and <TT>ifft</TT> together in a
+simple spectral modification algorithm.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2>FFT and IFFT</H2>
+<TT>
+<pre>
+
+specialop fft(asig in,
+              table re,
+              table im [,
+              ivar len,
+              ivar shift,
+              ivar size,
+              table win])
+
+See right panel for algorithm
+details. Characteristics of
+parameters described below.
+
+in: audio input signal that
+is processed by the opcode.
+
+re: table that holds the real
+portion of the DFT. Must have
+at least size samples.
+
+im: table holds the imaginary
+portion of the DFT. Must have
+at least size samples.
+
+len: optional parameter that
+sets the number of samples to
+use. may not be negative. if
+zero or not provided, it is
+the next power of two greater
+than a_rate/k_rate.
+
+shift: optional parameter that
+sets the shift amount of the
+analysis window. may not be
+negative. if not provided or
+zero, set to len.
+
+size: optional parameter that
+sets the DFT size. may not
+be negative. if zero, set to
+len. must be a power of 2,
+and no greater than 8192.
+
+win: windowing table for
+analysis. if not provided,
+a boxcar of length len. 
+may not have fewer than
+len samples.
+
+
+aopcode ifft(table re,
+             table im [,
+             ivar len,
+             ivar shift,
+             ivar size,
+             table win])
+
+See right panel for algorithm
+details. Descriptions of
+parameter limits for fft also
+hold for ifft.
+
+</pre>
+</TT>
+
+<H2>Example</H2>
+
+<TT>
+<pre>
+
+// hanning window table
+
+table win(window, 1024, 2); 
+
+// space for fft
+
+table re(empty, 1024);
+table im(empty, 1024);
+table re_m(empty, 1024);
+table im_m(empty, 1024);
+
+// signal new fft done
+
+ksig flag;
+
+// signal to process
+
+asig in;
+
+
+
+
+flag = fft(in, re, im, 1024, 128,
+	   1024, win);
+
+if (flag)
+ {
+  // modify re and im here
+  // put results in re_m and im_m
+ }
+
+output(ifft(re_m, im_m, 1024, 128,
+	   1024, win));
+
+</pre>
+</TT>
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="port">Portamento</A></H2>
+
+<P>
+The core opcode <B>port</B> is a k-rate filter, that converts a step
+transition of the k-rate parameter <TT>ctrl</TT> into a smooth
+transition with an exponential trajectory. When applied to a pitch
+control signal (in Hertz), it confers a portamento effect on pitch
+changes.
+
+<P>
+The right panel shows the header syntax and algorithm for the
+<B>port</B> opcode. A k-rate parameter <TT>htime</TT> sets the time
+that the output signal traverses one half of its total excursion.
+
+<P>
+This section concludes our descriptions of the SAOL core opcode 
+library. In the final chapter in this section, we describe how
+users may write new opcodes in SAOL.
+
+<P>
+<B>Next section:</B>
+<A HREF="../user/index.html">Part IV/4: User-Defined Opcodes</A></H2>
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<H2><TT>port</TT></H2>
+
+<TT>
+<pre>
+
+kopcode port(ksig ctrl,
+             ksig htime)
+
+
+ctrl: input k-rate signal
+       to be filtered.
+
+htime: half-transition
+       time, in seconds.
+       one half of the
+       time for the return
+       value of port to 
+       reflect a step change
+       in ctrl.
+
+port returns the value:
+
+o + (n - o)*(1 - 2^(t/htime))
+
+where o is the old value of
+ctrl and n is the new value
+of ctrl. o and n are updated
+whenever ctrl and n are not
+equal (o = n, n = ctrl).
+
+t is set to zero at each
+ctrl transition, and incremented
+by the 1/k_rate on each call.
+
+on first call, both o and n
+are set to ctrl.
+</pre>
+</TT>
+
+
+</TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../../index.html">mp4-sa</A>-><A HREF="../../index.html">
+the mp4-sa book</A>-><A HREF="../index.html">
+advanced opcodes</A>-><STRONG>signal processing core opcodes</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<A HREF="../../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+</BODY>
+</HTML>

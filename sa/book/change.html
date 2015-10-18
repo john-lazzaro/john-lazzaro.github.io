@@ -1,0 +1,934 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Change Log for John Wawrzynek Markup July 1999</TITLE>
+<META name="keywords" content="MP4-SA, syntax, semantics, numbers, 
+names, standard names, variables, parameters, declarations, declaration,
+global variables, instr variables, imports, exports, array, scalar,
+SASL, SAOL, MP4">
+<META name="description" content="Variable declarations, numeric
+constants, standard names, and instr parameters in the language of
+MPEG 4 Structured Audio.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../index.html">mp4-sa</A>-><A HREF="index.html">
+the mp4-sa book</A>-><STRONG>johnw markup</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Change Log for John Wawrzynek Markup July 1999</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+<TD WIDTH="100%" VALIGN=top BGCOLOR="#CCFFCC">
+
+<H2>Sections</H2>
+
+<H4><A HREF="#intro">Introduction to Change Log</H4>
+
+<H4><A HREF="#preamble">Preamble</H4>
+
+<H4>Part I. <A HREF="#I">A Tutorial Introduction.</A></H4>
+
+<H4>Part II. <A HREF="#II.1">The SAOL Language</A></H4>
+
+<OL TYPE=1>
+<LI><A HREF="#II.1">Numbers and Variables</A></LI>
+<LI><A HREF="#II.2">Expressions and Statements</A></LI>
+<LI><A HREF="#II.3">Simple Core Opcodes</A></LI>
+<LI><A HREF="#II.4">Wavetables</A></LI>
+<LI><A HREF="#II.5">Buses and Execution Order</A></LI>
+</OL>
+
+<H4>Part III. <A HREF="#III.1">Instrument Control</A></H4>
+<OL TYPE=1>
+<LI><A HREF="#III.1">The SASL Score Language</A></LI>
+<LI><A HREF="#III.2">MIDI Instrument Control</A></LI>
+<LI><A HREF="#III.3">SAOL Instrument Control</A></LI>
+</OL>
+
+<H4>Part IV. <A HREF="#IV.1">Advanced Opcodes</A></H4>
+<OL TYPE=1>
+<LI><A HREF="#IV.1">Sound Synthesis Core Opcodes</A></LI>
+<LI><A HREF="#IV.2">Filter Core Opcodes</A></LI>
+<LI><A HREF="#IV.3">Signal Processing Core Opcodes</A></LI>
+<LI><A HREF="#IV.4">User-Defined Opcodes</A></LI>
+</OL>
+<H4><A HREF="#app.A">Appendices</A></H4>
+<OL TYPE=A>
+<LI><A HREF="#app.A">Aspects of MP4-SA Not Covered in
+This Book</A>
+<LI><A HREF="#app.B">Core Opcode Sorted Alphabetically</A>
+<LI><A HREF="#app.C">Core Opcode Sorted by Opcode Type</A>
+<LI><A HREF="#app.D">Core Wavetable Generators</A>
+<LI><A HREF="#app.E">Standard Names</A>
+<LI><A HREF="#app.F">Language Elements</A>
+<LI><A HREF="#app.G">Language Rules</A>
+<LI><A HREF="#app.H">MP4-SA Language Standard (pdf file)</A>
+</A>
+</OL>
+<H4><A HREF="#ack">Acknowledgements</A></H4>
+<H4><A HREF="#biblio">Bibliography</A></H4>
+
+
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="intro">Introduction to Change Log</A></H2>
+
+<P>
+The left side describes comments John Wawrzynek made on a printed
+version of the first draft. The title links to a place in the document
+close to the reference.
+
+<P>
+The right side describes the document changes made in response to the
+comment.  A purple color implies action still pending; a red color
+implies action taken.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="preamble">Preamble Comment</A></H2>
+
+<P>
+Modeling examples?
+
+<P> 
+K&R uses as examples useful little programs, such as gettline, hash
+functions, ... the book therefore doubles as a recipe source.  We
+would do well to emulate it.
+
+<P>
+Also, because the sample little programs are substantial, the book
+serves as a style guide.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCFF">
+
+<H2>Response</H2>
+
+<P>
+Yes, I agree. This should be part of the expansion
+into a real book.
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="I">Part I: Tutorial</A></H2>
+
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A HREF="tut/index.html#execution">The Execution Model</A></H2>
+
+<P>
+[1] Didn't like phrasing in first paragraph --
+"when we <B>decide</B> a sound is interesting --
+since the act is unconscious.
+
+<P>
+[2] Didn't like "simulation" to describe running a program, preferred
+"execution".
+
+<P>
+[3] Didn't like "WAV file" as shorthand for audio file.
+
+<P>
+[4] Didn't like terse explanation/introduction to passes.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Response</H2>
+
+<P>
+All fixed.
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A HREF="tut/index.html#simple">A Simple Example</A></H2>
+
+<P>
+[1] SASL pass description uses i-pass in a confusing way.
+
+<P>
+[2] Execution replaces simulation as word describing running
+the program.
+
+<P>
+[3] Replace "The asig type indicates ... it runs at the a-rate"
+with "at the audio rate".
+
+<P>
+[4] Missing "the", un-TT's a, bad usage of specifically and
+D/A convertor.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Response</H2>
+
+<P>
+[1], [2], [4] fixed. 
+
+<P>
+[3] uses a-cycle, since the new pass description clarifies
+its meaning.
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A HREF="tut/index.html#melody">Playing a Melody</A></H2>
+
+<P>
+[1] wondered how many bits of pi were needed for
+the sine oscillator to be perceptually indistiguishable
+
+<P>
+[2] uses phrase "system code" without explanation
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Response</H2>
+
+<P>
+[1] 3.0 to 3.1 can be heard; 3.1 to 3.14 cannot.
+Still, I left it full precision to that it said
+"pi!" to the reader ...
+
+<P> 
+Fixed [2]
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A HREF="tut/index.html#reverb">In Reverberant Stereo</A></H2>
+
+<P>
+[1] Didn't like "buses are created at the start of the simulation"
+
+<P>
+[2] Explain instrument execution ordering rules for simple case
+
+<P>
+[3] Block diagram for example.
+
+<P>
+[4] Differentiate the two uses of imports (global variables and
+SASL control statements).
+
+<P>
+[5] Add "be" in "The a-pass section shows how unindexed arrays ..."
+sentence.
+
+<P>
+[6] Stereo signals or array signals, but not stereo arrays.
+
+<P>
+[7] Rephrasing label description.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Response</H2>
+
+<P>
+All fixed.
+
+<P> 
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="II.1">Part II/1: The SAOL Language: Numbers and Variables</A></H2>
+
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A HREF="saol/vars/index.html#intro">Introduction</A></H2>
+
+<P>
+[1] Break out "instr signal variable"
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Response</H2>
+
+<P>
+[1] Made it part of a bulleted list.
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A HREF="saol/vars/index.html#numbers">Numbers</A></H2>
+
+<P>
+[1] Numbers are stored or represented, not defined.
+<P>
+[2] IEEE-754 explanation.
+<P>
+[3] Typo on right panel
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Response</H2>
+
+<P>
+[1], [2], [3] Fixed.
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A HREF="saol/vars/index.html#decl">Declarations</A></H2>
+
+<P>
+[1] add "definition" after instr
+<P>
+[2] change [legal] to Legal in right-hand side titles
+throughout.
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Response</H2>
+
+<P>
+[1],[2] Fixed.
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A HREF="saol/vars/index.html#vars_instr">Instr Variables</A></H2>
+
+<P>
+[1] clarify when an i-rate imports variable is set to the
+value of its global variable
+
+<P>
+[2] rewrite "imports for SASL" subsection
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Response</H2>
+
+<P>
+[1], [2] fixed.
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A HREF="saol/vars/index.html#vars_global">Global Variables</A></H2>
+
+<P>
+[1] clarify when startup runs
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Response</H2>
+
+<P>
+[1] fixed, although your suggestion wouldn't work (start-up
+runs at i-rate long before simulated time even starts ticking
+away, so that i-rate variables can be used to do things like
+initialize global wavetables, ect).
+
+</TD>
+
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A HREF="saol/vars/index.html#stnames">Standard Names</A></H2>
+
+<P>
+[1] The book -> this book
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Response</H2>
+
+<P>
+[1] done.
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="II.2">Part II/2: The SAOL Language: Expressions and Statements</A></H2>
+
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A HREF="saol/exstat/index.html#arith">Arithmetic Expressions</A></H2>
+
+<P>
+[1] Redoing columns where lineup is a problem
+[2] Noting 4-function precedence the same as C
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Response</H2>
+
+<P>
+[1], [2] done.
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A HREF="saol/exstat/index.html#array">Arrays and Expressions</A></H2>
+
+<P>
+[1] Rounding rules
+
+<P>
+[2] Redo comments
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Response</H2>
+
+<P>
+[1], [2] done.
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A HREF="saol/exstat/index.html#assign">Assignment Statement</A></H2>
+
+<P>
+[1] Rephrase rule, and put into summary.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Response</H2>
+
+<P>
+[1]. Done.
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="II.3">Part II/3: The SAOL Language: Simple Core Opcodes</A></H2>
+
+<p>
+Starting with this chapter, only changes
+that are pending will be in this log -- doing
+the log was taking more time than doing the
+changes!
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2><pre> </pre></H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A HREF="saol/simple/index.html#random">Pseudorandom Numbers</A></H2>
+
+<P>
+[1] Add illustrations to right panel.
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCFF">
+
+<H2>Response</H2>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="II.4">Part II/4: The SAOL Language: Wavetables</A></H2>
+
+<p>
+Examples requested in the following sections:
+
+<UL>
+<LI>
+Periodic Waveforms.
+<LI>
+Table Playback.
+</UL>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCFF">
+
+<H2>Response</H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="II.5">Part II/5: The SAOL Language: Buses and Execution Order</A></H2>
+
+<P>
+Requests an example using outbus.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCFF">
+
+<H2>Response</H2>
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="III.1">Part III/1: The SASL Score Language</A></H2>
+
+<P>
+[1] Are SASL commands allowed to be put in an MP4 file with
+the timestamps out of order?
+
+<P>
+[2] <A HREF="control/sasl/index.html#stream">Streaming and SASL</A>
+section choppy.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCFF">
+
+<H2>Response</H2>
+
+<P>
+[1] Yes, time order of SASL lines can be totally random.
+
+<P>
+[2] Tried to improve it, could still use more work.
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="III.2">Part III/2: MIDI Instrument Control</A></H2>
+
+<P>
+Questioning "a MIDI File command executes when the
+trigger time is less that the current clock time".
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCFF">
+
+<H2>Response</H2>
+
+<P>
+The "that" is wrong, but the content is correct here -- the standard
+explicitly says less than, not less than or equal to, for all
+trigger-related items.  This issue comes up several more times in the
+comments ...
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="III.2">Part III/3: SAOL Instrument Control</A></H2>
+
+<P>
+Several "less than" comments on trigger times.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Response</H2>
+
+<P>
+See III.2.
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="IV.1">Part IV/1: Sound Synthesis Core Opcodes</A></H2>
+
+<P>
+No pending comments.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Response</H2>
+
+<P>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="IV.2">Part IV/2: Filter Core Opcodes</A></H2>
+
+<P>
+Suggests using hash-defines for oparray example, once
+it they are added to <TT>sfront</TT>
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCFF">
+
+<H2>Response</H2>
+
+<P>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="IV.3">Part IV/3: Signal Processing Core Opcodes</A></H2>
+
+<P>
+Noted that filters are also signal processing core opcodes.
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCFF">
+
+<H2>Response</H2>
+
+<P>
+Can't think of a better title, since this is really the
+miscellaneous core opcode section, any suggestions?
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2><A NAME="IV.4">Part IV/4: User-Defined Opcodes</A></H2>
+
+<P>
+
+
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Response</H2>
+
+<P>
+
+
+</TD>
+
+</TR>
+</TABLE>
+
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#CCFFCC">
+<P>
+<B>Next section:</B>
+<A HREF="index.html">Back to Book</A></H2>
+</TD>
+
+<TD WIDTH="50%" VALIGN=top BGCOLOR="#FFCCCC">
+<TT>
+<pre> </pre>
+</TT>
+</TD>
+</TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../index.html">mp4-sa</A>-><A HREF="index.html">
+the mp4-sa book</A>-><STRONG>johnw markup</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+
+<P>
+<P><TT>lazzaro [at] cs [dot] berkeley [dot] edu </TT></P>
+<P><TT>UC Berkeley/CS Division/413 Soda  Hall/Berkeley CA 94720</TT></P>
+<P><TT>(510) 643 4005</TT></P>
+</BODY>
+</HTML>

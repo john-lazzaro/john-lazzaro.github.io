@@ -1,0 +1,177 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+
+
+<HTML>
+<HEAD>
+<TITLE>The MP4-SA Book: Part III: Instrument Control</TITLE>
+<META name="keywords" content="MP4-SA, SAOL, language,
+MIDI, SASL, instr, extend, turnoff, time, dur, itime, 
+released, cpuload, instr, control, table, end, tempo,
+preset, MIDIctrl, MIDIbend, MIDItouch, channel, preset,
+extended channel number">
+<META name="description" content="Instrument control
+in MP4-SA. Using the SASL score language to control SAOL
+programs. Using MIDI files and MIDI commands to control
+SAOL programs. Launching instruments within SAOL, and 
+controlling the duration of instruments dynamically in
+SAOL.">
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="0000EE" ALINK="FF6666"
+VLINK="551A8B">
+
+<A NAME="begin"> </A>
+
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../index.html">
+the mp4-sa book</A>-><STRONG>instrument control</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<H3>From <A HREF="../index.html">The MPEG-4 Structured Audio Book</A>
+by <A HREF="http://john-lazzaro.github.io/index.html">
+John Lazzaro</A> and <A HREF="http://www.cs.berkeley.edu/~johnw">
+John Wawrzynek.</A></H3>
+
+<H1>Part III: Instrument Control</H1>
+
+
+<TABLE WIDTH="100%" CELLPADDING=12 CELLSPACING=0>
+<TR>
+
+<TD WIDTH="45%" VALIGN=top BGCOLOR="#CCFFCC">
+<H2>Introduction</H2>
+
+<P>
+MPEG-4 Structured Audio (MP4-SA) is an ISO/IEC standard (edited by
+Eric Scheirer) that specifies sound not as audio data, but as a
+computer program that generates audio when run.
+
+<P>
+
+For an introduction to MP4-SA see the <A
+HREF="../tut/index.html">introductory tutorial</A> presented in Part I
+of the book. For a complete description of the SAOL language, see <A
+HREF="../saol/index.html">Part II</A>.  
+
+<P>
+In Part III of the book, we focus on instrument control in MP4-SA.
+A SAOL program may be controlled by score lines of the SASL
+language, or by MIDI commands.
+
+<P>
+In addition, algorithmic compositions may be written completely in
+SAOL, by executing language statements for instantiating and
+terminating instruments.
+ 
+<P>
+In the <A HREF="sasl/index.html">first chapter</A> we describe the
+SASL score language. We explain the five SASL command types, and
+discuss how SASL commands may be distributed throughout an MP4 file.
+
+<P>
+In the <A HREF="midi/index.html">second chapter</A> we describe MIDI
+instrument control. We review MIDI and MIDI files. We show
+how SAOL instruments are tagged with MIDI preset numbers, and explain
+the MIDI-oriented standard names.
+
+<P>
+In the <A HREF="saolc/index.html">third chapter</A> we describe
+how a SAOL instrument may dynamically instantiate new instruments.
+We also describe standard names an instrument may use to monitor
+its own status, and statements an instrument may use to change that
+status. This chapter also includes a chart showing the order of execution
+of a SAOL program, to clarify the concept of instrument status.
+
+<P>
+<B>Next:</B>Part III/1: <A HREF="sasl/index.html">
+The SASL Control Language</A>
+
+</TD>
+<TD WIDTH="55%" VALIGN=top BGCOLOR="#FFCCCC">
+
+<H2>Part III: Table of Contents</H2>
+
+<H4>1. <A HREF="sasl/index.html">The SASL Score Language</A></H4>
+<UL>
+<LI>
+<B><A HREF="sasl/index.html#sasl">SASL Scores</A>.</B> Triggering semantics.
+<LI>
+<B><A HREF="sasl/index.html#instr">Instr Command</A>.</B> Creating instances of
+instruments.
+<LI>
+<B><A HREF="sasl/index.html#control">Control Command</A>.</B> Changing SAOL
+variables.
+<LI>
+<B><A HREF="sasl/index.html#tempo">Tempo and End Commands</A>.</B> Changing
+simulation behavior.
+<LI>
+<B><A HREF="sasl/index.html#table">Table Command</A>.</B> Updating wavetables using SASL. 
+<LI>
+<B><A HREF="sasl/index.html#stream">Streaming and SASL</A>.</B> Real-time flags for SASL.</B> 
+</UL>
+
+
+
+<H4>2. <A HREF="midi/index.html">MIDI Instrument Control</A></H4>
+<UL>
+<LI>
+<B><A HREF="midi/index.html#basic">MIDI Basics</A>.</B> Overview of MIDI commands.
+<LI>
+<B><A HREF="midi/index.html#saol">MIDI Files and SAOL</A>.</B> Trigger times and channels.
+<LI>
+<B><A HREF="midi/index.html#instr">SAOL Instruments for MIDI</A>.</B> Specializations.
+<LI>
+<B><A HREF="midi/index.html#stnames">Standard Names</A>.</B> Access the MIDI data stream.
+<LI>
+<B><A HREF="midi/index.html#stream">Streaming and MIDI</A>.</B>  Commands without trigger times. 
+</UL>
+
+<H4>3. <A HREF="saolc/index.html">SAOL Instrument Control</A></H4>
+<UL>
+<LI>
+<B><A HREF="saolc/index.html#instr">Dynamic Instruments.</A></B> The SAOL <B>instr</B> statement.
+<LI>
+<B><A HREF="saolc/index.html#stnames">Instrument Status</A>.</B> Standard names. 
+<LI>
+<B><A HREF="saolc/index.html#extend">The Extend Statement</A>.</B> 
+Delaying instance termination.
+<LI>
+<B><A HREF="saolc/index.html#turnoff">The Turnoff Statement</A>.</B> 
+Forcing instance termination.
+<LI>
+<B><A HREF="saolc/index.html#order">Decoder Execution Order</A>.</B> 
+What happens when.
+</UL>
+
+</TD>
+
+</TR>
+</TABLE>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BGCOLOR="#CCCCFF" WIDTH="100%" CLASS=navbar>
+<TR>
+<TD>
+<FONT FACE="Verdana, Lucida Sans, Arial, Helvetica, Geneva,
+sans-serif"><SMALL>
+<A HREF="../../index.html">mp4-sa</A>-><A HREF="../index.html">
+the mp4-sa book</A>-><STRONG>instrument control</STRONG>
+</SMALL></FONT>
+</TD></TR>
+</TABLE>
+
+<P>
+<A HREF="../../copyright/index.html">Copyright 1999 John Lazzaro and John
+Wawrzynek.</A> 
+
+
+
+</BODY>
+</HTML>

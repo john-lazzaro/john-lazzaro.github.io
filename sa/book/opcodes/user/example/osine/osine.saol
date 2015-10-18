@@ -1,0 +1,110 @@
+
+
+global {
+  outchannels 2; 
+}
+
+
+//
+// instr otone
+// plays a sine wave
+// and its octave
+//
+// uses two user-defined
+// opcodes
+
+
+instr otone (freq)    
+     
+{
+
+  // variable declaration
+
+  ivar a;
+  asig init;
+  asig s[2], out[2];
+
+  //***************
+  // runs at i-rate 
+  //***************
+
+  a = coeff(freq);
+
+  //***************
+  // runs at a-rate 
+  //***************
+
+  if (init == 0)
+    {
+      init = 1;
+      s[0] = 0.5;
+    }
+
+  out = update(s,a);
+
+  output(out);
+
+}
+
+// 
+// opcode definition
+// 
+// name: update
+// rate: a-rate 
+// width: 2
+//
+// expects to be passed,
+// BY REFERENCE, the
+// state array for the
+// oscillator. opcode 
+// updates state array,
+// and returns a stereo
+// signal, one channel 
+// is the fundamental 
+// tone, the other is
+// the first harmonic
+//
+
+aopcode update(asig s[2], 
+	       ivar a)
+
+{
+  // scales harmonic
+
+  asig w; 
+
+  s[0] = s[0] - a*s[1];
+  s[1] = s[1] + a*s[0];
+
+  w = 2.0;
+
+  return(s[1], w*s[1]*s[0]);
+
+}
+
+
+// 
+// opcode definition
+// 
+// name: coeff
+// rate: polymorphic
+// width: 1
+// 
+// 
+// parameter hertz is the
+// desired frequency of the
+// sine wave oscillator. 
+// returns the coefficient
+// value that produces that
+// frequency
+//
+
+opcode coeff(xsig hertz)
+
+{
+  xsig rval;
+  
+  rval = 2*sin(3.1415927*hertz/s_rate);
+  return(rval);
+}
+
